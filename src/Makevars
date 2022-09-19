@@ -1,0 +1,2 @@
+PKG_CPPFLAGS=-I../inst/include -D USE_ZLIB=1
+PKG_LIBS=-lz

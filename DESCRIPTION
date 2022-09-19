@@ -1,0 +1,32 @@
+Package: alabaster.base
+Title: Save Bioconductor Objects To File
+Version: 0.98.0
+Date: 2022-09-19
+Authors@R: person("Aaron", "Lun", role=c("aut", "cre"), email="infinite.monkeys.with.keyboards@gmail.com")
+License: MIT + file LICENSE
+Description: 
+    Save Bioconductor data structures into file artifacts, and load them back into memory.
+    This is a more robust and portable alternative to serialization of such objects into RDS files.
+    Each artifact is associated with metadata for further interpretation;
+    downstream applications can enrich this metadata with context-specific properties.
+Imports:
+    alabaster.schemas,
+    methods,
+    utils,
+    S4Vectors,
+    rhdf5,
+    jsonlite,
+    Rcpp
+Suggests:
+    BiocStyle,
+    rmarkdown,
+    knitr,
+    testthat,
+    digest,
+    jsonvalidate,
+    alabaster.matrix
+LinkingTo:
+    Rcpp
+VignetteBuilder: knitr
+SystemRequirements: C++17
+RoxygenNote: 7.2.1

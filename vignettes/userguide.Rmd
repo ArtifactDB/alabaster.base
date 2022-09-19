@@ -1,0 +1,177 @@
+---
+title: Saving objects to artifacts and back again
+author:
+- name: Aaron Lun
+  email: luna@gene.com
+  affiliation: gRED B&CB
+package: alabaster.base
+date: "Revised: December 10, 2021"
+output:
+  BiocStyle::html_document
+vignette: >
+  %\VignetteIndexEntry{Saving and loading artifacts}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, echo=FALSE}
+knitr::opts_chunk$set(error=FALSE, warning=FALSE, message=FALSE)
+```
+
+# Introduction
+
+The _alabaster.base_ package (and its family) implements methods to save common Bioconductor objects to file artifacts and load them back into R.
+This aims to provide a functional equivalent to RDS-based serialization that is:
+
+- More stable to changes in the class definition.
+  Such changes would typically require costly `updateObject()` operations at best, or invalidate RDS files at worst.
+- More interoperable with other analysis frameworks.
+  All artifacts are saved in standard formats (e.g., CSV, HDF5) and can be easily parsed by applications in other languages.
+- More modular, with each object split into multiple artifacts. 
+  This enables parts of the object to be loaded into memory according to each application's needs.
+  Parts can also be updated cheaply on disk without rewriting all files.
+
+# Quick start
+
+To demonstrate, let's mock up a `DataFrame` object from the `r Biocpkg("S4Vectors")` package.
+
+```{r}
+library(S4Vectors)
+df <- DataFrame(X=1:10, Y=letters[1:10])
+df
+```
+
+Each supported class has a staging and loading method.
+The staging method will save the object to one or more files, given a staging directory and a path inside it:
+
+```{r}
+tmp <- tempfile()
+dir.create(tmp)
+
+library(alabaster.base)
+meta <- stageObject(df, tmp, path="my_df")
+meta
+
+list.files(tmp, recursive=TRUE)
+```
+
+The loading method will - as the name suggests - load the object back into memory, given the staging directory and the file's metadata:
+
+```{r}
+loadDataFrame(meta, tmp)
+```
+
+_alabaster.base_ itself supports a small set of classes from the `r Biocpkg("S4Vectors")` packages;
+support for additional classes can be found in other packages like _alabaster.ranges_.
+
+# What's a staging directory?
+
+For some concept of a "project", the staging directory contains all of the artifacts generated for that project.
+Multiple objects can be saved into a single staging directory, usually in separate subdirectories to avoid conflicts.
+For example:
+
+```{r}
+df2 <- DataFrame(Z=factor(1:5))
+meta2 <- stageObject(df2, tmp, path="my_df2")
+list.files(tmp, recursive=TRUE)
+```
+
+We use the staging directory as a root for the hard-coded paths in the metadata (i.e., `meta`).
+Thus, we can easily copy the entire directory to a new system and everything will still be correctly referenced.
+
+```{r}
+meta$path
+file.exists(file.path(tmp, meta$path))
+```
+
+# Saving and validating metadata
+
+Each file artifact is associated with JSON-formatted metadata, denoted by a file with an additional `.json` suffix. 
+Developers can use the `.writeMetadata()` utility to easily write the metadata to file.
+
+```{r}
+# Writing the metadata to file.
+.writeMetadata(meta, dir=tmp)
+
+# Reading a snippet.
+meta.path <- file.path(tmp, paste0(meta$path, ".json"))
+cat(head(readLines(meta.path), 20), sep="\n")
+```
+
+The metadata determines the interpretation of the contents of the file, and is used to restore the corresponding object in an R session.
+We use the `acquireMetadata()` function to read the metadata back into memory prior to loading the `DataFrame`.
+
+```{r}
+re.read <- acquireMetadata(tmp, "my_df/simple.csv.gz")
+loadDataFrame(re.read, tmp)
+```
+
+The JSON metadata for each artifact follows the constraints of the schema specified in the `$schema` property.
+This schema determines what fields can be stored and which are mandatory; the loading method uses such fields to reliably restore the object into memory.
+`.writeMetadata()` will automatically validate the metadata against the schema to ensure that the contents are appropriate.
+
+```{r}
+meta.fail <- meta
+meta.fail[["data_frame"]][["columns"]] <- NULL
+try(.writeMetadata(meta.fail, dir=tmp))
+```
+
+The schema will also list the exact R function that is required to load an object into memory.
+This enables third-party extensions for new data structures without requiring changes to _alabaster.base_'s code.
+For example, in situations where the exact type is not known, we can use `loadObject()` to restore the object:
+
+```{r}
+loadObject(re.read, tmp)
+```
+
+# Writing extensions
+
+Developers can easily extend the _alabaster.base_ framework to new/custom classes by writing their own _alabaster.\*_ package. 
+(Let's call this package _alabaster.X_ in the rest of this section.)
+This process involves minimal input or approval from the _alabaster.base_ developers. 
+
+For staging, we need to define a new `stageObject()` method for our class of interest in our _alabaster.X_ package.
+This method will subsequently be called whenever an instance of that class is encountered, either directly or as a child of another object.
+If possible, we recommend defining the `stageObject()` method in the same package that defines the class,
+as this guarantees that the former will be available whenever an instance of the latter is created.
+Otherwise, users need to ensure that _alabaster.X_ is loaded when staging an instance of the class.
+
+For loading, we need to define a new `load*` function for the new class that recreates the R object from the staged files.
+Ideally, we would like our new function to be called by `loadObject()` when the metadata specifies an instance of our new class.
+Unfortunately, _alabaster.base_ does not know anything about _alabaster.X_ and thus does not know where to find the new loading function.
+We overcome this in the short term by setting the `alabaster.schema.locations` option to include the name of our new package; 
+in the long term, we can request that _alabaster.X_ be added to the search paths in `schemaLocations()`.
+
+We also need to write a new schema to describe and validate the metadata produced by our `stageObject()` method -
+see the [other vignette](schemas.html) for more information.
+This schema should be placed in the `inst/schemas` directory so that it can be found by `.writeMetadata()` and `loadObject()`.
+
+See the `?stageObject` and `?loadObject` documentation for more details.
+
+# Creating applications
+
+Developers can also create "Artificer applications", which customize the machinery of the `alabaster.*` framework for specific needs.
+Customizations typically involve:
+
+- Changing how files/metadata are retrieved when loading objects into an R session.
+- Added new schemas to support application-specific classes.
+- Adding more metadata requirements to some or existing classes.
+
+We provide a number of hooks to enable applications to apply these customizations within the _alabaster.\*_ code:
+
+- The `acquireMetadata()` and `acquireFile()` generic, which describe how the metadata and file artifacts should be acquired.
+  For example, applications can write new methods that query APIs for this content rather than reading it from the filesystem.
+- The `.altStageObject` setter, which allows applications to set an alternative staging generic to replace `stageObject()`.
+  This can be used to perform additional tasks during staging of some or all classes, e.g., add more metadata.
+- The `.altLoadObject()` setter, which allows applications to set an alternative loading function to replace `loadObject()`.
+  This can be used to perform additional tasks during loading of some or all classes, e.g., reconstruct some metadata.
+
+Once defined, the application-specific functions will be used in place of _alabaster.base_'s defaults whenever functions in the _alabaster.\*_ ecosystem are called.
+We recommend unsetting the overrides at the end of an application's calling context to avoid conflicting with other _alabaster.\*_ users in the same R session.
+
+# Session information {-}
+
+```{r}
+sessionInfo()
+```
+

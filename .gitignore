@@ -1,0 +1,7 @@
+inst/comservatory
+inst/uzuki
+*.swp
+*.html
+*.so
+*.o
+*.rds
