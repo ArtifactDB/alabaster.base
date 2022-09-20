@@ -31,7 +31,7 @@ test_that("DFs handle their column types correctly", {
     expect_true(file.exists(file.path(tmp, resource$path)))
 
     meta <- info$data_frame
-    expect_identical(as.character(meta$columns[[1]]$values), LETTERS[1:3])
+    expect_identical(meta$columns[[1]]$type, "string")
     expect_identical(read.csv(file.path(tmp, meta$columns[[2]]$levels$resource$path))[,1], LETTERS[10:1])
     expect_identical(meta$columns[[3]]$type, "integer")
     expect_identical(meta$columns[[4]]$type, "number")

@@ -36,7 +36,7 @@
 #' @importFrom S4Vectors DataFrame make_zero_col_DFrame
 #' @importFrom rhdf5 h5read h5readAttributes
 loadDataFrame <- function(info, project, include.nested=TRUE) {
-    has.rownames <- !is.null(info$data_frame$row_names)
+    has.rownames <- isTRUE(info$data_frame$row_names)
     col.info <- info$data_frame$columns
     has.columns <- length(col.info) > 0
     nrows <- as.integer(info$data_frame$dimensions[[1]])

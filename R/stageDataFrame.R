@@ -89,12 +89,10 @@ setMethod("stageObject", "DataFrame", function(x, dir, path, child=FALSE, df.nam
                      out$levels <- list(resource=.writeMetadata(lev.info, dir=dir))
                  }, error = function(e) stop("failed to stage levels of factor column '", out$name, "'\n  - ", e$message))
 
-                out$values <- .uniqueValues(levels(col))
                 x[[z]] <- as.character(col)
 
             } else if (is.character(col)) {
                 out$type <- "string"
-                out$values <- .uniqueValues(col)
 
             } else if (is(col, "Date")) {
                 out$type <- "date"
@@ -170,7 +168,7 @@ setMethod("stageObject", "DataFrame", function(x, dir, path, child=FALSE, df.nam
         is_child=child,
         data_frame=list(
             columns=meta,
-            row_names=.uniqueValues(rownames(x)),
+            row_names=!is.null(rownames(x)),
             column_data=element_data,
             other_data=other_data,
             dimensions=dim(x)

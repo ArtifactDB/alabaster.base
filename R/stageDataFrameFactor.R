@@ -55,7 +55,7 @@ setMethod("stageObject", "DataFrameFactor", function(x, dir, path, child=FALSE, 
         is_child=child,
         factor=list(
             length=length(x),
-            names=.uniqueValues(names(x)),
+            names=!is.null(names(x)),
             element_data=element_data,
             compression="gzip"
         ),

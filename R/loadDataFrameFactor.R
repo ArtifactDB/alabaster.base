@@ -28,7 +28,7 @@ loadDataFrameFactor <- function(info, project) {
     levels <- .loadObject(lev.info, project=project)
 
     path <- acquireFile(project, info$path)
-    has.names <- !is.null(info$factor$names)
+    has.names <- isTRUE(info$factor$names)
     idx <- .quickReadCsv(path, 
          c(index="integer"), 
          row.names=has.names, 
