@@ -1,0 +1,19 @@
+on: [push, pull_request]
+
+name: R CMD check
+
+jobs:
+  check:
+    name: R CMD check
+    runs-on: ubuntu-latest
+    container: ghcr.io/artifactdb/alabaster-docker/builder:latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Build the package
+      run: R CMD build .
+
+    - name: Test the package
+      run: |
+        tarball=$(ls *.tar.gz)
+        R CMD check --no-manual $tarball
