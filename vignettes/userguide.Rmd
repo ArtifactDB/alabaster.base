@@ -143,7 +143,7 @@ We overcome this in the short term by setting the `alabaster.schema.locations` o
 in the long term, we can request that _alabaster.X_ be added to the search paths in `schemaLocations()`.
 
 We also need to write a new schema to describe and validate the metadata produced by our `stageObject()` method -
-see the [other vignette](schemas.html) for more information.
+see instructions [here](https://github.com/ArtifactDB/BiocObjectSchemas/blob/master/docs/schema_conventions.md) for more information.
 This schema should be placed in the `inst/schemas` directory so that it can be found by `.writeMetadata()` and `loadObject()`.
 
 See the `?stageObject` and `?loadObject` documentation for more details.
