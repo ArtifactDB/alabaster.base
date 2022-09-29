@@ -1,0 +1,48 @@
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+name: Build pkgdown
+
+jobs:
+  build:
+    name: Build pkgdown
+    runs-on: ubuntu-latest
+    container: ghcr.io/artifactdb/alabaster-docker/builder:latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - run: |
+          sudo apt-get update
+          sudo apt-get install -y rsync
+
+      - uses: r-lib/actions/setup-pandoc@v2
+
+      - name: Set directories
+        run: |
+          echo "R_PKG_DIR=${R_HOME}/site-library" >> $GITHUB_ENV
+
+      - name: Restore the package directory
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.R_PKG_DIR }}
+          key: preinstalled-packages
+
+      - name: Install dependencies
+        shell: Rscript {0}
+        run: BiocManager::install("pkgdown")
+
+      - name: Build site
+        run: pkgdown::build_site_github_pages(new_process = FALSE, install = FALSE)
+        shell: Rscript {0}
+
+      - name: Deploy to GitHub pages 🚀
+        uses: JamesIves/github-pages-deploy-action@v4.4.0
+        with:
+          clean: false
+          branch: gh-pages
+          folder: docs
+
