@@ -5,3 +5,4 @@ inst/uzuki
 *.so
 *.o
 *.rds
+docs/

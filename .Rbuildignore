@@ -1,2 +1,4 @@
 ^\.gitignore$
 ^\.github$
+^README\.md$
+^docs$
