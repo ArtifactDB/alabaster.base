@@ -24,7 +24,7 @@ Suggests:
     testthat,
     digest,
     jsonvalidate,
-    alabaster.matrix
+    Matrix
 LinkingTo:
     Rcpp
 VignetteBuilder: knitr

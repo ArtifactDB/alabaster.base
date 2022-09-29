@@ -1,0 +1,190 @@
+---
+title: Creating new alabaster applications
+author:
+- name: Aaron Lun
+  email: infinite.monkeys.with.keyboards@gmail.com
+package: alabaster.base
+date: "Revised: September 29, 2022"
+output:
+  BiocStyle::html_document
+vignette: >
+  %\VignetteIndexEntry{Creating new applications}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, echo=FALSE}
+library(BiocStyle)
+self <- Githubpkg("ArtifactDB/alabaster.base");
+knitr::opts_chunk$set(error=FALSE, warning=FALSE, message=FALSE)
+```
+
+# Overview
+
+Developers can also create "alabaster applications", which customize the machinery of the **alabaster** framework for specific needs.
+Customizations typically involve:
+
+- Changing how files/metadata are retrieved when loading objects into an R session.
+- Added new schemas to support application-specific classes.
+- Adding more metadata requirements to some or existing classes.
+
+We provide a number of hooks inside `r self` to enable applications to apply these customizations over the defaults.
+
+# Creating a new retrieval mechanism
+
+The `acquireMetadata()` and `acquireFile()` generic, which describe how the metadata and file artifacts should be acquired.
+For example, applications can write new methods that query APIs for this content rather than reading it from the filesystem.
+
+```{r}
+library(alabaster.base)
+setClass("RemoteDownloadHandler", slots=c(host="character", id="character"))
+
+setMethod("acquireFile", "RemoteDownloadHandler", function(project, path) {
+    # Download a file here, possibly with some application-specific caching.
+    demo.url <- paste0(project@host, "/projects/", project@id, "/file", path)
+    target <- tempfile()
+    download.file(demo.url, target)
+    target
+})
+
+setMethod("acquireMetadata", "RemoteDownloadHandler", function(project, path) {
+    # Pull down JSON metadata, possibly with some application-specific caching.
+    demo.url <- paste0(project@host, "/projects/", project@id, "/file", path)
+    target <- tempfile()
+    download.file(demo.url, target)
+    jsonlite::fromJSON(target, simplifyVector=TRUE, simplifyMatrix=FALSE, simplifyDataFrame=FALSE)
+})
+```
+
+We can then construct an instance of a `RemoteDownloadHandler`;
+
+```{r}
+proj <- new("RemoteDownloadHandler", host="https://my.institute.org/downloads", id="PROJECT_ID")
+```
+
+And use it in `loadObject()`, which will use the new methods for all internal `acquireMetadata()` and `acquireFile()` calls.
+This will instruct `loadObject()` to download remote content on demand.
+
+```{r, eval=FALSE}
+# Demonstration only.
+meta <- acquireMetadata(proj, "some/file/path.csv")
+obj <- loadObject(meta, proj)
+```
+
+# Creating new schemas
+
+Applications can define their own schemas with custom metadata requirements or data structures.
+See [here](https://github.com/ArtifactDB/BiocObjectSchemas) for more details.
+Once created, the application-specific schemas should be stored in the `inst/schemas` directory of the application's R package.
+
+# Overriding the staging method
+
+The `.altStageObject()` setter allows applications to replace `stageObject()` with an alternative staging generic.
+This can be used to perform additional tasks during staging of some or all classes, e.g., add more metadata.
+For example, we could force all saving operations to include the author in the metadata for non-child objects:
+
+```{r}
+setGeneric("appStageObject", function(x, dir, path, child=FALSE, ...) 
+    standardGeneric("appStageObject"))
+
+setMethod("appStageObject", "ANY", function(x, dir, path, child=FALSE, ...) {
+    meta <- stageObject(x, dir, path, child=child, ...)
+
+    # Creating a fallback that adds authorship to all non-child objects. 
+    if (!child) {
+        meta$authors <- I(Sys.info()[["user"]])
+    }
+
+    # Pointing .writeMetadata to the application package storing the schemas.
+    attr(meta[["$schema"]], "package") <- "APPLICATION_NAME_HERE"
+
+    meta 
+})
+```
+
+Application developers will typically create another wrapper function that runs the setter before attempting to stage an object.
+This is more convenient for the end-users of that application, who do not have to remember what to set:
+
+```{r}
+appSave <- function(x, dir, path, child=FALSE) {
+    olds <- .altStageObject(appStageObject)
+    on.exit(.altStageObject(olds))
+
+    meta <- appStageObject(x, dir, path, child=child)
+    written <- .writeMetadata(meta, dir) 
+
+    written$path
+}
+```
+
+Of course, it is possible to customize the staging of specific classes by simply defining a new method for the new generic:
+
+```{r}
+setMethod("appStageObject", "DFrame", function(x, dir, path, child=FALSE, ...) {
+    # Extracting details from the metadata.
+    clinical.trial.id <- metadata(x)$trial_id
+    treatment <- metadata(x)$treatment
+    study.design <- metadata(x)$study
+
+    # Calling the ANY method, which eventually just calls stageObject...
+    meta <- callNextMethod()
+
+    # Adding some metadata for data frames, assuming these properties are
+    # listed in the schema.
+    meta[["clinical_trail_details"]] <- list(
+        trial_id = trail.id,
+        treatment = treatment,
+        design = study.design
+    )
+
+    meta
+})
+```
+
+# Overriding the loading method
+
+Similarly, the `.altLoadObject()` setter allows applications to set an alternative loading function to replace `loadObject()`.
+This is necessary if `.altStageObject()` is used to define a staging override that points to a different set of schemas;
+in which case, the loading method must also be overridden to look at those schemas to obtain appropriate restoration method (in the `_attributes.restore.R` property).
+The loading method may also attach various bits and pieces of global metadata that we might have stored, e.g. authorship.
+
+```{r}
+# Memorize schema look-up in the R session, to avoid having to repeatedly query
+# the R package directory on the file system at every loadObject request.
+memory <- new.env()
+memory$cache <- list()
+
+appLoadObject <- function(info, project, ...) {
+    output <- .loadObjectInternal(info, project, ..., 
+        locations="APPLCATION_NAME_HERE",
+        memory=memory.env
+    )
+
+    if ("authors" %in% names(info) && is(output, "Annotated")) {
+        metadata(output)$authors <- info$authors
+    }
+
+    output
+}
+```
+
+Application developers will typically create another wrapper function that runs the setter before attempting to load an object.
+This wrapper may also create the application-specific `*Handler` class that will be used to override `acquireFile` and `acquireMetadata`.
+
+```{r}
+appLoad <- function(project, path) {
+    oldl <- .altLoadObject(appLoadObject)
+    on.exit(.altLoadObject(oldl))
+    info <- acquireMetadata(project, path)
+    appLoadObject(info, project, child=child)
+}
+```
+
+Note that `.altLoadObject()` will override the loading for all objects.
+For overrides of specific objects, application developers can simply modify the `_attributes.restore.R` in the corresponding schema to point to a different function.
+
+# Session information {-}
+
+```{r}
+sessionInfo()
+```
