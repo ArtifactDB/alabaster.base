@@ -94,8 +94,12 @@
 <div class="section level2">
 <h2 id="quick-start">Quick start<a class="anchor" aria-label="anchor" href="#quick-start"></a>
 </h2>
-<p>The simplest example involves saving a <code>DataFrame</code> inside a staging directory. Let’s mock one up:</p>
+<p>First, we’ll install the package and its dependencies:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"ArtifactDB/alabaster.schemas"</span><span class="op">)</span></span>
+<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"ArtifactDB/alabaster.base"</span><span class="op">)</span></span></code></pre></div>
+<p>The simplest example involves saving a <code>DataFrame</code> inside a staging directory. Let’s mock one up:</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://bioconductor.org/packages/S4Vectors" class="external-link">S4Vectors</a></span><span class="op">)</span></span>
 <span><span class="va">df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/DataFrame-class.html" class="external-link">DataFrame</a></span><span class="op">(</span>X<span class="op">=</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span>, Y<span class="op">=</span><span class="va">letters</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">]</span><span class="op">)</span></span>
 <span><span class="co">## DataFrame with 10 rows and 2 columns</span></span>
@@ -112,42 +116,42 @@
 <span><span class="co">## 9          9           i</span></span>
 <span><span class="co">## 10        10           j</span></span></code></pre></div>
 <p>Then we can save it to the staging directory:</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">tmp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/files2.html" class="external-link">dir.create</a></span><span class="op">(</span><span class="va">tmp</span><span class="op">)</span></span>
 <span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">alabaster.base</span><span class="op">)</span></span>
 <span><span class="va">meta</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/stageObject.html">stageObject</a></span><span class="op">(</span><span class="va">df</span>, <span class="va">tmp</span>, path<span class="op">=</span><span class="st">"my_df"</span><span class="op">)</span></span></code></pre></div>
 <p>This returns some metadata that can also be saved:</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="reference/writeMetadata.html">.writeMetadata</a></span><span class="op">(</span><span class="va">meta</span>, <span class="va">tmp</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/readLines.html" class="external-link">readLines</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">tmp</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">meta</span><span class="op">$</span><span class="va">path</span>, <span class="st">".json"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>, sep<span class="op">=</span><span class="st">"\n"</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb4"><pre class="sourceCode json"><code class="sourceCode json"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"$schema"</span><span class="fu">:</span> <span class="st">"csv_data_frame/v2.json"</span><span class="fu">,</span></span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"path"</span><span class="fu">:</span> <span class="st">"my_df/simple.csv.gz"</span><span class="fu">,</span></span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"is_child"</span><span class="fu">:</span> <span class="kw">false</span><span class="fu">,</span></span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"data_frame"</span><span class="fu">:</span> <span class="fu">{</span></span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"columns"</span><span class="fu">:</span> <span class="ot">[</span></span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>      <span class="fu">{</span></span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>        <span class="dt">"name"</span><span class="fu">:</span> <span class="st">"X"</span><span class="fu">,</span></span>
-<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>        <span class="dt">"type"</span><span class="fu">:</span> <span class="st">"integer"</span></span>
-<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>      <span class="fu">}</span><span class="ot">,</span></span>
-<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>      <span class="fu">{</span></span>
-<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>        <span class="dt">"name"</span><span class="fu">:</span> <span class="st">"Y"</span><span class="fu">,</span></span>
-<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>        <span class="dt">"type"</span><span class="fu">:</span> <span class="st">"string"</span><span class="fu">,</span></span>
-<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>        <span class="dt">"values"</span><span class="fu">:</span> <span class="ot">[</span><span class="st">"a"</span><span class="ot">,</span> <span class="st">"b"</span><span class="ot">,</span> <span class="st">"c"</span><span class="ot">,</span> <span class="st">"d"</span><span class="ot">,</span> <span class="st">"e"</span><span class="ot">,</span> <span class="st">"f"</span><span class="ot">,</span> <span class="st">"g"</span><span class="ot">,</span> <span class="st">"h"</span><span class="ot">,</span> <span class="st">"i"</span><span class="ot">,</span> <span class="st">"j"</span><span class="ot">]</span></span>
-<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>      <span class="fu">}</span></span>
-<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>    <span class="ot">]</span><span class="fu">,</span></span>
-<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"dimensions"</span><span class="fu">:</span> <span class="ot">[</span><span class="dv">10</span><span class="ot">,</span> <span class="dv">2</span><span class="ot">]</span></span>
-<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">},</span></span>
-<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"csv_data_frame"</span><span class="fu">:</span> <span class="fu">{</span></span>
-<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"placeholder"</span><span class="fu">:</span> <span class="kw">true</span><span class="fu">,</span></span>
-<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"compression"</span><span class="fu">:</span> <span class="st">"gzip"</span></span>
-<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">},</span></span>
-<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"md5sum"</span><span class="fu">:</span> <span class="st">"3be9b301364d2d69fd2f51b43b0086ea"</span></span>
-<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode json"><code class="sourceCode json"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"$schema"</span><span class="fu">:</span> <span class="st">"csv_data_frame/v2.json"</span><span class="fu">,</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"path"</span><span class="fu">:</span> <span class="st">"my_df/simple.csv.gz"</span><span class="fu">,</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"is_child"</span><span class="fu">:</span> <span class="kw">false</span><span class="fu">,</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"data_frame"</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"columns"</span><span class="fu">:</span> <span class="ot">[</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>      <span class="fu">{</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>        <span class="dt">"name"</span><span class="fu">:</span> <span class="st">"X"</span><span class="fu">,</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>        <span class="dt">"type"</span><span class="fu">:</span> <span class="st">"integer"</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>      <span class="fu">}</span><span class="ot">,</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>      <span class="fu">{</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>        <span class="dt">"name"</span><span class="fu">:</span> <span class="st">"Y"</span><span class="fu">,</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>        <span class="dt">"type"</span><span class="fu">:</span> <span class="st">"string"</span><span class="fu">,</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>        <span class="dt">"values"</span><span class="fu">:</span> <span class="ot">[</span><span class="st">"a"</span><span class="ot">,</span> <span class="st">"b"</span><span class="ot">,</span> <span class="st">"c"</span><span class="ot">,</span> <span class="st">"d"</span><span class="ot">,</span> <span class="st">"e"</span><span class="ot">,</span> <span class="st">"f"</span><span class="ot">,</span> <span class="st">"g"</span><span class="ot">,</span> <span class="st">"h"</span><span class="ot">,</span> <span class="st">"i"</span><span class="ot">,</span> <span class="st">"j"</span><span class="ot">]</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>      <span class="fu">}</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>    <span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"dimensions"</span><span class="fu">:</span> <span class="ot">[</span><span class="dv">10</span><span class="ot">,</span> <span class="dv">2</span><span class="ot">]</span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">},</span></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"csv_data_frame"</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"placeholder"</span><span class="fu">:</span> <span class="kw">true</span><span class="fu">,</span></span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"compression"</span><span class="fu">:</span> <span class="st">"gzip"</span></span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">},</span></span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"md5sum"</span><span class="fu">:</span> <span class="st">"3be9b301364d2d69fd2f51b43b0086ea"</span></span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
 <p>Loading it back into memory is straightforward:</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="reference/loadObject.html">loadObject</a></span><span class="op">(</span><span class="va">meta</span>, <span class="va">tmp</span><span class="op">)</span></span>
 <span><span class="co">## DataFrame with 10 rows and 2 columns</span></span>
 <span><span class="co">##            X           Y</span></span>
@@ -162,7 +166,32 @@
 <span><span class="co">## 8          8           h</span></span>
 <span><span class="co">## 9          9           i</span></span>
 <span><span class="co">## 10        10           j</span></span></code></pre></div>
-<p>Check out the <a href="https://artifactdb.github.io/alabaster.base/articles/userguide.html" class="external-link">user’s guide</a> for more details. The same process can be applied to <code>GRanges</code>, <code>SummarizedExperiment</code>, <code>SingleCellExperiment</code> objects, etc., provided the appropriate <strong>alabaster</strong> package is installed.</p>
+<p>Check out the <a href="https://artifactdb.github.io/alabaster.base/articles/userguide.html" class="external-link">user’s guide</a> for more details.</p>
+</div>
+<div class="section level2">
+<h2 id="supported-classes">Supported classes<a class="anchor" aria-label="anchor" href="#supported-classes"></a>
+</h2>
+<p>The staging/loading process can be applied to a range of data structures, provided the appropriate <strong>alabaster</strong> package is installed.</p>
+<ul>
+<li>
+<a href="https://github.com/ArtifactDB/alabaster.matrix" class="external-link"><strong>alabaster.matrix</strong></a> for ordinary matrices, <code>Matrix</code> objects and <a href="https://bioconductor.org/packages/DelayedArray" class="external-link"><code>DelayedArray</code></a> objects.</li>
+<li>
+<a href="https://github.com/ArtifactDB/alabaster.ranges" class="external-link"><strong>alabaster.ranges</strong></a> for <a href="https://bioconductor.org/packages/GenomicRanges" class="external-link"><code>GRanges</code></a>, <code>GRangesList</code> and related objects.</li>
+<li>
+<a href="https://github.com/ArtifactDB/alabaster.se" class="external-link"><strong>alabaster.se</strong></a> for <a href="https://bioconductor.org/packages/SummarizedExperiment" class="external-link"><code>SummarizedExperiment</code></a> and <code>RangedSummarizedExperiment</code> objects.</li>
+<li>
+<a href="https://github.com/ArtifactDB/alabaster.sce" class="external-link"><strong>alabaster.sce</strong></a> for <a href="https://bioconductor.org/packages/SingleCellExperiment" class="external-link"><code>SingleCellExperiment</code></a> objects.</li>
+<li>
+<a href="https://github.com/ArtifactDB/alabaster.spatial" class="external-link"><strong>alabaster.spatial</strong></a> for <a href="https://bioconductor.org/packages/SpatialExperiment" class="external-link"><code>SpatialExperiment</code></a> and <code>VirtualSpatialImage</code> objects.</li>
+<li>
+<a href="https://github.com/ArtifactDB/alabaster.mae" class="external-link"><strong>alabaster.mae</strong></a> for <a href="https://bioconductor.org/packages/MultiAssayExperiment" class="external-link"><code>MultiAssayExperiment</code></a> objects.</li>
+<li>
+<a href="https://github.com/ArtifactDB/alabaster.bumpy" class="external-link"><strong>alabaster.bumpy</strong></a> for <a href="https://bioconductor.org/packages/BumpyMatrix" class="external-link"><code>BumpyMatrix</code></a> objects.</li>
+<li>
+<a href="https://github.com/ArtifactDB/alabaster.string" class="external-link"><strong>alabaster.string</strong></a> for <a href="https://bioconductor.org/packages/Biostrings" class="external-link"><code>XStringSet</code></a> objects.</li>
+<li>
+<a href="https://github.com/ArtifactDB/alabaster.vcf" class="external-link"><strong>alabaster.vcf</strong></a> for <a href="https://bioconductor.org/packages/Biostrings" class="external-link"><code>VCF</code></a> objects.</li>
+</ul>
 </div>
 <div class="section level2">
 <h2 id="extensions-and-applications">Extensions and applications<a class="anchor" aria-label="anchor" href="#extensions-and-applications"></a>
