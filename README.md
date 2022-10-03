@@ -17,6 +17,13 @@ Implementations of these methods for various Bioconductor packages can be found 
 
 ## Quick start
 
+First, we'll install the package and its dependencies:
+
+```r
+devtools::install_github("ArtifactDB/alabaster.schemas")
+devtools::install_github("ArtifactDB/alabaster.base")
+```
+
 The simplest example involves saving a `DataFrame` inside a staging directory.
 Let's mock one up:
 
@@ -102,7 +109,20 @@ loadObject(meta, tmp)
 ```
 
 Check out the [user's guide](https://artifactdb.github.io/alabaster.base/articles/userguide.html) for more details.
-The same process can be applied to `GRanges`, `SummarizedExperiment`, `SingleCellExperiment` objects, etc., provided the appropriate **alabaster** package is installed.
+
+## Supported classes
+
+The staging/loading process can be applied to a range of data structures, provided the appropriate **alabaster** package is installed.
+
+- [**alabaster.matrix**](https://github.com/ArtifactDB/alabaster.matrix) for ordinary matrices, `Matrix` objects and [`DelayedArray`](https://bioconductor.org/packages/DelayedArray) objects.
+- [**alabaster.ranges**](https://github.com/ArtifactDB/alabaster.ranges) for [`GRanges`](https://bioconductor.org/packages/GenomicRanges), `GRangesList` and related objects.
+- [**alabaster.se**](https://github.com/ArtifactDB/alabaster.se) for [`SummarizedExperiment`](https://bioconductor.org/packages/SummarizedExperiment) and `RangedSummarizedExperiment` objects.
+- [**alabaster.sce**](https://github.com/ArtifactDB/alabaster.sce) for [`SingleCellExperiment`](https://bioconductor.org/packages/SingleCellExperiment) objects.
+- [**alabaster.spatial**](https://github.com/ArtifactDB/alabaster.spatial) for [`SpatialExperiment`](https://bioconductor.org/packages/SpatialExperiment) and `VirtualSpatialImage` objects.
+- [**alabaster.mae**](https://github.com/ArtifactDB/alabaster.mae) for [`MultiAssayExperiment`](https://bioconductor.org/packages/MultiAssayExperiment) objects.
+- [**alabaster.bumpy**](https://github.com/ArtifactDB/alabaster.bumpy) for [`BumpyMatrix`](https://bioconductor.org/packages/BumpyMatrix) objects.
+- [**alabaster.string**](https://github.com/ArtifactDB/alabaster.string) for [`XStringSet`](https://bioconductor.org/packages/Biostrings) objects.
+- [**alabaster.vcf**](https://github.com/ArtifactDB/alabaster.vcf) for [`VCF`](https://bioconductor.org/packages/Biostrings) objects.
 
 ## Extensions and applications
 
