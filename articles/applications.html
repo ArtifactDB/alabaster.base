@@ -236,9 +236,11 @@ metadata that we might have stored, e.g. authorship.</p>
 <span><span class="va">memory</span><span class="op">$</span><span class="va">cache</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">appLoadObject</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">info</span>, <span class="va">project</span>, <span class="va">...</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="co"># .loadObjectInternal is a helper function that handles loading</span></span>
+<span>    <span class="co"># with different schema location and memory store.</span></span>
 <span>    <span class="va">output</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/loadObject.html">.loadObjectInternal</a></span><span class="op">(</span><span class="va">info</span>, <span class="va">project</span>, <span class="va">...</span>, </span>
 <span>        locations<span class="op">=</span><span class="st">"APPLCATION_NAME_HERE"</span>,</span>
-<span>        memory<span class="op">=</span><span class="va">memory.env</span></span>
+<span>        memory<span class="op">=</span><span class="va">memory</span></span>
 <span>    <span class="op">)</span></span>
 <span></span>
 <span>    <span class="kw">if</span> <span class="op">(</span><span class="st">"authors"</span> <span class="op"><a href="https://rdrr.io/pkg/BiocGenerics/man/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">info</span><span class="op">)</span> <span class="op">&amp;&amp;</span> <span class="fu"><a href="https://rdrr.io/r/methods/is.html" class="external-link">is</a></span><span class="op">(</span><span class="va">output</span>, <span class="st">"Annotated"</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
