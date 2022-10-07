@@ -155,9 +155,11 @@ memory <- new.env()
 memory$cache <- list()
 
 appLoadObject <- function(info, project, ...) {
+    # .loadObjectInternal is a helper function that handles loading
+    # with different schema location and memory store.
     output <- .loadObjectInternal(info, project, ..., 
-        locations="APPLCATION_NAME_HERE",
-        memory=memory.env
+        .locations="APPLCATION_NAME_HERE",
+        .memory=memory
     )
 
     if ("authors" %in% names(info) && is(output, "Annotated")) {
