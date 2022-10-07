@@ -74,7 +74,7 @@
     }
 
     jpath <- file.path(dir, jpath)
-    write(file=jpath, toJSON(meta, pretty=TRUE, auto_unbox=TRUE))
+    write(file=jpath, toJSON(meta, pretty=TRUE, auto_unbox=TRUE, digits=NA))
     jsonvalidate::json_validate(jpath, schema, error=TRUE, engine="ajv") 
 
     list(type="local", path=meta$path)
