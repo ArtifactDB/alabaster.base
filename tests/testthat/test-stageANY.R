@@ -53,3 +53,14 @@ test_that("stageObject fails for existing paths", {
     expect_identical(info$path, "./simple.csv.gz")
 })
 
+test_that("stageObject fails for saving non-child objects in other object's subdirectories", {
+    a <- S4Vectors::DataFrame(X = 1L)
+
+    tmp <- tempfile()
+    dir.create(tmp) 
+    meta <- stageObject(a, tmp, "foo")
+    .writeMetadata(meta, tmp)
+
+    expect_error(stageObject(a, tmp, "foo/bar"), "non-child object")
+})
+

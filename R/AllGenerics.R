@@ -24,19 +24,22 @@
 #' All files created by a \code{stageObject} method should be referenced from the metadata list, directly or otherwise (e.g., via child resources).
 #'
 #' @details
-#' All methods are expected to add more path components to the end of the input \code{path} when saving \code{x}.
-#' More specifically, a subdirectory should be created at the input \code{path}; all artifacts required to represent \code{x} should be created inside this subdirectory.
-#' Each artifact is associated with its own metadata, staging and loading methods, making it easy to decompose complex objects into manageable components.
+#' All methods are expected to create a subdirectory at the input \code{path}.
+#' All artifacts required to represent \code{x} should be created inside this subdirectory.
+#' Each artifact is associated with its own JSON-formatted metadata file and is processed by its own staging and loading methods.
+#' This makes it easy to decompose complex objects into manageable components.
 #'
 #' Exactly one artifact in this subdirectory should be marked \code{is_child = FALSE} and should reference (indirectly or otherwise) all other artifacts with \code{is_child = TRUE}.
 #' The non-child artifact is considered the \dQuote{entrypoint} file that should be referenced by \code{loadObject} to restore \code{x} in memory.
-#' Keep in mind that the path of the entrypoint will differ from the input \code{path};
+#' Keep in mind that the relative path of the entrypoint file will differ from the input \code{path} directory;
 #' if the former is needed (e.g., to reference \code{x} from the metadata of a larger object), use the \code{path} string returned in the output list.
 #'
 #' If a method for this generic needs to stage child artifacts, it should call \code{\link{.stageObject}} rather than \code{stageObject} (note the period at the start of the former).
 #' This ensures that the staging method will respect customizations from alabaster applications that define their own generic in \code{\link{.altStageObject}}.
+#' Child objects of \code{x} should be saved in the same subdirectory as \code{path};
+#' any attempt to save another non-child object into \code{path} will cause an error.
 #'
-#' The \code{stageObject} generic will also check if the \code{path} already exists before dispatching to the methods.
+#' The \code{stageObject} generic will check if the \code{path} already exists before dispatching to the methods.
 #' If so, it will throw an error to ensure that downstream name clashes do not occur.
 #' The exception is if \code{path = "."}, in which case no check is performed; this is useful for eliminating subdirectories in situations where the project contains only one object.
 #' 
@@ -54,9 +57,25 @@
 #' @aliases stageObject,ANY-method
 #' .searchForMethods
 #' @import methods
+#' @importFrom jsonlite fromJSON
 setGeneric("stageObject", function(x, dir, path, child=FALSE, ...) {
     if (path != "." && file.exists(full.path <- file.path(dir, path))) {
         stop("cannot stage ", class(x)[1], " at existing path '", full.path, "'")
+    }
+
+    if (!child) {
+        parent <- dirname(path)
+        while (parent != ".") {
+            ppath <- file.path(dir, parent)
+            candidates <- list.files(ppath, pattern="\\.json$")
+            for (can in candidates) {
+                schema <- fromJSON(file.path(ppath, can), simplifyVector=FALSE)[["$schema"]]
+                if (!startsWith(schema, "redirection/")) {
+                    stop("cannot save a non-child object inside another object's subdirectory at '", parent, "'")
+                }
+            }
+            parent <- dirname(parent)
+        }
     }
 
     .searchMethods(x)
