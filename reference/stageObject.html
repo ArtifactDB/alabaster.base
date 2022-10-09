@@ -104,21 +104,34 @@ This may be decorated with the <code>package</code> attribute to help <code><a h
     </div>
     <div id="details">
     <h2>Details</h2>
-    <p>All methods are expected to create a subdirectory at the input <code>path</code>.
-All artifacts required to represent <code>x</code> should be created inside this subdirectory.
-Each artifact is associated with its own JSON-formatted metadata file and is processed by its own staging and loading methods.
-This makes it easy to decompose complex objects into manageable components.</p>
-<p>Exactly one artifact in this subdirectory should be marked <code>is_child = FALSE</code> and should reference (indirectly or otherwise) all other artifacts with <code>is_child = TRUE</code>.
-The non-child artifact is considered the “entrypoint” file that should be referenced by <code>loadObject</code> to restore <code>x</code> in memory.
-Keep in mind that the relative path of the entrypoint file will differ from the input <code>path</code> directory;
-if the former is needed (e.g., to reference <code>x</code> from the metadata of a larger object), use the <code>path</code> string returned in the output list.</p>
-<p>If a method for this generic needs to stage child artifacts, it should call <code><a href="altStageObject.html">.stageObject</a></code> rather than <code>stageObject</code> (note the period at the start of the former).
-This ensures that the staging method will respect customizations from alabaster applications that define their own generic in <code><a href="altStageObject.html">.altStageObject</a></code>.
-Child objects of <code>x</code> should be saved in the same subdirectory as <code>path</code>;
-any attempt to save another non-child object into <code>path</code> will cause an error.</p>
+    <p>Methods for the <code>stageObject</code> generic are expected to create a subdirectory at the input <code>path</code> inside <code>dir</code>.
+All files (artifacts and metadata documents) required to represent <code>x</code> on disk should be created inside <code>path</code>.
+The expected contents of <code>path</code> are:</p><ul><li><p>Exactly one JSON metadata document with a name ending in <code>.json</code>.
+This contains the metadata describing <code>x</code>, according to the schema defined in the <code>$schema</code> property.
+If a data file exists (see next), the <code>path</code> property should contain the relative path to that file from <code>dir</code>;
+otherwise it should contain the relative path of the metadata document itself.</p></li>
+<li><p>(Optional) A file containing the data inside <code>x</code>.
+This file should have the same name as the metadata file after stripping the <code>.json</code> extension.
+Methods are free to choose any format and name within <code>path</code> except for the <code>.json</code> file extension, 
+which is reserved for metadata documents created with <code><a href="writeMetadata.html">.writeMetadata</a></code>.</p></li>
+<li><p>(Optional) Further subdirectories containing child objects of <code>x</code>.
+Each child object should be saved in its own subdirectory, and should be referenced via a <code>resource</code> object within the metadata for <code>x</code>.
+When saving children, methods should call <code><a href="altStageObject.html">.stageObject</a></code> rather than <code>stageObject</code> (note the period at the start of the former).
+This ensures that the staging method will respect customizations from alabaster applications that define their own generic in <code><a href="altStageObject.html">.altStageObject</a></code>.</p></li>
+</ul><p>Methods can create both a data file and multiple subdirectories.
+In this manner, we can decompose complex <code>x</code> into their components for easier handling.</p>
+<p>Keep in mind that the returned <code>path</code> will differ from the input <code>path</code>;
+the latter refers to the directory while the former refers to a file inside the directory.
+Methods should use the former to reference <code>x</code> from the metadata of a parent object.</p>
 <p>The <code>stageObject</code> generic will check if the <code>path</code> already exists before dispatching to the methods.
 If so, it will throw an error to ensure that downstream name clashes do not occur.
 The exception is if <code>path = "."</code>, in which case no check is performed; this is useful for eliminating subdirectories in situations where the project contains only one object.</p>
+<p>Any attempt to use the <code>stageObject</code> generic to save another non-child object into <code>path</code> or its subdirectories will cause an error.
+This ensures that <code>path</code> contains all and only the contents of <code>x</code>.</p>
+    </div>
+    <div id="see-also">
+    <h2>See also</h2>
+    <div class="dont-index"><p><code><a href="checkValidDirectory.html">checkValidDirectory</a></code>, for validation of the staged contents.</p></div>
     </div>
     <div id="author">
     <h2>Author</h2>

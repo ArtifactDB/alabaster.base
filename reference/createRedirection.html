@@ -85,6 +85,12 @@ This is useful for creating short-hand aliases for resources that have inconveni
 
 <p>A list of metadata that can be processed by <code><a href="writeMetadata.html">.writeMetadata</a></code>.</p>
     </div>
+    <div id="details">
+    <h2>Details</h2>
+    <p><code>src</code> should not correspond to an existing file inside <code>dir</code>.
+This avoids ambiguity when attempting to load <code>src</code> via <code><a href="acquireFile.html">acquireFile</a></code>.
+Otherwise, it would be unclear as to whether the user wants the file at <code>src</code> or the redirection target <code>dest</code>.</p>
+    </div>
     <div id="author">
     <h2>Author</h2>
     <p>Aaron Lun</p>
