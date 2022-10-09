@@ -24,24 +24,37 @@
 #' All files created by a \code{stageObject} method should be referenced from the metadata list, directly or otherwise (e.g., via child resources).
 #'
 #' @details
-#' All methods are expected to create a subdirectory at the input \code{path}.
-#' All artifacts required to represent \code{x} should be created inside this subdirectory.
-#' Each artifact is associated with its own JSON-formatted metadata file and is processed by its own staging and loading methods.
-#' This makes it easy to decompose complex objects into manageable components.
-#'
-#' Exactly one artifact in this subdirectory should be marked \code{is_child = FALSE} and should reference (indirectly or otherwise) all other artifacts with \code{is_child = TRUE}.
-#' The non-child artifact is considered the \dQuote{entrypoint} file that should be referenced by \code{loadObject} to restore \code{x} in memory.
-#' Keep in mind that the relative path of the entrypoint file will differ from the input \code{path} directory;
-#' if the former is needed (e.g., to reference \code{x} from the metadata of a larger object), use the \code{path} string returned in the output list.
-#'
-#' If a method for this generic needs to stage child artifacts, it should call \code{\link{.stageObject}} rather than \code{stageObject} (note the period at the start of the former).
+#' Methods for the \code{stageObject} generic are expected to create a subdirectory at the input \code{path} inside \code{dir}.
+#' All files (artifacts and metadata documents) required to represent \code{x} on disk should be created inside \code{path}.
+#' The expected contents of \code{path} are:
+#' \itemize{
+#' \item Exactly one JSON metadata document with a name ending in \code{.json}.
+#' This contains the metadata describing \code{x}, according to the schema defined in the \code{$schema} property.
+#' If a data file exists (see next), the \code{path} property should contain the relative path to that file from \code{dir};
+#' otherwise it should contain the relative path of the metadata document itself.
+#' \item (Optional) A file containing the data inside \code{x}.
+#' This file should have the same name as the metadata file after stripping the \code{.json} extension.
+#' Methods are free to choose any format and name within \code{path} except for the \code{.json} file extension, 
+#' which is reserved for metadata documents created with \code{\link{.writeMetadata}}.
+#' \item (Optional) Further subdirectories containing child objects of \code{x}.
+#' Each child object should be saved in its own subdirectory, and should be referenced via a \code{resource} object within the metadata for \code{x}.
+#' When saving children, methods should call \code{\link{.stageObject}} rather than \code{stageObject} (note the period at the start of the former).
 #' This ensures that the staging method will respect customizations from alabaster applications that define their own generic in \code{\link{.altStageObject}}.
-#' Child objects of \code{x} should be saved in the same subdirectory as \code{path};
-#' any attempt to save another non-child object into \code{path} will cause an error.
+#' }
+#' 
+#' Methods can create both a data file and multiple subdirectories.
+#' In this manner, we can decompose complex \code{x} into their components for easier handling.
+#' 
+#' Keep in mind that the returned \code{path} will differ from the input \code{path};
+#' the latter refers to the directory while the former refers to a file inside the directory.
+#' Methods should use the former to reference \code{x} from the metadata of a parent object.
 #'
 #' The \code{stageObject} generic will check if the \code{path} already exists before dispatching to the methods.
 #' If so, it will throw an error to ensure that downstream name clashes do not occur.
 #' The exception is if \code{path = "."}, in which case no check is performed; this is useful for eliminating subdirectories in situations where the project contains only one object.
+#'
+#' Any attempt to use the \code{stageObject} generic to save another non-child object into \code{path} or its subdirectories will cause an error.
+#' This ensures that \code{path} contains all and only the contents of \code{x}.
 #' 
 #' @author Aaron Lun
 #' @examples
@@ -52,6 +65,9 @@
 #' X <- DataFrame(X=LETTERS, Y=sample(3, 26, replace=TRUE))
 #' stageObject(X, tmp, path="test1")
 #' list.files(file.path(tmp, "test1"))
+#'
+#' @seealso
+#' \code{\link{checkValidDirectory}}, for validation of the staged contents.
 #'
 #' @export
 #' @aliases stageObject,ANY-method

@@ -20,6 +20,11 @@ A list of metadata that can be processed by \code{\link{.writeMetadata}}.
 Create a redirection to another path in the same staging directory.
 This is useful for creating short-hand aliases for resources that have inconveniently long paths.
 }
+\details{
+\code{src} should not correspond to an existing file inside \code{dir}.
+This avoids ambiguity when attempting to load \code{src} via \code{\link{acquireFile}}.
+Otherwise, it would be unclear as to whether the user wants the file at \code{src} or the redirection target \code{dest}.
+}
 \author{
 Aaron Lun
 }
