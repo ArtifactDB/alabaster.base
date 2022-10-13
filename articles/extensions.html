@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">alabaster.base</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.98.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.98.1</span>
       </span>
     </div>
 
@@ -331,16 +331,16 @@ either directly or as a child of another object (e.g., a
 <span><span class="va">x</span></span></code></pre></div>
 <pre><code><span><span class="co">## 10 x 10 sparse Matrix of class "dgTMatrix"</span></span>
 <span><span class="co">##                                                          </span></span>
-<span><span class="co">##  [1,] .         . 0.06110827 . . .        . .         . .</span></span>
-<span><span class="co">##  [2,] .         . .          . . 0.256158 . .         . .</span></span>
-<span><span class="co">##  [3,] 0.4663196 . .          . . .        . .         . .</span></span>
-<span><span class="co">##  [4,] .         . .          . . .        . .         . .</span></span>
-<span><span class="co">##  [5,] .         . 0.72962021 . . .        . .         . .</span></span>
-<span><span class="co">##  [6,] .         . .          . . .        . 0.7263595 . .</span></span>
-<span><span class="co">##  [7,] .         . .          . . .        . .         . .</span></span>
-<span><span class="co">##  [8,] .         . .          . . .        . .         . .</span></span>
-<span><span class="co">##  [9,] .         . .          . . .        . .         . .</span></span>
-<span><span class="co">## [10,] .         . .          . . .        . .         . .</span></span></code></pre>
+<span><span class="co">##  [1,] .         . 0.3354355 . . .         . .         . .</span></span>
+<span><span class="co">##  [2,] .         . .         . . 0.3221406 . .         . .</span></span>
+<span><span class="co">##  [3,] 0.4346215 . .         . . .         . .         . .</span></span>
+<span><span class="co">##  [4,] .         . .         . . .         . .         . .</span></span>
+<span><span class="co">##  [5,] .         . 0.8455996 . . .         . .         . .</span></span>
+<span><span class="co">##  [6,] .         . .         . . .         . 0.9917262 . .</span></span>
+<span><span class="co">##  [7,] .         . .         . . .         . .         . .</span></span>
+<span><span class="co">##  [8,] .         . .         . . .         . .         . .</span></span>
+<span><span class="co">##  [9,] .         . .         . . .         . .         . .</span></span>
+<span><span class="co">## [10,] .         . .         . . .         . .         . .</span></span></code></pre>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">tmp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/files2.html" class="external-link">dir.create</a></span><span class="op">(</span><span class="va">tmp</span><span class="op">)</span></span>
@@ -396,16 +396,16 @@ files. In this case, it’s fairly simple:</p>
 <code class="sourceCode R"><span><span class="fu">loadSparseTripletMatrix</span><span class="op">(</span><span class="va">meta</span>, <span class="va">tmp</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## 10 x 10 sparse Matrix of class "dgTMatrix"</span></span>
 <span><span class="co">##                                                          </span></span>
-<span><span class="co">##  [1,] .         . 0.06110827 . . .        . .         . .</span></span>
-<span><span class="co">##  [2,] .         . .          . . 0.256158 . .         . .</span></span>
-<span><span class="co">##  [3,] 0.4663196 . .          . . .        . .         . .</span></span>
-<span><span class="co">##  [4,] .         . .          . . .        . .         . .</span></span>
-<span><span class="co">##  [5,] .         . 0.72962021 . . .        . .         . .</span></span>
-<span><span class="co">##  [6,] .         . .          . . .        . 0.7263595 . .</span></span>
-<span><span class="co">##  [7,] .         . .          . . .        . .         . .</span></span>
-<span><span class="co">##  [8,] .         . .          . . .        . .         . .</span></span>
-<span><span class="co">##  [9,] .         . .          . . .        . .         . .</span></span>
-<span><span class="co">## [10,] .         . .          . . .        . .         . .</span></span></code></pre>
+<span><span class="co">##  [1,] .         . 0.3354355 . . .         . .         . .</span></span>
+<span><span class="co">##  [2,] .         . .         . . 0.3221406 . .         . .</span></span>
+<span><span class="co">##  [3,] 0.4346215 . .         . . .         . .         . .</span></span>
+<span><span class="co">##  [4,] .         . .         . . .         . .         . .</span></span>
+<span><span class="co">##  [5,] .         . 0.8455996 . . .         . .         . .</span></span>
+<span><span class="co">##  [6,] .         . .         . . .         . 0.9917262 . .</span></span>
+<span><span class="co">##  [7,] .         . .         . . .         . .         . .</span></span>
+<span><span class="co">##  [8,] .         . .         . . .         . .         . .</span></span>
+<span><span class="co">##  [9,] .         . .         . . .         . .         . .</span></span>
+<span><span class="co">## [10,] .         . .         . . .         . .         . .</span></span></code></pre>
 <p>To register this method with <em><a href="https://github.com/alabaster.base" class="external-link">alabaster.base</a></em>,
 <em>alabaster.foo</em> should add itself to the known schema locations
 upon load:</p>
