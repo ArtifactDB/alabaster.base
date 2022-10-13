@@ -18,7 +18,7 @@ setMethod("acquireMetadata", "character", function(project, path) {
         stop("'", path, "' has no accompanying JSON metadata file")
     }
 
-    info <- fromJSON(full.path, simplifyVector=TRUE, simplifyMatrix=FALSE, simplifyDataFrame=FALSE)
+    info <- fromJSON(full.path, simplifyVector=FALSE)
 
     # If this is a redirect, follow it.
     if (dirname(info[["$schema"]]) == "redirection") {

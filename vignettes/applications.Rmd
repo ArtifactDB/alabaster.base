@@ -52,7 +52,7 @@ setMethod("acquireMetadata", "RemoteDownloadHandler", function(project, path) {
     demo.url <- paste0(project@host, "/projects/", project@id, "/file", path)
     target <- tempfile()
     download.file(demo.url, target)
-    jsonlite::fromJSON(target, simplifyVector=TRUE, simplifyMatrix=FALSE, simplifyDataFrame=FALSE)
+    jsonlite::fromJSON(target, simplifyVector=FALSE)
 })
 ```
 
