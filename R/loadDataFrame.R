@@ -54,16 +54,18 @@ loadDataFrame <- function(info, project, include.nested=TRUE) {
             df <- df[order(as.integer(names(df)))]
             df <- lapply(df, as.vector)
 
-            # Replacing NAs. If it's _already_ NA according to R, 
-            # then we don't need to replace it (and we can't anyway,
-            # because the == won't evaluate to TRUE for NA's).
+            # Replacing NAs for strings.
             for (i in names(df)) {
-                attr <- h5readAttributes(path, paste0("data/", i))
-                replace.na <- attr[["missing-value-placeholder"]]
-                if (!is.null(replace.na) && !is.na(replace.na)) {
-                    df[[i]][df[[i]] == replace.na] <- NA
+                current <- df[[i]]
+                if (is.character(current)) {
+                    attr <- h5readAttributes(path, paste0("data/", i))
+                    replace.na <- attr[["missing-value-placeholder"]]
+                    if (!is.null(replace.na)) {
+                        df[[i]][current == replace.na] <- NA
+                    }
                 }
             }
+
             df <- DataFrame(df)
             colnames(df) <- as.vector(h5read(path, "column_names"))
         }

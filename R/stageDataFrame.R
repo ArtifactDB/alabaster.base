@@ -54,6 +54,10 @@
 #' list.files(tmp, recursive=TRUE)
 #' 
 #' @export
+#' @aliases
+#' .addStringPlaceholderAttribute
+#' .chooseStringPlaceholder
+#' 
 #' @rdname stageDataFrame
 #' @importFrom utils write.csv
 #' @importFrom S4Vectors DataFrame
@@ -191,8 +195,7 @@ setMethod("stageObject", "DataFrame", function(x, dir, path, child=FALSE, df.nam
     )
 }
 
-#' @importFrom rhdf5 h5write h5createGroup h5createFile H5Fopen H5Fclose
-#' H5Gopen H5Gclose h5writeAttribute H5Dopen H5Dclose
+#' @importFrom rhdf5 h5write h5createGroup h5createFile 
 .write_hdf5_data_frame <- function(x, ofile) {
     h5createFile(ofile)
     h5createGroup(ofile, "data")
@@ -206,38 +209,16 @@ setMethod("stageObject", "DataFrame", function(x, dir, path, child=FALSE, df.nam
         }
 
         missing.placeholder <- NULL
-        if (anyNA(current)) {
-            if (is.integer(current)) {
-                missing.placeholder <- NA_integer_
-            } else if (is.numeric(current)) {
-                missing.placeholder <- NA_real_
-            } else if (is.character(current)) {
-                missing.placeholder <- "NA"
-                search <- unique(current)
-                while (missing.placeholder %in% search) {
-                    missing.placeholder <- paste0("_", missing.placeholder)
-                }
-                current[is.na(current)] <- missing.placeholder
-            } else {
-                stop("unrecognized type for missing value elimination")
-            }
+        if (is.character(current) && anyNA(current)) {
+            missing.placeholder <- .chooseStringPlaceholder(current)
+            current[is.na(current)] <- missing.placeholder
         }
 
         data.name <- as.character(i - 1L)
         h5write(current, ofile, file.path("data", data.name))
 
         if (!is.null(missing.placeholder)) {
-            (function(){
-                fhandle <- H5Fopen(ofile)
-                ghandle <- H5Gopen(fhandle, "data")
-                dhandle <- H5Dopen(ghandle, data.name)
-                on.exit({
-                    H5Dclose(dhandle)
-                    H5Gclose(ghandle)
-                    H5Fclose(fhandle)
-                })
-                h5writeAttribute(missing.placeholder, h5obj=dhandle, name="missing-value-placeholder", asScalar=TRUE)
-            })()
+            .addStringPlaceholderAttribute(ofile, paste0("data/", data.name), missing.placeholder)
         }
     }
 
@@ -245,4 +226,27 @@ setMethod("stageObject", "DataFrame", function(x, dir, path, child=FALSE, df.nam
     if (!is.null(rownames(x))) {
         h5write(rownames(x), ofile, "row_names")
     }
+}
+
+# Exported for re-use in anything that saves possibly-missing strings to HDF5.
+# alabaster.matrix is probably the prime suspect here.
+
+#' @export
+.chooseStringPlaceholder <- function(x) {
+    missing.placeholder <- "NA"
+    search <- unique(x)
+    while (missing.placeholder %in% search) {
+        missing.placeholder <- paste0("_", missing.placeholder)
+    }
+    missing.placeholder
+}
+
+#' @export
+#' @importFrom rhdf5 H5Fopen H5Fclose H5Gopen H5Gclose h5writeAttribute H5Dopen H5Dclose
+.addStringPlaceholderAttribute <- function(file, path, placeholder) {
+    fhandle <- H5Fopen(file)
+    on.exit(H5Fclose(fhandle), add=TRUE)
+    dhandle <- H5Dopen(fhandle, path)
+    on.exit(H5Dclose(dhandle), add=TRUE)
+    h5writeAttribute(placeholder, h5obj=dhandle, name="missing-value-placeholder", asScalar=TRUE)
 }

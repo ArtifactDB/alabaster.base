@@ -2,6 +2,8 @@
 % Please edit documentation in R/stageDataFrame.R
 \name{stageObject,DataFrame-method}
 \alias{stageObject,DataFrame-method}
+\alias{.addStringPlaceholderAttribute}
+\alias{.chooseStringPlaceholder}
 \title{Stage a DataFrame}
 \usage{
 \S4method{stageObject}{DataFrame}(

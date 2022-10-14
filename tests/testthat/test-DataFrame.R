@@ -191,6 +191,7 @@ test_that("handling of NAs works correctly", {
     old <- .saveDataFrameFormat("hdf5")
     on.exit(.saveDataFrameFormat(old))
     meta2 <- stageObject(df, tmp, path="WHEE.h5")
+    expect_match(meta2[["$schema"]], "hdf5_data_frame")
 
     round2 <- loadDataFrame(meta2, project=tmp)
     expect_identical(df, round2)
