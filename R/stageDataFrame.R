@@ -210,7 +210,7 @@ setMethod("stageObject", "DataFrame", function(x, dir, path, child=FALSE, df.nam
 
         missing.placeholder <- NULL
         if (is.character(current) && anyNA(current)) {
-            missing.placeholder <- .chooseStringPlaceholder(current)
+            missing.placeholder <- .chooseMissingStringPlaceholder(current)
             current[is.na(current)] <- missing.placeholder
         }
 
@@ -218,7 +218,7 @@ setMethod("stageObject", "DataFrame", function(x, dir, path, child=FALSE, df.nam
         h5write(current, ofile, file.path("data", data.name))
 
         if (!is.null(missing.placeholder)) {
-            .addStringPlaceholderAttribute(ofile, paste0("data/", data.name), missing.placeholder)
+            .addMissingStringPlaceholderAttribute(ofile, paste0("data/", data.name), missing.placeholder)
         }
     }
 
@@ -232,7 +232,7 @@ setMethod("stageObject", "DataFrame", function(x, dir, path, child=FALSE, df.nam
 # alabaster.matrix is probably the prime suspect here.
 
 #' @export
-.chooseStringPlaceholder <- function(x) {
+.chooseMissingStringPlaceholder <- function(x) {
     missing.placeholder <- "NA"
     search <- unique(x)
     while (missing.placeholder %in% search) {
@@ -243,7 +243,7 @@ setMethod("stageObject", "DataFrame", function(x, dir, path, child=FALSE, df.nam
 
 #' @export
 #' @importFrom rhdf5 H5Fopen H5Fclose H5Gopen H5Gclose h5writeAttribute H5Dopen H5Dclose
-.addStringPlaceholderAttribute <- function(file, path, placeholder) {
+.addMissingStringPlaceholderAttribute <- function(file, path, placeholder) {
     fhandle <- H5Fopen(file)
     on.exit(H5Fclose(fhandle), add=TRUE)
     dhandle <- H5Dopen(fhandle, path)
