@@ -1,10 +1,9 @@
 #include "Rcpp.h"
 
-#include "uzuki/validate.hpp"
-#include "nlohmann/json.hpp"
+#include "uzuki2/validate.hpp"
 
 // [[Rcpp::export(rng=false)]]
-int check_list(std::string contents) {
-    nlohmann::json j = nlohmann::json::parse(contents);
-    return uzuki::validate(j);
+SEXP check_list(std::string file, std::string name, int num_external) {
+    uzuki2::validate(file, name, num_external);
+    return R_NilValue;
 }

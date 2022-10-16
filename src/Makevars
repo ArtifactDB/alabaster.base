@@ -1,2 +1,3 @@
-PKG_CPPFLAGS=-I../inst/include -D USE_ZLIB=1
-PKG_LIBS=-lz
+RHDF5_LIBS=$(shell "${R_HOME}/bin${R_ARCH_BIN}/Rscript" -e 'Rhdf5lib::pkgconfig("PKG_CXX_LIBS")') 
+PKG_CPPFLAGS=-I../inst/include
+PKG_LIBS=$(RHDF5_LIBS) -lz

@@ -23,12 +23,14 @@ BEGIN_RCPP
 END_RCPP
 }
 // check_list
-int check_list(std::string contents);
-RcppExport SEXP _alabaster_base_check_list(SEXP contentsSEXP) {
+SEXP check_list(std::string file, std::string name, int num_external);
+RcppExport SEXP _alabaster_base_check_list(SEXP fileSEXP, SEXP nameSEXP, SEXP num_externalSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
-    Rcpp::traits::input_parameter< std::string >::type contents(contentsSEXP);
-    rcpp_result_gen = Rcpp::wrap(check_list(contents));
+    Rcpp::traits::input_parameter< std::string >::type file(fileSEXP);
+    Rcpp::traits::input_parameter< std::string >::type name(nameSEXP);
+    Rcpp::traits::input_parameter< int >::type num_external(num_externalSEXP);
+    rcpp_result_gen = Rcpp::wrap(check_list(file, name, num_external));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -46,22 +48,37 @@ BEGIN_RCPP
 END_RCPP
 }
 // load_list
-Rcpp::RObject load_list(std::string contents, Rcpp::List obj);
-RcppExport SEXP _alabaster_base_load_list(SEXP contentsSEXP, SEXP objSEXP) {
+Rcpp::RObject load_list(std::string file, std::string name, Rcpp::List obj);
+RcppExport SEXP _alabaster_base_load_list(SEXP fileSEXP, SEXP nameSEXP, SEXP objSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
-    Rcpp::traits::input_parameter< std::string >::type contents(contentsSEXP);
+    Rcpp::traits::input_parameter< std::string >::type file(fileSEXP);
+    Rcpp::traits::input_parameter< std::string >::type name(nameSEXP);
     Rcpp::traits::input_parameter< Rcpp::List >::type obj(objSEXP);
-    rcpp_result_gen = Rcpp::wrap(load_list(contents, obj));
+    rcpp_result_gen = Rcpp::wrap(load_list(file, name, obj));
+    return rcpp_result_gen;
+END_RCPP
+}
+// write_integer_scalar
+SEXP write_integer_scalar(std::string path, std::string host, std::string name, int val);
+RcppExport SEXP _alabaster_base_write_integer_scalar(SEXP pathSEXP, SEXP hostSEXP, SEXP nameSEXP, SEXP valSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::traits::input_parameter< std::string >::type path(pathSEXP);
+    Rcpp::traits::input_parameter< std::string >::type host(hostSEXP);
+    Rcpp::traits::input_parameter< std::string >::type name(nameSEXP);
+    Rcpp::traits::input_parameter< int >::type val(valSEXP);
+    rcpp_result_gen = Rcpp::wrap(write_integer_scalar(path, host, name, val));
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
     {"_alabaster_base_check_csv", (DL_FUNC) &_alabaster_base_check_csv, 3},
-    {"_alabaster_base_check_list", (DL_FUNC) &_alabaster_base_check_list, 1},
+    {"_alabaster_base_check_list", (DL_FUNC) &_alabaster_base_check_list, 3},
     {"_alabaster_base_load_csv", (DL_FUNC) &_alabaster_base_load_csv, 4},
-    {"_alabaster_base_load_list", (DL_FUNC) &_alabaster_base_load_list, 2},
+    {"_alabaster_base_load_list", (DL_FUNC) &_alabaster_base_load_list, 3},
+    {"_alabaster_base_write_integer_scalar", (DL_FUNC) &_alabaster_base_write_integer_scalar, 4},
     {NULL, NULL, 0}
 };
 

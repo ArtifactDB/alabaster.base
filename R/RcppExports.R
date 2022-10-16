@@ -5,15 +5,19 @@ check_csv <- function(path, is_compressed, parallel) {
     .Call(`_alabaster_base_check_csv`, path, is_compressed, parallel)
 }
 
-check_list <- function(contents) {
-    .Call(`_alabaster_base_check_list`, contents)
+check_list <- function(file, name, num_external) {
+    .Call(`_alabaster_base_check_list`, file, name, num_external)
 }
 
 load_csv <- function(path, is_compressed, nrecords, parallel) {
     .Call(`_alabaster_base_load_csv`, path, is_compressed, nrecords, parallel)
 }
 
-load_list <- function(contents, obj) {
-    .Call(`_alabaster_base_load_list`, contents, obj)
+load_list <- function(file, name, obj) {
+    .Call(`_alabaster_base_load_list`, file, name, obj)
+}
+
+write_integer_scalar <- function(path, host, name, val) {
+    .Call(`_alabaster_base_write_integer_scalar`, path, host, name, val)
 }
 

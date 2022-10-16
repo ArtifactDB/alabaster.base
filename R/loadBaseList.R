@@ -26,14 +26,12 @@
 #'
 #' @export
 loadBaseList <- function(info, project) {
-    lpath <- acquireFile(project, info$path)
-    contents <- paste(readLines(lpath), collapse="\n")
-
-    children <- info$basic_list$children
+    children <- info$simple_list$children
     for (i in seq_along(children)) {
         child.meta <- acquireMetadata(project, children[[i]]$resource$path) 
         children[[i]] <- .loadObject(child.meta, project=project)
     }
 
-    load_list(contents, children)
+    lpath <- acquireFile(project, info$path)
+    load_list(lpath, info$hdf5_simple_list$group, children)
 }

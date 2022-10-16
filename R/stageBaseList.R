@@ -1,7 +1,7 @@
 #' Stage a base list
 #' 
-#' Save a \link{list} to a JSON file, with subdirectories created for any of the more complex members.
-#' This uses the \pkg{rlist2json} specification to ensure that appropriate types are declared.
+#' Save a \link{list} to a HDF5 file, with subdirectories created for any of the more complex members.
+#' This uses the uzuki2 specification to ensure that appropriate types are declared.
 #'
 #' @inheritParams stageObject
 #' @param fname String containing the name of the file to use to save \code{x}. 
@@ -12,6 +12,9 @@
 #'
 #' @author Aaron Lun
 #'
+#' @seealso
+#' \url{https://github.com/LTLA/uzuki2} for the specification.
+#'
 #' @examples
 #' library(S4Vectors)
 #' ll <- list(A=1, B=LETTERS, C=DataFrame(X=1:5))
@@ -21,49 +24,47 @@
 #' stageObject(ll, tmp, path="stuff")
 #'
 #' list.files(tmp, recursive=TRUE)
-#' cat(readLines(file.path(tmp, "stuff/list.gz")), sep="\n")
 #' 
 #' @export
 #' @rdname stageBaseList
-#' @importFrom jsonlite toJSON
+#' @importFrom rhdf5 h5createFile
 setMethod("stageObject", "list", function(x, dir, path, child=FALSE, fname="list") {
     dir.create(file.path(dir, path), showWarnings=FALSE)
+
+    target <- paste0(path, "/", fname, ".h5")
+    fpath <- file.path(dir, target)
+    h5createFile(fpath)
+    dname <- "contents"
+ 
     env <- new.env()
     env$collected <- list()
-    transformed <- .transform_list(x, dir=dir, path=path, env=env)
+    transformed <- .transform_list(x, dir=dir, path=path, fpath=fpath, name=dname, env=env)
 
-    contents <- toJSON(transformed, pretty=TRUE, auto_unbox=TRUE, na="null", null="null", digits=NA)
-    num.others <- check_list(contents) # check that we did it correctly.
-    stopifnot(num.others == length(env$collected))
-
-    target <- file.path(path, paste0(fname, ".gz"))
-    handle <- gzfile(file.path(dir, target), "wb")
-    on.exit(close(handle))
-    write(contents, file=handle)
+    # Check that we did it correctly.
+    check_list(fpath, dname, length(env$collected)) 
 
     list(
-        `$schema`="basic_list/v1.json",
+        `$schema`="hdf5_simple_list/v1.json",
         path=target,
         is_child=child,
-        basic_list=list(
-            children=env$collected,
-            compression="gzip"
+        simple_list=list(
+            children=env$collected
+        ),
+        hdf5_simple_list=list(
+            group=dname
         )
     )
 })
 
-.transform_list <- function(x, dir, path, env) {
-    if (is.data.frame(x)) {
-        info <- tryCatch({
-            .transform_list(as.list(x), dir=dir, path=path, env=env)
-        }, error=function(e) stop("failed to stage data frame inside a list\n  - ", e$message))
+#' @importFrom S4Vectors DataFrame
+#' @importFrom rhdf5 h5createGroup h5write
+.transform_list <- function(x, dir, path, fpath, name, env) {
+    h5createGroup(fpath, name)
 
-        out <- list(type="data.frame", columns=info, rows=nrow(x))
-        if (!is.null(rownames(x)) && !identical(attr(x, "row.names"), seq_len(nrow(x)))) {
-            out$names <- rownames(x)
-        }
+    if (is.list(x) && !is.data.frame(x)) {
+        .label_group(fpath, name, uzuki_object="list")
+        h5createGroup(fpath, paste0(name, "/data"))
 
-    } else if (is.list(x)) {
         nn <- names(x)
         if (!is.null(nn)) {
             empty <- nn == ""
@@ -72,72 +73,113 @@ setMethod("stageObject", "list", function(x, dir, path, child=FALSE, fname="list
             } else if (fail <- anyDuplicated(nn)) {
                 stop("names of named lists must be unique (multiple instances of '", nn[fail], "')")
             }
+            h5write(nn, fpath, paste0(name, "/names"))
         }
 
-        out <- x
         for (i in seq_along(x)) {
+            newname <- paste0(name, "/data/", i - 1L)
             tryCatch({
-                out[[i]] <- .transform_list(x[[i]], dir=dir, path=path, env=env)
+                .transform_list(x[[i]], dir=dir, path=path, fpath=fpath, name=newname, env=env)
             }, error=function(e) {
                 s <- if (is.null(nn)) i else paste0("'", nn[i], "'")
                 stop("failed to stage list element ", s, "\n  - ", e$message)
             })
         }
 
-    } else if (is.null(x)) {
-        out <- list(type = "nothing")
-
-    } else if (is.array(x)) {
-        flattened <- unname(as.vector(x))
-        out <- tryCatch({
-            .transform_list(flattened, dir=dir, path=path, env=env)
-        }, error=function(e) stop("failed to stage array inside a list\n  - ", e$message))
-        out$dimensions <- I(dim(x))
-
-        if (!is.null(dimnames(x))) {
-            dd <- dimnames(x)
-            for (i in seq_along(dd)) {
-                if (!is.null(dd[[i]])) {
-                    dd[[i]] <- I(dd[[i]])
-                }
-            }
-            out$names <- dd
-        }
-
-    } else if (is.factor(x)) {
-        ftype <- if (is.ordered(x)) "ordered" else "factor"
-        out <- list(type=ftype, values=I(as.character(x)), levels=I(levels(x)))
-        out <- .add_names(out, x)
-
-    } else if (is.character(x)) {
-        out <- list(type="string", values=I(x))
-        out <- .add_names(out, x)
-
-    } else if (is(x, "Date")) {
-        out <- list(type="date", values=I(as.character(x)))
-        out <- .add_names(out, x)
-
-    } else if (is.atomic(x)) {
-        out <- list(type=.remap_type(x), values=I(x))
-        out <- .add_names(out, x)
-
-    } else {
-        n <- length(env$collected) + 1L
-        tryCatch({
-            meta <- .stageObject(x, dir, file.path(path, paste0("child-", n)), child=TRUE)
-            env$collected[[n]] <- list(resource=.writeMetadata(meta, dir=dir))
-        }, error=function(e) stop("failed to stage '", class(x)[1], "' entry inside a list\n  - ", e$message)) 
-        out <- list(type="other", index=n-1L)
+        return(NULL)
     }
 
-    out 
+    if (is.null(x)) {
+        .label_group(fpath, name, uzuki_object="nothing")
+        return(NULL)
+    }
+
+    if (is.null(dim(x))) {
+        if (is.factor(x)) {
+            .label_group(fpath, name, 
+                uzuki_object="vector",
+                uzuki_type=if (is.ordered(x)) "ordered" else "factor"
+            )
+
+            h5write(as.integer(x) - 1L, fpath, paste0(name, "/data"))
+            h5write(levels(x), fpath, paste0(name, "/levels"))
+            .add_names(x, fpath, name)
+            return(NULL)
+
+        } else if (is(x, "Date") || is.character(x)) {
+            .label_group(fpath, name, 
+                uzuki_object="vector",
+                uzuki_type=if (is(x, "Date")) "date" else "string"
+            )
+
+            y <- as.character(x)
+            missing.placeholder <- NULL
+            if (anyNA(y)) {
+                missing.placeholder <- .chooseMissingStringPlaceholder(x)
+                y[is.na(y)] <- missing.placeholder
+            }
+
+            dname <- paste0(name, "/data")
+            h5write(y, fpath, dname)
+            if (!is.null(missing.placeholder)) {
+                .addMissingStringPlaceholderAttribute(fpath, dname, missing.placeholder)
+            }
+            .add_names(x, fpath, name)
+            return(NULL)
+
+        } else if (is.atomic(x)) {
+            .label_group(fpath, name, 
+                uzuki_object="vector",
+                uzuki_type=.remap_type(x)
+            )
+
+            if (is.logical(x) && anyNA(x)) {
+                # Force the use of a regular integer for missing values.
+                x <- as.integer(x)
+            }
+
+            h5write(x, fpath, paste0(name, "/data"))
+            .add_names(x, fpath, name)
+
+            return(NULL)
+       }
+    }
+
+    # External object fallback.
+    .label_group(fpath, name, uzuki_object="external")
+    n <- length(env$collected)
+    write_integer_scalar(fpath, name, "index", n)
+
+    n <- n + 1L
+    if (is.data.frame(x)) {
+        x <- DataFrame(x, check.names=FALSE)
+    }
+    tryCatch({
+        meta <- .stageObject(x, dir, paste0(path, paste0("/child-", n)), child=TRUE)
+        env$collected[[n]] <- list(resource=.writeMetadata(meta, dir=dir))
+    }, error=function(e) {
+        stop("failed to stage '", class(x)[1], "' entry inside a list\n  - ", e$message)
+    }) 
 }
 
-.add_names <- function(info, x) {
+#' @importFrom rhdf5 H5Fopen H5Fclose H5Gopen H5Gclose h5writeAttribute H5Dopen H5Dclose
+.label_group <- function(file, name, ...) {
+    fhandle <- H5Fopen(file)
+    on.exit(H5Fclose(fhandle), add=TRUE)
+    ghandle <- H5Gopen(fhandle, name)
+    on.exit(H5Gclose(ghandle), add=TRUE)
+
+    attrs <- list(...)
+    for (a in names(attrs)) {
+        h5writeAttribute(attrs[[a]], h5obj=ghandle, name=a, asScalar=TRUE)
+    }
+}
+
+#' @importFrom rhdf5 h5write
+.add_names <- function(x, fpath, name) {
     if (!is.null(names(x))) {
-        info$names <- I(names(x))
-    }    
-    info
+        h5write(names(x), fpath, paste0(name, "/names"))
+    }
 }
 
 #' @export

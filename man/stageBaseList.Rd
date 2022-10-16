@@ -26,8 +26,8 @@ Note that this should not have a \code{.json} suffix, so as to avoid confusion w
 A named list containing the metadata for \code{x}, where \code{x} itself is written to a JSON file.
 }
 \description{
-Save a \link{list} to a JSON file, with subdirectories created for any of the more complex members.
-This uses the \pkg{rlist2json} specification to ensure that appropriate types are declared.
+Save a \link{list} to a HDF5 file, with subdirectories created for any of the more complex members.
+This uses the uzuki2 specification to ensure that appropriate types are declared.
 }
 \examples{
 library(S4Vectors)
@@ -38,8 +38,10 @@ dir.create(tmp)
 stageObject(ll, tmp, path="stuff")
 
 list.files(tmp, recursive=TRUE)
-cat(readLines(file.path(tmp, "stuff/list.gz")), sep="\n")
 
+}
+\seealso{
+\url{https://github.com/LTLA/uzuki2} for the specification.
 }
 \author{
 Aaron Lun

@@ -26,7 +26,8 @@ Suggests:
     jsonvalidate,
     Matrix
 LinkingTo:
-    Rcpp
+    Rcpp,
+    Rhdf5lib
 VignetteBuilder: knitr
 SystemRequirements: C++17
 RoxygenNote: 7.2.1

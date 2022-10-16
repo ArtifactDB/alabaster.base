@@ -17,13 +17,16 @@ test_that("lists handle complex types correctly", {
     )
 
     info <- stageObject(vals, tmp, path="stuff")
-    expect_identical(length(info$basic_list$children), 0L) 
+    expect_identical(length(info$simple_list$children), 0L) 
 
     resource <- .writeMetadata(info, tmp)
     expect_true(file.exists(file.path(tmp, resource$path)))
 
-    contents <- paste(readLines(file.path(tmp, "stuff/list.gz")), collapse='\n')
-    expect_match(contents, "factor")
+    attrs <- rhdf5::h5readAttributes(file.path(tmp, "stuff/list.h5"), "contents/data/2/data")
+    expect_null(attrs[["missing-value-placeholder"]]) # no missing values... yet.
+
+    attrs <- rhdf5::h5readAttributes(file.path(tmp, "stuff/list.h5"), "contents/data/3")
+    expect_identical(attrs$uzuki_type, "factor")
 
     roundtrip <- loadBaseList(info, tmp)
     expect_identical(roundtrip, vals)
@@ -68,39 +71,7 @@ test_that("names are properly supported", {
     expect_identical(roundtrip, vals)
 })
 
-test_that("internal arrays are properly supported", {
-    tmp <- tempfile()
-    dir.create(tmp)
-
-    vals <- list(
-        A = array(runif(6), c(1,2,3)),
-        B = matrix(runif(20), c(5,4), dimnames=list(letters[1:5], LETTERS[1:4])),
-        C = matrix(runif(6), c(2,3), dimnames=list(NULL, LETTERS[1:3])),
-        D = matrix(factor(letters[1:6]), c(2,3), dimnames=list(c("X", "Y"), NULL)) # also checking factor arrays.
-    )
-
-    info <- stageObject(vals, tmp, path="stuff")
-    resource <- .writeMetadata(info, tmp)
-    expect_true(file.exists(file.path(tmp, resource$path)))
-
-    roundtrip <- loadBaseList(info, tmp)
-    expect_equal(roundtrip, vals)
-})
-
-test_that("1-d arrays are properly supported", {
-    tmp <- tempfile()
-    dir.create(tmp)
-
-    vals <- list(A = array(1, dimnames=list("X")))
-    info <- stageObject(vals, tmp, path="stuff")
-    resource <- .writeMetadata(info, tmp)
-    expect_true(file.exists(file.path(tmp, resource$path)))
-
-    roundtrip <- loadBaseList(info, tmp)
-    expect_equal(roundtrip, vals)
-})
-
-test_that("data.frames are properly supported", {
+test_that("data.frames cause dispatch to external objects", {
     tmp <- tempfile()
     dir.create(tmp)
 
@@ -115,6 +86,10 @@ test_that("data.frames are properly supported", {
     expect_true(file.exists(file.path(tmp, resource$path)))
 
     roundtrip <- loadBaseList(info, tmp)
+    roundtrip$X <- as.data.frame(roundtrip$X)
+    roundtrip$Y[[1]] <- as.data.frame(roundtrip$Y[[1]])
+    roundtrip$Z <- as.data.frame(roundtrip$Z)
+
     expect_equal(roundtrip, vals)
 })
 
@@ -125,13 +100,10 @@ test_that("unnamed lists are properly supported", {
     vals <- list("A", 1.5, 2.3, list("C", list(DataFrame(X=1:10)), 3.5), (2:6)*1.5)
 
     info <- stageObject(vals, tmp, path="stuff")
-    expect_identical(length(info$basic_list$children), 1L) 
+    expect_identical(length(info$simple_list$children), 1L) 
 
     resource <- .writeMetadata(info, tmp)
     expect_true(file.exists(file.path(tmp, resource$path)))
-
-    contents <- paste(readLines(file.path(tmp, "stuff/list.gz")), collapse='\n')
-    expect_match(contents, "^\\[")
 
     roundtrip <- loadBaseList(info, tmp)
     expect_identical(roundtrip, vals)
@@ -159,13 +131,13 @@ test_that("external references work correctly", {
     )
 
     info <- stageObject(vals, tmp, path="stuff")
-    expect_identical(length(info$basic_list$children), 3L) 
+    expect_identical(length(info$simple_list$children), 3L) 
 
     roundtrip <- loadBaseList(info, tmp)
     expect_equal(roundtrip, vals)
 })
 
-test_that("we handle lists with NAs and NULLs", {
+test_that("we handle lists with NAs", {
     vals <- list(A=NA, B=c(1,2,3,NA), C=c("A", "B", NA))
 
     tmp <- tempfile()
@@ -175,23 +147,36 @@ test_that("we handle lists with NAs and NULLs", {
     resource <- .writeMetadata(info, tmp)
     expect_true(file.exists(file.path(tmp, resource$path)))
 
-    contents <- paste(readLines(file.path(tmp, "stuff/list.gz")), collapse='\n')
-    expect_match(contents, "null")
-
     roundtrip <- loadBaseList(info, tmp)
     expect_equal(roundtrip, vals)
 
-    # And now with NULLs.
-    vals[1] <- list(NULL)
+    # More difficult NAs.
+    vals$C <- c(vals$C, "NA")
+
+    tmp <- tempfile()
+    dir.create(tmp)
+    info <- stageObject(vals, tmp, path="stuff")
+
+    resource <- .writeMetadata(info, tmp)
+    expect_true(file.exists(file.path(tmp, resource$path)))
+
+    attrs <- rhdf5::h5readAttributes(file.path(tmp, "stuff/list.h5"), "contents/data/2/data")
+    expect_identical(attrs[["missing-value-placeholder"]], "_NA")
+
+    roundtrip <- loadBaseList(info, tmp)
+    expect_equal(roundtrip, vals)
+})
+
+test_that("we handle lists with NULLs", {
+    vals <- list(NULL, list(list(NULL), NULL))
+
+    tmp <- tempfile()
+    dir.create(tmp)
     info <- stageObject(vals, tmp, path="whee")
 
     resource <- .writeMetadata(info, tmp)
     expect_true(file.exists(file.path(tmp, resource$path)))
 
-    contents <- paste(readLines(file.path(tmp, "stuff/list.gz")), collapse='\n')
-    expect_match(contents, "null")
-
     roundtrip <- loadBaseList(info, tmp)
-    expect_identical(vals["A"], list(A=NULL))
-    expect_equal(roundtrip, vals)
+    expect_identical(roundtrip, vals)
 })

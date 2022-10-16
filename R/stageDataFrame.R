@@ -242,7 +242,7 @@ setMethod("stageObject", "DataFrame", function(x, dir, path, child=FALSE, df.nam
 }
 
 #' @export
-#' @importFrom rhdf5 H5Fopen H5Fclose H5Gopen H5Gclose h5writeAttribute H5Dopen H5Dclose
+#' @importFrom rhdf5 H5Fopen H5Fclose H5Dopen H5Dclose h5writeAttribute
 .addMissingStringPlaceholderAttribute <- function(file, path, placeholder) {
     fhandle <- H5Fopen(file)
     on.exit(H5Fclose(fhandle), add=TRUE)
