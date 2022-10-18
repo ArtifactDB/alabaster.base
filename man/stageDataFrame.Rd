@@ -55,7 +55,7 @@ As a DataFrame is a \linkS4class{Vector} subclass, its R-level metadata can be s
 }
 \section{File formats}{
 
-If \code{\link{.saveDataFrameFormat}() == "none"}, the contents of \code{x} are saved to a uncompressed CSV file.
+If \code{\link{.saveDataFrameFormat}() == "csv"}, the contents of \code{x} are saved to a uncompressed CSV file.
 If \code{x} has non-\code{NULL} row names, the first saved column in the CSV is named \code{row_names} and will contain the row names.
 This should be ignored when indexing columns and comparing them to the corresponding entry of \code{columns} in the file's JSON metadata document.
 

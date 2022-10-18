@@ -22,15 +22,26 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// check_list
-SEXP check_list(std::string file, std::string name, int num_external);
-RcppExport SEXP _alabaster_base_check_list(SEXP fileSEXP, SEXP nameSEXP, SEXP num_externalSEXP) {
+// check_list_hdf5
+SEXP check_list_hdf5(std::string file, std::string name, int num_external);
+RcppExport SEXP _alabaster_base_check_list_hdf5(SEXP fileSEXP, SEXP nameSEXP, SEXP num_externalSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::traits::input_parameter< std::string >::type file(fileSEXP);
     Rcpp::traits::input_parameter< std::string >::type name(nameSEXP);
     Rcpp::traits::input_parameter< int >::type num_external(num_externalSEXP);
-    rcpp_result_gen = Rcpp::wrap(check_list(file, name, num_external));
+    rcpp_result_gen = Rcpp::wrap(check_list_hdf5(file, name, num_external));
+    return rcpp_result_gen;
+END_RCPP
+}
+// check_list_json
+SEXP check_list_json(std::string file, int num_external);
+RcppExport SEXP _alabaster_base_check_list_json(SEXP fileSEXP, SEXP num_externalSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::traits::input_parameter< std::string >::type file(fileSEXP);
+    Rcpp::traits::input_parameter< int >::type num_external(num_externalSEXP);
+    rcpp_result_gen = Rcpp::wrap(check_list_json(file, num_external));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -47,15 +58,26 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// load_list
-Rcpp::RObject load_list(std::string file, std::string name, Rcpp::List obj);
-RcppExport SEXP _alabaster_base_load_list(SEXP fileSEXP, SEXP nameSEXP, SEXP objSEXP) {
+// load_list_hdf5
+Rcpp::RObject load_list_hdf5(std::string file, std::string name, Rcpp::List obj);
+RcppExport SEXP _alabaster_base_load_list_hdf5(SEXP fileSEXP, SEXP nameSEXP, SEXP objSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::traits::input_parameter< std::string >::type file(fileSEXP);
     Rcpp::traits::input_parameter< std::string >::type name(nameSEXP);
     Rcpp::traits::input_parameter< Rcpp::List >::type obj(objSEXP);
-    rcpp_result_gen = Rcpp::wrap(load_list(file, name, obj));
+    rcpp_result_gen = Rcpp::wrap(load_list_hdf5(file, name, obj));
+    return rcpp_result_gen;
+END_RCPP
+}
+// load_list_json
+Rcpp::RObject load_list_json(std::string file, Rcpp::List obj);
+RcppExport SEXP _alabaster_base_load_list_json(SEXP fileSEXP, SEXP objSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::traits::input_parameter< std::string >::type file(fileSEXP);
+    Rcpp::traits::input_parameter< Rcpp::List >::type obj(objSEXP);
+    rcpp_result_gen = Rcpp::wrap(load_list_json(file, obj));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -75,9 +97,11 @@ END_RCPP
 
 static const R_CallMethodDef CallEntries[] = {
     {"_alabaster_base_check_csv", (DL_FUNC) &_alabaster_base_check_csv, 3},
-    {"_alabaster_base_check_list", (DL_FUNC) &_alabaster_base_check_list, 3},
+    {"_alabaster_base_check_list_hdf5", (DL_FUNC) &_alabaster_base_check_list_hdf5, 3},
+    {"_alabaster_base_check_list_json", (DL_FUNC) &_alabaster_base_check_list_json, 2},
     {"_alabaster_base_load_csv", (DL_FUNC) &_alabaster_base_load_csv, 4},
-    {"_alabaster_base_load_list", (DL_FUNC) &_alabaster_base_load_list, 3},
+    {"_alabaster_base_load_list_hdf5", (DL_FUNC) &_alabaster_base_load_list_hdf5, 3},
+    {"_alabaster_base_load_list_json", (DL_FUNC) &_alabaster_base_load_list_json, 2},
     {"_alabaster_base_write_integer_scalar", (DL_FUNC) &_alabaster_base_write_integer_scalar, 4},
     {NULL, NULL, 0}
 };

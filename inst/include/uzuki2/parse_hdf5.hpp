@@ -10,14 +10,23 @@
 #include <unordered_set>
 
 #include "H5Cpp.h"
+
 #include "interfaces.hpp"
 #include "Dummy.hpp"
+#include "utils.hpp"
+
+/**
+ * @file parse_hdf5.hpp
+ * @brief Parsing methods for HDF5 files.
+ */
 
 namespace uzuki2 {
 
 /**
  * @cond
  */
+namespace hdf5 {
+
 inline std::string load_string_attribute(const H5::Attribute& attr, const std::string& field, const std::string& path) {
     if (attr.getTypeClass() != H5T_STRING || attr.getSpace().getSimpleExtentNdims() != 0) {
         throw std::runtime_error(std::string("'") + field + "' attribute should be a scalar string at '" + path + "'");
@@ -77,47 +86,29 @@ inline hsize_t check_1d_length(const H5::DataSet& handle, const std::string& pat
     return dims;
 }
 
-inline bool is_date(const std::string& val) {
-    if (val.size() != 10) {
-        return false;
-    } 
-    
-    for (size_t p = 0; p < val.size(); ++p) {
-        if (p == 4 || p == 7) {
-            if (val[p] != '-') {
-                return false;
-            }
-        } else {
-            if (!std::isdigit(val[p])) {
-                return false;
-            }
+inline void forbid_large_integers(const H5::DataSet& handle, const std::string& path) {
+    H5::IntType itype(handle);
+
+    bool failed = false;
+    if (itype.getSign() == H5T_SGN_NONE) {
+        if (itype.getPrecision() >= 32) {
+            failed = true;
         }
+    } else if (itype.getPrecision() > 32) {
+        failed = true;
     }
 
-    if (val[5] == '1') {
-        if (val[6] > '2') {
-            return false;
-        }
-    } else if (val[5] != '0') {
-        return false;
+    if (failed) {
+        throw std::runtime_error("data type is potentially out of range of a 32-bit signed integer for '" + path + "'");
     }
-
-    if (val[8] == '3') {
-        if (val[6] > '1') {
-            return false;
-        }
-    } else if (val[8] > '3') {
-        return false;
-    }
-
-    return true;
 }
 
 template<class Host, class Function>
-void parse_integer_like(H5::DataSet handle, Host* ptr, const std::string& path, Function check) {
+void parse_integer_like(const H5::DataSet& handle, Host* ptr, const std::string& path, Function check) {
     if (handle.getDataType().getClass() != H5T_INTEGER) {
         throw std::runtime_error("expected an integer dataset at '" + path + "'");
     }
+    forbid_large_integers(handle, path);
 
     size_t len = ptr->size();
 
@@ -138,7 +129,7 @@ void parse_integer_like(H5::DataSet handle, Host* ptr, const std::string& path, 
 }
 
 template<class Host, class Function>
-void parse_string_like(H5::DataSet handle, Host* ptr, const std::string& path, Function check) {
+void parse_string_like(const H5::DataSet& handle, Host* ptr, const std::string& path, Function check) {
     auto dtype = handle.getDataType();
     if (dtype.getClass() != H5T_STRING) {
         throw std::runtime_error("expected a string dataset at '" + path + "'");
@@ -163,9 +154,14 @@ void parse_string_like(H5::DataSet handle, Host* ptr, const std::string& path, F
 }
 
 template<class Host, class Function>
-void parse_numbers(H5::DataSet handle, Host* ptr, const std::string& path, Function check) {
+void parse_numbers(const H5::DataSet& handle, Host* ptr, const std::string& path, Function check) {
     if (handle.getDataType().getClass() != H5T_FLOAT) {
         throw std::runtime_error("expected a float dataset at '" + path + "'");
+    }
+
+    H5::FloatType ftype(handle);
+    if (ftype.getPrecision() > 64) {
+        throw std::runtime_error("data type is potentially out of range for a double at '" + path + "'");
     }
 
     size_t len = ptr->size();
@@ -182,7 +178,7 @@ void parse_numbers(H5::DataSet handle, Host* ptr, const std::string& path, Funct
 }
 
 template<class Host>
-void parse_names(H5::Group handle, Host* ptr, const std::string& path, const std::string& dpath) {
+void parse_names(const H5::Group& handle, Host* ptr, const std::string& path, const std::string& dpath) {
     if (handle.exists("names")) {
         auto npath = path + "/names";
         if (handle.childObjType("names") != H5O_TYPE_DATASET) {
@@ -327,7 +323,12 @@ std::shared_ptr<Base> parse_inner(const H5::Group& handle, Externals& ext, const
         if (!handle.exists("index") || handle.childObjType("index") != H5O_TYPE_DATASET) {
             throw std::runtime_error("expected a dataset at '" + ipath + "'");
         }
+
         auto ihandle = handle.openDataSet("index");
+        if (ihandle.getDataType().getClass() != H5T_INTEGER) {
+            throw std::runtime_error("expected integer dataset at '" + ipath + "'");
+        }
+        forbid_large_integers(ihandle, ipath);
 
         auto ispace = ihandle.getSpace();
         int idims = ispace.getSimpleExtentNdims();
@@ -350,22 +351,7 @@ std::shared_ptr<Base> parse_inner(const H5::Group& handle, Externals& ext, const
     return output;
 }
 
-template<class CustomExternals>
-struct ExternalTracker {
-    ExternalTracker(CustomExternals e) : getter(std::move(e)) {}
-
-    void* get(size_t i) {
-        indices.push_back(i);
-        return getter.get(i);
-    };
-
-    size_t size() const {
-        return getter.size();
-    }
-
-    CustomExternals getter;
-    std::vector<size_t> indices;
-};
+}
 /**
  * @endcond
  */
@@ -408,23 +394,10 @@ struct ExternalTracker {
  * - `size_t size()`, which returns the number of available external references.
  */
 template<class Provisioner, class Externals>
-std::shared_ptr<Base> parse(const H5::Group& handle, const std::string& name, Externals ext) {
+std::shared_ptr<Base> parse_hdf5(const H5::Group& handle, const std::string& name, Externals ext) {
     ExternalTracker etrack(std::move(ext));
-    auto ptr = parse_inner<Provisioner>(handle, etrack, name);
-
-    // Checking that the external indices match up.
-    auto& other_indices = etrack.indices;
-    if (other_indices.size() != etrack.getter.size()) {
-        throw std::runtime_error("fewer instances of type \"external\" than expected from 'ext'");
-    }
-
-    std::sort(other_indices.begin(), other_indices.end());
-    for (int i = 0; i < static_cast<int>(other_indices.size()); ++i) {
-        if (i != other_indices[i]) {
-            throw std::runtime_error("set of \"index\" values for type \"external\" should be consecutive starting from zero");
-        }
-    }
-
+    auto ptr = hdf5::parse_inner<Provisioner>(handle, etrack, name);
+    etrack.validate();
     return ptr;
 }
 
@@ -444,9 +417,9 @@ std::shared_ptr<Base> parse(const H5::Group& handle, const std::string& name, Ex
  * Any invalid representations in `contents` will cause an error to be thrown.
  */
 template<class Provisioner, class Externals>
-std::shared_ptr<Base> parse(const std::string& file, const std::string& name, Externals ext) {
+std::shared_ptr<Base> parse_hdf5(const std::string& file, const std::string& name, Externals ext) {
     H5::H5File handle(file, H5F_ACC_RDONLY);
-    return parse<Provisioner>(handle.openGroup(name), name, std::move(ext));
+    return parse_hdf5<Provisioner>(handle.openGroup(name), name, std::move(ext));
 }
 
 /**
@@ -465,8 +438,8 @@ std::shared_ptr<Base> parse(const std::string& file, const std::string& name, Ex
  * Any invalid representations in `contents` will cause an error to be thrown.
  */
 template<class Provisioner>
-std::shared_ptr<Base> parse(const H5::Group& handle, const std::string& name) {
-    return parse<Provisioner>(handle, name, uzuki2::DummyExternals(0));
+std::shared_ptr<Base> parse_hdf5(const H5::Group& handle, const std::string& name) {
+    return parse_hdf5<Provisioner>(handle, name, uzuki2::DummyExternals(0));
 }
 
 /**
@@ -484,9 +457,38 @@ std::shared_ptr<Base> parse(const H5::Group& handle, const std::string& name) {
  * Any invalid representations in `contents` will cause an error to be thrown.
  */
 template<class Provisioner>
-std::shared_ptr<Base> parse(const std::string& file, const std::string& name) {
+std::shared_ptr<Base> parse_hdf5(const std::string& file, const std::string& name) {
     H5::H5File handle(file, H5F_ACC_RDONLY);
-    return parse<Provisioner>(handle.openGroup(name), name, uzuki2::DummyExternals(0));
+    return parse_hdf5<Provisioner>(handle.openGroup(name), name, uzuki2::DummyExternals(0));
+}
+
+/**
+ * Validate HDF5 file contents against the **uzuki2** specification.
+ * Any invalid representations will cause an error to be thrown.
+ *
+ * @param handle Handle for a HDF5 group corresponding to the list.
+ * @param name Name of the HDF5 group corresponding to `handle`. 
+ * Only used for error messages.
+ * @param num_external Expected number of external references. 
+ */
+inline void validate_hdf5(const H5::Group& handle, const std::string& name, int num_external = 0) {
+    DummyExternals ext(num_external);
+    parse_hdf5<DummyProvisioner>(handle, name, ext);
+    return;
+}
+
+/**
+ * Validate HDF5 file contents against the **uzuki2** specification.
+ * Any invalid representations will cause an error to be thrown.
+ *
+ * @param file Path to a HDF5 file.
+ * @param name Name of the HDF5 group containing the list in `file`.
+ * @param num_external Expected number of external references. 
+ */
+inline void validate_hdf5(const std::string& file, const std::string& name, int num_external = 0) {
+    DummyExternals ext(num_external);
+    parse_hdf5<DummyProvisioner>(file, name, ext);
+    return;
 }
 
 }

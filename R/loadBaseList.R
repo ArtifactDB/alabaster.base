@@ -33,5 +33,17 @@ loadBaseList <- function(info, project) {
     }
 
     lpath <- acquireFile(project, info$path)
-    load_list(lpath, info$hdf5_simple_list$group, children)
+
+    output <- NULL
+    if ("hdf5_simple_list" %in% names(info)) {
+        output <- load_list_hdf5(lpath, info$hdf5_simple_list$group, children)
+    } else {
+        comp <- info$json_simple_list$compression
+        if (!is.null(comp) && !(comp %in% c("none", "gzip"))) {
+            stop("only uncompressed or Gzip-compressed JSON lists are supported")
+        }
+        output <- load_list_json(lpath, children)
+    }
+
+    output
 }

@@ -26,9 +26,18 @@ Note that this should not have a \code{.json} suffix, so as to avoid confusion w
 A named list containing the metadata for \code{x}, where \code{x} itself is written to a JSON file.
 }
 \description{
-Save a \link{list} to a HDF5 file, with subdirectories created for any of the more complex members.
+Save a \link{list} or \linkS4class{List} to a JSON or HDF5 file, with external subdirectories created for any of the more complex list elements (e.g., DataFrames, arrays). 
 This uses the uzuki2 specification to ensure that appropriate types are declared.
 }
+\section{File formats}{
+
+If \code{\link{.saveBaseListFormat}() == "json.gz"}, the list is saved to a Gzip-compressed JSON file (the default).
+This is an easily parsed format with low storage overhead.
+
+If \code{\link{.saveBaseListFormat}() == "hdf5"}, \code{x} is saved into a HDF5 file instead.
+This format is most useful for random access and for preserving the precision of numerical data.
+}
+
 \examples{
 library(S4Vectors)
 ll <- list(A=1, B=LETTERS, C=DataFrame(X=1:5))
