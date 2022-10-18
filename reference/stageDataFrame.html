@@ -127,13 +127,13 @@ For consistency, they will be replaced in the main file by a placeholder all-zer
     <h2>File formats</h2>
     
 
-<p>If <code><a href="saveDataFrameFormat.html">.saveDataFrameFormat</a>() == "none"</code>, the contents of <code>x</code> are saved to a uncompressed CSV file.
+<p>If <code><a href="saveFormats.html">.saveDataFrameFormat</a>() == "csv"</code>, the contents of <code>x</code> are saved to a uncompressed CSV file.
 If <code>x</code> has non-<code>NULL</code> row names, the first saved column in the CSV is named <code>row_names</code> and will contain the row names.
 This should be ignored when indexing columns and comparing them to the corresponding entry of <code>columns</code> in the file's JSON metadata document.</p>
-<p>If <code><a href="saveDataFrameFormat.html">.saveDataFrameFormat</a>() == "csv.gz"</code>, the CSV file is compressed (the default).
+<p>If <code><a href="saveFormats.html">.saveDataFrameFormat</a>() == "csv.gz"</code>, the CSV file is compressed (the default).
 This reduces space and bandwidth requirements at the cost of the (de)compression overhead.
 It also makes it more difficult to do queries inside the file without decompression of the entire file.</p>
-<p>If <code><a href="saveDataFrameFormat.html">.saveDataFrameFormat</a>() == "hdf5"</code>, <code>x</code> is saved into a HDF5 file instead of a CSV.
+<p>If <code><a href="saveFormats.html">.saveDataFrameFormat</a>() == "hdf5"</code>, <code>x</code> is saved into a HDF5 file instead of a CSV.
 Columns are saved into a <code>data</code> group where each column is a dataset named after its positional index.
 The names of the columns are saved into the <code>column_names</code> dataset.
 If row names are present, a separate <code>row_names</code> dataset containing the row names will be generated.
