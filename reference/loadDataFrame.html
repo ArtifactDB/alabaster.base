@@ -60,7 +60,7 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">loadDataFrame</span><span class="op">(</span><span class="va">info</span>, <span class="va">project</span>, include.nested <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">loadDataFrame</span><span class="op">(</span><span class="va">info</span>, <span class="va">project</span>, include.nested <span class="op">=</span> <span class="cn">TRUE</span>, parallel <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -76,6 +76,10 @@ By default, this should be a string containing the path to a staging directory.<
 
 <dt>include.nested</dt>
 <dd><p>Logical scalar indicating whether nested <a href="https://rdrr.io/pkg/S4Vectors/man/DataFrame-class.html" class="external-link">DataFrame</a>s should be loaded.</p></dd>
+
+
+<dt>parallel</dt>
+<dd><p>Whether to perform reading and parsing in parallel for greater speed.</p></dd>
 
 </dl></div>
     <div id="value">

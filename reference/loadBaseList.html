@@ -60,7 +60,7 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">loadBaseList</span><span class="op">(</span><span class="va">info</span>, <span class="va">project</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">loadBaseList</span><span class="op">(</span><span class="va">info</span>, <span class="va">project</span>, parallel <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -72,6 +72,11 @@
 <dt>project</dt>
 <dd><p>Any argument accepted by the acquisition functions, see <code>?<a href="acquireFile.html">acquireFile</a></code>.
 By default, this should be a string containing the path to a staging directory.</p></dd>
+
+
+<dt>parallel</dt>
+<dd><p>Whether to perform reading and parsing in parallel for greater speed.
+Only relevant for lists stored in the JSON format.</p></dd>
 
 </dl></div>
     <div id="value">
