@@ -8,7 +8,7 @@ else
 fi
 
 cd comservatory
-git checkout 216a2b266d06e38c6f87523109d821ecb9148771
+git checkout 11c6f896127efabebc5875025f992800f02e1b10
 if [ ! -e build ]
 then
     cmake -S . -B build
@@ -16,7 +16,7 @@ fi
 cd -
 
 rm -rf include/comservatory
-cp -r comservatory/include/ include
+cp -r comservatory/include/comservatory include/
 
 rm -rf include/byteme
-cp -r comservatory/build/_deps/byteme-src/include/byteme include
+cp -r comservatory/build/_deps/byteme-src/include/byteme include/

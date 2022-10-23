@@ -77,7 +77,6 @@ private:
 
         Contents output;
         parser.parse(reader, output, parallel);
-        parser.finish();
         return output;
     }
 

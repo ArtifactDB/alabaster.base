@@ -3,6 +3,8 @@
 #' Load a \link{list} from file, possibly containing complex entries.
 #'
 #' @inheritParams loadDataFrame
+#' @param parallel Whether to perform reading and parsing in parallel for greater speed.
+#' Only relevant for lists stored in the JSON format.
 #' 
 #' @return The list described by \code{info}.
 #'
@@ -25,7 +27,7 @@
 #' loadBaseList(info, tmp)
 #'
 #' @export
-loadBaseList <- function(info, project) {
+loadBaseList <- function(info, project, parallel=TRUE) {
     children <- info$simple_list$children
     for (i in seq_along(children)) {
         child.meta <- acquireMetadata(project, children[[i]]$resource$path) 
@@ -42,7 +44,7 @@ loadBaseList <- function(info, project) {
         if (!is.null(comp) && !(comp %in% c("none", "gzip"))) {
             stop("only uncompressed or Gzip-compressed JSON lists are supported")
         }
-        output <- load_list_json(lpath, children)
+        output <- load_list_json(lpath, children, parallel)
     }
 
     output

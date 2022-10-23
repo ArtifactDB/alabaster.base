@@ -66,7 +66,7 @@ setMethod("stageObject", "list", function(x, dir, path, child=FALSE, fname="list
         write(file=con, str)
         close(con)
 
-        check_list_json(fpath, length(env$collected)) # Check that we did it correctly.
+        check_list_json(fpath, length(env$collected), parallel=TRUE) # Check that we did it correctly.
         meta[["$schema"]] <- "json_simple_list/v1.json"
         meta$json_simple_list <- list(compression="gzip")
     }

@@ -13,6 +13,8 @@
 #include "Field.hpp"
 #include "Creator.hpp"
 
+#include "byteme/PerByte.hpp"
+
 /**
  * @file Parser.hpp
  *
@@ -99,156 +101,299 @@ public:
     }
 
 private:
-    void check_new_line(Contents& info) {
-        if (on_header) {
-            auto copy = info.names;
-            std::sort(copy.begin(), copy.end());
-            for (size_t s = 1; s < copy.size(); ++s) {
-                if (copy[s] == copy[s-1]) {
-                    throw std::runtime_error("detected duplicated header names");
-                }
-            }
-
-            info.fields.resize(info.names.size());
-            for (auto& o : info.fields) {
-                o.reset(new UnknownField);
-            }
-
-            on_header = false;
-        } else if (field_counter + 1 != info.fields.size()) {
-            throw std::runtime_error("fewer fields than expected from the header");
+    static Field* fetch_column(Contents& info, size_t column, size_t line) {
+        auto& everything = info.fields;
+        if (column >= everything.size()) {
+            throw std::runtime_error("more fields on line " + std::to_string(line + 1) + " than expected from the header");
         }
+        return everything[column].get();
     }
 
-    void add_entry(Contents& info, const char* x, size_t n) {
-        if (buffer.size()) {
-            buffer.insert(buffer.end(), x, x + n);
-            add_entry_raw(info, buffer.data(), buffer.size());
-            buffer.clear();
-        } else {
-            add_entry_raw(info, x, n);
+    Field* check_column_type(Contents& info, Type observed, size_t column, size_t line) const {
+        Field* current = fetch_column(info, column, line);
+        auto expected = current->type();
+
+        if (expected == UNKNOWN) {
+            bool use_dummy = check_store && 
+                to_store_by_name.find(info.names[column]) == to_store_by_name.end() &&
+                to_store_by_index.find(column) == to_store_by_index.end();
+
+            auto ptr = creator->create(observed, current->size(), use_dummy);
+            info.fields[column].reset(ptr);
+            current = info.fields[column].get();
+        } else if (expected != observed) {
+            throw std::runtime_error("previous and current types do not match up");
         }
+
+        return current;
     }
 
-    template<typename Char>
-    void add_entry_raw(Contents& info, const Char* x, size_t n) {
-        if (on_header) {
-            info.names.push_back(to_string(x, n));
-        } else {
-            auto& everything = info.fields;
-            if (field_counter >= everything.size()) {
-                throw std::runtime_error("more fields than expected from the header");
-            }
+    template<class Input>
+    void store_nan(Input& input, Contents& info, size_t column, size_t line) const {
+        input.advance();
+        expect_fixed(input, "an", "AN", column, line); // i.e., NaN or any of its capitalizations.
+        auto* current = check_column_type(info, NUMBER, column, line);
+        static_cast<NumberField*>(current)->push_back(std::numeric_limits<double>::quiet_NaN());
+    }
 
-            auto* current = everything[field_counter].get();
-            auto observed = decide_type(x, n);
-            if (observed == UNKNOWN) {
-                current->add_missing();
+    template<class Input>
+    void store_inf(Input& input, Contents& info, size_t column, size_t line, bool negative) const {
+        input.advance();
+        expect_fixed(input, "nf", "NF", column, line); // i.e., Inf or any of its capitalizations.
+        auto* current = check_column_type(info, NUMBER, column, line);
+
+        double val = std::numeric_limits<double>::infinity();
+        if (negative) {
+            val *= -1;
+        }
+        static_cast<NumberField*>(current)->push_back(val);
+    }
+
+    template<class Input>
+    void store_na_or_nan(Input& input, Contents& info, size_t column, size_t line) const {
+        // Some shenanigans required here to distinguish between
+        // NAN/NaN/etc. and NA, given that both are allowed.
+        input.advance();
+        if (!input.valid()) {
+            throw std::runtime_error("truncated keyword in " + get_location(column, line));
+        }
+
+        char second = input.get();
+        bool is_missing = true;
+        if (second == 'a') {
+            is_missing = false;
+        } else if (second != 'A') {
+            throw std::runtime_error("unknown keyword in " + get_location(column, line));
+        }
+
+        input.advance();
+        if (!input.valid()) {
+            if (is_missing) {
+                throw std::runtime_error("line " + std::to_string(line + 1) + " should terminate with a newline");
             } else {
-                auto expected = current->type();
-                if (expected == UNKNOWN) {
-                    expected = observed;
-
-                    bool use_dummy = check_store && 
-                        to_store_by_name.find(info.names[field_counter]) == to_store_by_name.end() &&
-                        to_store_by_index.find(field_counter) == to_store_by_index.end();
-
-                    auto ptr = creator->create(observed, current->size(), use_dummy);
-                    everything[field_counter].reset(ptr);
-
-                    current = everything[field_counter].get();
-
-                } else if (expected != observed) {
-                    throw std::runtime_error("previous and current types do not match up");
-                }
-
-                switch (expected) {
-                    case STRING:
-                        static_cast<StringField*>(current)->push_back(to_string(x, n));
-                        break;
-                    case NUMBER:
-                        static_cast<NumberField*>(current)->push_back(to_number(x, n));
-                        break;
-                    case COMPLEX:
-                        static_cast<ComplexField*>(current)->push_back(to_complex(x, n));
-                        break; 
-                    case BOOLEAN:
-                        static_cast<BooleanField*>(current)->push_back(to_boolean(x, n));
-                        break; 
-                    case UNKNOWN:
-                        throw std::runtime_error("cannot add UNKNOWN type");
-                }
+                throw std::runtime_error("truncated keyword in " + get_location(column, line));
             }
         }
-        return;
+
+        char next = input.get();
+        if (next == 'n' || next == 'N') {
+            auto* current = check_column_type(info, NUMBER, column, line);
+            static_cast<NumberField*>(current)->push_back(std::numeric_limits<double>::quiet_NaN());
+            input.advance(); // for consistency with the NA case, in the sense that we are always past the keyword regardless of whether the keyword is NaN or NA.
+        } else if (is_missing) {
+            auto raw = fetch_column(info, column, line);
+            raw->add_missing();
+        } else {
+            throw std::runtime_error("unknown keyword in " + get_location(column, line));
+        }
+    }
+
+    template<class Input>
+    void store_number_or_complex(Input& input, Contents& info, size_t column, size_t line, bool negative) {
+        auto first = to_number(input, column, line);
+        if (negative) {
+            first *= -1;
+        }
+
+        char next = input.get(); // no need to check validity, as to_number always leaves us on a valid position (or throws itself).
+        if (next == ',' || next == '\n') {
+            auto* current = check_column_type(info, NUMBER, column, line);
+            static_cast<NumberField*>(current)->push_back(first);
+            return;
+        }
+
+        char second_neg = false;
+        if (next == '-') {
+            second_neg = true;
+        } else if (next != '+') {
+            throw std::runtime_error("incorrectly formatted number in " + get_location(column, line));
+        }
+
+        input.advance();
+        if (!input.valid()) {
+            throw std::runtime_error("truncated complex number in " + get_location(column, line));
+        } else if (!std::isdigit(input.get())) {
+            throw std::runtime_error("incorrectly formatted complex number in " + get_location(column, line));
+        }
+
+        auto second = to_number(input, column, line);
+        if (second_neg) {
+            second *= -1;
+        }
+        if (input.get() != 'i') { // again, no need to check validity.
+            throw std::runtime_error("incorrectly formatted complex number in " + get_location(column, line));
+        }
+        input.advance(); // for consistency with the numbers, in the sense that we are always past the keyword regardless of whether we're a NUMBER or COMPLEX.
+
+        auto* current = check_column_type(info, COMPLEX, column, line);
+        static_cast<ComplexField*>(current)->push_back(std::complex<double>(first, second));
     }
 
 private:
-    void parse_loop(const char* ptr, size_t length, Contents& info) {
-        size_t previous = 0;
-        for (size_t i = 0; i < length; ++i) {
-            char c = ptr[i];
+    template<class Input>
+    void parse_loop(Input& input, Contents& info) {
+        if (!input.valid()) {
+            throw std::runtime_error("CSV file is empty");
+        }
 
-            if (on_string) {
-                if (c == '"') {
-                    on_quote = !on_quote;
-
-                } else if (c == ',') {
-                    if (on_quote) {
-                        add_entry(info, ptr + previous, i - previous);
-                        previous = i + 1; // skip past the comma.
-                        ++field_counter;
-                        on_string = false;
-                        on_quote = false;
-                    }
-
-                } else if (c == '\n') {
-                    if (on_quote) {
-                        add_entry(info, ptr + previous, i - previous); 
-                        check_new_line(info);
-                        previous = i + 1; // skip past the newline.
-                        field_counter = 0;
-                        on_string = false;
-                        on_quote = false;
-                    }
+        // Special case for a new-line only file.
+        if (input.get() == '\n') {
+            auto& line = info.fallback;
+            while (1) {
+                input.advance();
+                if (!input.valid()) {
+                    break;
                 }
-            } else {
-                if (c == ',') {
-                    add_entry(info, ptr + previous, i - previous);
-                    previous = i + 1; // skip past the comma.
-                    ++field_counter;
-
-                } else if (c == '"') {
-                    if (previous != i) {
-                        throw std::runtime_error("encountered quote in the middle of a non-string entry");
-                    }
-                    on_string = true;
-
-                } else if (c == '\n') {
-                    if (field_counter == 0 && i == previous) {
-                        // It's a zero-column file. If on_header is true, then
-                        // this declares that there are no columns; if false but info.names 
-                        // is empty, we're simply proceeding by not adding any values. 
-                        if (on_header) {
-                            on_header = false; 
-                        } else if (info.names.empty()) {
-                            ++info.fallback;
-                        } else {
-                            throw std::runtime_error("encountered empty line in a file with non-zero columns"); 
-                        }
-                    } else {
-                        add_entry(info, ptr + previous, i - previous);
-                        check_new_line(info);
-                    }
-                    previous = i + 1; // skip past the newline.
-                    field_counter = 0;
+                ++line;
+                if (input.get() != '\n') {
+                    throw std::runtime_error("more fields on line " + std::to_string(line + 1) + " than expected from the header");
                 }
+            }
+            return;
+        }
+
+        // Processing the header.
+        while (1) {
+            char c = input.get();
+            if (c != '"') {
+                throw std::runtime_error("all headers should be quoted strings");
+            }
+
+            info.names.push_back(to_string(input, info.names.size(), 0)); // no need to check validity, as to_string always leaves us on a valid position (or throws itself).
+
+            char next = input.get();
+            input.advance();
+            if (next == '\n') {
+                break;
+            } else if (next != ',') {
+                throw std::runtime_error("header " + std::to_string(info.names.size()) + " contains trailing character '" + std::string(1, next) + "'"); 
+            }
+        } 
+
+        auto copy = info.names;
+        std::sort(copy.begin(), copy.end());
+        for (size_t s = 1; s < copy.size(); ++s) {
+            if (copy[s] == copy[s-1]) {
+                throw std::runtime_error("detected duplicated header names");
             }
         }
 
-        // Storing content in the buffer.
-        if (previous < length) {
-            buffer.insert(buffer.end(), ptr + previous, ptr + length);
+        info.fields.resize(info.names.size());
+        for (auto& o : info.fields) {
+            o.reset(new UnknownField);
+        }
+
+        // Special case if there are no records, i.e., it's header-only.
+        if (!input.valid()) {
+            return;
+        }
+
+        // Processing the records in a CSV.
+        size_t column = 0;
+        size_t line = 1;
+        while (1) {
+            switch (input.get()) {
+                case '"':
+                    {
+                        auto* current = check_column_type(info, STRING, column, line);
+                        static_cast<StringField*>(current)->push_back(to_string(input, column, line));
+                    }
+                    break;
+
+                case 't': case 'T':
+                    {
+                        input.advance();
+                        expect_fixed(input, "rue", "RUE", column, line);
+                        auto* current = check_column_type(info, BOOLEAN, column, line);
+                        static_cast<BooleanField*>(current)->push_back(true);
+                    }
+                    break;
+
+                case 'f': case 'F':
+                    {
+                        input.advance();
+                        expect_fixed(input, "alse", "ALSE", column, line);
+                        auto* current = check_column_type(info, BOOLEAN, column, line);
+                        static_cast<BooleanField*>(current)->push_back(false);
+                    }
+                    break;
+
+                case 'N':
+                    store_na_or_nan(input, info, column, line);
+                    break;
+
+                case 'n': 
+                    store_nan(input, info, column, line);
+                    break;
+                
+                case 'i': case 'I':
+                    store_inf(input, info, column, line, false);
+                    break;
+
+                case '0': case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9':
+                    store_number_or_complex(input, info, column, line, false);
+                    break;
+
+                case '+':
+                    input.advance();
+                    if (!input.valid()) {
+                        throw std::runtime_error("truncated field in " + get_location(column, line)); 
+                    } else if (!std::isdigit(input.get())) {
+                        throw std::runtime_error("invalid number in " + get_location(column, line)); 
+                    }
+                    store_number_or_complex(input, info, column, line, false);
+                    break;
+
+                case '-':
+                    {
+                        input.advance();
+                        if (!input.valid()) {
+                            throw std::runtime_error("truncated field in " + get_location(column, line));
+                        }
+
+                        char next = input.get();
+                        if (next == 'i' || next == 'I') {
+                            store_inf(input, info, column, line, true);
+                        } else if (next == 'n' || next == 'N') {
+                            store_nan(input, info, column, line);
+                        } else if (std::isdigit(next)) {
+                            store_number_or_complex(input, info, column, line, true);
+                        } else {
+                            throw std::runtime_error("incorrectly formatted number in " + get_location(column, line));
+                        }
+                    }
+                    break;
+
+                case '\n':
+                    throw std::runtime_error(get_location(column, line) + " is empty");
+
+                default:
+                    throw std::runtime_error("unknown type starting with '" + std::string(1, input.get()) + "' in " + get_location(column, line));
+            }
+
+            if (!input.valid()) {
+                throw std::runtime_error("last line must be terminated by a single newline");
+            }
+
+            char next = input.get();
+            input.advance();
+            if (next == ',') {
+                ++column;
+                if (!input.valid()) {
+                    throw std::runtime_error("line " + std::to_string(line + 1) + " is truncated at column " + std::to_string(column + 1));
+                }
+            } else if (next == '\n') {
+                if (column + 1 != info.names.size()) {
+                    throw std::runtime_error("line " + std::to_string(line + 1) + " has fewer fields than expected from the header");
+                }
+                if (!input.valid()) {
+                    break;
+                }
+                column = 0;
+                ++line;
+            } else {
+                throw std::runtime_error(get_location(column, line) + " contains trailing character '" + std::string(1, next) + "'"); 
+            }
         }
     }
 
@@ -256,67 +401,14 @@ public:
     template<class Reader>
     void parse(Reader& reader, Contents& info, bool parallel) {
         if (parallel) {
-            std::vector<unsigned char> holding;
-            bool ok = reader();
-            std::thread runner;
-
-            while (1) {
-                // Need to reinterpret_cast to interpret bytes as text.
-                auto ptr = reinterpret_cast<const char*>(reader.buffer());
-                size_t n = reader.available();
-
-                if (!ok) {
-                    parse_loop(ptr, n, info);
-                    break;
-                } 
-
-                holding.resize(n);
-                std::copy(ptr, ptr + n, holding.begin());
-                runner = std::thread([&]() -> void { 
-                    ok = reader(); 
-                });
-
-                try {
-                    parse_loop(reinterpret_cast<const char*>(holding.data()), n, info);
-                } catch (std::exception& e) {
-                    runner.join();
-                    throw;
-                }
-
-                runner.join();
-            }
-
+            byteme::PerByteParallel input(reader);
+            parse_loop(input, info);
         } else {
-            bool ok = true;
-            while (ok) {
-                ok = reader();
-                size_t n = reader.available();
-                auto ptr = reinterpret_cast<const char*>(reader.buffer());
-                parse_loop(ptr, n, info);
-            }
+            byteme::PerByte input(reader);
+            parse_loop(input, info);
         }
     }
 
-    void finish() {
-        // If we didn't end on a newline, then field_counter > 0 (if more fields
-        // were added) or the buffer is non-empty (if we're caught in the middle
-        // of adding a new first field). 
-        if (field_counter != 0 || buffer.size()) {
-            if (on_string && !on_quote) {
-                throw std::runtime_error("string not terminated by a double quote");
-            } else {
-                throw std::runtime_error("last record must be terminated by a single newline");
-            }
-        }
-    }
-
-private:
-    bool on_header = true; 
-    bool on_string = false;
-    bool on_quote = false;
-    std::vector<char> buffer;
-
-    int field_counter = 0;
     const FieldCreator* creator;
 
     bool check_store = false;

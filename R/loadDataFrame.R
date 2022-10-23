@@ -6,6 +6,7 @@
 #' @param project Any argument accepted by the acquisition functions, see \code{?\link{acquireFile}}.
 #' By default, this should be a string containing the path to a staging directory.
 #' @param include.nested Logical scalar indicating whether nested \linkS4class{DataFrame}s should be loaded.
+#' @param parallel Whether to perform reading and parsing in parallel for greater speed.
 #'
 #' @details
 #' This function effectively reverses the behavior of \code{\link{stageObject}}, 
@@ -35,7 +36,7 @@
 #' @export
 #' @importFrom S4Vectors DataFrame make_zero_col_DFrame
 #' @importFrom rhdf5 h5read h5readAttributes
-loadDataFrame <- function(info, project, include.nested=TRUE) {
+loadDataFrame <- function(info, project, include.nested=TRUE, parallel=TRUE) {
     has.rownames <- isTRUE(info$data_frame$row_names)
     col.info <- info$data_frame$columns
     has.columns <- length(col.info) > 0

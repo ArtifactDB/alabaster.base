@@ -4,7 +4,7 @@
 \alias{loadDataFrame}
 \title{Load a DataFrame}
 \usage{
-loadDataFrame(info, project, include.nested = TRUE)
+loadDataFrame(info, project, include.nested = TRUE, parallel = TRUE)
 }
 \arguments{
 \item{info}{Named list containing the metadata for this object.}
@@ -13,6 +13,8 @@ loadDataFrame(info, project, include.nested = TRUE)
 By default, this should be a string containing the path to a staging directory.}
 
 \item{include.nested}{Logical scalar indicating whether nested \linkS4class{DataFrame}s should be loaded.}
+
+\item{parallel}{Whether to perform reading and parsing in parallel for greater speed.}
 }
 \value{
 The DataFrame described by \code{info}.

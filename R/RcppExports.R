@@ -9,8 +9,8 @@ check_list_hdf5 <- function(file, name, num_external) {
     .Call(`_alabaster_base_check_list_hdf5`, file, name, num_external)
 }
 
-check_list_json <- function(file, num_external) {
-    .Call(`_alabaster_base_check_list_json`, file, num_external)
+check_list_json <- function(file, num_external, parallel) {
+    .Call(`_alabaster_base_check_list_json`, file, num_external, parallel)
 }
 
 load_csv <- function(path, is_compressed, nrecords, parallel) {
@@ -21,8 +21,8 @@ load_list_hdf5 <- function(file, name, obj) {
     .Call(`_alabaster_base_load_list_hdf5`, file, name, obj)
 }
 
-load_list_json <- function(file, obj) {
-    .Call(`_alabaster_base_load_list_json`, file, obj)
+load_list_json <- function(file, obj, parallel) {
+    .Call(`_alabaster_base_load_list_json`, file, obj, parallel)
 }
 
 write_integer_scalar <- function(path, host, name, val) {

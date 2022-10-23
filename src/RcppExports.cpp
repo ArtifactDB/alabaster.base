@@ -35,13 +35,14 @@ BEGIN_RCPP
 END_RCPP
 }
 // check_list_json
-SEXP check_list_json(std::string file, int num_external);
-RcppExport SEXP _alabaster_base_check_list_json(SEXP fileSEXP, SEXP num_externalSEXP) {
+SEXP check_list_json(std::string file, int num_external, bool parallel);
+RcppExport SEXP _alabaster_base_check_list_json(SEXP fileSEXP, SEXP num_externalSEXP, SEXP parallelSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::traits::input_parameter< std::string >::type file(fileSEXP);
     Rcpp::traits::input_parameter< int >::type num_external(num_externalSEXP);
-    rcpp_result_gen = Rcpp::wrap(check_list_json(file, num_external));
+    Rcpp::traits::input_parameter< bool >::type parallel(parallelSEXP);
+    rcpp_result_gen = Rcpp::wrap(check_list_json(file, num_external, parallel));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -71,13 +72,14 @@ BEGIN_RCPP
 END_RCPP
 }
 // load_list_json
-Rcpp::RObject load_list_json(std::string file, Rcpp::List obj);
-RcppExport SEXP _alabaster_base_load_list_json(SEXP fileSEXP, SEXP objSEXP) {
+Rcpp::RObject load_list_json(std::string file, Rcpp::List obj, bool parallel);
+RcppExport SEXP _alabaster_base_load_list_json(SEXP fileSEXP, SEXP objSEXP, SEXP parallelSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::traits::input_parameter< std::string >::type file(fileSEXP);
     Rcpp::traits::input_parameter< Rcpp::List >::type obj(objSEXP);
-    rcpp_result_gen = Rcpp::wrap(load_list_json(file, obj));
+    Rcpp::traits::input_parameter< bool >::type parallel(parallelSEXP);
+    rcpp_result_gen = Rcpp::wrap(load_list_json(file, obj, parallel));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -98,10 +100,10 @@ END_RCPP
 static const R_CallMethodDef CallEntries[] = {
     {"_alabaster_base_check_csv", (DL_FUNC) &_alabaster_base_check_csv, 3},
     {"_alabaster_base_check_list_hdf5", (DL_FUNC) &_alabaster_base_check_list_hdf5, 3},
-    {"_alabaster_base_check_list_json", (DL_FUNC) &_alabaster_base_check_list_json, 2},
+    {"_alabaster_base_check_list_json", (DL_FUNC) &_alabaster_base_check_list_json, 3},
     {"_alabaster_base_load_csv", (DL_FUNC) &_alabaster_base_load_csv, 4},
     {"_alabaster_base_load_list_hdf5", (DL_FUNC) &_alabaster_base_load_list_hdf5, 3},
-    {"_alabaster_base_load_list_json", (DL_FUNC) &_alabaster_base_load_list_json, 2},
+    {"_alabaster_base_load_list_json", (DL_FUNC) &_alabaster_base_load_list_json, 3},
     {"_alabaster_base_write_integer_scalar", (DL_FUNC) &_alabaster_base_write_integer_scalar, 4},
     {NULL, NULL, 0}
 };

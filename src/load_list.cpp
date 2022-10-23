@@ -257,13 +257,15 @@ struct RExternals {
 // [[Rcpp::export(rng=false)]]
 Rcpp::RObject load_list_hdf5(std::string file, std::string name, Rcpp::List obj) {
     RExternals others(obj);
-    auto ptr = uzuki2::parse_hdf5<RProvisioner>(file, name, std::move(others));
+    auto ptr = uzuki2::Hdf5Parser().parse<RProvisioner>(file, name, std::move(others));
     return dynamic_cast<RBase*>(ptr.get())->extract_object();
 }
 
 // [[Rcpp::export(rng=false)]]
-Rcpp::RObject load_list_json(std::string file, Rcpp::List obj) {
+Rcpp::RObject load_list_json(std::string file, Rcpp::List obj, bool parallel) {
+    uzuki2::JsonParser parser;
+    parser.parallel = parallel;
     RExternals others(obj);
-    auto ptr = uzuki2::parse_json<RProvisioner>(file, std::move(others));
+    auto ptr = parser.parse_file<RProvisioner>(file, std::move(others));
     return dynamic_cast<RBase*>(ptr.get())->extract_object();
 }
