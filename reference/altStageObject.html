@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">alabaster.base</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.98.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.99.0</span>
       </span>
     </div>
 
@@ -109,6 +109,35 @@ For child objects, no infinite recursion will occur and either <code>stageObject
     <p>Aaron Lun</p>
     </div>
 
+    <div id="ref-examples">
+    <h2>Examples</h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">old</span> <span class="op">&lt;-</span> <span class="fu">.altStageObject</span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Creating a new generic for demonstration purposes:</span></span></span>
+<span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/methods/setGeneric.html" class="external-link">setGeneric</a></span><span class="op">(</span><span class="st">"superStageObject"</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span>, <span class="va">dir</span>, <span class="va">path</span>, <span class="va">child</span><span class="op">=</span><span class="cn">FALSE</span>, <span class="va">...</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/base/standardGeneric.html" class="external-link">standardGeneric</a></span><span class="op">(</span><span class="st">"superStageObject"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "superStageObject"</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/methods/setMethod.html" class="external-link">setMethod</a></span><span class="op">(</span><span class="st">"superStageObject"</span>, <span class="st">"ANY"</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span>, <span class="va">dir</span>, <span class="va">path</span>, <span class="va">child</span><span class="op">=</span><span class="cn">FALSE</span>, <span class="va">...</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="st">"Falling back to the base method!"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="stageObject.html">stageObject</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">dir</span>, <span class="va">path</span>, child<span class="op">=</span><span class="va">child</span>, <span class="va">...</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu">.altStageObject</span><span class="op">(</span><span class="va">superStageObject</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Staging an example DataFrame. This should print our message.</span></span></span>
+<span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://bioconductor.org/packages/S4Vectors" class="external-link">S4Vectors</a></span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/DataFrame-class.html" class="external-link">DataFrame</a></span><span class="op">(</span>A<span class="op">=</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span>, B<span class="op">=</span><span class="va">LETTERS</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">]</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">tmp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/files2.html" class="external-link">dir.create</a></span><span class="op">(</span><span class="va">tmp</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">out</span> <span class="op">&lt;-</span> <span class="fu">.stageObject</span><span class="op">(</span><span class="va">df</span>, <span class="va">tmp</span>, path<span class="op">=</span><span class="st">"coldata"</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Falling back to the base method!"</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Restoring the old loader:</span></span></span>
+<span class="r-in"><span><span class="fu">.altStageObject</span><span class="op">(</span><span class="va">old</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+</code></pre></div>
+    </div>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top"><h2 data-toc-skip>Contents</h2>
@@ -121,7 +150,7 @@ For child objects, no infinite recursion will occur and either <code>stageObject
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
 </div>
 
       </footer></div>

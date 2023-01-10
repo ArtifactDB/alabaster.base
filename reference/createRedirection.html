@@ -18,7 +18,7 @@ This is useful for creating short-hand aliases for resources that have inconveni
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">alabaster.base</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.98.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.99.0</span>
       </span>
     </div>
 
@@ -76,7 +76,8 @@ This is useful for creating short-hand aliases for resources that have inconveni
 
 
 <dt>dest</dt>
-<dd><p>String containing the destination path relative to <code>dir</code>.</p></dd>
+<dd><p>String containing the destination path relative to <code>dir</code>.
+This may be any path that can also be used in <code><a href="acquireFile.html">acquireMetadata</a></code>.</p></dd>
 
 </dl></div>
     <div id="value">
@@ -88,14 +89,67 @@ This is useful for creating short-hand aliases for resources that have inconveni
     <div id="details">
     <h2>Details</h2>
     <p><code>src</code> should not correspond to an existing file inside <code>dir</code>.
-This avoids ambiguity when attempting to load <code>src</code> via <code><a href="acquireFile.html">acquireFile</a></code>.
+This avoids ambiguity when attempting to load <code>src</code> via <code><a href="acquireFile.html">acquireMetadata</a></code>.
 Otherwise, it would be unclear as to whether the user wants the file at <code>src</code> or the redirection target <code>dest</code>.</p>
+<p><code>src</code> may correspond to existing directories.
+This is because directories cannot be used in <code>acquireMetadata</code>, so no such ambiguity exists.</p>
     </div>
     <div id="author">
     <h2>Author</h2>
     <p>Aaron Lun</p>
     </div>
 
+    <div id="ref-examples">
+    <h2>Examples</h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Staging an example DataFrame:</span></span></span>
+<span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://bioconductor.org/packages/S4Vectors" class="external-link">S4Vectors</a></span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/DataFrame-class.html" class="external-link">DataFrame</a></span><span class="op">(</span>A<span class="op">=</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span>, B<span class="op">=</span><span class="va">LETTERS</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">]</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">tmp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/files2.html" class="external-link">dir.create</a></span><span class="op">(</span><span class="va">tmp</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">info</span> <span class="op">&lt;-</span> <span class="fu"><a href="stageObject.html">stageObject</a></span><span class="op">(</span><span class="va">df</span>, <span class="va">tmp</span>, path<span class="op">=</span><span class="st">"coldata"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="writeMetadata.html">.writeMetadata</a></span><span class="op">(</span><span class="va">info</span>, <span class="va">tmp</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $type</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "local"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $path</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "coldata/simple.csv.gz"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Creating a redirection:</span></span></span>
+<span class="r-in"><span><span class="va">redirect</span> <span class="op">&lt;-</span> <span class="fu">.createRedirection</span><span class="op">(</span><span class="va">tmp</span>, <span class="st">"foobar"</span>, <span class="st">"coldata/simple.csv.gz"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="writeMetadata.html">.writeMetadata</a></span><span class="op">(</span><span class="va">redirect</span>, <span class="va">tmp</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $type</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "local"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $path</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "foobar"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># We can then use this redirect to pull out metadata:</span></span></span>
+<span class="r-in"><span><span class="va">info2</span> <span class="op">&lt;-</span> <span class="fu"><a href="acquireFile.html">acquireMetadata</a></span><span class="op">(</span><span class="va">tmp</span>, <span class="st">"foobar"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">info2</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> List of 6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ $schema       : chr "csv_data_frame/v1.json"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ path          : chr "coldata/simple.csv.gz"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ is_child      : logi FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ data_frame    :List of 3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ columns   :List of 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ :List of 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..$ name: chr "A"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..$ type: chr "integer"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ :List of 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..$ name: chr "B"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..$ type: chr "string"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ row_names : logi FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ dimensions:List of 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ : int 10</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ : int 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ csv_data_frame:List of 1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ compression: chr "gzip"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ md5sum        : chr "042b00e066dfa96577b5d6ac3c3ee700"</span>
+<span class="r-in"><span></span></span>
+</code></pre></div>
+    </div>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top"><h2 data-toc-skip>Contents</h2>
@@ -108,7 +162,7 @@ Otherwise, it would be unclear as to whether the user wants the file at <code>sr
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
 </div>
 
       </footer></div>
