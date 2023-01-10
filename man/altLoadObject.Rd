@@ -48,6 +48,29 @@ Doing so will introduce an infinite recursion where \code{.loadObject} calls the
 Rather, developers should either call \code{loadObject} or \code{loadX} directly.
 For child objects, no infinite recursion will occur and \code{loadObject2} or \code{.loadObject} can be used.
 }
+\examples{
+old <- .altLoadObject()
+
+# Setting it to something.
+.altLoadObject(function(...) {
+    print("YAY")
+    loadObject(...) 
+})
+
+# Staging an example DataFrame:
+library(S4Vectors)
+df <- DataFrame(A=1:10, B=LETTERS[1:10])
+tmp <- tempfile()
+dir.create(tmp)
+out <- stageObject(df, tmp, path="coldata")
+
+# And now loading it - this should print our message.
+.loadObject(out, tmp)
+
+# Restoring the old loader:
+.altLoadObject(old)
+
+}
 \author{
 Aaron Lun
 }

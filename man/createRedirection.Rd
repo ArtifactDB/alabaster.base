@@ -11,7 +11,8 @@
 
 \item{src}{String containing the source path relative to \code{dir}.}
 
-\item{dest}{String containing the destination path relative to \code{dir}.}
+\item{dest}{String containing the destination path relative to \code{dir}.
+This may be any path that can also be used in \code{\link{acquireMetadata}}.}
 }
 \value{
 A list of metadata that can be processed by \code{\link{.writeMetadata}}.
@@ -22,8 +23,29 @@ This is useful for creating short-hand aliases for resources that have inconveni
 }
 \details{
 \code{src} should not correspond to an existing file inside \code{dir}.
-This avoids ambiguity when attempting to load \code{src} via \code{\link{acquireFile}}.
+This avoids ambiguity when attempting to load \code{src} via \code{\link{acquireMetadata}}.
 Otherwise, it would be unclear as to whether the user wants the file at \code{src} or the redirection target \code{dest}.
+
+\code{src} may correspond to existing directories.
+This is because directories cannot be used in \code{acquireMetadata}, so no such ambiguity exists.
+}
+\examples{
+# Staging an example DataFrame:
+library(S4Vectors)
+df <- DataFrame(A=1:10, B=LETTERS[1:10])
+tmp <- tempfile()
+dir.create(tmp)
+info <- stageObject(df, tmp, path="coldata")
+.writeMetadata(info, tmp)
+
+# Creating a redirection:
+redirect <- .createRedirection(tmp, "foobar", "coldata/simple.csv.gz")
+.writeMetadata(redirect, tmp)
+
+# We can then use this redirect to pull out metadata:
+info2 <- acquireMetadata(tmp, "foobar")
+str(info2)
+
 }
 \author{
 Aaron Lun

@@ -47,6 +47,23 @@ The return value for each custom acquisition function should be the same as thei
 That is, any custom file acquisition function should return a file path,
 and any custom metadata acquisition function should return a naamed list of metadata.
 }
+\examples{
+# Staging an example DataFrame:
+library(S4Vectors)
+df <- DataFrame(A=1:10, B=LETTERS[1:10])
+tmp <- tempfile()
+dir.create(tmp)
+info <- stageObject(df, tmp, path="coldata")
+.writeMetadata(info, tmp)
+
+# Retrieving the metadata:
+meta <- acquireMetadata(tmp, "coldata/simple.csv.gz")
+str(meta)
+
+# Retrieving the file:
+acquireFile(tmp, "coldata/simple.csv.gz")
+
+}
 \author{
 Aaron Lun
 }

@@ -35,6 +35,29 @@
 #' For child objects, no infinite recursion will occur and either \code{stageObject2} or \code{.stageObject} can be used. 
 #' 
 #' @author Aaron Lun
+#' @examples
+#' old <- .altStageObject()
+#'
+#' # Creating a new generic for demonstration purposes:
+#' setGeneric("superStageObject", function(x, dir, path, child=FALSE, ...)
+#'     standardGeneric("superStageObject"))
+#'
+#' setMethod("superStageObject", "ANY", function(x, dir, path, child=FALSE, ...) {
+#'     print("Falling back to the base method!")
+#'     stageObject(x, dir, path, child=child, ...)
+#' })
+#' 
+#' .altStageObject(superStageObject)
+#'
+#' # Staging an example DataFrame. This should print our message.
+#' library(S4Vectors)
+#' df <- DataFrame(A=1:10, B=LETTERS[1:10])
+#' tmp <- tempfile()
+#' dir.create(tmp)
+#' out <- .stageObject(df, tmp, path="coldata")
+#' 
+#' # Restoring the old loader:
+#' .altStageObject(old)
 #'
 #' @export
 #' @rdname altStageObject

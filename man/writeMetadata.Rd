@@ -45,6 +45,17 @@ For artifacts, the MD5 sum calculation will be skipped if the \code{meta} alread
 This can be useful on some occasions, e.g., to improve efficiency when the MD5 sum was already computed during staging,
 or if the artifact does not actually exist in its full form on the file system.
 }
+\examples{
+library(S4Vectors)
+df <- DataFrame(A=1:10, B=LETTERS[1:10])
+
+tmp <- tempfile()
+dir.create(tmp)
+info <- stageObject(df, tmp, path="coldata")
+.writeMetadata(info, tmp)
+cat(readLines(file.path(tmp, "coldata/simple.csv.gz.json")), sep="\n")
+
+}
 \author{
 Aaron Lun
 }

@@ -131,6 +131,21 @@ setGeneric("stageObject", function(x, dir, path, child=FALSE, ...) {
 #' and any custom metadata acquisition function should return a naamed list of metadata.
 #'
 #' @author Aaron Lun
+#' @examples
+#' # Staging an example DataFrame:
+#' library(S4Vectors)
+#' df <- DataFrame(A=1:10, B=LETTERS[1:10])
+#' tmp <- tempfile()
+#' dir.create(tmp)
+#' info <- stageObject(df, tmp, path="coldata")
+#' .writeMetadata(info, tmp)
+#'
+#' # Retrieving the metadata:
+#' meta <- acquireMetadata(tmp, "coldata/simple.csv.gz")
+#' str(meta)
+#'
+#' # Retrieving the file:
+#' acquireFile(tmp, "coldata/simple.csv.gz")
 #'
 #' @export
 #' @name acquireFile

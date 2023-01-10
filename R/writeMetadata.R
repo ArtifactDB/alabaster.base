@@ -35,6 +35,15 @@
 #' A list of resource metadata is returned, e.g., for inclusion as the \code{"resource"} property in parent schemas.
 #'
 #' @author Aaron Lun
+#' @examples
+#' library(S4Vectors)
+#' df <- DataFrame(A=1:10, B=LETTERS[1:10])
+#'
+#' tmp <- tempfile()
+#' dir.create(tmp)
+#' info <- stageObject(df, tmp, path="coldata")
+#' .writeMetadata(info, tmp)
+#' cat(readLines(file.path(tmp, "coldata/simple.csv.gz.json")), sep="\n")
 #'
 #' @export
 #' @rdname writeMetadata

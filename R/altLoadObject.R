@@ -37,6 +37,27 @@
 #' For child objects, no infinite recursion will occur and \code{loadObject2} or \code{.loadObject} can be used. 
 #'
 #' @author Aaron Lun
+#' @examples
+#' old <- .altLoadObject()
+#'
+#' # Setting it to something.
+#' .altLoadObject(function(...) {
+#'     print("YAY")
+#'     loadObject(...) 
+#' })
+#'
+#' # Staging an example DataFrame:
+#' library(S4Vectors)
+#' df <- DataFrame(A=1:10, B=LETTERS[1:10])
+#' tmp <- tempfile()
+#' dir.create(tmp)
+#' out <- stageObject(df, tmp, path="coldata")
+#'
+#' # And now loading it - this should print our message.
+#' .loadObject(out, tmp)
+#' 
+#' # Restoring the old loader:
+#' .altLoadObject(old)
 #'
 #' @export
 #' @rdname altLoadObject
