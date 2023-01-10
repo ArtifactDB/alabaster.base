@@ -18,18 +18,5 @@ setMethod("acquireMetadata", "character", function(project, path) {
         stop("'", path, "' has no accompanying JSON metadata file")
     }
 
-    info <- fromJSON(full.path, simplifyVector=FALSE)
-
-    # If this is a redirect, follow it.
-    if (dirname(info[["$schema"]]) == "redirection") {
-        first <- info[["redirection"]][["targets"]][[1]]
-        if (first$type == "local") {
-            info <- acquireMetadata(project, first$location)
-        } else {
-            # TODO: allow applications to insert their own redirection handlers.
-            stop("unknown '", first$type, "'-type redirect to '", info$location, "'")
-        }
-    }
-
-    info
+    fromJSON(full.path, simplifyVector=FALSE)
 })

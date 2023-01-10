@@ -153,4 +153,18 @@ setGeneric("acquireFile", function(project, path) standardGeneric("acquireFile")
 
 #' @export
 #' @rdname acquireFile
-setGeneric("acquireMetadata", function(project, path) standardGeneric("acquireMetadata"))
+setGeneric("acquireMetadata", function(project, path) {
+    ans <- standardGeneric("acquireMetadata")
+
+    # Handling redirections. Applications that want to support different redirection
+    # types should implement the relevant logic in their acquireMetadata method.
+    if (dirname(ans[["$schema"]]) == "redirection") {
+        first <- ans[["redirection"]][["targets"]][[1]]
+        if (first$type != "local") {
+            stop("unknown redirection type '", first$type, "' to '", first$location, "'")
+        }
+        ans <- acquireMetadata(project, first$location)
+    }
+
+    ans
+})
