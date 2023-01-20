@@ -45,8 +45,9 @@ warn.package.exists <- function(pkg, cls) {
 #' @import methods
 .searchForMethods <- function(x, lookup, implements) {
     cls <- class(x)[1]
+    ok <- FALSE
 
-    if (! cls %in% lookup$found) {
+    if (!(cls %in% lookup$found)) {
         found <- NULL
         if (cls %in% names(implements)) {
             found <- implements[[cls]]
@@ -71,10 +72,22 @@ warn.package.exists <- function(pkg, cls) {
 
         if (!is.null(found) && !isNamespaceLoaded(found)) {
             loadNamespace(found)
+            ok <- TRUE
         }
 
         # Regardless of whether it was successful, we add the class,
         # so as to short-circuit any attempts in the future.
         lookup$found <- c(lookup$found, cls)
     }
+
+    ok 
 }
+
+#' @export
+setMethod("stageObject", "ANY", function(x, dir, path, child=FALSE, ...) {
+    # The logic is that .searchMethods should have run in the generic before
+    # hitting this method. If that's the case, we must have failed to find a 
+    # suitable method, so we just throw an error here. We still need to define
+    # an ANY method, though, because otherwise the generic won't even run. 
+    stop("no known method for 'stageObject' function with signature '", class(x)[1], "'")
+})

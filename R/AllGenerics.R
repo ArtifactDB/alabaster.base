@@ -94,7 +94,14 @@ setGeneric("stageObject", function(x, dir, path, child=FALSE, ...) {
         }
     }
 
-    .searchMethods(x)
+    # Need to search here to pick up any subclasses that might have better
+    # stageObject methods in yet-to-be-loaded packages.
+    if (.searchMethods(x)) {
+        fun <- selectMethod("stageObject", class(x)[1], optional=TRUE)
+        if (!is.null(fun)) {
+            return(fun(x, dir, path, child=child, ...))
+        }
+    }
 
     standardGeneric("stageObject")
 })

@@ -9,9 +9,8 @@ test_that("stageObject redirects to an appropriate hint with name checks", {
     if (alabaster.base:::package.exists("alabaster.matrix")) {
         expect_error(info <- stageObject(a, tmp, "foo"), NA)
         expect_identical(as.character(info[["$schema"]]), "hdf5_dense_array/v1.json")
-        expect_true("matrix" %in% alabaster.base:::package.lookup$found)
     } else {
-        expect_error(stageObject(a, tmp, "foo"), "alabaster.matrix")
+        expect_error(expect_warning(stageObject(a, tmp, "foo"), "alabaster.matrix"), "signature 'matrix'")
     }
 })
 
@@ -24,9 +23,8 @@ test_that("stageObject redirects to an appropriate hint via is()", {
     if (alabaster.base:::package.exists("alabaster.matrix")) {
         expect_error(info <- stageObject(x, tmp, "foo"), NA)
         expect_identical(as.character(info[["$schema"]]), "hdf5_sparse_matrix/v1.json")
-        expect_true("dgCMatrix" %in% alabaster.base:::package.lookup$found)
     } else {
-        expect_error(stageObject(x, tmp, "foo"), "alabaster.matrix")
+        expect_error(expect_warning(stageObject(x, tmp, "foo"), "alabaster.matrix"), "signature 'dgCMatrix'")
     }
 })
 
