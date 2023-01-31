@@ -330,17 +330,17 @@ either directly or as a child of another object (e.g., a
 <span><span class="op">)</span></span>
 <span><span class="va">x</span></span></code></pre></div>
 <pre><code><span><span class="co">## 10 x 10 sparse Matrix of class "dgTMatrix"</span></span>
-<span><span class="co">##                                                            </span></span>
-<span><span class="co">##  [1,] .         . 0.88294199 . . .         . .          . .</span></span>
-<span><span class="co">##  [2,] .         . .          . . 0.5493811 . .          . .</span></span>
-<span><span class="co">##  [3,] 0.9692538 . .          . . .         . .          . .</span></span>
-<span><span class="co">##  [4,] .         . .          . . .         . .          . .</span></span>
-<span><span class="co">##  [5,] .         . 0.02961352 . . .         . .          . .</span></span>
-<span><span class="co">##  [6,] .         . .          . . .         . 0.05053956 . .</span></span>
-<span><span class="co">##  [7,] .         . .          . . .         . .          . .</span></span>
-<span><span class="co">##  [8,] .         . .          . . .         . .          . .</span></span>
-<span><span class="co">##  [9,] .         . .          . . .         . .          . .</span></span>
-<span><span class="co">## [10,] .         . .          . . .         . .          . .</span></span></code></pre>
+<span><span class="co">##                                                           </span></span>
+<span><span class="co">##  [1,] .          . 0.4745284 . . .         . .         . .</span></span>
+<span><span class="co">##  [2,] .          . .         . . 0.2055612 . .         . .</span></span>
+<span><span class="co">##  [3,] 0.06300505 . .         . . .         . .         . .</span></span>
+<span><span class="co">##  [4,] .          . .         . . .         . .         . .</span></span>
+<span><span class="co">##  [5,] .          . 0.1114374 . . .         . .         . .</span></span>
+<span><span class="co">##  [6,] .          . .         . . .         . 0.3511583 . .</span></span>
+<span><span class="co">##  [7,] .          . .         . . .         . .         . .</span></span>
+<span><span class="co">##  [8,] .          . .         . . .         . .         . .</span></span>
+<span><span class="co">##  [9,] .          . .         . . .         . .         . .</span></span>
+<span><span class="co">## [10,] .          . .         . . .         . .         . .</span></span></code></pre>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">tmp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/files2.html" class="external-link">dir.create</a></span><span class="op">(</span><span class="va">tmp</span><span class="op">)</span></span>
@@ -395,17 +395,17 @@ files. In this case, it’s fairly simple:</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">loadSparseTripletMatrix</span><span class="op">(</span><span class="va">meta</span>, <span class="va">tmp</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## 10 x 10 sparse Matrix of class "dgTMatrix"</span></span>
-<span><span class="co">##                                                            </span></span>
-<span><span class="co">##  [1,] .         . 0.88294199 . . .         . .          . .</span></span>
-<span><span class="co">##  [2,] .         . .          . . 0.5493811 . .          . .</span></span>
-<span><span class="co">##  [3,] 0.9692538 . .          . . .         . .          . .</span></span>
-<span><span class="co">##  [4,] .         . .          . . .         . .          . .</span></span>
-<span><span class="co">##  [5,] .         . 0.02961352 . . .         . .          . .</span></span>
-<span><span class="co">##  [6,] .         . .          . . .         . 0.05053956 . .</span></span>
-<span><span class="co">##  [7,] .         . .          . . .         . .          . .</span></span>
-<span><span class="co">##  [8,] .         . .          . . .         . .          . .</span></span>
-<span><span class="co">##  [9,] .         . .          . . .         . .          . .</span></span>
-<span><span class="co">## [10,] .         . .          . . .         . .          . .</span></span></code></pre>
+<span><span class="co">##                                                           </span></span>
+<span><span class="co">##  [1,] .          . 0.4745284 . . .         . .         . .</span></span>
+<span><span class="co">##  [2,] .          . .         . . 0.2055612 . .         . .</span></span>
+<span><span class="co">##  [3,] 0.06300505 . .         . . .         . .         . .</span></span>
+<span><span class="co">##  [4,] .          . .         . . .         . .         . .</span></span>
+<span><span class="co">##  [5,] .          . 0.1114374 . . .         . .         . .</span></span>
+<span><span class="co">##  [6,] .          . .         . . .         . 0.3511583 . .</span></span>
+<span><span class="co">##  [7,] .          . .         . . .         . .         . .</span></span>
+<span><span class="co">##  [8,] .          . .         . . .         . .         . .</span></span>
+<span><span class="co">##  [9,] .          . .         . . .         . .         . .</span></span>
+<span><span class="co">## [10,] .          . .         . . .         . .         . .</span></span></code></pre>
 <p>To register this method with <em><a href="https://github.com/alabaster.base" class="external-link">alabaster.base</a></em>,
 <em>alabaster.foo</em> should add itself to the known schema locations
 upon load:</p>
@@ -540,7 +540,7 @@ called even if the user hasn’t loaded your package.</p>
 </h2>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/sessionInfo.html" class="external-link">sessionInfo</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## R Under development (unstable) (2023-01-11 r83598)</span></span>
+<pre><code><span><span class="co">## R Under development (unstable) (2023-01-26 r83699)</span></span>
 <span><span class="co">## Platform: x86_64-pc-linux-gnu (64-bit)</span></span>
 <span><span class="co">## Running under: Ubuntu 22.04.1 LTS</span></span>
 <span><span class="co">## </span></span>
@@ -565,26 +565,26 @@ called even if the user hasn’t loaded your package.</p>
 <span><span class="co">## </span></span>
 <span><span class="co">## other attached packages:</span></span>
 <span><span class="co">## [1] S4Vectors_0.37.3      BiocGenerics_0.45.0   alabaster.base_0.99.0</span></span>
-<span><span class="co">## [4] Matrix_1.5-3          BiocStyle_2.27.0     </span></span>
+<span><span class="co">## [4] Matrix_1.5-3          BiocStyle_2.27.1     </span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## loaded via a namespace (and not attached):</span></span>
-<span><span class="co">##  [1] sass_0.4.4               stringi_1.7.12           lattice_0.20-45         </span></span>
+<span><span class="co">##  [1] sass_0.4.5               stringi_1.7.12           lattice_0.20-45         </span></span>
 <span><span class="co">##  [4] jsonvalidate_1.3.2       digest_0.6.31            magrittr_2.0.3          </span></span>
-<span><span class="co">##  [7] evaluate_0.19            grid_4.3.0               bookdown_0.31           </span></span>
+<span><span class="co">##  [7] evaluate_0.20            grid_4.3.0               bookdown_0.32           </span></span>
 <span><span class="co">## [10] fastmap_1.1.0            rprojroot_2.0.3          jsonlite_1.8.4          </span></span>
 <span><span class="co">## [13] alabaster.schemas_0.99.0 BiocManager_1.30.19      purrr_1.0.1             </span></span>
 <span><span class="co">## [16] HDF5Array_1.27.0         textshaping_0.3.6        jquerylib_0.1.4         </span></span>
 <span><span class="co">## [19] cli_3.6.0                rlang_1.0.6              cachem_1.0.6            </span></span>
-<span><span class="co">## [22] DelayedArray_0.25.0      yaml_2.3.6               tools_4.3.0             </span></span>
+<span><span class="co">## [22] DelayedArray_0.25.0      yaml_2.3.7               tools_4.3.0             </span></span>
 <span><span class="co">## [25] memoise_2.0.1            Rhdf5lib_1.21.0          alabaster.matrix_0.99.0 </span></span>
-<span><span class="co">## [28] curl_5.0.0               vctrs_0.5.1              R6_2.5.1                </span></span>
+<span><span class="co">## [28] curl_5.0.0               vctrs_0.5.2              R6_2.5.1                </span></span>
 <span><span class="co">## [31] matrixStats_0.63.0       lifecycle_1.0.3          rhdf5_2.43.0            </span></span>
-<span><span class="co">## [34] stringr_1.5.0            fs_1.5.2                 V8_4.2.2                </span></span>
+<span><span class="co">## [34] stringr_1.5.0            fs_1.6.0                 V8_4.2.2                </span></span>
 <span><span class="co">## [37] IRanges_2.33.0           ragg_1.2.5               desc_1.4.2              </span></span>
 <span><span class="co">## [40] pkgdown_2.0.7            bslib_0.4.2              glue_1.6.2              </span></span>
-<span><span class="co">## [43] Rcpp_1.0.9               systemfonts_1.0.4        xfun_0.36               </span></span>
-<span><span class="co">## [46] MatrixGenerics_1.11.0    knitr_1.41               rhdf5filters_1.11.0     </span></span>
-<span><span class="co">## [49] htmltools_0.5.4          rmarkdown_2.19           compiler_4.3.0</span></span></code></pre>
+<span><span class="co">## [43] Rcpp_1.0.10              systemfonts_1.0.4        xfun_0.36               </span></span>
+<span><span class="co">## [46] MatrixGenerics_1.11.0    knitr_1.42               rhdf5filters_1.11.0     </span></span>
+<span><span class="co">## [49] htmltools_0.5.4          rmarkdown_2.20           compiler_4.3.0</span></span></code></pre>
 </div>
   </div>
 

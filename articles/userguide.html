@@ -221,11 +221,11 @@ referenced.</p>
 <pre><code><span><span class="co">## DataFrame with 5 rows and 2 columns</span></span>
 <span><span class="co">##          Z                  AA</span></span>
 <span><span class="co">##   &lt;factor&gt;         &lt;DataFrame&gt;</span></span>
-<span><span class="co">## 1        1 0.0156331:-0.614372</span></span>
-<span><span class="co">## 2        2 0.4505826: 1.292866</span></span>
-<span><span class="co">## 3        3 0.7024486: 1.283037</span></span>
-<span><span class="co">## 4        4 0.9640019: 1.700375</span></span>
-<span><span class="co">## 5        5 0.2286026:-1.115666</span></span></code></pre>
+<span><span class="co">## 1        1 0.401493: 0.9905438</span></span>
+<span><span class="co">## 2        2 0.365779:-1.1157625</span></span>
+<span><span class="co">## 3        3 0.423830:-0.0423961</span></span>
+<span><span class="co">## 4        4 0.852875:-0.0239306</span></span>
+<span><span class="co">## 5        5 0.108870:-0.5544691</span></span></code></pre>
 </div>
 <div class="section level2">
 <h2 id="saving-and-validating-metadata">Saving and validating metadata<a class="anchor" aria-label="anchor" href="#saving-and-validating-metadata"></a>
@@ -290,18 +290,18 @@ determine how it should load the files back into memory:</p>
 <pre><code><span><span class="co">## DataFrame with 5 rows and 2 columns</span></span>
 <span><span class="co">##          Z                  AA</span></span>
 <span><span class="co">##   &lt;factor&gt;         &lt;DataFrame&gt;</span></span>
-<span><span class="co">## 1        1 0.0156331:-0.614372</span></span>
-<span><span class="co">## 2        2 0.4505826: 1.292866</span></span>
-<span><span class="co">## 3        3 0.7024486: 1.283037</span></span>
-<span><span class="co">## 4        4 0.9640019: 1.700375</span></span>
-<span><span class="co">## 5        5 0.2286026:-1.115666</span></span></code></pre>
+<span><span class="co">## 1        1 0.401493: 0.9905438</span></span>
+<span><span class="co">## 2        2 0.365779:-1.1157625</span></span>
+<span><span class="co">## 3        3 0.423830:-0.0423961</span></span>
+<span><span class="co">## 4        4 0.852875:-0.0239306</span></span>
+<span><span class="co">## 5        5 0.108870:-0.5544691</span></span></code></pre>
 </div>
 <div class="section level2">
 <h2 class="unnumbered" id="session-information">Session information<a class="anchor" aria-label="anchor" href="#session-information"></a>
 </h2>
 <div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/sessionInfo.html" class="external-link">sessionInfo</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## R Under development (unstable) (2023-01-11 r83598)</span></span>
+<pre><code><span><span class="co">## R Under development (unstable) (2023-01-26 r83699)</span></span>
 <span><span class="co">## Platform: x86_64-pc-linux-gnu (64-bit)</span></span>
 <span><span class="co">## Running under: Ubuntu 22.04.1 LTS</span></span>
 <span><span class="co">## </span></span>
@@ -326,23 +326,23 @@ determine how it should load the files back into memory:</p>
 <span><span class="co">## </span></span>
 <span><span class="co">## other attached packages:</span></span>
 <span><span class="co">## [1] alabaster.base_0.99.0 S4Vectors_0.37.3      BiocGenerics_0.45.0  </span></span>
-<span><span class="co">## [4] BiocStyle_2.27.0     </span></span>
+<span><span class="co">## [4] BiocStyle_2.27.1     </span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## loaded via a namespace (and not attached):</span></span>
 <span><span class="co">##  [1] jsonlite_1.8.4           compiler_4.3.0           BiocManager_1.30.19     </span></span>
-<span><span class="co">##  [4] Rcpp_1.0.9               stringr_1.5.0            rhdf5filters_1.11.0     </span></span>
+<span><span class="co">##  [4] Rcpp_1.0.10              stringr_1.5.0            rhdf5filters_1.11.0     </span></span>
 <span><span class="co">##  [7] jquerylib_0.1.4          systemfonts_1.0.4        textshaping_0.3.6       </span></span>
-<span><span class="co">## [10] yaml_2.3.6               fastmap_1.1.0            jsonvalidate_1.3.2      </span></span>
-<span><span class="co">## [13] R6_2.5.1                 curl_5.0.0               knitr_1.41              </span></span>
-<span><span class="co">## [16] bookdown_0.31            desc_1.4.2               rprojroot_2.0.3         </span></span>
+<span><span class="co">## [10] yaml_2.3.7               fastmap_1.1.0            jsonvalidate_1.3.2      </span></span>
+<span><span class="co">## [13] R6_2.5.1                 curl_5.0.0               knitr_1.42              </span></span>
+<span><span class="co">## [16] bookdown_0.32            desc_1.4.2               rprojroot_2.0.3         </span></span>
 <span><span class="co">## [19] bslib_0.4.2              rlang_1.0.6              V8_4.2.2                </span></span>
 <span><span class="co">## [22] cachem_1.0.6             stringi_1.7.12           xfun_0.36               </span></span>
-<span><span class="co">## [25] fs_1.5.2                 sass_0.4.4               memoise_2.0.1           </span></span>
+<span><span class="co">## [25] fs_1.6.0                 sass_0.4.5               memoise_2.0.1           </span></span>
 <span><span class="co">## [28] cli_3.6.0                pkgdown_2.0.7            magrittr_2.0.3          </span></span>
 <span><span class="co">## [31] Rhdf5lib_1.21.0          digest_0.6.31            alabaster.schemas_0.99.0</span></span>
-<span><span class="co">## [34] rhdf5_2.43.0             lifecycle_1.0.3          vctrs_0.5.1             </span></span>
-<span><span class="co">## [37] evaluate_0.19            glue_1.6.2               ragg_1.2.5              </span></span>
-<span><span class="co">## [40] rmarkdown_2.19           purrr_1.0.1              tools_4.3.0             </span></span>
+<span><span class="co">## [34] rhdf5_2.43.0             lifecycle_1.0.3          vctrs_0.5.2             </span></span>
+<span><span class="co">## [37] evaluate_0.20            glue_1.6.2               ragg_1.2.5              </span></span>
+<span><span class="co">## [40] rmarkdown_2.20           purrr_1.0.1              tools_4.3.0             </span></span>
 <span><span class="co">## [43] htmltools_0.5.4</span></span></code></pre>
 </div>
   </div>
