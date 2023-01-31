@@ -29,7 +29,7 @@ LinkingTo:
     Rcpp,
     Rhdf5lib
 VignetteBuilder: knitr
-SystemRequirements: C++17
+SystemRequirements: C++17, GNU make
 RoxygenNote: 7.2.3
 biocViews:
     DataRepresentation,
