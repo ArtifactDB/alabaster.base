@@ -11,9 +11,12 @@
 #' @author Aaron Lun
 #'
 #' @details
-#' This function effectively reverses the behavior of the list method for \code{\link{stageObject}}, loading the \link{list} back into memory from the JSON file.
+#' This function effectively reverses the behavior of \code{"\link{stageObject,list-method}"}, loading the \link{list} back into memory from the JSON file.
 #' Atomic vectors, arrays and data frames are loaded directly while complex values are loaded by calling the appropriate loading function.
 #' 
+#' @seealso
+#' \code{"\link{stageObject,list-method}"}, for the staging method.
+#'
 #' @examples
 #' library(S4Vectors)
 #' ll <- list(A=1, B=LETTERS, C=DataFrame(X=letters))

@@ -41,6 +41,8 @@ Additional files may also be created inside \code{path} and referenced from the 
 }
 \description{
 Stage a DataFrame by saving it to a CSV or HDF5 file.
+CSV files follow the \href{https://github.com/LTLA/comservatory}{comservatory} specification,
+while the expected layout of a HDF5 file is described in the \code{hdf5_data_frame} schema in \pkg{alabaster.schemas}.
 }
 \details{
 All atomic vector types are supported in the columns along with dates and (ordered) factors.
@@ -80,6 +82,11 @@ stageObject(df, tmp, path="coldata")
 
 list.files(tmp, recursive=TRUE)
 
+}
+\seealso{
+\url{https://github.com/LTLA/comservatory}, for the CSV file specification.
+
+The \code{csv_data_frame} and \code{hdf5_data_frame} schemas from the \pkg{alabaster.schemas} package.
 }
 \author{
 Aaron Lun

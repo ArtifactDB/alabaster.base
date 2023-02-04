@@ -8,6 +8,9 @@
 #'
 #' @author Aaron Lun
 #'
+#' @seealso
+#' \code{"\link{stageObject,DataFrameFactor-method}"}, for the staging method.
+#'
 #' @examples
 #' library(S4Vectors)
 #' df <- DataFrame(X=LETTERS[1:5], Y=1:5)

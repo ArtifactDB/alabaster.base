@@ -44,6 +44,7 @@ For \code{.quickWriteCsv}, \code{df} is written to \code{path} and a \code{NULL}
 }
 \description{
 Quickly read and write a CSV file, usually as a part of staging or loading a larger object.
+This assumes that all files follow the \href{https://github.com/LTLA/comservatory}{comservatory} specification.
 }
 \examples{
 library(S4Vectors)

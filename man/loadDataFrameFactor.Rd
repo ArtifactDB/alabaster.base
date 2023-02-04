@@ -32,6 +32,9 @@ info <- stageObject(out, tmp, path="test")
 loadDataFrameFactor(info, tmp)
 
 }
+\seealso{
+\code{"\link{stageObject,DataFrameFactor-method}"}, for the staging method.
+}
 \author{
 Aaron Lun
 }

@@ -9,7 +9,7 @@
 #' @param parallel Whether to perform reading and parsing in parallel for greater speed.
 #'
 #' @details
-#' This function effectively reverses the behavior of \code{\link{stageObject}}, 
+#' This function effectively reverses the behavior of \code{"\link{stageObject,DataFrame-method}"}, 
 #' loading the \linkS4class{DataFrame} back into memory from the CSV or HDF5 file.
 #' Atomic columns are loaded directly while complex columns (such as nested DataFrames) are loaded by calling the appropriate \code{restore} method.
 #' 
@@ -18,6 +18,9 @@
 #' This avoids the cost of loading a (potentially large) nested DataFrame when its contents are unlikely to be relevant.
 #' 
 #' @return The DataFrame described by \code{info}.
+#'
+#' @seealso
+#' \code{"\link{stageObject,DataFrame-method}"}, for the staging method.
 #'
 #' @author Aaron Lun
 #'
@@ -105,7 +108,7 @@ loadDataFrame <- function(info, project, include.nested=TRUE, parallel=TRUE) {
 
         } else if (col.type == "other") {
             current <- acquireMetadata(project, col.info[[i]]$resource$path)
-            if (include.nested || !"data_frame" %in% names(current)) {
+            if (include.nested || !("data_frame" %in% names(current))) {
                 df[[i]] <- .loadObject(current, project=project)
             } else {
                 new.names[i] <- NA_character_
@@ -124,7 +127,5 @@ loadDataFrame <- function(info, project, include.nested=TRUE, parallel=TRUE) {
     # Replacing the names with the values at input.
     colnames(df) <- new.names
 
-    df <- .restoreMetadata(df, mcol.data=info$data_frame$column_data, meta.data=info$data_frame$other_data, project=project)
-
-    df
+    .restoreMetadata(df, mcol.data=info$data_frame$column_data, meta.data=info$data_frame$other_data, project=project)
 }

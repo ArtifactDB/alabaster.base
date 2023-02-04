@@ -27,7 +27,7 @@ A named list containing the metadata for \code{x}, where \code{x} itself is writ
 }
 \description{
 Save a \link{list} or \linkS4class{List} to a JSON or HDF5 file, with external subdirectories created for any of the more complex list elements (e.g., DataFrames, arrays). 
-This uses the uzuki2 specification to ensure that appropriate types are declared.
+This uses the \href{https://github.com/LTLA/uzuki2}{uzuki2} specification to ensure that appropriate types are declared.
 }
 \section{File formats}{
 
@@ -51,6 +51,8 @@ list.files(tmp, recursive=TRUE)
 }
 \seealso{
 \url{https://github.com/LTLA/uzuki2} for the specification.
+
+The \code{json_simple_list} and \code{hdf5_simple_list} schemas from the \pkg{alabaster.schemas} package.
 }
 \author{
 Aaron Lun

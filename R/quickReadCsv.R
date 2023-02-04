@@ -1,6 +1,7 @@
 #' Quickly read and write a CSV file
 #'
 #' Quickly read and write a CSV file, usually as a part of staging or loading a larger object.
+#' This assumes that all files follow the \href{https://github.com/LTLA/comservatory}{comservatory} specification.
 #'
 #' @param path String containing a path to a CSV to read/write.
 #' @param expected.columns Named character vector specifying the type of each column in the CSV (excluding the first column containing row names, if \code{row.names=TRUE}).

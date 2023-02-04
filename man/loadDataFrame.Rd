@@ -23,7 +23,7 @@ The DataFrame described by \code{info}.
 Load a \linkS4class{DataFrame} from file, possibly containing complex columns and row names.
 }
 \details{
-This function effectively reverses the behavior of \code{\link{stageObject}}, 
+This function effectively reverses the behavior of \code{"\link{stageObject,DataFrame-method}"}, 
 loading the \linkS4class{DataFrame} back into memory from the CSV or HDF5 file.
 Atomic columns are loaded directly while complex columns (such as nested DataFrames) are loaded by calling the appropriate \code{restore} method.
 
@@ -43,6 +43,9 @@ out <- stageObject(df, tmp, path="coldata")
 # And now loading it:
 loadDataFrame(out, tmp)
 
+}
+\seealso{
+\code{"\link{stageObject,DataFrame-method}"}, for the staging method.
 }
 \author{
 Aaron Lun

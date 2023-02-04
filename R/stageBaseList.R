@@ -1,7 +1,7 @@
 #' Stage a base list
 #' 
 #' Save a \link{list} or \linkS4class{List} to a JSON or HDF5 file, with external subdirectories created for any of the more complex list elements (e.g., DataFrames, arrays). 
-#' This uses the uzuki2 specification to ensure that appropriate types are declared.
+#' This uses the \href{https://github.com/LTLA/uzuki2}{uzuki2} specification to ensure that appropriate types are declared.
 #'
 #' @inheritParams stageObject
 #' @param fname String containing the name of the file to use to save \code{x}. 
@@ -21,6 +21,8 @@
 #'
 #' @seealso
 #' \url{https://github.com/LTLA/uzuki2} for the specification.
+#'
+#' The \code{json_simple_list} and \code{hdf5_simple_list} schemas from the \pkg{alabaster.schemas} package.
 #'
 #' @examples
 #' library(S4Vectors)

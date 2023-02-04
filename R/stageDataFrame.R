@@ -1,6 +1,8 @@
 #' Stage a DataFrame
 #'
 #' Stage a DataFrame by saving it to a CSV or HDF5 file.
+#' CSV files follow the \href{https://github.com/LTLA/comservatory}{comservatory} specification,
+#' while the expected layout of a HDF5 file is described in the \code{hdf5_data_frame} schema in \pkg{alabaster.schemas}.
 #'
 #' @param x A \linkS4class{DataFrame}.
 #' @inheritParams stageObject
@@ -40,6 +42,12 @@
 #' The names of the columns are saved into the \code{column_names} dataset.
 #' If row names are present, a separate \code{row_names} dataset containing the row names will be generated.
 #' This format is most useful for random access and for preserving the precision of numerical data.
+#'
+#' @seealso
+#' \url{https://github.com/LTLA/comservatory}, for the CSV file specification.
+#'
+#' The \code{csv_data_frame} and \code{hdf5_data_frame} schemas from the \pkg{alabaster.schemas} package.
+#'
 #' 
 #' @author Aaron Lun
 #'

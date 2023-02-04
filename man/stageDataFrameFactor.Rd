@@ -52,6 +52,9 @@ stageObject(out, tmp, path="test")
 list.files(file.path(tmp, "test"), recursive=TRUE)
 
 }
+\seealso{
+The \code{data_frame_factor} schema from \pkg{alabaster.schemas}.
+}
 \author{
 Aaron Lun
 }

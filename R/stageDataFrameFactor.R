@@ -15,6 +15,9 @@
 #' Indices are 1-based and reference one record of the levels file.
 #' As the DataFrameFactor is a Vector subclass, its R-level metadata can be staged by \code{\link{.processMetadata}}.
 #' 
+#' @seealso
+#' The \code{data_frame_factor} schema from \pkg{alabaster.schemas}.
+#' 
 #' @author Aaron Lun
 #' @examples
 #' library(S4Vectors)
