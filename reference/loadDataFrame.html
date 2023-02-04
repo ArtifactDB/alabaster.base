@@ -90,12 +90,16 @@ By default, this should be a string containing the path to a staging directory.<
     </div>
     <div id="details">
     <h2>Details</h2>
-    <p>This function effectively reverses the behavior of <code><a href="stageObject.html">stageObject</a></code>, 
+    <p>This function effectively reverses the behavior of <code>"<a href="stageDataFrame.html">stageObject,DataFrame-method</a>"</code>, 
 loading the <a href="https://rdrr.io/pkg/S4Vectors/man/DataFrame-class.html" class="external-link">DataFrame</a> back into memory from the CSV or HDF5 file.
 Atomic columns are loaded directly while complex columns (such as nested DataFrames) are loaded by calling the appropriate <code>restore</code> method.</p>
 <p>One implicit interpretation of using a nested DataFrame is that the contents are not important enough to warrant top-level columns.
 In such cases, we can skip all columns containing a nested DataFrame by setting <code>include.nested=FALSE</code>.
 This avoids the cost of loading a (potentially large) nested DataFrame when its contents are unlikely to be relevant.</p>
+    </div>
+    <div id="see-also">
+    <h2>See also</h2>
+    <div class="dont-index"><p><code>"<a href="stageDataFrame.html">stageObject,DataFrame-method</a>"</code>, for the staging method.</p></div>
     </div>
     <div id="author">
     <h2>Author</h2>
