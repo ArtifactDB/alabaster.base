@@ -1,6 +1,6 @@
 Package: alabaster.base
 Title: Save Bioconductor Objects To File
-Version: 0.99.0
+Version: 0.99.1
 Date: 2023-01-10
 Authors@R: person("Aaron", "Lun", role=c("aut", "cre"), email="infinite.monkeys.with.keyboards@gmail.com")
 License: MIT + file LICENSE
@@ -16,6 +16,7 @@ Imports:
     S4Vectors,
     rhdf5,
     jsonlite,
+    jsonvalidate,
     Rcpp
 Suggests:
     BiocStyle,
@@ -23,7 +24,6 @@ Suggests:
     knitr,
     testthat,
     digest,
-    jsonvalidate,
     Matrix
 LinkingTo:
     Rcpp,
