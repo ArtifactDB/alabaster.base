@@ -135,6 +135,31 @@ test_that("staging of HDF5-based DFs works correctly", {
     expect_identical(round2, df)
 })
 
+test_that("staging of complex HDF5-based DFs works correctly", {
+    tmp <- tempfile()
+    dir.create(tmp)
+
+    df <- DataFrame(A=sample(3, 100, replace=TRUE), B=sample(letters[1:3], 100, replace=TRUE))
+    df$FOO <- DataFrame(X=1:100, Y=100:1 * 1.5)
+
+    old <- .saveDataFrameFormat("hdf5")
+    on.exit(.saveDataFrameFormat(old))
+    meta <- stageObject(df, tmp, path="WHEE")
+
+    expect_match(meta$path, ".h5$")
+    expect_identical(meta$`$schema`, "hdf5_data_frame/v1.json")
+    expect_false(is.null(meta$hdf5_data_frame))
+
+    contents <- rhdf5::h5read(file.path(tmp, meta$path), paste0(meta$hdf5_data_frame$group, "/data"))
+    expect_true("0" %in% names(contents)) 
+    expect_true("1" %in% names(contents))
+    expect_false("2" %in% names(contents)) # complex column is not stored.
+
+    resource <- .writeMetadata(meta, tmp)
+    round <- loadDataFrame(meta, project=tmp)
+    expect_identical(round, df)
+})
+
 test_that("staging of empty objects works correctly", {
     tmp <- tempfile()
     dir.create(tmp)
