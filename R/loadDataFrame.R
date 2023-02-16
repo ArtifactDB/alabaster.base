@@ -56,23 +56,26 @@ loadDataFrame <- function(info, project, include.nested=TRUE, parallel=TRUE) {
             df <- make_zero_col_DFrame(nrow=nrows)
         } else {
             raw <- h5read(path, prefix("data"))
-            df <- vector("list", length(col.info))
-            df[as.integer(names(raw))] <- lapply(raw, as.vector)
-            for (i in seq_along(df)) {
-                if (is.null(df[[i]])) {
-                    df[[i]] <- logical(nrows)
-                }
-            }
 
             # Replacing NAs for strings.
-            for (i in names(df)) {
-                current <- df[[i]]
+            for (i in names(raw)) {
+                current <- raw[[i]]
                 if (is.character(current)) {
                     attr <- h5readAttributes(path, prefix(paste0("data/", i)))
                     replace.na <- attr[["missing-value-placeholder"]]
                     if (!is.null(replace.na)) {
-                        df[[i]][current == replace.na] <- NA
+                        raw[[i]][current == replace.na] <- NA
                     }
+                }
+            }
+
+            # Adding placeholders for type:"other".
+            indices <- as.integer(names(raw)) + 1L # get back to 1-based.
+            df <- vector("list", length(col.info))
+            df[indices] <- lapply(raw, as.vector) # remove 1d arrays.
+            for (i in seq_along(df)) {
+                if (is.null(df[[i]])) {
+                    df[[i]] <- logical(nrows) 
                 }
             }
 

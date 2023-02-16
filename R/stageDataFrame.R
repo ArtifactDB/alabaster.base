@@ -145,7 +145,8 @@ setMethod("stageObject", "DataFrame", function(x, dir, path, child=FALSE, df.nam
     if (!is.null(format) && format=="hdf5") {
         opath <- paste0(opath, ".h5")
         ofile <- file.path(dir, opath)
-        .write_hdf5_data_frame(x, "contents", ofile)
+        skippable <- vapply(meta, function(x) x$type == "other", TRUE)
+        .write_hdf5_data_frame(x, skippable, "contents", ofile)
         schema <- "hdf5_data_frame/v1.json"
         extra[[1]]$group <- "contents"
 
@@ -204,13 +205,17 @@ setMethod("stageObject", "DataFrame", function(x, dir, path, child=FALSE, df.nam
 }
 
 #' @importFrom rhdf5 h5write h5createGroup h5createFile
-.write_hdf5_data_frame <- function(x, host, ofile) {
+.write_hdf5_data_frame <- function(x, skippable, host, ofile) {
     h5createFile(ofile)
     prefix <- function(x) paste0(host, "/", x)
     h5createGroup(ofile, host)
     h5createGroup(ofile, prefix("data"))
 
     for (i in seq_along(x)) {
+        if (skippable[i]) {
+            next
+        }
+
         current <- x[[i]]
         if (is.logical(current)) {
             # The logical'ness of this column is preserved in the metadata,
