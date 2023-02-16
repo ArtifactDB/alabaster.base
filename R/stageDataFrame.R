@@ -145,9 +145,9 @@ setMethod("stageObject", "DataFrame", function(x, dir, path, child=FALSE, df.nam
     if (!is.null(format) && format=="hdf5") {
         opath <- paste0(opath, ".h5")
         ofile <- file.path(dir, opath)
-        .write_hdf5_data_frame(x, ofile)
+        .write_hdf5_data_frame(x, "contents", ofile)
         schema <- "hdf5_data_frame/v1.json"
-        extra[[1]]$group <- "data"
+        extra[[1]]$group <- "contents"
 
     } else {
         X <- data.frame(x, check.names=FALSE)
@@ -203,10 +203,12 @@ setMethod("stageObject", "DataFrame", function(x, dir, path, child=FALSE, df.nam
     )
 }
 
-#' @importFrom rhdf5 h5write h5createGroup h5createFile 
-.write_hdf5_data_frame <- function(x, ofile) {
+#' @importFrom rhdf5 h5write h5createGroup h5createFile
+.write_hdf5_data_frame <- function(x, host, ofile) {
     h5createFile(ofile)
-    h5createGroup(ofile, "data")
+    prefix <- function(x) paste0(host, "/", x)
+    h5createGroup(ofile, host)
+    h5createGroup(ofile, prefix("data"))
 
     for (i in seq_along(x)) {
         current <- x[[i]]
@@ -223,16 +225,16 @@ setMethod("stageObject", "DataFrame", function(x, dir, path, child=FALSE, df.nam
         }
 
         data.name <- as.character(i - 1L)
-        h5write(current, ofile, file.path("data", data.name))
+        h5write(current, ofile, prefix(paste0("data/", data.name)))
 
         if (!is.null(missing.placeholder)) {
-            .addMissingStringPlaceholderAttribute(ofile, paste0("data/", data.name), missing.placeholder)
+            .addMissingStringPlaceholderAttribute(ofile, prefix(paste0("data/", data.name)), missing.placeholder)
         }
     }
 
-    h5write(colnames(x), ofile, "column_names")
+    h5write(colnames(x), ofile, prefix("column_names"))
     if (!is.null(rownames(x))) {
-        h5write(rownames(x), ofile, "row_names")
+        h5write(rownames(x), ofile, prefix("row_names"))
     }
 }
 

@@ -51,10 +51,11 @@ loadDataFrame <- function(info, project, include.nested=TRUE, parallel=TRUE) {
     # Reading the file into a data frame.
     path <- acquireFile(project, info$path)
     if ("hdf5_data_frame" %in% names(info)) {
+        prefix <- function(x) paste0(info$hdf5_data_frame$group, "/", x)
         if (!has.columns) {
             df <- make_zero_col_DFrame(nrow=nrows)
         } else {
-            df <- h5read(path, "data")
+            df <- h5read(path, prefix("data"))
             df <- df[order(as.integer(names(df)))]
             df <- lapply(df, as.vector)
 
@@ -62,7 +63,7 @@ loadDataFrame <- function(info, project, include.nested=TRUE, parallel=TRUE) {
             for (i in names(df)) {
                 current <- df[[i]]
                 if (is.character(current)) {
-                    attr <- h5readAttributes(path, paste0("data/", i))
+                    attr <- h5readAttributes(path, prefix(paste0("data/", i)))
                     replace.na <- attr[["missing-value-placeholder"]]
                     if (!is.null(replace.na)) {
                         df[[i]][current == replace.na] <- NA
@@ -71,10 +72,10 @@ loadDataFrame <- function(info, project, include.nested=TRUE, parallel=TRUE) {
             }
 
             df <- DataFrame(df)
-            colnames(df) <- as.vector(h5read(path, "column_names"))
+            colnames(df) <- as.vector(h5read(path, prefix("column_names")))
         }
         if (has.rownames) {
-            rownames(df) <- as.vector(h5read(path, "row_names"))
+            rownames(df) <- as.vector(h5read(path, prefix("row_names")))
         }
     } else {
         df <- read.csv3(path, compression=info$csv_data_frame$compression, nrows=nrows)
