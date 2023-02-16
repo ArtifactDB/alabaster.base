@@ -55,9 +55,14 @@ loadDataFrame <- function(info, project, include.nested=TRUE, parallel=TRUE) {
         if (!has.columns) {
             df <- make_zero_col_DFrame(nrow=nrows)
         } else {
-            df <- h5read(path, prefix("data"))
-            df <- df[order(as.integer(names(df)))]
-            df <- lapply(df, as.vector)
+            raw <- h5read(path, prefix("data"))
+            df <- vector("list", length(col.info))
+            df[as.integer(names(raw))] <- lapply(raw, as.vector)
+            for (i in seq_along(df)) {
+                if (is.null(df[[i]])) {
+                    df[[i]] <- logical(nrows)
+                }
+            }
 
             # Replacing NAs for strings.
             for (i in names(df)) {
