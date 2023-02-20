@@ -15,6 +15,11 @@
 #' Indices are 1-based and reference one record of the levels file.
 #' As the DataFrameFactor is a Vector subclass, its R-level metadata can be staged by \code{\link{.processMetadata}}.
 #' 
+#' @return 
+#' A named list containing the metadata for \code{x}.
+#' \code{x} itself is written to a file inside \code{path}.
+#' Additional files may also be created inside \code{path} and referenced from the metadata.
+#'
 #' @seealso
 #' The \code{data_frame_factor} schema from \pkg{alabaster.schemas}.
 #' 

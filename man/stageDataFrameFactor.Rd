@@ -31,6 +31,11 @@ The actual path used to save \code{x} may include additional components, see Det
 \item{mcols.name}{String specifying the name of the directory inside \code{path} to save the \code{\link{mcols}}.
 If \code{NULL}, the metadata columns are not saved.}
 }
+\value{
+A named list containing the metadata for \code{x}.
+\code{x} itself is written to a file inside \code{path}.
+Additional files may also be created inside \code{path} and referenced from the metadata.
+}
 \description{
 Stage a \linkS4class{DataFrameFactor} object, a generalization of the base factor for \linkS4class{DataFrame} levels.
 }
