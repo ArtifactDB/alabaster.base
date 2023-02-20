@@ -41,6 +41,8 @@ struct RTypedVector : public uzuki2::TypedVector<T, tt>, public RBase {
         return vec; 
     }
 
+    void is_scalar() {}
+
     RVector vec;
     bool named = false;
     Rcpp::CharacterVector names;

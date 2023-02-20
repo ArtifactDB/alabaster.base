@@ -24,6 +24,8 @@ struct DummyTypedVector : public TypedVector<T, tt> {
     void use_names() {}
     void set_name(size_t, std::string) {}
 
+    void is_scalar() {}
+
     size_t length;
 };
 

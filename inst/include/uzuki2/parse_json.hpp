@@ -49,6 +49,27 @@ inline const std::vector<std::shared_ptr<millijson::Base> >& extract_array(
     return static_cast<const millijson::Array*>(values_ptr.get())->values;
 }
 
+template<class Function>
+void process_array_or_scalar_values(
+    const std::unordered_map<std::string, std::shared_ptr<millijson::Base> >& properties, 
+    const std::string& path,
+    Function fun)
+{
+    auto vIt = properties.find("values");
+    if (vIt == properties.end()) {
+        throw std::runtime_error("expected 'values' property for object at '" + path + "'");
+    }
+
+    const auto& values_ptr = vIt->second;
+    if (values_ptr->type() == millijson::ARRAY) {
+        fun(static_cast<const millijson::Array*>(values_ptr.get())->values);
+    } else {
+        std::vector<std::shared_ptr<millijson::Base> > temp { values_ptr };
+        auto ptr = fun(temp);
+        ptr->is_scalar();
+    }
+}
+
 template<class Destination, class Function>
 void extract_integers(const std::vector<std::shared_ptr<millijson::Base> >& values, Destination* dest, Function check, const std::string& path) {
     for (size_t i = 0; i < values.size(); ++i) {
@@ -164,11 +185,13 @@ std::shared_ptr<Base> parse_object(const millijson::Base* contents, Externals& e
         output.reset(Provisioner::new_External(ext.get(index)));
 
     } else if (type == "integer") {
-        const auto& vals = extract_array(map, "values", path);
-        auto ptr = Provisioner::new_Integer(vals.size());
-        output.reset(ptr);
-        extract_integers(vals, ptr, [](int32_t) -> void {}, path);
-        extract_names(map, ptr, path);
+        process_array_or_scalar_values(map, path, [&](const auto& vals) -> auto {
+            auto ptr = Provisioner::new_Integer(vals.size());
+            output.reset(ptr);
+            extract_integers(vals, ptr, [](int32_t) -> void {}, path);
+            extract_names(map, ptr, path);
+            return ptr;
+        });
 
     } else if (type == "factor" || type == "ordered") {
         const auto& vals = extract_array(map, "values", path);
@@ -204,72 +227,80 @@ std::shared_ptr<Base> parse_object(const millijson::Base* contents, Externals& e
         extract_names(map, ptr, path);
 
     } else if (type == "boolean") {
-        const auto& vals = extract_array(map, "values", path);
-        auto ptr = Provisioner::new_Boolean(vals.size());
-        output.reset(ptr);
+        process_array_or_scalar_values(map, path, [&](const auto& vals) -> auto {
+            auto ptr = Provisioner::new_Boolean(vals.size());
+            output.reset(ptr);
 
-        for (size_t i = 0; i < vals.size(); ++i) {
-            if (vals[i]->type() == millijson::NOTHING) {
-                ptr->set_missing(i);
-                continue;
+            for (size_t i = 0; i < vals.size(); ++i) {
+                if (vals[i]->type() == millijson::NOTHING) {
+                    ptr->set_missing(i);
+                    continue;
+                }
+
+                if (vals[i]->type() != millijson::BOOLEAN) {
+                    throw std::runtime_error("expected a boolean at '" + path + ".values[" + std::to_string(i) + "]'");
+                }
+                ptr->set(i, static_cast<const millijson::Boolean*>(vals[i].get())->value);
             }
 
-            if (vals[i]->type() != millijson::BOOLEAN) {
-                throw std::runtime_error("expected a boolean at '" + path + ".values[" + std::to_string(i) + "]'");
-            }
-            ptr->set(i, static_cast<const millijson::Boolean*>(vals[i].get())->value);
-        }
-
-        extract_names(map, ptr, path);
+            extract_names(map, ptr, path);
+            return ptr;
+        });
 
     } else if (type == "number") {
-        const auto& vals = extract_array(map, "values", path);
-        auto ptr = Provisioner::new_Number(vals.size());
-        output.reset(ptr);
+        process_array_or_scalar_values(map, path, [&](const auto& vals) -> auto {
+            auto ptr = Provisioner::new_Number(vals.size());
+            output.reset(ptr);
 
-        for (size_t i = 0; i < vals.size(); ++i) {
-            if (vals[i]->type() == millijson::NOTHING) {
-                ptr->set_missing(i);
-                continue;
-            }
-
-            if (vals[i]->type() == millijson::NUMBER) {
-                ptr->set(i, static_cast<const millijson::Number*>(vals[i].get())->value);
-            } else if (vals[i]->type() == millijson::STRING) {
-                auto str = static_cast<const millijson::String*>(vals[i].get())->value;
-                if (str == "NaN") {
-                    ptr->set(i, std::numeric_limits<double>::quiet_NaN());
-                } else if (str == "Inf") {
-                    ptr->set(i, std::numeric_limits<double>::infinity());
-                } else if (str == "-Inf") {
-                    ptr->set(i, -std::numeric_limits<double>::infinity());
-                } else {
-                    throw std::runtime_error("unsupported string '" + str + "' at '" + path + ".values[" + std::to_string(i) + "]'");
+            for (size_t i = 0; i < vals.size(); ++i) {
+                if (vals[i]->type() == millijson::NOTHING) {
+                    ptr->set_missing(i);
+                    continue;
                 }
-            } else {
-                throw std::runtime_error("expected a number at '" + path + ".values[" + std::to_string(i) + "]'");
-            }
-        }
 
-        extract_names(map, ptr, path);
+                if (vals[i]->type() == millijson::NUMBER) {
+                    ptr->set(i, static_cast<const millijson::Number*>(vals[i].get())->value);
+                } else if (vals[i]->type() == millijson::STRING) {
+                    auto str = static_cast<const millijson::String*>(vals[i].get())->value;
+                    if (str == "NaN") {
+                        ptr->set(i, std::numeric_limits<double>::quiet_NaN());
+                    } else if (str == "Inf") {
+                        ptr->set(i, std::numeric_limits<double>::infinity());
+                    } else if (str == "-Inf") {
+                        ptr->set(i, -std::numeric_limits<double>::infinity());
+                    } else {
+                        throw std::runtime_error("unsupported string '" + str + "' at '" + path + ".values[" + std::to_string(i) + "]'");
+                    }
+                } else {
+                    throw std::runtime_error("expected a number at '" + path + ".values[" + std::to_string(i) + "]'");
+                }
+            }
+
+            extract_names(map, ptr, path);
+            return ptr;
+        });
 
     } else if (type == "string") {
-        const auto& vals = extract_array(map, "values", path);
-        auto ptr = Provisioner::new_String(vals.size());
-        output.reset(ptr);
-        extract_strings(vals, ptr, [](const std::string&) -> void {}, path);
-        extract_names(map, ptr, path);
+        process_array_or_scalar_values(map, path, [&](const auto& vals) -> auto {
+            auto ptr = Provisioner::new_String(vals.size());
+            output.reset(ptr);
+            extract_strings(vals, ptr, [](const std::string&) -> void {}, path);
+            extract_names(map, ptr, path);
+            return ptr;
+        });
 
     } else if (type == "date") {
-        const auto& vals = extract_array(map, "values", path);
-        auto ptr = Provisioner::new_Date(vals.size());
-        output.reset(ptr);
-        extract_strings(vals, ptr, [&](const std::string& x) -> void {
-            if (!is_date(x)) {
-                 throw std::runtime_error("dates should follow YYYY-MM-DD formatting in '" + path + ".values'");
-            }
-        }, path);
-        extract_names(map, ptr, path);
+        process_array_or_scalar_values(map, path, [&](const auto& vals) -> auto {
+            auto ptr = Provisioner::new_Date(vals.size());
+            output.reset(ptr);
+            extract_strings(vals, ptr, [&](const std::string& x) -> void {
+                if (!is_date(x)) {
+                     throw std::runtime_error("dates should follow YYYY-MM-DD formatting in '" + path + ".values'");
+                }
+            }, path);
+            extract_names(map, ptr, path);
+            return ptr;
+        });
 
     } else if (type == "list") {
         const auto& vals = extract_array(map, "values", path);

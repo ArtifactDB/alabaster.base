@@ -116,6 +116,11 @@ struct TypedVector : public Vector {
      * @param v Value of the vector element.
      */
     virtual void set(size_t i, T v) = 0;
+
+    /**
+     * Indicate that a length-1 vector should be treated as a scalar.
+     */
+    virtual void is_scalar() = 0;
 };
 
 /**

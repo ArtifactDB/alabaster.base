@@ -75,12 +75,18 @@ void load_string_dataset(const H5::DataSet& handle, hsize_t full_length, const s
     }
 }
 
-inline hsize_t check_1d_length(const H5::DataSet& handle, const std::string& path) {
+inline hsize_t check_1d_length(const H5::DataSet& handle, const std::string& path, bool allow_scalar) {
     auto dspace = handle.getSpace();
     int ndims = dspace.getSimpleExtentNdims();
+
+    if (ndims == 0 && allow_scalar) {
+        return 0;
+    }
+
     if (ndims != 1) {
         throw std::runtime_error("expected a 1-dimensional dataset at '" + path + "'");
     }
+
     hsize_t dims;
     dspace.getSimpleExtentDims(&dims);
     return dims;
@@ -193,7 +199,7 @@ void parse_names(const H5::Group& handle, Host* ptr, const std::string& path, co
         }
 
         auto len = ptr->size();
-        auto nlen = check_1d_length(nhandle, npath);
+        auto nlen = check_1d_length(nhandle, npath, false);
         if (nlen != len) {
             throw std::runtime_error("length of '" + npath + "' should be equal to length of '" + dpath + "'");
         }
@@ -238,12 +244,20 @@ std::shared_ptr<Base> parse_inner(const H5::Group& handle, Externals& ext, const
             throw std::runtime_error("expected a dataset at '" + dpath + "'");
         }
         auto dhandle = handle.openDataSet("data");
-        auto len = check_1d_length(dhandle, dpath);
+
+        auto len = check_1d_length(dhandle, dpath, true);
+        bool is_scalar = (len == 0);
+        if (is_scalar) {
+            len = 1;
+        }
 
         if (vector_type == "integer") {
             auto iptr = Provisioner::new_Integer(len);
             output.reset(iptr);
             parse_integer_like(dhandle, iptr, dpath, [](int32_t x) -> void {});
+            if (is_scalar) {
+                iptr->is_scalar();
+            }
 
         } else if (vector_type == "boolean") {
             auto bptr = Provisioner::new_Boolean(len);
@@ -253,6 +267,9 @@ std::shared_ptr<Base> parse_inner(const H5::Group& handle, Externals& ext, const
                      throw std::runtime_error("boolean values should be 0 or 1 in '" + dpath + "'");
                 }
             });
+            if (is_scalar) {
+                bptr->is_scalar();
+            }
 
         } else if (vector_type == "factor" || vector_type == "ordered") {
             // First we need to figure out the number of levels.
@@ -265,7 +282,7 @@ std::shared_ptr<Base> parse_inner(const H5::Group& handle, Externals& ext, const
             if (levtype.getClass() != H5T_STRING) {
                 throw std::runtime_error("expected a string dataset at '" + levpath + "'");
             }
-            auto levlen = check_1d_length(levhandle, levpath);
+            auto levlen = check_1d_length(levhandle, levpath, false);
 
             // Then we can initialize the interface.
             auto fptr = Provisioner::new_Factor(len, levlen);
@@ -293,6 +310,9 @@ std::shared_ptr<Base> parse_inner(const H5::Group& handle, Externals& ext, const
             auto sptr = Provisioner::new_String(len);
             output.reset(sptr);
             parse_string_like(dhandle, sptr, dpath, [](const std::string& x) -> void {});
+            if (is_scalar) {
+                sptr->is_scalar();
+            }
 
         } else if (vector_type == "date") {
             auto dptr = Provisioner::new_Date(len);
@@ -302,11 +322,17 @@ std::shared_ptr<Base> parse_inner(const H5::Group& handle, Externals& ext, const
                      throw std::runtime_error("dates should follow YYYY-MM-DD formatting in '" + dpath + "'");
                 }
             });
+            if (is_scalar) {
+                dptr->is_scalar();
+            }
 
         } else if (vector_type == "number") {
             auto dptr = Provisioner::new_Number(len);
             output.reset(dptr);
             parse_numbers(dhandle, dptr, dpath, [](double x) -> void {});
+            if (is_scalar) {
+                dptr->is_scalar();
+            }
 
         } else {
             throw std::runtime_error("unknown vector type '" + vector_type + "' for '" + path + "'");
