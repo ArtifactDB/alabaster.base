@@ -242,7 +242,7 @@ test_that("stageObject works with extra mcols", {
     expect_equal(df, df2)
 })
 
-test_that("DFs fails with duplicate colnames", {
+test_that("DFs fails with duplicate or empty colnames", {
     tmp <- tempfile()
     dir.create(tmp)
 
@@ -255,4 +255,8 @@ test_that("DFs fails with duplicate colnames", {
     )
 
     expect_error(info <- stageObject(df, tmp, "rnaseq"), "duplicate")
+
+    unlink(file.path(tmp, "rnaseq"), recursive=TRUE)
+    colnames(df)[2] <- ""
+    expect_error(info <- stageObject(df, tmp, "rnaseq"), "empty")
 })

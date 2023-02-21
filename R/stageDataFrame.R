@@ -72,9 +72,16 @@
 setMethod("stageObject", "DataFrame", function(x, dir, path, child=FALSE, df.name="simple", mcols.name="mcols", meta.name="other") {
     dir.create(file.path(dir, path), showWarnings=FALSE)
 
-    # Fix to ensure that DFs with duplicate names are properly saved;
-    # otherwise any [[<- will call make.names.
     true.colnames <- colnames(x)
+    if (anyDuplicated(true.colnames)) {
+        stop("detected duplicate column names in a ", class(x)[1], " object")
+    }
+    if (any(true.colnames == "")) {
+        stop("detected empty column name in a ", class(x)[1], " object")
+    }
+
+    # Fix to ensure that DFs with invalid names are properly saved;
+    # otherwise any [[<- will call make.names.
     colnames(x) <- sprintf("V%s", seq_len(ncol(x)))
 
     # Returning the metadata about the column type.
