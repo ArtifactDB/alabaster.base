@@ -31,7 +31,7 @@
 .processMcols <- function(x, dir, path, mcols.name) {
     if (!is.null(mcols.name) && !is.null(mcols(x)) && ncol(mcols(x))) {
         tryCatch({
-            meta <- .stageObject(mcols(x), dir, file.path(path, mcols.name), child=TRUE)
+            meta <- .stageObject(mcols(x), dir, paste0(path, "/", mcols.name), child=TRUE)
             list(resource=.writeMetadata(meta, dir=dir))
         }, error=function(e) stop("failed to stage 'mcols(<", class(x)[1], ">)'\n  - ", e$message))
     } else { 
@@ -45,7 +45,7 @@
 .processMetadata <- function(x, dir, path, meta.name) {
     if (!is.null(meta.name) && length(metadata(x))) {
         tryCatch({
-            meta <- .stageObject(metadata(x), dir, file.path(path, meta.name), child=TRUE)
+            meta <- .stageObject(metadata(x), dir, paste0(path, "/", meta.name), child=TRUE)
             list(resource=.writeMetadata(meta, dir=dir))
         }, error=function(e) stop("failed to stage 'metadata(<", class(x)[1], ">)'\n  - ", e$message))
     } else { 

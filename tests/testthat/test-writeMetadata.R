@@ -44,6 +44,12 @@ test_that("writing strips the dots", {
     expect_identical(round$path, "whee/simple.csv.gz")
 })
 
+test_that("writing doesn't allow windows-style separators", {
+    tmp <- tempfile()
+    dir.create(tmp)
+    expect_error(stageObject(df, tmp, "whee\\asdasd"), "Windows-style")
+})
+
 test_that("writing respects the package attribute", {
     tmp <- tempfile()
     dir.create(tmp)

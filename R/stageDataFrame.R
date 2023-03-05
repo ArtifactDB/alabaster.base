@@ -104,7 +104,7 @@ setMethod("stageObject", "DataFrame", function(x, dir, path, child=FALSE, df.nam
                 }
 
                 tryCatch({
-                     lev.info <- .stageObject(DataFrame(levels=levels(col)), dir, file.path(path, paste0("column", z)), df.name="levels", child=TRUE)
+                     lev.info <- .stageObject(DataFrame(levels=levels(col)), dir, paste0(path, "/column", z), df.name="levels", child=TRUE)
                      out$levels <- list(resource=.writeMetadata(lev.info, dir=dir))
                  }, error = function(e) stop("failed to stage levels of factor column '", out$name, "'\n  - ", e$message))
 
@@ -131,7 +131,7 @@ setMethod("stageObject", "DataFrame", function(x, dir, path, child=FALSE, df.nam
             out$type <- "other"
 
             tryCatch({
-                other.info <- .stageObject(x[[z]], dir, file.path(path, paste0("column", z)), child=TRUE)
+                other.info <- .stageObject(x[[z]], dir, paste0(path, "/column", z), child=TRUE)
                 out$resource <- .writeMetadata(other.info, dir=dir)
             }, error = function(e) stop("failed to stage column '", out$name, "'\n  - ", e$message))
 
@@ -146,7 +146,7 @@ setMethod("stageObject", "DataFrame", function(x, dir, path, child=FALSE, df.nam
 
     # Saving contents to file.
     format <- .saveDataFrameFormat()
-    opath <- file.path(path, df.name)
+    opath <- paste0(path, "/", df.name)
     extra <- list(list())
 
     if (!is.null(format) && format=="hdf5") {
