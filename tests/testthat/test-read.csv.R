@@ -8,9 +8,15 @@ df <- data.frame(
     compx = rnorm(10) + rnorm(10) * 1i
 )
 
+write.csv2 <- function(file, ...) {
+    handle <- file(file, "wb")
+    write.csv(file=handle, ...)
+    close(handle)
+}
+
 test_that("read.csv3 handles the different types correctly", {
     path <- tempfile(fileext=".csv")
-    write.csv(file=path, df, row.names=FALSE)
+    write.csv2(file=path, df, row.names=FALSE)
     out <- alabaster.base:::read.csv3(path, compression="none", nrows=nrow(df))
     expect_equal(df, out)
 })
@@ -18,7 +24,7 @@ test_that("read.csv3 handles the different types correctly", {
 test_that("read.csv3 handles weird names", {
     colnames(df) <- c("asdasd asdasd", "qwerty\nasdasd", "stuff,\"asdasd\"", "compx,5\n\"")
     path <- tempfile(fileext=".csv")
-    write.csv(file=path, df, row.names=FALSE)
+    write.csv2(file=path, df, row.names=FALSE)
     out <- alabaster.base:::read.csv3(path, compression="none", nrows=nrow(df))
     expect_equal(df, data.frame(out, check.names=FALSE))
 })
@@ -30,7 +36,7 @@ test_that("read.csv3 handles missing values correctly", {
     df[4,4] <- NA
 
     path <- tempfile(fileext=".csv")
-    write.csv(file=path, df, row.names=FALSE)
+    write.csv2(file=path, df, row.names=FALSE)
     out <- alabaster.base:::read.csv3(path, compression="none", nrows=nrow(df))
     expect_equal(df, data.frame(out, check.names=FALSE))
 })
@@ -38,7 +44,7 @@ test_that("read.csv3 handles missing values correctly", {
 test_that("read.csv3 handles all-missing columns correctly", {
     df$asdasd <- NA
     path <- tempfile(fileext=".csv")
-    write.csv(file=path, df, row.names=FALSE)
+    write.csv2(file=path, df, row.names=FALSE)
     out <- alabaster.base:::read.csv3(path, compression="none", nrows=nrow(df))
     expect_equal(df, data.frame(out, check.names=FALSE))
 })
@@ -47,7 +53,7 @@ test_that("read.csv3 handles empty DFs correctly", {
     df <- df[0,]
 
     path <- tempfile(fileext=".csv")
-    write.csv(file=path, df, row.names=FALSE)
+    write.csv2(file=path, df, row.names=FALSE)
 
     out <- alabaster.base:::read.csv3(path, compression="none", nrows=nrow(df))
     expect_identical(nrow(out), 0L)
@@ -57,7 +63,7 @@ test_that("read.csv3 handles empty DFs correctly", {
 test_that("read.csv3 handles single- and no-column DFs correctly", {
     df <- data.frame(asdasd = 1:10)
     path <- tempfile(fileext=".csv")
-    write.csv(file=path, df, row.names=FALSE)
+    write.csv2(file=path, df, row.names=FALSE)
     out <- alabaster.base:::read.csv3(path, compression="none", nrows=nrow(df))
     expect_equal(df, data.frame(out, check.names=FALSE))
 
