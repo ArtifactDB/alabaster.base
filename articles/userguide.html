@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">alabaster.base</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.99.4</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.99.5</span>
       </span>
     </div>
 
@@ -219,13 +219,13 @@ referenced.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/invisible.html" class="external-link">invisible</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/files.html" class="external-link">file.copy</a></span><span class="op">(</span><span class="va">tmp</span>, <span class="va">new.dir</span>, recursive<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/loadObject.html">loadObject</a></span><span class="op">(</span><span class="va">meta2</span>, <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">new.dir</span>, <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/path.html" class="external-link">basename</a></span><span class="op">(</span><span class="va">tmp</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## DataFrame with 5 rows and 2 columns</span></span>
-<span><span class="co">##          Z                 AA</span></span>
-<span><span class="co">##   &lt;factor&gt;        &lt;DataFrame&gt;</span></span>
-<span><span class="co">## 1        1 0.920273: 0.583837</span></span>
-<span><span class="co">## 2        2 0.412003: 0.872372</span></span>
-<span><span class="co">## 3        3 0.218542: 1.096624</span></span>
-<span><span class="co">## 4        4 0.346801:-0.408835</span></span>
-<span><span class="co">## 5        5 0.554201: 1.684226</span></span></code></pre>
+<span><span class="co">##          Z                  AA</span></span>
+<span><span class="co">##   &lt;factor&gt;         &lt;DataFrame&gt;</span></span>
+<span><span class="co">## 1        1 0.4477606:-0.821486</span></span>
+<span><span class="co">## 2        2 0.2609882:-0.135148</span></span>
+<span><span class="co">## 3        3 0.1063421: 1.119333</span></span>
+<span><span class="co">## 4        4 0.0784111: 1.520031</span></span>
+<span><span class="co">## 5        5 0.1029430:-1.215255</span></span></code></pre>
 </div>
 <div class="section level2">
 <h2 id="saving-and-validating-metadata">Saving and validating metadata<a class="anchor" aria-label="anchor" href="#saving-and-validating-metadata"></a>
@@ -288,20 +288,20 @@ determine how it should load the files back into memory:</p>
 <code class="sourceCode R"><span><span class="va">re.read</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/acquireFile.html">acquireMetadata</a></span><span class="op">(</span><span class="va">tmp</span>, <span class="st">"my_df2/simple.csv.gz"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/loadObject.html">loadObject</a></span><span class="op">(</span><span class="va">re.read</span>, <span class="va">tmp</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## DataFrame with 5 rows and 2 columns</span></span>
-<span><span class="co">##          Z                 AA</span></span>
-<span><span class="co">##   &lt;factor&gt;        &lt;DataFrame&gt;</span></span>
-<span><span class="co">## 1        1 0.920273: 0.583837</span></span>
-<span><span class="co">## 2        2 0.412003: 0.872372</span></span>
-<span><span class="co">## 3        3 0.218542: 1.096624</span></span>
-<span><span class="co">## 4        4 0.346801:-0.408835</span></span>
-<span><span class="co">## 5        5 0.554201: 1.684226</span></span></code></pre>
+<span><span class="co">##          Z                  AA</span></span>
+<span><span class="co">##   &lt;factor&gt;         &lt;DataFrame&gt;</span></span>
+<span><span class="co">## 1        1 0.4477606:-0.821486</span></span>
+<span><span class="co">## 2        2 0.2609882:-0.135148</span></span>
+<span><span class="co">## 3        3 0.1063421: 1.119333</span></span>
+<span><span class="co">## 4        4 0.0784111: 1.520031</span></span>
+<span><span class="co">## 5        5 0.1029430:-1.215255</span></span></code></pre>
 </div>
 <div class="section level2">
 <h2 class="unnumbered" id="session-information">Session information<a class="anchor" aria-label="anchor" href="#session-information"></a>
 </h2>
 <div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/sessionInfo.html" class="external-link">sessionInfo</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## R Under development (unstable) (2023-02-16 r83857)</span></span>
+<pre><code><span><span class="co">## R Under development (unstable) (2023-02-22 r83892)</span></span>
 <span><span class="co">## Platform: x86_64-pc-linux-gnu (64-bit)</span></span>
 <span><span class="co">## Running under: Ubuntu 22.04.1 LTS</span></span>
 <span><span class="co">## </span></span>
@@ -325,22 +325,22 @@ determine how it should load the files back into memory:</p>
 <span><span class="co">## [8] base     </span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## other attached packages:</span></span>
-<span><span class="co">## [1] alabaster.base_0.99.0 S4Vectors_0.37.3      BiocGenerics_0.45.0  </span></span>
+<span><span class="co">## [1] alabaster.base_0.99.4 S4Vectors_0.37.3      BiocGenerics_0.45.0  </span></span>
 <span><span class="co">## [4] BiocStyle_2.27.1     </span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## loaded via a namespace (and not attached):</span></span>
-<span><span class="co">##  [1] jsonlite_1.8.4           compiler_4.3.0           BiocManager_1.30.19     </span></span>
-<span><span class="co">##  [4] Rcpp_1.0.10              stringr_1.5.0            rhdf5filters_1.11.0     </span></span>
+<span><span class="co">##  [1] jsonlite_1.8.4           compiler_4.3.0           BiocManager_1.30.20     </span></span>
+<span><span class="co">##  [4] Rcpp_1.0.10              stringr_1.5.0            rhdf5filters_1.11.1     </span></span>
 <span><span class="co">##  [7] jquerylib_0.1.4          systemfonts_1.0.4        textshaping_0.3.6       </span></span>
-<span><span class="co">## [10] yaml_2.3.7               fastmap_1.1.0            jsonvalidate_1.3.2      </span></span>
+<span><span class="co">## [10] yaml_2.3.7               fastmap_1.1.1            jsonvalidate_1.3.2      </span></span>
 <span><span class="co">## [13] R6_2.5.1                 curl_5.0.0               knitr_1.42              </span></span>
 <span><span class="co">## [16] bookdown_0.32            desc_1.4.2               rprojroot_2.0.3         </span></span>
 <span><span class="co">## [19] bslib_0.4.2              rlang_1.0.6              V8_4.2.2                </span></span>
-<span><span class="co">## [22] cachem_1.0.6             stringi_1.7.12           xfun_0.37               </span></span>
+<span><span class="co">## [22] cachem_1.0.7             stringi_1.7.12           xfun_0.37               </span></span>
 <span><span class="co">## [25] fs_1.6.1                 sass_0.4.5               memoise_2.0.1           </span></span>
 <span><span class="co">## [28] cli_3.6.0                pkgdown_2.0.7            magrittr_2.0.3          </span></span>
-<span><span class="co">## [31] Rhdf5lib_1.21.0          digest_0.6.31            alabaster.schemas_0.99.0</span></span>
-<span><span class="co">## [34] rhdf5_2.43.0             lifecycle_1.0.3          vctrs_0.5.2             </span></span>
+<span><span class="co">## [31] Rhdf5lib_1.21.0          digest_0.6.31            alabaster.schemas_0.99.1</span></span>
+<span><span class="co">## [34] rhdf5_2.43.1             lifecycle_1.0.3          vctrs_0.5.2             </span></span>
 <span><span class="co">## [37] evaluate_0.20            glue_1.6.2               ragg_1.2.5              </span></span>
 <span><span class="co">## [40] rmarkdown_2.20           purrr_1.0.1              tools_4.3.0             </span></span>
 <span><span class="co">## [43] htmltools_0.5.4</span></span></code></pre>
