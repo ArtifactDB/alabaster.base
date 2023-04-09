@@ -78,6 +78,9 @@ setGeneric("stageObject", function(x, dir, path, child=FALSE, ...) {
     if (path != "." && file.exists(full.path <- file.path(dir, path))) {
         stop("cannot stage ", class(x)[1], " at existing path '", full.path, "'")
     }
+    if (grepl("\\\\", path)) {
+        stop("Windows-style path separators are not allowed")
+    }
 
     if (!child) {
         parent <- dirname(path)

@@ -73,9 +73,6 @@
     }
 
     meta$path <- gsub("^\\./", "", meta$path) # stripping this out for convenience.
-    if (grepl("\\\\", meta$path)) {
-        stop("Windows-style path separators are not allowed")
-    }
 
     jpath <- meta$path
     if (!meta.only) {
