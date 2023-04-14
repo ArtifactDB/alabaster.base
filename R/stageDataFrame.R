@@ -118,7 +118,9 @@ setMethod("stageObject", "DataFrame", function(x, dir, path, child=FALSE, df.nam
                 x[[z]] <- format(col, "%Y-%m-%d")
 
             } else if (is.atomic(col)) {
-                out$type <- .remap_type(col)
+                coerced <- .remap_type(col)
+                out$type <- coerced$type
+                x[[z]] <- coerced$values
 
             } else {
                 is.other <- TRUE
@@ -202,11 +204,15 @@ setMethod("stageObject", "DataFrame", function(x, dir, path, child=FALSE, df.nam
 
 .remap_type <- function(x) {
     y <- typeof(x)
+
+    # Forcibly coercing the types, just to make sure that
+    # we don't get tricked by classes that might do something
+    # different inside write.csv or whatever.
     switch(y,
-        integer="integer",
-        double="number",
-        numeric="number",
-        logical="boolean",
+        integer=list(type="integer", values=as.integer(x)),
+        double=list(type="number", values=as.double(x)),
+        numeric=list(type="number", values=as.double(x)),
+        logical=list(type="boolean", values=as.logical(x)),
         stop("type '", y, "' is not supported")
     )
 }

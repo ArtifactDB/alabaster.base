@@ -151,17 +151,20 @@ setMethod("stageObject", "list", function(x, dir, path, child=FALSE, fname="list
             return(NULL)
 
         } else if (is.atomic(x)) {
+            coerced <- .remap_type(x)
+
             .label_hdf5_group(fpath, name, 
                 uzuki_object="vector",
-                uzuki_type=.remap_type(x)
+                uzuki_type=coerced$type
             )
 
-            if (is.logical(x) && anyNA(x)) {
+            y <- coerced$values
+            if (is.logical(y) && anyNA(y)) {
                 # Force the use of a regular integer for missing values.
-                x <- as.integer(x)
+                y <- as.integer(y)
             }
 
-            h5write(x, fpath, paste0(name, "/data"))
+            h5write(y, fpath, paste0(name, "/data"))
             .add_hdf5_names(x, fpath, name)
 
             return(NULL)
@@ -261,31 +264,30 @@ setMethod("stageObject", "list", function(x, dir, path, child=FALSE, fname="list
             return(formatted)
 
         } else if (is.atomic(x)) {
-            formatted <- list(
-                type=.remap_type(x),
-                values=I(x)
-            )
+            formatted <- .remap_type(x)
 
-            if (is.numeric(x) && !all(is.finite(x))) {
-                nan <- is.nan(x)
-                inf <- is.infinite(x)
-                pos <- x > 0
+            y <- formatted$values
+            if (is.numeric(y) && !all(is.finite(y))) {
+                nan <- is.nan(y)
+                inf <- is.infinite(y)
+                pos <- y > 0
 
                 has.nan <- any(nan)
                 has.inf <- any(inf)
                 if (has.nan || has.inf) {
-                    x <- as.list(x)
+                    y <- as.list(y)
                     if (has.nan) {
-                        x[nan] <- list("NaN")
+                        y[nan] <- list("NaN")
                     }
                     if (has.inf) {
-                        x[inf & pos] <- list("Inf")
-                        x[inf & !pos] <- list("-Inf")
+                        y[inf & pos] <- list("Inf")
+                        y[inf & !pos] <- list("-Inf")
                     }
-                    formatted$values <- x
+                    formatted$values <- y
                 }
             }
 
+            formatted$values <- I(formatted$values)
             formatted <- .add_json_names(x, formatted)
             return(formatted)
        }
