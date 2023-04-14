@@ -34,6 +34,7 @@ typedef DummyTypedVector<double, NUMBER> DummyNumberVector;
 typedef DummyTypedVector<std::string, STRING> DummyStringVector;
 typedef DummyTypedVector<unsigned char, BOOLEAN> DummyBooleanVector;
 typedef DummyTypedVector<std::string, DATE> DummyDateVector;
+typedef DummyTypedVector<std::string, DATETIME> DummyDateTimeVector;
 
 struct DummyFactor : public Factor {
     DummyFactor(size_t s, size_t) : length(s) {}
@@ -88,6 +89,8 @@ struct DummyProvisioner {
     static BooleanVector* new_Boolean(size_t l) { return (new DummyBooleanVector(l)); }
 
     static DateVector* new_Date(size_t l) { return (new DummyDateVector(l)); }
+
+    static DateTimeVector* new_DateTime(size_t l) { return (new DummyDateTimeVector(l)); }
 
     static Factor* new_Factor(size_t l, size_t ll) { return (new DummyFactor(l, ll)); }
 };

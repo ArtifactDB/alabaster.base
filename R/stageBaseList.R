@@ -89,7 +89,7 @@ setMethod("stageObject", "list", function(x, dir, path, child=FALSE, fname="list
 .transform_list_hdf5 <- function(x, dir, path, fpath, name, env) {
     h5createGroup(fpath, name)
 
-    if (is.list(x) && !is.data.frame(x)) {
+    if (is.list(x) && !is.data.frame(x) && !is(x, "POSIXlt")) {
         .label_hdf5_group(fpath, name, uzuki_object="list")
         h5createGroup(fpath, paste0(name, "/data"))
 
@@ -129,13 +129,13 @@ setMethod("stageObject", "list", function(x, dir, path, child=FALSE, fname="list
             .add_hdf5_names(x, fpath, name)
             return(NULL)
 
-        } else if (is(x, "Date") || is.character(x)) {
+        } else if (!is.null(sltype <- .is_stringlike(x))) {
             .label_hdf5_group(fpath, name, 
                 uzuki_object="vector",
-                uzuki_type=if (is(x, "Date")) "date" else "string"
+                uzuki_type=sltype
             )
 
-            y <- as.character(x)
+            y <- .sanitize_stringlike(x, sltype)
             missing.placeholder <- NULL
             if (anyNA(y)) {
                 missing.placeholder <- .chooseMissingStringPlaceholder(x)
@@ -186,6 +186,25 @@ setMethod("stageObject", "list", function(x, dir, path, child=FALSE, fname="list
     }, error=function(e) {
         stop("failed to stage '", class(x)[1], "' entry inside a list\n  - ", e$message)
     }) 
+}
+
+.is_stringlike <- function(x) {
+    if (is(x, "Date")) {
+        return("date")
+    } else if (is(x, "POSIXct") || is(x, "POSIXlt")) {
+        return("date-time")
+    } else if (is.character(x)) {
+        return("string")
+    }
+    return(NULL)
+}
+
+.sanitize_stringlike <- function(x, type) {
+    if (type == "date-time") {
+        .sanitize_datetime(x)
+    } else {
+        as.character(x)
+    }
 }
 
 #' @importFrom rhdf5 H5Fopen H5Fclose H5Gopen H5Gclose h5writeAttribute H5Dopen H5Dclose
@@ -255,10 +274,10 @@ setMethod("stageObject", "list", function(x, dir, path, child=FALSE, fname="list
             formatted <- .add_json_names(x, formatted)
             return(formatted)
 
-        } else if (is(x, "Date") || is.character(x)) {
+        } else if (!is.null(sltype <- .is_stringlike(x))) {
             formatted <- list(
-                type=if (is(x, "Date")) "date" else "string",
-                values=I(as.character(x))
+                type=sltype,
+                values=I(.sanitize_stringlike(x, sltype))
             )
             formatted <- .add_json_names(x, formatted)
             return(formatted)

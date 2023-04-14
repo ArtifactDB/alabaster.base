@@ -326,6 +326,15 @@ std::shared_ptr<Base> parse_inner(const H5::Group& handle, Externals& ext, const
                 dptr->is_scalar();
             }
 
+        } else if (vector_type == "date-time") {
+            auto dptr = Provisioner::new_DateTime(len);
+            output.reset(dptr);
+            parse_string_like(dhandle, dptr, dpath, [&](const std::string& x) -> void {
+                if (!is_rfc3339(x)) {
+                     throw std::runtime_error("dates should follow the Internet Date/Time format in '" + dpath + "'");
+                }
+            });
+
         } else if (vector_type == "number") {
             auto dptr = Provisioner::new_Number(len);
             output.reset(dptr);
@@ -417,8 +426,9 @@ public:
      * - `StringVector* new_String(size_t l)`, which returns a new instance of a `StringVector` subclass of length `l`.
      * - `BooleanVector* new_Boolean(size_t l)`, which returns a new instance of a `BooleanVector` subclass of length `l`.
      * - `DateVector* new_Date(size_t l)`, which returns a new instance of a `DateVector` subclass of length `l`.
+     * - `DateTimeVector* new_DateTime(size_t l)`, which returns a new instance of a `DateTimeVector` subclass of length `l`.
      * - `Factor* new_Factor(size_t l, size_t ll)`, which returns a new instance of a `Factor` subclass of length `l` and with `ll` unique levels.
-
+     *
      * @section external-contract Externals requirements
      * The `Externals` class is expected to provide the following `const` methods:
      *

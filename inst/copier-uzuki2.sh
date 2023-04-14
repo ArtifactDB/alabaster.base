@@ -8,7 +8,7 @@ else
 fi
 
 cd uzuki2
-git checkout 81285baa92520a9bc6758498ca5f3476867e4331
+git checkout fceb37ef0ecf48bc6d29e9c6c4cb5c6d18636fb8
 if [ ! -e build ]
 then
     cmake -S . -B build

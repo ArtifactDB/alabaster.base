@@ -38,7 +38,13 @@ struct RTypedVector : public uzuki2::TypedVector<T, tt>, public RBase {
         if (named) {
             vec.names() = names;
         }
-        return vec; 
+
+        if constexpr(tt == uzuki2::DATETIME) {
+            Rcpp::Function f("as.POSIXct");   
+            return f(vec, Rcpp::Named("format", "%Y-%m-%dT%H:%M:%S%z"));
+        } else {
+            return vec; 
+        }
     }
 
     void is_scalar() {}
@@ -91,6 +97,24 @@ void RDateVector::set(size_t i, std::string val) {
 template<>
 void RDateVector::set_missing(size_t i) {
     vec[i] = Rcpp::Date(NA_STRING);
+    return;
+}
+
+typedef RTypedVector<std::string, uzuki2::DATETIME, Rcpp::StringVector> RDateTimeVector;
+
+template<>
+void RDateTimeVector::set(size_t i, std::string val) {
+    // Stripping out the time zone ':' because as.POSIXct gets confused.
+    if (val.size() >= 3) {
+        val.erase(val.size() - 3, 1);
+    }
+    vec[i] = val;
+    return;
+}
+
+template<>
+void RDateTimeVector::set_missing(size_t i) {
+    vec[i] = NA_STRING;
     return;
 }
 
@@ -231,6 +255,8 @@ struct RProvisioner {
     static uzuki2::BooleanVector* new_Boolean(size_t l) { return (new RBooleanVector(l)); }
 
     static uzuki2::DateVector* new_Date(size_t l) { return (new RDateVector(l)); }
+
+    static uzuki2::DateTimeVector* new_DateTime(size_t l) { return (new RDateTimeVector(l)); }
 
     static uzuki2::Factor* new_Factor(size_t l, size_t ll) { return (new RFactor(l, ll)); }
 };

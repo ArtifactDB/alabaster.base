@@ -115,7 +115,7 @@ setMethod("stageObject", "DataFrame", function(x, dir, path, child=FALSE, df.nam
 
             } else if (is(col, "POSIXct") || is(col, "POSIXlt")) {
                 out$type <- "date-time"
-                x[[z]] <- sub("([0-9]{2})$", ":\\1", strftime(col, "%Y-%m-%dT%H:%M:%S%z"))
+                x[[z]] <- .sanitize_datetime(col)
 
             } else if (is(col, "Date")) {
                 out$type <- "date"
@@ -205,6 +205,10 @@ setMethod("stageObject", "DataFrame", function(x, dir, path, child=FALSE, df.nam
     meta <- c(meta, extra)
     meta
 })
+
+.sanitize_datetime <- function(x) {
+    sub("([0-9]{2})$", ":\\1", strftime(x, "%Y-%m-%dT%H:%M:%S%z"))
+}
 
 .remap_type <- function(x) {
     y <- typeof(x)

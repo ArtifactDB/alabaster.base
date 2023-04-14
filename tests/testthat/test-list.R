@@ -306,3 +306,35 @@ test_that("we handle lists with NULLs", {
     roundtrip <- loadBaseList(info, tmp)
     expect_identical(roundtrip, vals)
 })
+
+test_that("we handle lists with times", {
+    now <- as.POSIXct(round(Sys.time()))         
+    vals <- list(now, list(list(now + 10000), c(X=now + 400000, Y=now + 1000000)))
+
+    tmp <- tempfile()
+    dir.create(tmp)
+    info <- stageObject(vals, tmp, path="whee")
+    expect_match(info[["$schema"]], "json_simple_list")
+
+    roundtrip <- loadBaseList(info, tmp)
+    expect_equal(roundtrip, vals)
+
+    # Works in HDF5 mode.
+    old <- .saveBaseListFormat("hdf5")
+    on.exit(.saveBaseListFormat(old))
+
+    info <- stageObject(vals, tmp, path="hstuff")
+    resource <- .writeMetadata(info, tmp)
+    expect_match(info[["$schema"]], "hdf5_simple_list")
+
+    roundtrip <- loadBaseList(info, tmp)
+    expect_equal(roundtrip, vals)
+
+    # Works with POSIXlt objects, though these lose some precision when they go to POSIXct on back-conversion.
+    now2 <- as.POSIXlt(now)
+    vals2 <- list(now, list(list(now + 10000), c(X=now + 400000, Y=now + 1000000)))
+
+    info2 <- stageObject(vals, tmp, path="whee2")
+    roundtrip2 <- loadBaseList(info2, tmp)
+    expect_equal(roundtrip2, vals)
+})

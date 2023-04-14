@@ -21,6 +21,7 @@ namespace uzuki2 {
  * - `STRING`: vector of strings.
  * - `BOOLEAN`: vector of booleans.
  * - `DATE`: vector of date strings in `YYYY-MM-DD` format.
+ * - `DATETIME`: vector of date-time strings in Internet Date/Time format (see RFC 3339, section 5.6).
  * - `FACTOR`: factor containing integer indices to unique levels.
  * - `LIST`: a list containing nested objects.
  * - `NOTHING`: equivalent to R's `NULL`.
@@ -33,6 +34,7 @@ enum Type {
     BOOLEAN,
     FACTOR,
     DATE,
+    DATETIME,
 
     LIST,
     NOTHING,
@@ -147,6 +149,11 @@ typedef TypedVector<unsigned char, BOOLEAN> BooleanVector;
  * Interface for a date-formatted vector.
  */
 typedef TypedVector<std::string, DATE> DateVector;
+
+/**
+ * Interface for a RFC3339 date/time-formatted vector.
+ */
+typedef TypedVector<std::string, DATETIME> DateTimeVector;
 
 /**
  * @brief Interface for a factor.
