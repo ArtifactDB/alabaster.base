@@ -112,6 +112,9 @@ loadDataFrame <- function(info, project, include.nested=TRUE, parallel=TRUE) {
         } else if (col.type=="date") {
             df[[i]] <- as.Date(df[[i]])
 
+        } else if (col.type=="date-time") {
+            df[[i]] <- as.POSIXct(sub(":([0-9]{2})$", "\\1", df[[i]]), format="%Y-%m-%dT%H:%M:%S%z")
+
         } else if (col.type %in% names(atomics)) {
             df[[i]] <- as(df[[i]], as.character(atomics[col.type]))
 

@@ -113,6 +113,10 @@ setMethod("stageObject", "DataFrame", function(x, dir, path, child=FALSE, df.nam
             } else if (is.character(col)) {
                 out$type <- "string"
 
+            } else if (is(col, "POSIXct") || is(col, "POSIXlt")) {
+                out$type <- "date-time"
+                x[[z]] <- sub("([0-9]{2})$", ":\\1", strftime(col, "%Y-%m-%dT%H:%M:%S%z"))
+
             } else if (is(col, "Date")) {
                 out$type <- "date"
                 x[[z]] <- format(col, "%Y-%m-%d")

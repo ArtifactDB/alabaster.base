@@ -260,3 +260,24 @@ test_that("DFs fails with duplicate or empty colnames", {
     colnames(df)[2] <- ""
     expect_error(info <- stageObject(df, tmp, "rnaseq"), "empty")
 })
+
+test_that("DFs handle POSIX times correctly", {
+    tmp <- tempfile()
+    dir.create(tmp, recursive=TRUE)
+
+    df <- DataFrame(
+        foo = as.POSIXct(c(123123, 124235235, 96546546)),
+        bar = as.POSIXct(c(123123, 124235235, 96546546)) # TODO: should be POSIXlt, but see Bioconductor/S4Vectors#113
+    )
+
+    info <- stageObject(df, tmp, "rnaseq")
+    meta <- info$data_frame
+    expect_identical(meta$columns[[1]]$type, "date-time")
+    expect_identical(meta$columns[[2]]$type, "date-time")
+
+    # Round-tripping to make sure it's okay.
+    out <- loadDataFrame(info, tmp)
+    expect_identical(df$foo, as.POSIXct(out$foo))
+    expect_identical(df$bar, as.POSIXct(out$bar))
+})
+
