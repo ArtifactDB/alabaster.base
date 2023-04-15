@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">alabaster.base</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.99.6</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.99.7</span>
       </span>
     </div>
 
@@ -219,13 +219,13 @@ referenced.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/invisible.html" class="external-link">invisible</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/files.html" class="external-link">file.copy</a></span><span class="op">(</span><span class="va">tmp</span>, <span class="va">new.dir</span>, recursive<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/loadObject.html">loadObject</a></span><span class="op">(</span><span class="va">meta2</span>, <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">new.dir</span>, <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/path.html" class="external-link">basename</a></span><span class="op">(</span><span class="va">tmp</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## DataFrame with 5 rows and 2 columns</span></span>
-<span><span class="co">##          Z                 AA</span></span>
-<span><span class="co">##   &lt;factor&gt;        &lt;DataFrame&gt;</span></span>
-<span><span class="co">## 1        1 0.324691:-1.278746</span></span>
-<span><span class="co">## 2        2 0.222789:-2.262932</span></span>
-<span><span class="co">## 3        3 0.251686: 0.797199</span></span>
-<span><span class="co">## 4        4 0.209664:-0.103589</span></span>
-<span><span class="co">## 5        5 0.799109: 0.324609</span></span></code></pre>
+<span><span class="co">##          Z                  AA</span></span>
+<span><span class="co">##   &lt;factor&gt;         &lt;DataFrame&gt;</span></span>
+<span><span class="co">## 1        1 0.739290:-1.0293732</span></span>
+<span><span class="co">## 2        2 0.921429: 0.7894908</span></span>
+<span><span class="co">## 3        3 0.751716: 1.5614587</span></span>
+<span><span class="co">## 4        4 0.247258:-0.2855086</span></span>
+<span><span class="co">## 5        5 0.965557: 0.0846735</span></span></code></pre>
 </div>
 <div class="section level2">
 <h2 id="saving-and-validating-metadata">Saving and validating metadata<a class="anchor" aria-label="anchor" href="#saving-and-validating-metadata"></a>
@@ -288,13 +288,13 @@ determine how it should load the files back into memory:</p>
 <code class="sourceCode R"><span><span class="va">re.read</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/acquireFile.html">acquireMetadata</a></span><span class="op">(</span><span class="va">tmp</span>, <span class="st">"my_df2/simple.csv.gz"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/loadObject.html">loadObject</a></span><span class="op">(</span><span class="va">re.read</span>, <span class="va">tmp</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## DataFrame with 5 rows and 2 columns</span></span>
-<span><span class="co">##          Z                 AA</span></span>
-<span><span class="co">##   &lt;factor&gt;        &lt;DataFrame&gt;</span></span>
-<span><span class="co">## 1        1 0.324691:-1.278746</span></span>
-<span><span class="co">## 2        2 0.222789:-2.262932</span></span>
-<span><span class="co">## 3        3 0.251686: 0.797199</span></span>
-<span><span class="co">## 4        4 0.209664:-0.103589</span></span>
-<span><span class="co">## 5        5 0.799109: 0.324609</span></span></code></pre>
+<span><span class="co">##          Z                  AA</span></span>
+<span><span class="co">##   &lt;factor&gt;         &lt;DataFrame&gt;</span></span>
+<span><span class="co">## 1        1 0.739290:-1.0293732</span></span>
+<span><span class="co">## 2        2 0.921429: 0.7894908</span></span>
+<span><span class="co">## 3        3 0.751716: 1.5614587</span></span>
+<span><span class="co">## 4        4 0.247258:-0.2855086</span></span>
+<span><span class="co">## 5        5 0.965557: 0.0846735</span></span></code></pre>
 </div>
 <div class="section level2">
 <h2 class="unnumbered" id="session-information">Session information<a class="anchor" aria-label="anchor" href="#session-information"></a>
