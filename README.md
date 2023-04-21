@@ -20,8 +20,8 @@ Implementations of these methods for various Bioconductor packages can be found 
 First, we'll install the package and its dependencies:
 
 ```r
-devtools::install_github("ArtifactDB/alabaster.schemas")
-devtools::install_github("ArtifactDB/alabaster.base")
+# install.packages("BiocManager")
+BiocManager::install("alabaster.base")
 ```
 
 The simplest example involves saving a `DataFrame` inside a staging directory.
@@ -52,47 +52,13 @@ tmp <- tempfile()
 dir.create(tmp)
 
 library(alabaster.base)
-meta <- stageObject(df, tmp, path="my_df")
+saveLocalObject(df, tmp, path="my_df")
 ```
   
-This returns some metadata that can also be saved:
-
-```r
-.writeMetadata(meta, tmp)
-cat(readLines(file.path(tmp, paste0(meta$path, ".json"))), sep="\n")
-```
-
-```json
-{
-  "$schema": "csv_data_frame/v2.json",
-  "path": "my_df/simple.csv.gz",
-  "is_child": false,
-  "data_frame": {
-    "columns": [
-      {
-        "name": "X",
-        "type": "integer"
-      },
-      {
-        "name": "Y",
-        "type": "string",
-        "values": ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j"]
-      }
-    ],
-    "dimensions": [10, 2]
-  },
-  "csv_data_frame": {
-    "placeholder": true,
-    "compression": "gzip"
-  },
-  "md5sum": "3be9b301364d2d69fd2f51b43b0086ea"
-}
-```
-
 Loading it back into memory is straightforward:
 
 ```r
-loadObject(meta, tmp)
+readLocalObject(tmp, "my_df")
 ## DataFrame with 10 rows and 2 columns
 ##            X           Y
 ##    <integer> <character>
@@ -123,6 +89,8 @@ The staging/loading process can be applied to a range of data structures, provid
 - [**alabaster.bumpy**](https://github.com/ArtifactDB/alabaster.bumpy) for [`BumpyMatrix`](https://bioconductor.org/packages/BumpyMatrix) objects.
 - [**alabaster.string**](https://github.com/ArtifactDB/alabaster.string) for [`XStringSet`](https://bioconductor.org/packages/Biostrings) objects.
 - [**alabaster.vcf**](https://github.com/ArtifactDB/alabaster.vcf) for [`VCF`](https://bioconductor.org/packages/Biostrings) objects.
+
+All packages are available from Bioconductor and can be installed with the usual `BiocManager::install()` process.
 
 ## Extensions and applications
 
