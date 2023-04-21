@@ -10,7 +10,7 @@ df <- data.frame(
 
 write.csv2 <- function(file, ...) {
     handle <- file(file, "wb")
-    write.csv(file=handle, ...)
+    write.csv(file=handle, ..., eol="\n")
     close(handle)
 }
 

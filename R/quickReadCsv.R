@@ -97,6 +97,6 @@ read.csv3 <- function(path, compression, nrows, parallel=TRUE) {
         # Avoid creating an empty header.
         writeLines(character(nrow(df) + 1L), sep="\n", con=handle)
     } else {
-        write.csv(as.data.frame(df), file=handle, row.names=row.names, ...)
+        write.csv(as.data.frame(df), file=handle, row.names=row.names, ..., eol="\n")
     }
 }
