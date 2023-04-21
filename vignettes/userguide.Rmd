@@ -15,7 +15,7 @@ vignette: >
 
 ```{r, echo=FALSE}
 library(BiocStyle)
-self <- Githubpkg("ArtifactDB/alabaster.base");
+self <- Biocpkg("alabaster.base");
 knitr::opts_chunk$set(error=FALSE, warning=FALSE, message=FALSE)
 ```
 
@@ -42,30 +42,53 @@ df <- DataFrame(X=1:10, Y=letters[1:10])
 df
 ```
 
-Each supported class has a staging and loading method.
-The staging method will save the object to one or more files, given a staging directory and a path inside it:
+We'll save this `DataFrame` to file inside a "staging directory":
+
+```{r}
+staging <- tempfile()
+
+library(alabaster.base)
+saveLocalObject(df, staging, "my_favorite_df")
+```
+
+And reading it back in:
+
+```{r}
+readLocalObject(staging, "my_favorite_df")
+```
+
+# Class-specific methods
+
+Each class implements a staging and loading method for use inside the _alabaster_ framework.
+The staging method (for the `stageObject()` generic) will save the object to one or more files, given a staging directory and a path inside it:
 
 ```{r}
 tmp <- tempfile()
 dir.create(tmp)
 
-# Method already defined for the stageObject generic:
-library(alabaster.base)
+# DataFrame method already defined for the stageObject generic:
 meta <- stageObject(df, tmp, path="my_df")
 str(meta)
+
+# Writing the metadata to file.
+invisible(.writeMetadata(meta, tmp))
 
 list.files(tmp, recursive=TRUE)
 ```
 
-The loading function is automatically called by the `loadObject()` function.
-This will - as the name suggests - load the object back into memory, given the staging directory and the file's metadata:
+Conversely, the loading function will - as the name suggests - load the object back into memory, given the staging directory and the file's metadata.
+The correct loading function for each class is automatically called by the `loadObject()` function:
 
 ```{r}
-loadObject(meta, tmp)
+remeta <- acquireMetadata(tmp, "my_df/simple.csv.gz")
+loadObject(remeta, tmp)
 ```
 
 `r self` itself supports a small set of classes from the `r Biocpkg("S4Vectors")` packages;
-support for additional classes can be found in other packages like `r Githubpkg("ArtifactDB/alabaster.ranges")` and `r Githubpkg("ArtifactDB/alabaster.se")`.
+support for additional classes can be found in other packages like `r Biocpkg("alabaster.ranges")` and `r Biocpkg("alabaster.se")`.
+Third-party developers can also add support for their own classes by defining new methods, see the [_Extensions_](extensions.html) vignette for details.
+
+Incidentally, `readLocalObject()` and `saveLocalObject()` are just convenience wrappers acround `stageObject()` and `loadObject()`, respectively.
 
 # What's a staging directory?
 
@@ -82,7 +105,7 @@ list.files(tmp, recursive=TRUE)
 ```
 
 We use the staging directory as a root for the hard-coded paths in the metadata returned by `stageObject()` (i.e., `meta` and `meta2`).
-Thus, we can easily copy the entire directory to a new system and everything will still be correctly referenced.
+Thus, we can easily copy the entire directory to a new file system and everything will still be correctly referenced.
 
 ```{r}
 meta2$path
@@ -91,6 +114,10 @@ dir.create(new.dir)
 invisible(file.copy(tmp, new.dir, recursive=TRUE))
 loadObject(meta2, file.path(new.dir, basename(tmp)))
 ```
+
+The simplest way to share objects is to just `zip` or `tar` the staging directory for _ad hoc_ distribution.
+For more serious applications, `r self` can be used in conjunction with centralized file storage systems - 
+see the [_Applications_](applications.html) vignette for more details.
 
 # Saving and validating metadata
 
@@ -125,9 +152,6 @@ Indeed, `loadObject()` automatically uses the schema to determine how it should 
 ```{r}
 re.read <- acquireMetadata(tmp, "my_df2/simple.csv.gz")
 loadObject(re.read, tmp)
-
-# Or more succintly:
-readLocalObject(tmp, "my_df2/simple.csv.gz")
 ```
 
 # Session information {-}
