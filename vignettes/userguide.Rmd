@@ -125,6 +125,9 @@ Indeed, `loadObject()` automatically uses the schema to determine how it should 
 ```{r}
 re.read <- acquireMetadata(tmp, "my_df2/simple.csv.gz")
 loadObject(re.read, tmp)
+
+# Or more succintly:
+readLocalObject(tmp, "my_df2/simple.csv.gz")
 ```
 
 # Session information {-}
