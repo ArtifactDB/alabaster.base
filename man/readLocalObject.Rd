@@ -17,6 +17,8 @@ listLocalObjects(dir, includeChildren = FALSE)
 
 \item{path}{String containing a relative path to the object of interest inside \code{dir}.}
 
+\item{...}{Further arguments to pass to \code{\link{loadObject}} (for \code{readLocalObject}) or \code{\link{stageObject}} (for \code{saveLocalObject}).}
+
 \item{x}{Object to be saved.}
 
 \item{includeChildren}{Logical scalar indicating whether child objects should be returned.}

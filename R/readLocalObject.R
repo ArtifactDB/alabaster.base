@@ -7,6 +7,7 @@
 #' @param dir String containing a path to the directory.
 #' @param path String containing a relative path to the object of interest inside \code{dir}.
 #' @param includeChildren Logical scalar indicating whether child objects should be returned.
+#' @param ... Further arguments to pass to \code{\link{loadObject}} (for \code{readLocalObject}) or \code{\link{stageObject}} (for \code{saveLocalObject}).
 #'
 #' @return For \code{readLocalObject}, the object at \code{path}.
 #'
