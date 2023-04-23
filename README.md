@@ -17,7 +17,9 @@ Implementations of these methods for various Bioconductor packages can be found 
 
 ## Quick start
 
-First, we'll install the package and its dependencies:
+First, we'll install the **alabaster.base** package.
+This package is available from [Bioconductor](https://bioconductor.org/packages/alabaster.base),
+so we can use the standard Bioconductor installation process:
 
 ```r
 # install.packages("BiocManager")
@@ -91,6 +93,7 @@ The staging/loading process can be applied to a range of data structures, provid
 - [**alabaster.vcf**](https://github.com/ArtifactDB/alabaster.vcf) for [`VCF`](https://bioconductor.org/packages/Biostrings) objects.
 
 All packages are available from Bioconductor and can be installed with the usual `BiocManager::install()` process.
+To install all packages in one go, users can install the [**alabaster**](https://bioconductor.org/packages/alabaster) umbrella package.
 
 ## Extensions and applications
 
