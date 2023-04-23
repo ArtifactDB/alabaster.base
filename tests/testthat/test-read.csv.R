@@ -67,7 +67,9 @@ test_that("read.csv3 handles single- and no-column DFs correctly", {
     out <- alabaster.base:::read.csv3(path, compression="none", nrows=nrow(df))
     expect_equal(df, data.frame(out, check.names=FALSE))
 
-    write(character(11), file=path)
+    handle <- file(path, open="wb") # Avoid problems with \r on windows.
+    write(character(11), file=handle)
+    close(handle)
     out <- alabaster.base:::read.csv3(path, compression="none", nrows=nrow(df))
     expect_equal(df[,0], data.frame(out, check.names=FALSE))
 })
