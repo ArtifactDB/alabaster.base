@@ -82,15 +82,19 @@ Check out the [user's guide](https://artifactdb.github.io/alabaster.base/article
 
 The staging/loading process can be applied to a range of data structures, provided the appropriate **alabaster** package is installed.
 
-- [**alabaster.matrix**](https://github.com/ArtifactDB/alabaster.matrix) for ordinary matrices, `Matrix` objects and [`DelayedArray`](https://bioconductor.org/packages/DelayedArray) objects.
-- [**alabaster.ranges**](https://github.com/ArtifactDB/alabaster.ranges) for [`GRanges`](https://bioconductor.org/packages/GenomicRanges), `GRangesList` and related objects.
-- [**alabaster.se**](https://github.com/ArtifactDB/alabaster.se) for [`SummarizedExperiment`](https://bioconductor.org/packages/SummarizedExperiment) and `RangedSummarizedExperiment` objects.
-- [**alabaster.sce**](https://github.com/ArtifactDB/alabaster.sce) for [`SingleCellExperiment`](https://bioconductor.org/packages/SingleCellExperiment) objects.
-- [**alabaster.spatial**](https://github.com/ArtifactDB/alabaster.spatial) for [`SpatialExperiment`](https://bioconductor.org/packages/SpatialExperiment) and `VirtualSpatialImage` objects.
-- [**alabaster.mae**](https://github.com/ArtifactDB/alabaster.mae) for [`MultiAssayExperiment`](https://bioconductor.org/packages/MultiAssayExperiment) objects.
-- [**alabaster.bumpy**](https://github.com/ArtifactDB/alabaster.bumpy) for [`BumpyMatrix`](https://bioconductor.org/packages/BumpyMatrix) objects.
-- [**alabaster.string**](https://github.com/ArtifactDB/alabaster.string) for [`XStringSet`](https://bioconductor.org/packages/Biostrings) objects.
-- [**alabaster.vcf**](https://github.com/ArtifactDB/alabaster.vcf) for [`VCF`](https://bioconductor.org/packages/Biostrings) objects.
+| Package | Object types | BioC-release | BioC-devel |
+|-----|-----|----|----|
+| [**alabaster.base**](https://github.com/ArtifactDB/alabaster.base) | `DataFrame`, list, `List` | [![](http://bioconductor.org/shields/build/devel/bioc/alabaster.base.svg)](http://bioconductor.org/checkResults/devel/bioc-LATEST/alabaster.base) | [![](http://bioconductor.org/shields/build/release/bioc/alabaster.base.svg)](http://bioconductor.org/checkResults/release/bioc-LATEST/alabaster.base) |
+| [**alabaster.matrix**](https://github.com/ArtifactDB/alabaster.matrix) | Ordinary matrix, `Matrix` instance, [`DelayedArray`](https://bioconductor.org/packages/DelayedArray) | [![](http://bioconductor.org/shields/build/devel/bioc/alabaster.matrix.svg)](http://bioconductor.org/checkResults/devel/bioc-LATEST/alabaster.matrix) | [![](http://bioconductor.org/shields/build/release/bioc/alabaster.matrix.svg)](http://bioconductor.org/checkResults/release/bioc-LATEST/alabaster.matrix) |
+| [**alabaster.ranges**](https://github.com/ArtifactDB/alabaster.ranges) | [`GRanges`](https://bioconductor.org/packages/GenomicRanges), `GRangesList` and related objects | [![](http://bioconductor.org/shields/build/devel/bioc/alabaster.ranges.svg)](http://bioconductor.org/checkResults/devel/bioc-LATEST/alabaster.ranges) | [![](http://bioconductor.org/shields/build/release/bioc/alabaster.ranges.svg)](http://bioconductor.org/checkResults/release/bioc-LATEST/alabaster.ranges) |
+| [**alabaster.se**](https://github.com/ArtifactDB/alabaster.se) | [`SummarizedExperiment`](https://bioconductor.org/packages/SummarizedExperiment), `RangedSummarizedExperiment` | [![](http://bioconductor.org/shields/build/devel/bioc/alabaster.se.svg)](http://bioconductor.org/checkResults/devel/bioc-LATEST/alabaster.se) | [![](http://bioconductor.org/shields/build/release/bioc/alabaster.se.svg)](http://bioconductor.org/checkResults/release/bioc-LATEST/alabaster.se) |
+| [**alabaster.sce**](https://github.com/ArtifactDB/alabaster.sce) | [`SingleCellExperiment`](https://bioconductor.org/packages/SingleCellExperiment) | [![](http://bioconductor.org/shields/build/devel/bioc/alabaster.sce.svg)](http://bioconductor.org/checkResults/devel/bioc-LATEST/alabaster.sce) | [![](http://bioconductor.org/shields/build/release/bioc/alabaster.sce.svg)](http://bioconductor.org/checkResults/release/bioc-LATEST/alabaster.sce) |
+| [**alabaster.mae**](https://github.com/ArtifactDB/alabaster.mae) | [`MultiAssayExperiment`](https://bioconductor.org/packages/MultiAssayExperiment) | [![](http://bioconductor.org/shields/build/devel/bioc/alabaster.mae.svg)](http://bioconductor.org/checkResults/devel/bioc-LATEST/alabaster.mae) | [![](http://bioconductor.org/shields/build/release/bioc/alabaster.mae.svg)](http://bioconductor.org/checkResults/release/bioc-LATEST/alabaster.mae) |
+| [**alabaster.string**](https://github.com/ArtifactDB/alabaster.string) | [`XStringSet`](https://bioconductor.org/packages/Biostrings) | [![](http://bioconductor.org/shields/build/devel/bioc/alabaster.string.svg)](http://bioconductor.org/checkResults/devel/bioc-LATEST/alabaster.string) | [![](http://bioconductor.org/shields/build/release/bioc/alabaster.string.svg)](http://bioconductor.org/checkResults/release/bioc-LATEST/alabaster.string) |
+| [**alabaster.spatial**](https://github.com/ArtifactDB/alabaster.spatial) | [`SpatialExperiment`](https://bioconductor.org/packages/SpatialExperiment), `VirtualSpatialImage` | [![](http://bioconductor.org/shields/build/devel/bioc/alabaster.spatial.svg)](http://bioconductor.org/checkResults/devel/bioc-LATEST/alabaster.spatial) | [![](http://bioconductor.org/shields/build/release/bioc/alabaster.spatial.svg)](http://bioconductor.org/checkResults/release/bioc-LATEST/alabaster.spatial) |
+| [**alabaster.bumpy**](https://github.com/ArtifactDB/alabaster.bumpy) | [`BumpyMatrix`](https://bioconductor.org/packages/BumpyMatrix) objects | [![](http://bioconductor.org/shields/build/devel/bioc/alabaster.bumpy.svg)](http://bioconductor.org/checkResults/devel/bioc-LATEST/alabaster.bumpy) | [![](http://bioconductor.org/shields/build/release/bioc/alabaster.bumpy.svg)](http://bioconductor.org/checkResults/release/bioc-LATEST/alabaster.bumpy) |
+| [**alabaster.vcf**](https://github.com/ArtifactDB/alabaster.vcf) | [`VCF`](https://bioconductor.org/packages/Biostrings) objects | [![](http://bioconductor.org/shields/build/devel/bioc/alabaster.vcf.svg)](http://bioconductor.org/checkResults/devel/bioc-LATEST/alabaster.vcf) | [![](http://bioconductor.org/shields/build/release/bioc/alabaster.vcf.svg)](http://bioconductor.org/checkResults/release/bioc-LATEST/alabaster.vcf) |
+| [**alabaster.files**](https://github.com/ArtifactDB/alabaster.files) | Common bioinformatics files, e.g., FASTQ, BAM | [![](http://bioconductor.org/shields/build/devel/bioc/alabaster.files.svg)](http://bioconductor.org/checkResults/devel/bioc-LATEST/alabaster.files) | [![](http://bioconductor.org/shields/build/release/bioc/alabaster.files.svg)](http://bioconductor.org/checkResults/release/bioc-LATEST/alabaster.files) |
 
 All packages are available from Bioconductor and can be installed with the usual `BiocManager::install()` process.
 To install all packages in one go, users can install the [**alabaster**](https://bioconductor.org/packages/alabaster) umbrella package.
@@ -98,11 +102,11 @@ To install all packages in one go, users can install the [**alabaster**](https:/
 ## Extensions and applications
 
 Developers can _extend_ this framework to support more R/Bioconductor classes by creating their own **alabaster** package.
-Check out the [extension guide](https://artifactdb.github.io/alabaster.base/articles/extensions.html) for more details.
+Check out the [extension guide](https://bioconductor.org/packages/release/bioc/vignettes/alabaster.base/inst/doc/extensions.html) for more details.
 
 Developers can also _customize_ this framework for specific applications, most typically to save bespoke metadata in the JSON file.
 The JSON file can then be indexed by systems like MongoDB and Elasticsearch to provide search capabilities.
-Check out the [applications guide](https://artifactdb.github.io/alabaster.base/articles/applications.html) for more details.
+Check out the [applications guide](https://bioconductor.org/packages/release/bioc/vignettes/alabaster.base/inst/doc/applications.html) for more details.
 
 ## Links
 
