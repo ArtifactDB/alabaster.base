@@ -2,10 +2,9 @@
 % Please edit documentation in R/loadAllObjects.R
 \name{loadAllObjects}
 \alias{loadAllObjects}
-\alias{.resolveRedirectedObjects}
 \title{Load all non-child objects in a directory}
 \usage{
-loadAllObjects(dir, redirect.action = c("to", "from", "both"))
+loadAllObjects(dir, redirect.action = c("from", "to", "both"))
 }
 \arguments{
 \item{dir}{String containing a path to a staging directory.}
@@ -43,7 +42,7 @@ redirect <- .createRedirection(tmp, "whoop", "whee/simple.csv.gz")
 .writeMetadata(redirect, tmp)
 
 all.meta <- loadAllObjects(tmp)
-names(all.meta) 
+str(all.meta) 
 
 }
 \author{

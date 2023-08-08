@@ -36,7 +36,7 @@
 loadAllMetadata <- function(dir, ignore.children = TRUE) {
     all.json <- list.files(dir, pattern="\\.json$", recursive=TRUE)
     out <- lapply(file.path(dir, all.json), fromJSON, simplifyVector=FALSE)
-    names(out) <- all.json
+    names(out) <- vapply(out, function(x) x$path, "")
 
     if (ignore.children) {
         child <- vapply(out, function(x) isTRUE(x$is_child), TRUE)

@@ -35,11 +35,8 @@
 #' all.meta <- loadAllObjects(tmp)
 #' str(all.meta) 
 #'
-#' @aliases
-#' .resolveRedirectedObjects
-#'
 #' @export
-loadAllObjects <- function(dir, redirect.action = c("to", "from", "both")) {
+loadAllObjects <- function(dir, redirect.action = c("from", "to", "both")) {
     all.meta <- loadAllMetadata(dir, ignore.children=TRUE)
 
     collected <- list()
@@ -48,11 +45,9 @@ loadAllObjects <- function(dir, redirect.action = c("to", "from", "both")) {
     for (m in all.meta) {
         if (startsWith(m[["$schema"]], "redirection/")) {
             redirects[[m$path]] <- m$redirection$targets[[1]]$location
-            next
-        } else if (isTRUE(m$is_child)) {
-            next
+        } else if (!isTRUE(m$is_child)) {
+            collected[[m$path]] <- .loadObject(m, dir)
         }
-        collected[[m$path]] <- .loadObject(m, dir)
     }
 
     redirect.action <- match.arg(redirect.action)
@@ -60,25 +55,23 @@ loadAllObjects <- function(dir, redirect.action = c("to", "from", "both")) {
         return(collected)
     }
 
-    resolved <- .resolveRedirectedObjects(collected, redirects) 
-    if (redirect.action == "from") {
-        return(c(collected[-m], resolved))
-    } else {
-        return(c(collected, resolved))
-    }
-}
-
-#' @export
-.resolveRedirectedObjects<- function(values, redirects) {
     host <- names(redirects)
-    targets <- unlist(redirects)
+    targets <- unlist(redirects, use.names=FALSE)
 
-    m <- match(targets, names(values))
+    m <- match(targets, names(collected))
     keep <- !is.na(m)
     m <- m[keep]
     host <- host[keep]
 
-    copies <- current[m]
+    if (length(m) == 0) {
+        return(collected)
+    }
+
+    copies <- collected[m]
     names(copies) <- host
-    copies
+
+    if (redirect.action == "from") {
+        collected <- collected[-m]
+    }
+    return(c(collected, copies))
 }
