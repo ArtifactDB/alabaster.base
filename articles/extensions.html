@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">alabaster.base</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.99.7</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.99.9</span>
       </span>
     </div>
 
@@ -117,38 +117,38 @@ your schema.</li>
 <code>v1.json</code>.</li>
 </ol>
 <p>Our new schema will be called <code>sparse_triplet_matrix</code>:</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode json"><code class="sourceCode json"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"$schema"</span><span class="fu">:</span> <span class="st">"http://json-schema.org/draft-07/schema"</span><span class="fu">,</span></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"$id"</span><span class="fu">:</span> <span class="st">"sparse_triplet_matrix/v1.json"</span><span class="fu">,</span></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"title"</span><span class="fu">:</span> <span class="st">"Sparse Triplet Matrix"</span><span class="fu">,</span></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"type"</span><span class="fu">:</span> <span class="st">"object"</span><span class="fu">,</span></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"description"</span><span class="fu">:</span> <span class="st">"Sparse matrix in triplet form, as a demonstration of how to use a schema for my dense matrix type. Data is stored in a CSV file with three columns - `i`, an integer field containing the 0-based row indices of each non-zero element; `j`, an integer field containing the column indices; and `x`, a double-precision field containing the value of the non-zero element."</span><span class="fu">,</span></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"allOf"</span><span class="fu">:</span> <span class="ot">[</span></span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>        <span class="fu">{</span> <span class="dt">"$ref"</span><span class="fu">:</span> <span class="st">"../array/v1.json"</span> <span class="fu">}</span><span class="ot">,</span></span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>        <span class="fu">{</span> <span class="dt">"$ref"</span><span class="fu">:</span> <span class="st">"../_md5sum/v1.json"</span> <span class="fu">}</span></span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    <span class="ot">]</span><span class="fu">,</span></span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"properties"</span><span class="fu">:</span> <span class="fu">{</span></span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>        <span class="dt">"sparse_triplet_matrix"</span><span class="fu">:</span> <span class="fu">{</span></span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>            <span class="dt">"type"</span><span class="fu">:</span> <span class="st">"object"</span><span class="fu">,</span></span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>            <span class="dt">"properties"</span><span class="fu">:</span> <span class="fu">{</span></span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>                <span class="dt">"num_elements"</span><span class="fu">:</span> <span class="fu">{</span></span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>                    <span class="dt">"type"</span><span class="fu">:</span> <span class="st">"integer"</span><span class="fu">,</span></span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>                    <span class="dt">"description"</span><span class="fu">:</span> <span class="st">"Number of non-zero elements in the sparse matrix."</span><span class="fu">,</span></span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>                    <span class="dt">"minimum"</span><span class="fu">:</span> <span class="dv">0</span></span>
-<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>                <span class="fu">}</span></span>
-<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>            <span class="fu">},</span></span>
-<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>            <span class="dt">"required"</span><span class="fu">:</span> <span class="ot">[</span> <span class="st">"num_elements"</span> <span class="ot">]</span><span class="fu">,</span></span>
-<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>            <span class="dt">"allOf"</span><span class="fu">:</span> <span class="ot">[</span> <span class="fu">{</span> <span class="dt">"$ref"</span><span class="fu">:</span> <span class="st">"../_compression/v1.json"</span> <span class="fu">}</span> <span class="ot">]</span></span>
-<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>        <span class="fu">}</span></span>
-<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>    <span class="fu">},</span></span>
-<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"required"</span><span class="fu">:</span> <span class="ot">[</span> <span class="st">"sparse_triplet_matrix"</span> <span class="ot">]</span><span class="fu">,</span></span>
-<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"_attributes"</span><span class="fu">:</span> <span class="fu">{</span></span>
-<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>        <span class="dt">"format"</span><span class="fu">:</span> <span class="st">"text/csv"</span><span class="fu">,</span></span>
-<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>        <span class="dt">"restore"</span><span class="fu">:</span> <span class="fu">{</span></span>
-<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>            <span class="dt">"R"</span><span class="fu">:</span> <span class="st">"alabaster.foo::loadSparseTripletMatrix"</span></span>
-<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>        <span class="fu">}</span></span>
-<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>    <span class="fu">}</span></span>
-<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode json"><code class="sourceCode json"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>    <span class="dt">"$schema"</span><span class="fu">:</span> <span class="st">"http://json-schema.org/draft-07/schema"</span><span class="fu">,</span></span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>    <span class="dt">"$id"</span><span class="fu">:</span> <span class="st">"sparse_triplet_matrix/v1.json"</span><span class="fu">,</span></span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a>    <span class="dt">"title"</span><span class="fu">:</span> <span class="st">"Sparse Triplet Matrix"</span><span class="fu">,</span></span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a>    <span class="dt">"type"</span><span class="fu">:</span> <span class="st">"object"</span><span class="fu">,</span></span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a>    <span class="dt">"description"</span><span class="fu">:</span> <span class="st">"Sparse matrix in triplet form, as a demonstration of how to use a schema for my dense matrix type. Data is stored in a CSV file with three columns - `i`, an integer field containing the 0-based row indices of each non-zero element; `j`, an integer field containing the column indices; and `x`, a double-precision field containing the value of the non-zero element."</span><span class="fu">,</span></span>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a>    <span class="dt">"allOf"</span><span class="fu">:</span> <span class="ot">[</span></span>
+<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a>        <span class="fu">{</span> <span class="dt">"$ref"</span><span class="fu">:</span> <span class="st">"../array/v1.json"</span> <span class="fu">}</span><span class="ot">,</span></span>
+<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a>        <span class="fu">{</span> <span class="dt">"$ref"</span><span class="fu">:</span> <span class="st">"../_md5sum/v1.json"</span> <span class="fu">}</span></span>
+<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a>    <span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a>    <span class="dt">"properties"</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb1-12"><a href="#cb1-12" tabindex="-1"></a>        <span class="dt">"sparse_triplet_matrix"</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb1-13"><a href="#cb1-13" tabindex="-1"></a>            <span class="dt">"type"</span><span class="fu">:</span> <span class="st">"object"</span><span class="fu">,</span></span>
+<span id="cb1-14"><a href="#cb1-14" tabindex="-1"></a>            <span class="dt">"properties"</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb1-15"><a href="#cb1-15" tabindex="-1"></a>                <span class="dt">"num_elements"</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb1-16"><a href="#cb1-16" tabindex="-1"></a>                    <span class="dt">"type"</span><span class="fu">:</span> <span class="st">"integer"</span><span class="fu">,</span></span>
+<span id="cb1-17"><a href="#cb1-17" tabindex="-1"></a>                    <span class="dt">"description"</span><span class="fu">:</span> <span class="st">"Number of non-zero elements in the sparse matrix."</span><span class="fu">,</span></span>
+<span id="cb1-18"><a href="#cb1-18" tabindex="-1"></a>                    <span class="dt">"minimum"</span><span class="fu">:</span> <span class="dv">0</span></span>
+<span id="cb1-19"><a href="#cb1-19" tabindex="-1"></a>                <span class="fu">}</span></span>
+<span id="cb1-20"><a href="#cb1-20" tabindex="-1"></a>            <span class="fu">},</span></span>
+<span id="cb1-21"><a href="#cb1-21" tabindex="-1"></a>            <span class="dt">"required"</span><span class="fu">:</span> <span class="ot">[</span> <span class="st">"num_elements"</span> <span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb1-22"><a href="#cb1-22" tabindex="-1"></a>            <span class="dt">"allOf"</span><span class="fu">:</span> <span class="ot">[</span> <span class="fu">{</span> <span class="dt">"$ref"</span><span class="fu">:</span> <span class="st">"../_compression/v1.json"</span> <span class="fu">}</span> <span class="ot">]</span></span>
+<span id="cb1-23"><a href="#cb1-23" tabindex="-1"></a>        <span class="fu">}</span></span>
+<span id="cb1-24"><a href="#cb1-24" tabindex="-1"></a>    <span class="fu">},</span></span>
+<span id="cb1-25"><a href="#cb1-25" tabindex="-1"></a>    <span class="dt">"required"</span><span class="fu">:</span> <span class="ot">[</span> <span class="st">"sparse_triplet_matrix"</span> <span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb1-26"><a href="#cb1-26" tabindex="-1"></a>    <span class="dt">"_attributes"</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb1-27"><a href="#cb1-27" tabindex="-1"></a>        <span class="dt">"format"</span><span class="fu">:</span> <span class="st">"text/csv"</span><span class="fu">,</span></span>
+<span id="cb1-28"><a href="#cb1-28" tabindex="-1"></a>        <span class="dt">"restore"</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb1-29"><a href="#cb1-29" tabindex="-1"></a>            <span class="dt">"R"</span><span class="fu">:</span> <span class="st">"alabaster.foo::loadSparseTripletMatrix"</span></span>
+<span id="cb1-30"><a href="#cb1-30" tabindex="-1"></a>        <span class="fu">}</span></span>
+<span id="cb1-31"><a href="#cb1-31" tabindex="-1"></a>    <span class="fu">}</span></span>
+<span id="cb1-32"><a href="#cb1-32" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
 <p>This involves a few choices:</p>
 <ul>
 <li>Given that we’re dealing with an array-like type, we’ll “inherit”
@@ -169,99 +169,99 @@ session.</li>
 </ul>
 <p>Once we’re happy, we can run the <a href="https://github.com/ArtifactDB/BiocObjectSchemas/tree/scripts/resolver.py" class="external-link"><code>scripts/resolver.py</code></a>
 script to resolve all the <code>$ref</code> references.</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">python3</span> scripts/resolver.py raw resolved</span></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="ex">python3</span> scripts/resolver.py raw resolved</span></code></pre></div>
 <p>This creates a <code>resolved/sparse_triplet_matrix/v1.json</code>
 file that looks like:</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode json"><code class="sourceCode json"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"$id"</span><span class="fu">:</span> <span class="st">"sparse_triplet_matrix/v1.json"</span><span class="fu">,</span></span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"$schema"</span><span class="fu">:</span> <span class="st">"http://json-schema.org/draft-07/schema"</span><span class="fu">,</span></span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"_attributes"</span><span class="fu">:</span> <span class="fu">{</span></span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>        <span class="dt">"format"</span><span class="fu">:</span> <span class="st">"text/csv"</span><span class="fu">,</span></span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>        <span class="dt">"restore"</span><span class="fu">:</span> <span class="fu">{</span></span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>            <span class="dt">"R"</span><span class="fu">:</span> <span class="st">"alabaster.foo::loadSparseTripletMatrix"</span></span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>        <span class="fu">}</span></span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">},</span></span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"description"</span><span class="fu">:</span> <span class="st">"Sparse matrix in triplet form, as a demonstration of how to use a schema for my dense matrix type. Data is stored in a CSV file with three columns - `i`, an integer field containing the 0-based row indices of each non-zero element; `j`, an integer field containing the column indices; and `x`, a double-precision field containing the value of the non-zero element.</span><span class="ch">\n\n</span><span class="st">Derived from `array/v1.json`: some kind of multi-dimensional array, where we store metadata about the dimensions and type of data. The exact implementation of the array is left to concrete subclasses."</span><span class="fu">,</span></span>
-<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"properties"</span><span class="fu">:</span> <span class="fu">{</span></span>
-<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>        <span class="dt">"$schema"</span><span class="fu">:</span> <span class="fu">{</span></span>
-<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>            <span class="dt">"description"</span><span class="fu">:</span> <span class="st">"The schema to use."</span><span class="fu">,</span></span>
-<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>            <span class="dt">"type"</span><span class="fu">:</span> <span class="st">"string"</span></span>
-<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>        <span class="fu">},</span></span>
-<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>        <span class="dt">"array"</span><span class="fu">:</span> <span class="fu">{</span></span>
-<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>            <span class="dt">"additionalProperties"</span><span class="fu">:</span> <span class="kw">false</span><span class="fu">,</span></span>
-<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>            <span class="dt">"properties"</span><span class="fu">:</span> <span class="fu">{</span></span>
-<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>                <span class="dt">"dimensions"</span><span class="fu">:</span> <span class="fu">{</span></span>
-<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>                    <span class="dt">"description"</span><span class="fu">:</span> <span class="st">"Dimensions of an n-dimensional array. Dimensions should be ordered from the fastest-changing to the slowest."</span><span class="fu">,</span></span>
-<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>                    <span class="dt">"items"</span><span class="fu">:</span> <span class="fu">{</span></span>
-<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>                        <span class="dt">"type"</span><span class="fu">:</span> <span class="st">"integer"</span></span>
-<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>                    <span class="fu">},</span></span>
-<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>                    <span class="dt">"minItems"</span><span class="fu">:</span> <span class="dv">1</span><span class="fu">,</span></span>
-<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>                    <span class="dt">"type"</span><span class="fu">:</span> <span class="st">"array"</span></span>
-<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>                <span class="fu">},</span></span>
-<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>                <span class="dt">"type"</span><span class="fu">:</span> <span class="fu">{</span></span>
-<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>                    <span class="dt">"description"</span><span class="fu">:</span> <span class="st">"Type of data stored in this array."</span><span class="fu">,</span></span>
-<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a>                    <span class="dt">"enum"</span><span class="fu">:</span> <span class="ot">[</span></span>
-<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a>                        <span class="st">"boolean"</span><span class="ot">,</span></span>
-<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a>                        <span class="st">"number"</span><span class="ot">,</span></span>
-<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a>                        <span class="st">"integer"</span><span class="ot">,</span></span>
-<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a>                        <span class="st">"string"</span><span class="ot">,</span></span>
-<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a>                        <span class="st">"other"</span></span>
-<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a>                    <span class="ot">]</span><span class="fu">,</span></span>
-<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a>                    <span class="dt">"type"</span><span class="fu">:</span> <span class="st">"string"</span></span>
-<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a>                <span class="fu">}</span></span>
-<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a>            <span class="fu">},</span></span>
-<span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a>            <span class="dt">"required"</span><span class="fu">:</span> <span class="ot">[</span></span>
-<span id="cb3-41"><a href="#cb3-41" aria-hidden="true" tabindex="-1"></a>                <span class="st">"dimensions"</span></span>
-<span id="cb3-42"><a href="#cb3-42" aria-hidden="true" tabindex="-1"></a>            <span class="ot">]</span><span class="fu">,</span></span>
-<span id="cb3-43"><a href="#cb3-43" aria-hidden="true" tabindex="-1"></a>            <span class="dt">"type"</span><span class="fu">:</span> <span class="st">"object"</span></span>
-<span id="cb3-44"><a href="#cb3-44" aria-hidden="true" tabindex="-1"></a>        <span class="fu">},</span></span>
-<span id="cb3-45"><a href="#cb3-45" aria-hidden="true" tabindex="-1"></a>        <span class="dt">"is_child"</span><span class="fu">:</span> <span class="fu">{</span></span>
-<span id="cb3-46"><a href="#cb3-46" aria-hidden="true" tabindex="-1"></a>            <span class="dt">"default"</span><span class="fu">:</span> <span class="kw">false</span><span class="fu">,</span></span>
-<span id="cb3-47"><a href="#cb3-47" aria-hidden="true" tabindex="-1"></a>            <span class="dt">"description"</span><span class="fu">:</span> <span class="st">"Is this a child document, only to be interpreted in the context of the parent document from which it is linked? This may have implications for search and metadata requirements."</span><span class="fu">,</span></span>
-<span id="cb3-48"><a href="#cb3-48" aria-hidden="true" tabindex="-1"></a>            <span class="dt">"type"</span><span class="fu">:</span> <span class="st">"boolean"</span></span>
-<span id="cb3-49"><a href="#cb3-49" aria-hidden="true" tabindex="-1"></a>        <span class="fu">},</span></span>
-<span id="cb3-50"><a href="#cb3-50" aria-hidden="true" tabindex="-1"></a>        <span class="dt">"md5sum"</span><span class="fu">:</span> <span class="fu">{</span></span>
-<span id="cb3-51"><a href="#cb3-51" aria-hidden="true" tabindex="-1"></a>            <span class="dt">"description"</span><span class="fu">:</span> <span class="st">"MD5 checksum for the file."</span><span class="fu">,</span></span>
-<span id="cb3-52"><a href="#cb3-52" aria-hidden="true" tabindex="-1"></a>            <span class="dt">"type"</span><span class="fu">:</span> <span class="st">"string"</span></span>
-<span id="cb3-53"><a href="#cb3-53" aria-hidden="true" tabindex="-1"></a>        <span class="fu">},</span></span>
-<span id="cb3-54"><a href="#cb3-54" aria-hidden="true" tabindex="-1"></a>        <span class="dt">"path"</span><span class="fu">:</span> <span class="fu">{</span></span>
-<span id="cb3-55"><a href="#cb3-55" aria-hidden="true" tabindex="-1"></a>            <span class="dt">"description"</span><span class="fu">:</span> <span class="st">"Path to the file in the project directory."</span><span class="fu">,</span></span>
-<span id="cb3-56"><a href="#cb3-56" aria-hidden="true" tabindex="-1"></a>            <span class="dt">"type"</span><span class="fu">:</span> <span class="st">"string"</span></span>
-<span id="cb3-57"><a href="#cb3-57" aria-hidden="true" tabindex="-1"></a>        <span class="fu">},</span></span>
-<span id="cb3-58"><a href="#cb3-58" aria-hidden="true" tabindex="-1"></a>        <span class="dt">"sparse_triplet_matrix"</span><span class="fu">:</span> <span class="fu">{</span></span>
-<span id="cb3-59"><a href="#cb3-59" aria-hidden="true" tabindex="-1"></a>            <span class="dt">"properties"</span><span class="fu">:</span> <span class="fu">{</span></span>
-<span id="cb3-60"><a href="#cb3-60" aria-hidden="true" tabindex="-1"></a>                <span class="dt">"compression"</span><span class="fu">:</span> <span class="fu">{</span></span>
-<span id="cb3-61"><a href="#cb3-61" aria-hidden="true" tabindex="-1"></a>                    <span class="dt">"description"</span><span class="fu">:</span> <span class="st">"Type of compression applied to the file."</span><span class="fu">,</span></span>
-<span id="cb3-62"><a href="#cb3-62" aria-hidden="true" tabindex="-1"></a>                    <span class="dt">"enum"</span><span class="fu">:</span> <span class="ot">[</span></span>
-<span id="cb3-63"><a href="#cb3-63" aria-hidden="true" tabindex="-1"></a>                        <span class="st">"none"</span><span class="ot">,</span></span>
-<span id="cb3-64"><a href="#cb3-64" aria-hidden="true" tabindex="-1"></a>                        <span class="st">"gzip"</span><span class="ot">,</span></span>
-<span id="cb3-65"><a href="#cb3-65" aria-hidden="true" tabindex="-1"></a>                        <span class="st">"bzip2"</span></span>
-<span id="cb3-66"><a href="#cb3-66" aria-hidden="true" tabindex="-1"></a>                    <span class="ot">]</span><span class="fu">,</span></span>
-<span id="cb3-67"><a href="#cb3-67" aria-hidden="true" tabindex="-1"></a>                    <span class="dt">"type"</span><span class="fu">:</span> <span class="st">"string"</span></span>
-<span id="cb3-68"><a href="#cb3-68" aria-hidden="true" tabindex="-1"></a>                <span class="fu">},</span></span>
-<span id="cb3-69"><a href="#cb3-69" aria-hidden="true" tabindex="-1"></a>                <span class="dt">"num_elements"</span><span class="fu">:</span> <span class="fu">{</span></span>
-<span id="cb3-70"><a href="#cb3-70" aria-hidden="true" tabindex="-1"></a>                    <span class="dt">"description"</span><span class="fu">:</span> <span class="st">"Number of non-zero elements in the sparse matrix."</span><span class="fu">,</span></span>
-<span id="cb3-71"><a href="#cb3-71" aria-hidden="true" tabindex="-1"></a>                    <span class="dt">"minimum"</span><span class="fu">:</span> <span class="dv">0</span><span class="fu">,</span></span>
-<span id="cb3-72"><a href="#cb3-72" aria-hidden="true" tabindex="-1"></a>                    <span class="dt">"type"</span><span class="fu">:</span> <span class="st">"integer"</span></span>
-<span id="cb3-73"><a href="#cb3-73" aria-hidden="true" tabindex="-1"></a>                <span class="fu">}</span></span>
-<span id="cb3-74"><a href="#cb3-74" aria-hidden="true" tabindex="-1"></a>            <span class="fu">},</span></span>
-<span id="cb3-75"><a href="#cb3-75" aria-hidden="true" tabindex="-1"></a>            <span class="dt">"required"</span><span class="fu">:</span> <span class="ot">[</span></span>
-<span id="cb3-76"><a href="#cb3-76" aria-hidden="true" tabindex="-1"></a>                <span class="st">"num_elements"</span></span>
-<span id="cb3-77"><a href="#cb3-77" aria-hidden="true" tabindex="-1"></a>            <span class="ot">]</span><span class="fu">,</span></span>
-<span id="cb3-78"><a href="#cb3-78" aria-hidden="true" tabindex="-1"></a>            <span class="dt">"type"</span><span class="fu">:</span> <span class="st">"object"</span></span>
-<span id="cb3-79"><a href="#cb3-79" aria-hidden="true" tabindex="-1"></a>        <span class="fu">}</span></span>
-<span id="cb3-80"><a href="#cb3-80" aria-hidden="true" tabindex="-1"></a>    <span class="fu">},</span></span>
-<span id="cb3-81"><a href="#cb3-81" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"required"</span><span class="fu">:</span> <span class="ot">[</span></span>
-<span id="cb3-82"><a href="#cb3-82" aria-hidden="true" tabindex="-1"></a>        <span class="st">"$schema"</span><span class="ot">,</span></span>
-<span id="cb3-83"><a href="#cb3-83" aria-hidden="true" tabindex="-1"></a>        <span class="st">"array"</span><span class="ot">,</span></span>
-<span id="cb3-84"><a href="#cb3-84" aria-hidden="true" tabindex="-1"></a>        <span class="st">"md5sum"</span><span class="ot">,</span></span>
-<span id="cb3-85"><a href="#cb3-85" aria-hidden="true" tabindex="-1"></a>        <span class="st">"path"</span><span class="ot">,</span></span>
-<span id="cb3-86"><a href="#cb3-86" aria-hidden="true" tabindex="-1"></a>        <span class="st">"sparse_triplet_matrix"</span></span>
-<span id="cb3-87"><a href="#cb3-87" aria-hidden="true" tabindex="-1"></a>    <span class="ot">]</span><span class="fu">,</span></span>
-<span id="cb3-88"><a href="#cb3-88" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"title"</span><span class="fu">:</span> <span class="st">"Sparse Triplet Matrix "</span><span class="fu">,</span></span>
-<span id="cb3-89"><a href="#cb3-89" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"type"</span><span class="fu">:</span> <span class="st">"object"</span></span>
-<span id="cb3-90"><a href="#cb3-90" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode json"><code class="sourceCode json"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a></span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>    <span class="dt">"$id"</span><span class="fu">:</span> <span class="st">"sparse_triplet_matrix/v1.json"</span><span class="fu">,</span></span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>    <span class="dt">"$schema"</span><span class="fu">:</span> <span class="st">"http://json-schema.org/draft-07/schema"</span><span class="fu">,</span></span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>    <span class="dt">"_attributes"</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a>        <span class="dt">"format"</span><span class="fu">:</span> <span class="st">"text/csv"</span><span class="fu">,</span></span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a>        <span class="dt">"restore"</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a>            <span class="dt">"R"</span><span class="fu">:</span> <span class="st">"alabaster.foo::loadSparseTripletMatrix"</span></span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a>        <span class="fu">}</span></span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a>    <span class="fu">},</span></span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a>    <span class="dt">"description"</span><span class="fu">:</span> <span class="st">"Sparse matrix in triplet form, as a demonstration of how to use a schema for my dense matrix type. Data is stored in a CSV file with three columns - `i`, an integer field containing the 0-based row indices of each non-zero element; `j`, an integer field containing the column indices; and `x`, a double-precision field containing the value of the non-zero element.</span><span class="ch">\n\n</span><span class="st">Derived from `array/v1.json`: some kind of multi-dimensional array, where we store metadata about the dimensions and type of data. The exact implementation of the array is left to concrete subclasses."</span><span class="fu">,</span></span>
+<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a>    <span class="dt">"properties"</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a>        <span class="dt">"$schema"</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a>            <span class="dt">"description"</span><span class="fu">:</span> <span class="st">"The schema to use."</span><span class="fu">,</span></span>
+<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a>            <span class="dt">"type"</span><span class="fu">:</span> <span class="st">"string"</span></span>
+<span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a>        <span class="fu">},</span></span>
+<span id="cb3-17"><a href="#cb3-17" tabindex="-1"></a>        <span class="dt">"array"</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb3-18"><a href="#cb3-18" tabindex="-1"></a>            <span class="dt">"additionalProperties"</span><span class="fu">:</span> <span class="kw">false</span><span class="fu">,</span></span>
+<span id="cb3-19"><a href="#cb3-19" tabindex="-1"></a>            <span class="dt">"properties"</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb3-20"><a href="#cb3-20" tabindex="-1"></a>                <span class="dt">"dimensions"</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb3-21"><a href="#cb3-21" tabindex="-1"></a>                    <span class="dt">"description"</span><span class="fu">:</span> <span class="st">"Dimensions of an n-dimensional array. Dimensions should be ordered from the fastest-changing to the slowest."</span><span class="fu">,</span></span>
+<span id="cb3-22"><a href="#cb3-22" tabindex="-1"></a>                    <span class="dt">"items"</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb3-23"><a href="#cb3-23" tabindex="-1"></a>                        <span class="dt">"type"</span><span class="fu">:</span> <span class="st">"integer"</span></span>
+<span id="cb3-24"><a href="#cb3-24" tabindex="-1"></a>                    <span class="fu">},</span></span>
+<span id="cb3-25"><a href="#cb3-25" tabindex="-1"></a>                    <span class="dt">"minItems"</span><span class="fu">:</span> <span class="dv">1</span><span class="fu">,</span></span>
+<span id="cb3-26"><a href="#cb3-26" tabindex="-1"></a>                    <span class="dt">"type"</span><span class="fu">:</span> <span class="st">"array"</span></span>
+<span id="cb3-27"><a href="#cb3-27" tabindex="-1"></a>                <span class="fu">},</span></span>
+<span id="cb3-28"><a href="#cb3-28" tabindex="-1"></a>                <span class="dt">"type"</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb3-29"><a href="#cb3-29" tabindex="-1"></a>                    <span class="dt">"description"</span><span class="fu">:</span> <span class="st">"Type of data stored in this array."</span><span class="fu">,</span></span>
+<span id="cb3-30"><a href="#cb3-30" tabindex="-1"></a>                    <span class="dt">"enum"</span><span class="fu">:</span> <span class="ot">[</span></span>
+<span id="cb3-31"><a href="#cb3-31" tabindex="-1"></a>                        <span class="st">"boolean"</span><span class="ot">,</span></span>
+<span id="cb3-32"><a href="#cb3-32" tabindex="-1"></a>                        <span class="st">"number"</span><span class="ot">,</span></span>
+<span id="cb3-33"><a href="#cb3-33" tabindex="-1"></a>                        <span class="st">"integer"</span><span class="ot">,</span></span>
+<span id="cb3-34"><a href="#cb3-34" tabindex="-1"></a>                        <span class="st">"string"</span><span class="ot">,</span></span>
+<span id="cb3-35"><a href="#cb3-35" tabindex="-1"></a>                        <span class="st">"other"</span></span>
+<span id="cb3-36"><a href="#cb3-36" tabindex="-1"></a>                    <span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb3-37"><a href="#cb3-37" tabindex="-1"></a>                    <span class="dt">"type"</span><span class="fu">:</span> <span class="st">"string"</span></span>
+<span id="cb3-38"><a href="#cb3-38" tabindex="-1"></a>                <span class="fu">}</span></span>
+<span id="cb3-39"><a href="#cb3-39" tabindex="-1"></a>            <span class="fu">},</span></span>
+<span id="cb3-40"><a href="#cb3-40" tabindex="-1"></a>            <span class="dt">"required"</span><span class="fu">:</span> <span class="ot">[</span></span>
+<span id="cb3-41"><a href="#cb3-41" tabindex="-1"></a>                <span class="st">"dimensions"</span></span>
+<span id="cb3-42"><a href="#cb3-42" tabindex="-1"></a>            <span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb3-43"><a href="#cb3-43" tabindex="-1"></a>            <span class="dt">"type"</span><span class="fu">:</span> <span class="st">"object"</span></span>
+<span id="cb3-44"><a href="#cb3-44" tabindex="-1"></a>        <span class="fu">},</span></span>
+<span id="cb3-45"><a href="#cb3-45" tabindex="-1"></a>        <span class="dt">"is_child"</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb3-46"><a href="#cb3-46" tabindex="-1"></a>            <span class="dt">"default"</span><span class="fu">:</span> <span class="kw">false</span><span class="fu">,</span></span>
+<span id="cb3-47"><a href="#cb3-47" tabindex="-1"></a>            <span class="dt">"description"</span><span class="fu">:</span> <span class="st">"Is this a child document, only to be interpreted in the context of the parent document from which it is linked? This may have implications for search and metadata requirements."</span><span class="fu">,</span></span>
+<span id="cb3-48"><a href="#cb3-48" tabindex="-1"></a>            <span class="dt">"type"</span><span class="fu">:</span> <span class="st">"boolean"</span></span>
+<span id="cb3-49"><a href="#cb3-49" tabindex="-1"></a>        <span class="fu">},</span></span>
+<span id="cb3-50"><a href="#cb3-50" tabindex="-1"></a>        <span class="dt">"md5sum"</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb3-51"><a href="#cb3-51" tabindex="-1"></a>            <span class="dt">"description"</span><span class="fu">:</span> <span class="st">"MD5 checksum for the file."</span><span class="fu">,</span></span>
+<span id="cb3-52"><a href="#cb3-52" tabindex="-1"></a>            <span class="dt">"type"</span><span class="fu">:</span> <span class="st">"string"</span></span>
+<span id="cb3-53"><a href="#cb3-53" tabindex="-1"></a>        <span class="fu">},</span></span>
+<span id="cb3-54"><a href="#cb3-54" tabindex="-1"></a>        <span class="dt">"path"</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb3-55"><a href="#cb3-55" tabindex="-1"></a>            <span class="dt">"description"</span><span class="fu">:</span> <span class="st">"Path to the file in the project directory."</span><span class="fu">,</span></span>
+<span id="cb3-56"><a href="#cb3-56" tabindex="-1"></a>            <span class="dt">"type"</span><span class="fu">:</span> <span class="st">"string"</span></span>
+<span id="cb3-57"><a href="#cb3-57" tabindex="-1"></a>        <span class="fu">},</span></span>
+<span id="cb3-58"><a href="#cb3-58" tabindex="-1"></a>        <span class="dt">"sparse_triplet_matrix"</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb3-59"><a href="#cb3-59" tabindex="-1"></a>            <span class="dt">"properties"</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb3-60"><a href="#cb3-60" tabindex="-1"></a>                <span class="dt">"compression"</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb3-61"><a href="#cb3-61" tabindex="-1"></a>                    <span class="dt">"description"</span><span class="fu">:</span> <span class="st">"Type of compression applied to the file."</span><span class="fu">,</span></span>
+<span id="cb3-62"><a href="#cb3-62" tabindex="-1"></a>                    <span class="dt">"enum"</span><span class="fu">:</span> <span class="ot">[</span></span>
+<span id="cb3-63"><a href="#cb3-63" tabindex="-1"></a>                        <span class="st">"none"</span><span class="ot">,</span></span>
+<span id="cb3-64"><a href="#cb3-64" tabindex="-1"></a>                        <span class="st">"gzip"</span><span class="ot">,</span></span>
+<span id="cb3-65"><a href="#cb3-65" tabindex="-1"></a>                        <span class="st">"bzip2"</span></span>
+<span id="cb3-66"><a href="#cb3-66" tabindex="-1"></a>                    <span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb3-67"><a href="#cb3-67" tabindex="-1"></a>                    <span class="dt">"type"</span><span class="fu">:</span> <span class="st">"string"</span></span>
+<span id="cb3-68"><a href="#cb3-68" tabindex="-1"></a>                <span class="fu">},</span></span>
+<span id="cb3-69"><a href="#cb3-69" tabindex="-1"></a>                <span class="dt">"num_elements"</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb3-70"><a href="#cb3-70" tabindex="-1"></a>                    <span class="dt">"description"</span><span class="fu">:</span> <span class="st">"Number of non-zero elements in the sparse matrix."</span><span class="fu">,</span></span>
+<span id="cb3-71"><a href="#cb3-71" tabindex="-1"></a>                    <span class="dt">"minimum"</span><span class="fu">:</span> <span class="dv">0</span><span class="fu">,</span></span>
+<span id="cb3-72"><a href="#cb3-72" tabindex="-1"></a>                    <span class="dt">"type"</span><span class="fu">:</span> <span class="st">"integer"</span></span>
+<span id="cb3-73"><a href="#cb3-73" tabindex="-1"></a>                <span class="fu">}</span></span>
+<span id="cb3-74"><a href="#cb3-74" tabindex="-1"></a>            <span class="fu">},</span></span>
+<span id="cb3-75"><a href="#cb3-75" tabindex="-1"></a>            <span class="dt">"required"</span><span class="fu">:</span> <span class="ot">[</span></span>
+<span id="cb3-76"><a href="#cb3-76" tabindex="-1"></a>                <span class="st">"num_elements"</span></span>
+<span id="cb3-77"><a href="#cb3-77" tabindex="-1"></a>            <span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb3-78"><a href="#cb3-78" tabindex="-1"></a>            <span class="dt">"type"</span><span class="fu">:</span> <span class="st">"object"</span></span>
+<span id="cb3-79"><a href="#cb3-79" tabindex="-1"></a>        <span class="fu">}</span></span>
+<span id="cb3-80"><a href="#cb3-80" tabindex="-1"></a>    <span class="fu">},</span></span>
+<span id="cb3-81"><a href="#cb3-81" tabindex="-1"></a>    <span class="dt">"required"</span><span class="fu">:</span> <span class="ot">[</span></span>
+<span id="cb3-82"><a href="#cb3-82" tabindex="-1"></a>        <span class="st">"$schema"</span><span class="ot">,</span></span>
+<span id="cb3-83"><a href="#cb3-83" tabindex="-1"></a>        <span class="st">"array"</span><span class="ot">,</span></span>
+<span id="cb3-84"><a href="#cb3-84" tabindex="-1"></a>        <span class="st">"md5sum"</span><span class="ot">,</span></span>
+<span id="cb3-85"><a href="#cb3-85" tabindex="-1"></a>        <span class="st">"path"</span><span class="ot">,</span></span>
+<span id="cb3-86"><a href="#cb3-86" tabindex="-1"></a>        <span class="st">"sparse_triplet_matrix"</span></span>
+<span id="cb3-87"><a href="#cb3-87" tabindex="-1"></a>    <span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb3-88"><a href="#cb3-88" tabindex="-1"></a>    <span class="dt">"title"</span><span class="fu">:</span> <span class="st">"Sparse Triplet Matrix "</span><span class="fu">,</span></span>
+<span id="cb3-89"><a href="#cb3-89" tabindex="-1"></a>    <span class="dt">"type"</span><span class="fu">:</span> <span class="st">"object"</span></span>
+<span id="cb3-90"><a href="#cb3-90" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
 <p>Let’s put this file in the
 <code>inst/schemas/sparse_triplet_matrix</code> subdirectory of
 <em>alabaster.foo</em>.</p>
@@ -275,7 +275,7 @@ instance of that class is encountered by <code><a href="../reference/stageObject
 either directly or as a child of another object (e.g., a
 <code>SummarizedExperiment</code>’s assay).</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://Matrix.R-forge.R-project.org/" class="external-link">Matrix</a></span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://Matrix.R-forge.R-project.org" class="external-link">Matrix</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">alabaster.base</span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://bioconductor.org/packages/S4Vectors" class="external-link">S4Vectors</a></span><span class="op">)</span></span>
 <span></span>
@@ -330,17 +330,17 @@ either directly or as a child of another object (e.g., a
 <span><span class="op">)</span></span>
 <span><span class="va">x</span></span></code></pre></div>
 <pre><code><span><span class="co">## 10 x 10 sparse Matrix of class "dgTMatrix"</span></span>
-<span><span class="co">##                                                           </span></span>
-<span><span class="co">##  [1,] .          . 0.4664237 . . .         . .         . .</span></span>
-<span><span class="co">##  [2,] .          . .         . . 0.6900903 . .         . .</span></span>
-<span><span class="co">##  [3,] 0.01802033 . .         . . .         . .         . .</span></span>
-<span><span class="co">##  [4,] .          . .         . . .         . .         . .</span></span>
-<span><span class="co">##  [5,] .          . 0.6064454 . . .         . .         . .</span></span>
-<span><span class="co">##  [6,] .          . .         . . .         . 0.6896237 . .</span></span>
-<span><span class="co">##  [7,] .          . .         . . .         . .         . .</span></span>
-<span><span class="co">##  [8,] .          . .         . . .         . .         . .</span></span>
-<span><span class="co">##  [9,] .          . .         . . .         . .         . .</span></span>
-<span><span class="co">## [10,] .          . .         . . .         . .         . .</span></span></code></pre>
+<span><span class="co">##                                                         </span></span>
+<span><span class="co">##  [1,] .         . 0.05742332 . . .         . .       . .</span></span>
+<span><span class="co">##  [2,] .         . .          . . 0.4361316 . .       . .</span></span>
+<span><span class="co">##  [3,] 0.2470173 . .          . . .         . .       . .</span></span>
+<span><span class="co">##  [4,] .         . .          . . .         . .       . .</span></span>
+<span><span class="co">##  [5,] .         . 0.51100837 . . .         . .       . .</span></span>
+<span><span class="co">##  [6,] .         . .          . . .         . 0.85773 . .</span></span>
+<span><span class="co">##  [7,] .         . .          . . .         . .       . .</span></span>
+<span><span class="co">##  [8,] .         . .          . . .         . .       . .</span></span>
+<span><span class="co">##  [9,] .         . .          . . .         . .       . .</span></span>
+<span><span class="co">## [10,] .         . .          . . .         . .       . .</span></span></code></pre>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">tmp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/files2.html" class="external-link">dir.create</a></span><span class="op">(</span><span class="va">tmp</span><span class="op">)</span></span>
@@ -395,17 +395,17 @@ files. In this case, it’s fairly simple:</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">loadSparseTripletMatrix</span><span class="op">(</span><span class="va">meta</span>, <span class="va">tmp</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## 10 x 10 sparse Matrix of class "dgTMatrix"</span></span>
-<span><span class="co">##                                                           </span></span>
-<span><span class="co">##  [1,] .          . 0.4664237 . . .         . .         . .</span></span>
-<span><span class="co">##  [2,] .          . .         . . 0.6900903 . .         . .</span></span>
-<span><span class="co">##  [3,] 0.01802033 . .         . . .         . .         . .</span></span>
-<span><span class="co">##  [4,] .          . .         . . .         . .         . .</span></span>
-<span><span class="co">##  [5,] .          . 0.6064454 . . .         . .         . .</span></span>
-<span><span class="co">##  [6,] .          . .         . . .         . 0.6896237 . .</span></span>
-<span><span class="co">##  [7,] .          . .         . . .         . .         . .</span></span>
-<span><span class="co">##  [8,] .          . .         . . .         . .         . .</span></span>
-<span><span class="co">##  [9,] .          . .         . . .         . .         . .</span></span>
-<span><span class="co">## [10,] .          . .         . . .         . .         . .</span></span></code></pre>
+<span><span class="co">##                                                         </span></span>
+<span><span class="co">##  [1,] .         . 0.05742332 . . .         . .       . .</span></span>
+<span><span class="co">##  [2,] .         . .          . . 0.4361316 . .       . .</span></span>
+<span><span class="co">##  [3,] 0.2470173 . .          . . .         . .       . .</span></span>
+<span><span class="co">##  [4,] .         . .          . . .         . .       . .</span></span>
+<span><span class="co">##  [5,] .         . 0.51100837 . . .         . .       . .</span></span>
+<span><span class="co">##  [6,] .         . .          . . .         . 0.85773 . .</span></span>
+<span><span class="co">##  [7,] .         . .          . . .         . .       . .</span></span>
+<span><span class="co">##  [8,] .         . .          . . .         . .       . .</span></span>
+<span><span class="co">##  [9,] .         . .          . . .         . .       . .</span></span>
+<span><span class="co">## [10,] .         . .          . . .         . .       . .</span></span></code></pre>
 <p>To register this method with <em><a href="https://github.com/alabaster.base" class="external-link">alabaster.base</a></em>,
 <em>alabaster.foo</em> should add itself to the known schema locations
 upon load:</p>
@@ -540,7 +540,7 @@ called even if the user hasn’t loaded your package.</p>
 </h2>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/sessionInfo.html" class="external-link">sessionInfo</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## R Under development (unstable) (2023-03-02 r83926)</span></span>
+<pre><code><span><span class="co">## R version 4.3.1 (2023-06-16)</span></span>
 <span><span class="co">## Platform: x86_64-pc-linux-gnu (64-bit)</span></span>
 <span><span class="co">## Running under: Ubuntu 22.04.2 LTS</span></span>
 <span><span class="co">## </span></span>
@@ -564,27 +564,25 @@ called even if the user hasn’t loaded your package.</p>
 <span><span class="co">## [8] base     </span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## other attached packages:</span></span>
-<span><span class="co">## [1] S4Vectors_0.37.4      BiocGenerics_0.45.0   alabaster.base_0.99.5</span></span>
-<span><span class="co">## [4] Matrix_1.5-3          BiocStyle_2.27.1     </span></span>
+<span><span class="co">## [1] S4Vectors_0.39.1      BiocGenerics_0.47.0   alabaster.base_0.99.9</span></span>
+<span><span class="co">## [4] Matrix_1.6-0          BiocStyle_2.29.1     </span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## loaded via a namespace (and not attached):</span></span>
-<span><span class="co">##  [1] sass_0.4.5               stringi_1.7.12           lattice_0.20-45         </span></span>
-<span><span class="co">##  [4] jsonvalidate_1.3.2       digest_0.6.31            magrittr_2.0.3          </span></span>
-<span><span class="co">##  [7] evaluate_0.20            grid_4.3.0               bookdown_0.32           </span></span>
-<span><span class="co">## [10] fastmap_1.1.1            rprojroot_2.0.3          jsonlite_1.8.4          </span></span>
-<span><span class="co">## [13] alabaster.schemas_0.99.1 BiocManager_1.30.20      purrr_1.0.1             </span></span>
-<span><span class="co">## [16] HDF5Array_1.27.0         textshaping_0.3.6        jquerylib_0.1.4         </span></span>
-<span><span class="co">## [19] cli_3.6.0                rlang_1.0.6              cachem_1.0.7            </span></span>
-<span><span class="co">## [22] DelayedArray_0.25.0      yaml_2.3.7               tools_4.3.0             </span></span>
-<span><span class="co">## [25] memoise_2.0.1            Rhdf5lib_1.21.0          alabaster.matrix_0.99.1 </span></span>
-<span><span class="co">## [28] curl_5.0.0               vctrs_0.5.2              R6_2.5.1                </span></span>
-<span><span class="co">## [31] matrixStats_0.63.0       lifecycle_1.0.3          rhdf5_2.43.1            </span></span>
-<span><span class="co">## [34] stringr_1.5.0            fs_1.6.1                 V8_4.2.2                </span></span>
-<span><span class="co">## [37] IRanges_2.33.0           ragg_1.2.5               desc_1.4.2              </span></span>
-<span><span class="co">## [40] pkgdown_2.0.7            bslib_0.4.2              glue_1.6.2              </span></span>
-<span><span class="co">## [43] Rcpp_1.0.10              systemfonts_1.0.4        xfun_0.37               </span></span>
-<span><span class="co">## [46] MatrixGenerics_1.11.0    knitr_1.42               rhdf5filters_1.11.1     </span></span>
-<span><span class="co">## [49] htmltools_0.5.4          rmarkdown_2.20           compiler_4.3.0</span></span></code></pre>
+<span><span class="co">##  [1] jsonlite_1.8.7          compiler_4.3.1          BiocManager_1.30.21.1  </span></span>
+<span><span class="co">##  [4] Rcpp_1.0.11             stringr_1.5.0           rhdf5filters_1.13.5    </span></span>
+<span><span class="co">##  [7] jquerylib_0.1.4         systemfonts_1.0.4       textshaping_0.3.6      </span></span>
+<span><span class="co">## [10] yaml_2.3.7              fastmap_1.1.1           jsonvalidate_1.3.2     </span></span>
+<span><span class="co">## [13] lattice_0.21-8          R6_2.5.1                curl_5.0.1             </span></span>
+<span><span class="co">## [16] knitr_1.43              bookdown_0.34           desc_1.4.2             </span></span>
+<span><span class="co">## [19] rprojroot_2.0.3         bslib_0.5.0             rlang_1.1.1            </span></span>
+<span><span class="co">## [22] V8_4.3.3                cachem_1.0.8            stringi_1.7.12         </span></span>
+<span><span class="co">## [25] xfun_0.39               fs_1.6.3                sass_0.4.7             </span></span>
+<span><span class="co">## [28] memoise_2.0.1           cli_3.6.1               Rhdf5lib_1.23.0        </span></span>
+<span><span class="co">## [31] pkgdown_2.0.7           magrittr_2.0.3          digest_0.6.33          </span></span>
+<span><span class="co">## [34] grid_4.3.1              alabaster.schemas_1.1.2 rhdf5_2.45.1           </span></span>
+<span><span class="co">## [37] lifecycle_1.0.3         vctrs_0.6.3             evaluate_0.21          </span></span>
+<span><span class="co">## [40] glue_1.6.2              ragg_1.2.5              rmarkdown_2.23         </span></span>
+<span><span class="co">## [43] purrr_1.0.1             tools_4.3.1             htmltools_0.5.5</span></span></code></pre>
 </div>
   </div>
 
