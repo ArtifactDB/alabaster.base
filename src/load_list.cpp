@@ -38,13 +38,7 @@ struct RTypedVector : public uzuki2::TypedVector<T, tt>, public RBase {
         if (named) {
             vec.names() = names;
         }
-
-        if constexpr(tt == uzuki2::DATETIME) {
-            Rcpp::Function f("as.POSIXct");   
-            return f(vec, Rcpp::Named("format", "%Y-%m-%dT%H:%M:%S%z"));
-        } else {
-            return vec; 
-        }
+        return vec; 
     }
 
     void is_scalar() {}
@@ -100,23 +94,54 @@ void RDateVector::set_missing(size_t i) {
     return;
 }
 
-typedef RTypedVector<std::string, uzuki2::DATETIME, Rcpp::StringVector> RDateTimeVector;
+/** Date-time vector requires a bit more effort. **/
 
-template<>
-void RDateTimeVector::set(size_t i, std::string val) {
-    // Stripping out the time zone ':' because as.POSIXct gets confused.
-    if (val.size() >= 3) {
-        val.erase(val.size() - 3, 1);
+struct RDateTimeVector : public uzuki2::TypedVector<std::string, uzuki2::DATETIME>, public RBase {
+    RDateTimeVector(size_t s) : vec(s) {}
+
+    size_t size() const { 
+        return vec.size();
     }
-    vec[i] = val;
-    return;
-}
 
-template<>
-void RDateTimeVector::set_missing(size_t i) {
-    vec[i] = NA_STRING;
-    return;
-}
+    void set(size_t i, std::string val) {
+        if (val.size() >= 3 && val[val.size() - 3] == ':') { // Need to erase the colon, as this confuses as.POSIXct.
+            val.erase(val.size() - 3, 1);
+        }
+        vec[i] = val;
+        return;
+    }
+
+    void set_missing(size_t i) {
+        vec[i] = NA_STRING;
+    }
+
+    void use_names() {
+        named = true;
+        names = Rcpp::CharacterVector(vec.size());
+        return;
+    }
+
+    void set_name(size_t i, std::string nm) {
+        names[i] = nm;
+        return;
+    }
+
+    Rcpp::RObject extract_object() { 
+        if (named) {
+            vec.names() = names;
+        }
+        Rcpp::Function f("as.POSIXct");   
+        return f(vec, Rcpp::Named("format", "%Y-%m-%dT%H:%M:%S%z"));
+    }
+
+    void is_scalar() {}
+
+    Rcpp::StringVector vec;
+    bool named = false;
+    Rcpp::CharacterVector names;
+};
+
+/** As do factors. **/
 
 struct RFactor : public uzuki2::Factor, public RBase {
     RFactor(size_t s, size_t l) : vec(s), levels(l) {}
