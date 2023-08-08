@@ -1,4 +1,8 @@
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - master
+  pull_request:
 
 name: R CMD check
 
@@ -6,14 +10,33 @@ jobs:
   check:
     name: R CMD check
     runs-on: ubuntu-latest
-    container: ghcr.io/artifactdb/alabaster-docker/builder:latest
+    container: bioconductor/bioconductor_docker:devel
+
     steps:
-    - uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-    - name: Build the package
-      run: R CMD build .
+      - name: Set directories
+        run: |
+          echo "R_PKG_DIR=${R_HOME}/site-library" >> $GITHUB_ENV
 
-    - name: Test the package
-      run: |
-        tarball=$(ls *.tar.gz)
-        R CMD check --no-manual $tarball
+      - name: Restore the package directory
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.R_PKG_DIR }}
+          key: check-packages
+
+      - name: Install dependencies
+        shell: Rscript {0}
+        run: |
+          stuff <- read.dcf("DESCRIPTION")
+          stuff <- stuff[,intersect(colnames(stuff), c("Imports", "LinkingTo", "Suggests", "Depends"))]
+          deps <- unlist(strsplit(stuff, ",\\s*"), use.names=FALSE)
+          BiocManager::install(deps)
+
+      - name: Build the package
+        run: R CMD build .
+  
+      - name: Check the package
+        run: |
+          tarball=$(ls *.tar.gz)
+          R CMD check --no-manual $tarball
