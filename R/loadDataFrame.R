@@ -113,6 +113,7 @@ loadDataFrame <- function(info, project, include.nested=TRUE, parallel=TRUE) {
             df[[i]] <- as.Date(df[[i]])
 
         } else if (col.type=="date-time") {
+            # Remove colon in the timezone, which confuses as.POSIXct().
             df[[i]] <- as.POSIXct(sub(":([0-9]{2})$", "\\1", df[[i]]), format="%Y-%m-%dT%H:%M:%S%z")
 
         } else if (col.type %in% names(atomics)) {

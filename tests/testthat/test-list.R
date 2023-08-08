@@ -308,7 +308,7 @@ test_that("we handle lists with NULLs", {
 })
 
 test_that("we handle lists with times", {
-    now <- as.POSIXct(round(Sys.time()))         
+    now <- as.POSIXct(round(Sys.time()), tz="")
     vals <- list(now, list(list(now + 10000), c(X=now + 400000, Y=now + 1000000)))
 
     tmp <- tempfile()
