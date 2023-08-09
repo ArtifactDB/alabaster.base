@@ -18,7 +18,7 @@ More methods may be defined by other packages to extend the alabaster.base frame
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">alabaster.base</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.99.9</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.1.0</span>
       </span>
     </div>
 
@@ -93,41 +93,55 @@ The actual path used to save <code>x</code> may include additional components, s
     
 
 <p><code>dir</code> is populated with files containing the contents of <code>x</code>.
-All created files should be prefixed by <code>path</code>, either in the file name or as part of a subdirectory path.</p>
-
-
-<p>A named list containing the metadata for <code>x</code> is returned, containing at least:</p><ul><li><p><code>$schema</code>, a string specifying the schema to use to validate the metadata.
-This may be decorated with the <code>package</code> attribute to help <code><a href="writeMetadata.html">.writeMetadata</a></code> find the package containing the schema.</p></li>
-<li><p><code>path</code>, a string containing the path to some file prefixed by the input <code>path</code>.</p></li>
-<li><p><code>is_child</code>, a logical scalar equal to the input <code>child</code>.</p></li>
-</ul><p>All files created by a <code>stageObject</code> method should be referenced from the metadata list, directly or otherwise (e.g., via child resources).</p>
+A named list containing the metadata for <code>x</code> is returned.</p>
     </div>
     <div id="details">
     <h2>Details</h2>
-    <p>Methods for the <code>stageObject</code> generic are expected to create a subdirectory at the input <code>path</code> inside <code>dir</code>.
+    <p>Methods for the <code>stageObject</code> generic should create a subdirectory at the input <code>path</code> inside <code>dir</code>.
 All files (artifacts and metadata documents) required to represent <code>x</code> on disk should be created inside <code>path</code>.
-The expected contents of <code>path</code> are:</p><ul><li><p>Exactly one JSON metadata document with a name ending in <code>.json</code>.
-This contains the metadata describing <code>x</code>, according to the schema defined in the <code>$schema</code> property.
-If a data file exists (see next), the <code>path</code> property should contain the relative path to that file from <code>dir</code>;
-otherwise it should contain the relative path of the metadata document itself.</p></li>
-<li><p>(Optional) A file containing the data inside <code>x</code>.
-This file should have the same name as the metadata file after stripping the <code>.json</code> extension.
+Upon method completion, <code>path</code> should contain:</p><ul><li><p>Zero or one file containing the data inside <code>x</code>.
 Methods are free to choose any format and name within <code>path</code> except for the <code>.json</code> file extension, 
-which is reserved for metadata documents created with <code><a href="writeMetadata.html">.writeMetadata</a></code>.</p></li>
-<li><p>(Optional) Further subdirectories containing child objects of <code>x</code>.
-Each child object should be saved in its own subdirectory, and should be referenced via a <code>resource</code> object within the metadata for <code>x</code>.
-When saving children, methods should call <code><a href="altStageObject.html">.stageObject</a></code> rather than <code>stageObject</code> (note the period at the start of the former).
-This ensures that the staging method will respect customizations from alabaster applications that define their own generic in <code><a href="altStageObject.html">.altStageObject</a></code>.</p></li>
-</ul><p>Methods can create both a data file and multiple subdirectories.
-In this manner, we can decompose complex <code>x</code> into their components for easier handling.</p>
-<p>Keep in mind that the returned <code>path</code> will differ from the input <code>path</code>;
-the latter refers to the directory while the former refers to a file inside the directory.
-Methods should use the former to reference <code>x</code> from the metadata of a parent object.</p>
-<p>The <code>stageObject</code> generic will check if the <code>path</code> already exists before dispatching to the methods.
+which is reserved for JSON metadata documents (see below).
+The presence of such a file is optional and may be omitted for metadata-only schemas.</p></li>
+<li><p>Zero or many subdirectories containing child objects of <code>x</code>.
+Each child object should be saved in its own subdirectory within <code>dir</code>, 
+which can have any name that does not conflict with the data file (if present) and does not end with <code>.json</code>.
+This allows developers to decompose complex <code>x</code> into their components for more flexible staging/loading.</p></li>
+</ul><p>The return value of each method should be a named list of metadata, 
+which will (eventually) be passed to <code><a href="writeMetadata.html">.writeMetadata</a></code> to save a JSON metadata file inside the <code>path</code> subdirectory.
+This list should contain at least:</p><ul><li><p><code>$schema</code>, a string specifying the schema to use to validate the metadata for the class of <code>x</code>.
+This may be decorated with the <code>package</code> attribute to help <code><a href="writeMetadata.html">.writeMetadata</a></code> find the package containing the schema.</p></li>
+<li><p><code>path</code>, a string containing the relative path to the object's file representation inside <code>dir</code>.
+For clarity, we will denote the input <code>path</code> argument as PATHIN and the output <code>path</code> property as PATHOUT.
+These are different as PATHIN refers to the directory while PATHOUT refers to a file inside the directory.</p>
+<p>If a data file exists, PATHOUT should contain the relative path to that file from <code>dir</code>.
+Otherwise, for metadata-only schemas, PATHOUT should be set to a relative path of a JSON file inside the PATHIN subdirectory,
+specifying the location in which the metadata is to be saved by <code><a href="writeMetadata.html">.writeMetadata</a></code>.</p></li>
+<li><p><code>is_child</code>, a logical scalar equal to the input <code>child</code>.</p></li>
+</ul><p>This list will usually contain more useful elements to describe <code>x</code>.
+The exact nature of those elements will depend on the specified schema for the class of <code>x</code>.</p>
+<p>The <code>stageObject</code> generic will check if PATHIN already exists inside <code>dir</code> before dispatching to the methods.
 If so, it will throw an error to ensure that downstream name clashes do not occur.
-The exception is if <code>path = "."</code>, in which case no check is performed; this is useful for eliminating subdirectories in situations where the project contains only one object.</p>
-<p>Any attempt to use the <code>stageObject</code> generic to save another non-child object into <code>path</code> or its subdirectories will cause an error.
-This ensures that <code>path</code> contains all and only the contents of <code>x</code>.</p>
+The exception is if PATHIN is <code>"."</code>, in which case no check is performed; this is useful for eliminating subdirectories in situations where the project contains only one object.</p>
+    </div>
+    <div id="saving-child-objects">
+    <h2>Saving child objects</h2>
+    
+
+<p>The concept of child objects allows developers to break down complex objects into its basic components for convenience.
+For example, if one <a href="https://rdrr.io/pkg/S4Vectors/man/DataFrame-class.html" class="external-link">DataFrame</a> is nested within another as a separate column, the former is a child and the latter is the parent.
+A list of multiple <a href="https://rdrr.io/pkg/S4Vectors/man/DataFrame-class.html" class="external-link">DataFrame</a>s will also represent each DataFrame as a child object.
+This allows developers to re-use the staging/loading code for DataFrames when reconstructing the complex parent object.</p>
+<p>If a <code>stageObject</code> method needs to save a child object, it should do so in a subdirectory of PATHIN (i.e., the input <code>path</code> argument).
+This is achieved by calling <code><a href="altStageObject.html">.stageObject</a>(child, dir, subpath)</code> where <code>child</code> is the child component of <code>x</code> and <code>subdir</code> is the desired subdirectory path.
+Note the period at the start of the function, which ensures that the method respects customizations from alabaster applications (see <code><a href="altStageObject.html">.altStageObject</a></code> for details).
+We also suggest creating <code>subdir</code> with <code>paste0(path, "/", subname)</code> for a given subdirectory name, which avoids potential problems with non-<code>/</code> file separators.</p>
+<p>After creating the child object's subdirectory, the <code>stageObject</code> method should call <code><a href="writeMetadata.html">.writeMetadata</a></code> on the output of <code>.stageObject</code> to save the child's metadata.
+This will return a list that can be inserted into the parent's metadata list for the method's return value.
+All child files created by a <code>stageObject</code> method should be referenced from the metadata list, 
+i.e., the child metadata's PATHOUT should be present in in the metadata list as a <code>resource</code> entry somewhere.</p>
+<p>Any attempt to use the <code>stageObject</code> generic to save another non-child object into PATHIN or its subdirectories will cause an error.
+This ensures that PATHIN contains all and only the contents of <code>x</code>.</p>
     </div>
     <div id="see-also">
     <h2>See also</h2>

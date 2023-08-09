@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">alabaster.base</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.99.9</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.1.0</span>
       </span>
     </div>
 
@@ -60,7 +60,16 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">loadObject</span><span class="op">(</span><span class="va">info</span>, <span class="va">project</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">loadObject</span><span class="op">(</span><span class="va">info</span>, <span class="va">project</span>, <span class="va">...</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">customloadObjectHelper</span><span class="op">(</span></span>
+<span>  <span class="va">info</span>,</span>
+<span>  <span class="va">project</span>,</span>
+<span>  <span class="va">...</span>,</span>
+<span>  <span class="va">.locations</span>,</span>
+<span>  <span class="va">.memory</span>,</span>
+<span>  .fallback <span class="op">=</span> <span class="cn">NULL</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -77,6 +86,19 @@ By default, this should be a string containing the path to a staging directory.<
 <dt>...</dt>
 <dd><p>Further arguments to pass to the specific loading function listed in the schema.</p></dd>
 
+
+<dt>.locations</dt>
+<dd><p>Character vector of package names containing application-specific schemas.</p></dd>
+
+
+<dt>.memory</dt>
+<dd><p>An environment used to cache the loading functions, to avoid extra schema file reads on subsequent calls.</p></dd>
+
+
+<dt>.fallback</dt>
+<dd><p>Function that accepts a schema string (e.g., <code>"data_frame/v1.json"</code>) and returns the path to a schema.
+If <code>NULL</code>, no fallback is used and an error is raised if the schema cannot be found.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
@@ -86,19 +108,33 @@ By default, this should be a string containing the path to a staging directory.<
     </div>
     <div id="details">
     <h2>Details</h2>
-    <p>The <code>loadObject</code> function is intended to load objects where the class is not known in advance.
-Most typically, this is indirectly called inside other loading functions to restore <em>child</em> objects of arbitrary type.
-Once in memory, the child objects can then be assembled into more complex objects by the caller.
-(It would be unwise to use <code>loadObject</code> to try restore a non-child object as this would result in infinite recursion.)</p>
-<p>This function will look through the schemas in <span class="pkg">alabaster.schemas</span> to find the schema specified in <code>info$`$schema`</code>.
-Upon discovery, <code>loadObject</code> will extract the loading function from the <code>_attributes.restore.R</code> property of the schema;
+    <p>The <code>loadObject</code> function loads an object from file into memory based on the schema specified in <code>info</code>,
+effectively reversing the activity of the corresponding <code><a href="stageObject.html">stageObject</a></code> method.
+It does so by extracting the name of the appropriate loading function from the <code>_attributes.restore.R</code> property of the schema;
 this should be a string that contains a namespaced function, which can be parsed and evaluated to obtain said function.
-<code>loadObject</code> will then call the loading function with the supplied arguments.
-Developers can temporarily add extra packages to the schema search path by supplying package names in the <code>alabaster.schema.locations</code> option;
-schema files are expected to be stored in the <code>schemas</code> subdirectory of each package's installation directory.</p>
-<p>Developers of Artificer extensions should use <code><a href="altLoadObject.html">.loadObject</a></code> rather than calling <code>loadObject</code> directly.
+<code>loadObject</code> will then call the loading function with the supplied arguments.</p>
+    </div>
+    <div id="comments-for-extension-developers">
+    <h2>Comments for extension developers</h2>
+    
+
+<p>When writing alabaster extensions, developers may need to load child objects inside the loading functions for their classes. 
+In such cases, developers should use <code><a href="altLoadObject.html">.loadObject</a></code> rather than calling <code>loadObject</code> directly.
 This ensures that any application-level overrides of the loading functions are respected. 
-Developers of Artificer applications should also read the commentary in <code>?"<a href="altLoadObject.html">.altLoadObject</a>"</code>.</p>
+Once in memory, the child objects can then be assembled into more complex objects by the caller.</p>
+<p>By default, this function will look through the schemas in <span class="pkg">alabaster.schemas</span> to find the schema specified in <code>info$`$schema`</code>.
+Developers of alabaster extensions can temporarily add extra packages to the schema search path by supplying package names in the <code>alabaster.schema.locations</code> option;
+schema files are expected to be stored in the <code>schemas</code> subdirectory of each package's installation directory. 
+(Long term, extension developers should request that their packages be added to <code>loadObject</code>'s own search path.)</p>
+    </div>
+    <div id="comments-for-application-developers">
+    <h2>Comments for application developers</h2>
+    
+
+<p>Application developers can override the behavior of <code>loadObject</code> by specifying a custom function in <code><a href="altLoadObject.html">.altLoadObject</a></code>.
+This is typically used to point to a different set of application-specific schemas, 
+which can in turn point to different loading functions in their <code>_application.restore.R</code> properties.
+In most applications, the custom override can be defined with <code>customloadObjectHelper</code>, which simplifies the process of specifying a different set of schemas.</p>
     </div>
     <div id="author">
     <h2>Author</h2>
