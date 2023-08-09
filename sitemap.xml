@@ -43,6 +43,12 @@
     <loc>/reference/index.html</loc>
   </url>
   <url>
+    <loc>/reference/loadAllMetadata.html</loc>
+  </url>
+  <url>
+    <loc>/reference/loadAllObjects.html</loc>
+  </url>
+  <url>
     <loc>/reference/loadBaseList.html</loc>
   </url>
   <url>
