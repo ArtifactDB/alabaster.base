@@ -15,8 +15,6 @@ loadAllObjects(dir, redirect.action = c("from", "to", "both"))
 \item \code{"from"} will report an object at the redirection source(s), not the destination.
 \item \code{"both"} will report an object at both the redirection source(s) and destination.
 }}
-
-\item{...}{Further arguments to pass to \code{\link{fetchObject}}.}
 }
 \value{
 A named list is returned containing all (non-child) R objects in \code{dir}.

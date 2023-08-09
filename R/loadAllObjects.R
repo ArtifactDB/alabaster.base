@@ -4,7 +4,6 @@
 #' Children are used to assemble their parent objects and are not reported here.
 #'
 #' @param dir String containing a path to a staging directory.
-#' @param ... Further arguments to pass to \code{\link{fetchObject}}.
 #' @param redirect.action String specifying how redirects should be handled:
 #' \itemize{
 #' \item \code{"to"} will report an object at the redirection destination, not the redirection source.

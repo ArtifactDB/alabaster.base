@@ -62,7 +62,7 @@ restore.memory$cache <- list()
     schema <- info[["$schema"]]
 
     if (is.null(FUN <- .memory$cache[[schema]])) {
-        schema.path <- .hunt_for_schemas(schema, .locations)
+        schema.path <- .hunt_for_schemas(schema, .locations, .fallback=.fallback)
 
         schema.data <- fromJSON(schema.path, simplifyVector=TRUE, simplifyMatrix=FALSE, simplifyDataFrame=FALSE)
         restore <- schema.data[["_attributes"]][["restore"]][["R"]]
@@ -80,7 +80,7 @@ restore.memory$cache <- list()
 #' @export
 schemaLocations <- function() c(getOption("alabaster.schema.locations"), "alabaster.schemas")
 
-.hunt_for_schemas <- function(schema, .locations) {
+.hunt_for_schemas <- function(schema, .locations, .fallback=NULL) {
     schema.path <- "" 
     for (pkg in .locations) {
         schema.path <- system.file("schemas", schema, package=pkg)
