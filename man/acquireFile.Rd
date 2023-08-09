@@ -33,15 +33,19 @@ As one might expect, these are typically used inside a \code{load*} function.
 }
 \details{
 By default, files and metadata are loaded from the same staging directory that is written to by \code{\link{stageObject}}.
-Artificer applications can define custom methods to obtain the files and metadata from a different location, e.g., remote databases.
-This is achieved by dispatching on a different value of \code{project}.
+alabaster applications can define custom methods to obtain the files and metadata from a different location, e.g., remote databases.
+This is achieved by dispatching on a different class of \code{project}.
 
 Each custom acquisition method should take two arguments.
 The first argument is an R object representing some concept of a \dQuote{project}.
 In the default case, this is a string containing a path to the staging directory representing the project.
 However, it can be anything, e.g., a number containing a database identifier, a list of identifiers and versions, and so on -
 as long as the custom acquisition method is capable of understanding it, the \code{load*} functions don't care.
+
 The second argument is a string containing the relative path to the resource inside that project.
+This should be the path to a specific file inside the project, not the subdirectory containing the file.
+More concretely, it should be equivalent to the \code{path} in the \emph{output} of \code{\link{stageObject}},
+not the path to the subdirectory used as the input to the same function.
 
 The return value for each custom acquisition function should be the same as their local counterparts.
 That is, any custom file acquisition function should return a file path,

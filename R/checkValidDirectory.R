@@ -5,7 +5,7 @@
 #' @param dir String containing the path to a staging directory.
 #' @param validate.metadata Whether to validate each metadata JSON file against the schema.
 #' @param schema.locations Character vector containing the name of the package containing the JSON schemas.
-#' Only used if \code{validate.metadata=TRUE}; if \code{NULL}, defaults to \code{\link{schemaLocations}}.
+#' Only used if \code{validate.metadata=TRUE}; if \code{NULL}, defaults to the locations described in \code{\link{loadObject}}.
 #' @param attempt.load Whether to validate each object by attempting to load it into memory.
 #'
 #' @return \code{NULL} invisibly on success, otherwise an error is raised.
@@ -62,7 +62,7 @@ checkValidDirectory <- function(dir, validate.metadata = TRUE, schema.locations 
 
     schema.paths <- list()
     if (is.null(schema.locations)) {
-        schema.locations <- schemaLocations()
+        schema.locations <- .default_schema_locations()
     }
 
     # Opening all the metadata files.

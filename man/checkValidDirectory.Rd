@@ -17,7 +17,7 @@ checkValidDirectory(
 \item{validate.metadata}{Whether to validate each metadata JSON file against the schema.}
 
 \item{schema.locations}{Character vector containing the name of the package containing the JSON schemas.
-Only used if \code{validate.metadata=TRUE}; if \code{NULL}, defaults to \code{\link{schemaLocations}}.}
+Only used if \code{validate.metadata=TRUE}; if \code{NULL}, defaults to the locations described in \code{\link{loadObject}}.}
 
 \item{attempt.load}{Whether to validate each object by attempting to load it into memory.}
 }
