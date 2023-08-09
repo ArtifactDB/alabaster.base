@@ -36,6 +36,17 @@ test_that("checkValidDirectory throws with invalid metadata", {
     expect_error(checkValidDirectory(tmp, validate.metadata=FALSE), NA)
 })
 
+test_that("checkValidDirectory throws with invalid objects", {
+    tmp <- tempfile()
+    dir.create(tmp, recursive=TRUE)
+    info <- stageObject(df, tmp, "foo")
+    .writeMetadata(info, tmp)
+    write(file=file.path(tmp, info$path), "YAAAA")
+
+    expect_error(checkValidDirectory(tmp), NA)
+    expect_error(checkValidDirectory(tmp, attempt.load=TRUE), "foo/simple.csv.gz")
+})
+
 test_that("checkValidDirectory throws with inconsistent paths", {
     {
         tmp <- tempfile()

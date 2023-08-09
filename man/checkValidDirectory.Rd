@@ -4,7 +4,12 @@
 \alias{checkValidDirectory}
 \title{Check if a staging directory is valid}
 \usage{
-checkValidDirectory(dir, validate.metadata = TRUE, schema.locations = NULL)
+checkValidDirectory(
+  dir,
+  validate.metadata = TRUE,
+  schema.locations = NULL,
+  attempt.load = FALSE
+)
 }
 \arguments{
 \item{dir}{String containing the path to a staging directory.}
@@ -13,6 +18,8 @@ checkValidDirectory(dir, validate.metadata = TRUE, schema.locations = NULL)
 
 \item{schema.locations}{Character vector containing the name of the package containing the JSON schemas.
 Only used if \code{validate.metadata=TRUE}; if \code{NULL}, defaults to \code{\link{schemaLocations}}.}
+
+\item{attempt.load}{Whether to validate each object by attempting to load it into memory.}
 }
 \value{
 \code{NULL} invisibly on success, otherwise an error is raised.
@@ -38,6 +45,11 @@ This function will also check that redirections are valid:
 
 If \code{validate.metadata=TRUE}, this function will validate each metadata file against its specified JSON schema.
 Applications may set \code{schema.locations} to point to an appropriate set of schemas other than the defaults in \pkg{alabaster.base}.
+
+If \code{attempt.load=TRUE}, this function will attempt to load each non-child object into memory.
+This serves as an additional validation step to check that the contents of each file are valid (at least, according to the \code{loadObject} functions).
+However, it may be time-consuming and so defaults to \code{FALSE}.
+Child objects are assumed to be loaded as part of their parents and are not explicitly checked.
 }
 \examples{
 # Mocking up an object:
