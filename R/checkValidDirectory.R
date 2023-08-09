@@ -86,7 +86,7 @@ checkValidDirectory <- function(dir, validate.metadata = TRUE, schema.locations 
             tryCatch(
                 jsonvalidate::json_validate(jpath, schema.path, error=TRUE, engine="ajv"), 
                 error=function(e) {
-                    stop("failed to validate metadata at '", jpath, "', ", e$message)
+                    stop("failed to validate metadata at '", jpath, "'\n  - ", e$message)
                 }
             )
         }
