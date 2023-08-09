@@ -59,17 +59,17 @@
         pkg <- "alabaster.schemas"
     }
 
-    schema <- system.file("schemas", schema.id, package=pkg)
-    if (schema == "") {
+    schema.path <- system.file("schemas", schema.id, package=pkg)
+    if (schema.path == "") {
         stop("failed to find '", schema.id, "' in package '", pkg, "'")
     }
 
     # Avoid an extra look-up from file.
-    if (schema %in% names(schema.details$is.meta)) {
-        meta.only <- schema.details$is.meta[[schema]]
+    if (schema.path %in% names(schema.details$is.meta)) {
+        meta.only <- schema.details$is.meta[[schema.path]]
     } else {
-        meta.only <- isTRUE(fromJSON(schema)[["_attributes"]][["metadata_only"]])
-        schema.details$is.meta[[schema]] <- meta.only
+        meta.only <- isTRUE(fromJSON(schema.path)[["_attributes"]][["metadata_only"]])
+        schema.details$is.meta[[schema.path]] <- meta.only
     }
 
     meta$path <- gsub("^\\./", "", meta$path) # stripping this out for convenience.
@@ -84,7 +84,7 @@
 
     jpath <- file.path(dir, jpath)
     write(file=jpath, toJSON(meta, pretty=TRUE, auto_unbox=TRUE, digits=NA))
-    jsonvalidate::json_validate(jpath, schema, error=TRUE, engine="ajv") 
+    jsonvalidate::json_validate(jpath, schema.path, error=TRUE, engine="ajv") 
 
     list(type="local", path=meta$path)
 }
