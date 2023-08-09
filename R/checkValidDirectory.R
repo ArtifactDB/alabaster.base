@@ -3,6 +3,9 @@
 #' Check whether a staging directory is valid in terms of its structure and metadata.
 #'
 #' @param dir String containing the path to a staging directory.
+#' @param validate.metadata Whether to validate each metadata JSON file against the schema.
+#' @param schema.locations Character vector containing the name of the package containing the JSON schemas.
+#' Only used if \code{validate.metadata=TRUE}; if \code{NULL}, defaults to \code{\link{schemaLocations}}.
 #'
 #' @return \code{NULL} invisibly on success, otherwise an error is raised.
 #'
@@ -21,6 +24,9 @@
 #' \item The \code{path} property of the redirection does \emph{not} exist and is consistent with the path of the redirection document.
 #' \item The redirection target location exists in the directory.
 #' }
+#'
+#' If \code{validate.metadata=TRUE}, this function will validate each metadata file against its specified JSON schema.
+#' Applications may set \code{schema.locations} to point to an appropriate set of schemas other than the defaults in \pkg{alabaster.base}.
 #'
 #' @author Aaron Lun
 #' @examples
@@ -42,11 +48,16 @@
 #' checkValidDirectory(tmp)
 #' @export
 #' @importFrom jsonlite fromJSON
-checkValidDirectory <- function(dir) {
+checkValidDirectory <- function(dir, validate.metadata = TRUE, schema.locations = NULL) {
     all.files <- list.files(dir, recursive=TRUE)
     is.json <- endsWith(all.files, ".json")
     meta.files <- all.files[is.json]
     other.files <- all.files[!is.json]
+
+    schema.paths <- list()
+    if (is.null(schema.locations)) {
+        schema.locations <- schemaLocations()
+    }
 
     # Opening all the metadata files.
     am.child <- character(0)
@@ -55,10 +66,27 @@ checkValidDirectory <- function(dir) {
     redirects <- character(0)
 
     for (metapath in meta.files) {
-        meta <- fromJSON(file.path(dir, metapath), simplifyVector=TRUE, simplifyMatrix=FALSE, simplifyDataFrame=FALSE)
+        jpath <- file.path(dir, metapath)
+        meta <- fromJSON(jpath, simplifyVector=TRUE, simplifyMatrix=FALSE, simplifyDataFrame=FALSE)
+
+        schema.id <- meta[["$schema"]]
+        if (validate.metadata) {
+            if (!(schema.id %in% schema.paths)) {
+                schema.path <- .hunt_for_schemas(meta[["$schema"]], schema.locations)
+                schema.paths[[schema.id]] <- schema.path
+            } 
+            schema.path <- schema.paths[[schema.id]]
+
+            tryCatch(
+                jsonvalidate::json_validate(jpath, schema.path, error=TRUE, engine="ajv"), 
+                error=function(e) {
+                    stop("failed to validate metadata at '", jpath, "', ", e$message)
+                }
+            )
+        }
 
         # Special case for redirections
-        if (startsWith(meta[["$schema"]], "redirection/")) {
+        if (startsWith(schema.id, "redirection/")) {
             if (paste0(meta$path, ".json") != metapath) {
                 stop("metadata in '", metapath, "' references an unexpected path '", meta$path, "'")
             }

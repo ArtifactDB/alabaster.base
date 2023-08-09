@@ -4,10 +4,15 @@
 \alias{checkValidDirectory}
 \title{Check if a staging directory is valid}
 \usage{
-checkValidDirectory(dir)
+checkValidDirectory(dir, validate.metadata = TRUE, schema.locations = NULL)
 }
 \arguments{
 \item{dir}{String containing the path to a staging directory.}
+
+\item{validate.metadata}{Whether to validate each metadata JSON file against the schema.}
+
+\item{schema.locations}{Character vector containing the name of the package containing the JSON schemas.
+Only used if \code{validate.metadata=TRUE}; if \code{NULL}, defaults to \code{\link{schemaLocations}}.}
 }
 \value{
 \code{NULL} invisibly on success, otherwise an error is raised.
@@ -30,6 +35,9 @@ This function will also check that redirections are valid:
 \item The \code{path} property of the redirection does \emph{not} exist and is consistent with the path of the redirection document.
 \item The redirection target location exists in the directory.
 }
+
+If \code{validate.metadata=TRUE}, this function will validate each metadata file against its specified JSON schema.
+Applications may set \code{schema.locations} to point to an appropriate set of schemas other than the defaults in \pkg{alabaster.base}.
 }
 \examples{
 # Mocking up an object:

@@ -48,7 +48,7 @@ loadObject <- function(info, project, ...) {
     .loadObjectInternal(info, 
         project, 
         ...,
-        .locations=c(getOption("alabaster.schema.locations"), "alabaster.schemas"),
+        .locations=schemaLocations(),
         .memory=restore.memory
     )
 }
@@ -62,21 +62,7 @@ restore.memory$cache <- list()
     schema <- info[["$schema"]]
 
     if (is.null(FUN <- .memory$cache[[schema]])) {
-        # Hunt for our schemas!
-        schema.path <- "" 
-        for (pkg in .locations) {
-            schema.path <- system.file("schemas", schema, package=pkg)
-            if (schema.path != "") {
-                break
-            }
-        }
-
-        if (schema.path == "") {
-            if (is.null(.fallback)) {
-                stop("couldn't find the '", schema, "' schema")
-            }
-            schema.path <- .fallback(schema)
-        }
+        schema.path <- .hunt_for_schemas(schema, .locations)
 
         schema.data <- fromJSON(schema.path, simplifyVector=TRUE, simplifyMatrix=FALSE, simplifyDataFrame=FALSE)
         restore <- schema.data[["_attributes"]][["restore"]][["R"]]
@@ -92,7 +78,23 @@ restore.memory$cache <- list()
 }
 
 #' @export
-schemaLocations <- function() {
-    .Deprecated()
-    c(getOption("alabaster.schema.locations"), "alabaster.schemas")
+schemaLocations <- function() c(getOption("alabaster.schema.locations"), "alabaster.schemas")
+
+.hunt_for_schemas <- function(schema, .locations) {
+    schema.path <- "" 
+    for (pkg in .locations) {
+        schema.path <- system.file("schemas", schema, package=pkg)
+        if (schema.path != "") {
+            break
+        }
+    }
+
+    if (schema.path == "") {
+        if (is.null(.fallback)) {
+            stop("couldn't find the '", schema, "' schema")
+        }
+        schema.path <- .fallback(schema)
+    }
+
+    schema.path
 }

@@ -23,6 +23,19 @@ test_that("checkValidDirectory works as expected", {
     expect_error(checkValidDirectory(tmp), NA)
 })
 
+test_that("checkValidDirectory throws with invalid metadata", {
+    tmp <- tempfile()
+    dir.create(tmp, recursive=TRUE)
+    info <- stageObject(df, tmp, "foo")
+
+    info2 <- info
+    info2$data_frame$YAY <- TRUE
+    write(file=file.path(tmp, paste0(info$path, ".json")), jsonlite::toJSON(info2, pretty=TRUE, auto_unbox=TRUE, digits=NA))
+
+    expect_error(checkValidDirectory(tmp), "data_frame")
+    expect_error(checkValidDirectory(tmp, validate.metadata=FALSE), NA)
+})
+
 test_that("checkValidDirectory throws with inconsistent paths", {
     {
         tmp <- tempfile()
