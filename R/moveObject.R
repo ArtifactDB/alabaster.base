@@ -78,7 +78,7 @@ moveObject <- function(dir, from, to, rename.redirections = TRUE) {
                 x <- survivors[[i]]
                 if (x$type == "local" && x$location == refpath) {
                     renamed <- TRUE
-                    x$location <- new.refpath
+                    survivors[[i]]$location <- new.refpath
                     break
                 }
             }
@@ -113,7 +113,7 @@ moveObject <- function(dir, from, to, rename.redirections = TRUE) {
     contents <- list.files(location, all.files=TRUE, no..=TRUE)
 
     from_slash <- paste0(from, "/")
-    to_slash <- paste0(from, "/")
+    to_slash <- paste0(to, "/")
     new.ref <- NULL
 
     for (x in contents) {
@@ -141,7 +141,7 @@ moveObject <- function(dir, from, to, rename.redirections = TRUE) {
     new.ref
 }
 
-.update_resource_paths <- function(meta, from, to) {
+.update_resource_paths <- function(meta, from_slash, to_slash) {
     modified <- FALSE
     replace.resource <- FALSE
     resmeta <- NULL
