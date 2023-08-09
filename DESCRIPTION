@@ -16,9 +16,9 @@ Imports:
     S4Vectors,
     rhdf5,
     jsonlite,
-    jsonvalidate,
     Rcpp
 Suggests:
+    jsonvalidate,
     BiocStyle,
     rmarkdown,
     knitr,
