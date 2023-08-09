@@ -85,7 +85,7 @@ A <code>NULL</code> is invisibly returned.</p>
     </div>
     <div id="details">
     <h2>Details</h2>
-    <p>This function will around <code>path</code> for JSON files containing redirections to <code>path</code>, and remove them.
+    <p>This function will search around <code>path</code> for JSON files containing redirections to <code>path</code>, and remove them.
 More specifically, if <code>path</code> is a subdirectory, it will search in the same directory containing <code>path</code>;
 otherwise, it will search in the directory containing <code>dirname(path)</code>.
 Redirections in other locations will not be removed automatically - these will be caught by <code><a href="checkValidDirectory.html">checkValidDirectory</a></code> and should be manually removed.</p>
