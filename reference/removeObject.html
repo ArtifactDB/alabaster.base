@@ -80,7 +80,8 @@ This can also be a redirection to such an object.</p></dd>
     <h2>Value</h2>
     
 
-<p>The object represented by <code>path</code> is removed, along with any redirections to it.</p>
+<p>The object represented by <code>path</code> is removed, along with any redirections to it.
+A <code>NULL</code> is invisibly returned.</p>
     </div>
     <div id="details">
     <h2>Details</h2>
@@ -134,13 +135,10 @@ Redirections in other locations will not be removed automatically - these will b
 <span class="r-out co"><span class="r-pr">#&gt;</span> [3] "stuff/list.json.gz"               "stuff/list.json.gz.json"         </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [5] "whee/simple.csv.gz"               "whee/simple.csv.gz.json"         </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [7] "whoop.json"                      </span>
-<span class="r-in"><span><span class="fu">removeObject</span><span class="op">(</span><span class="va">tmp</span>, <span class="st">"whee"</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in acquireMetadata(dir, path):</span> 'whee' has no accompanying JSON metadata file</span>
+<span class="r-in"><span><span class="fu">removeObject</span><span class="op">(</span><span class="va">tmp</span>, <span class="st">"whoop"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/list.files.html" class="external-link">list.files</a></span><span class="op">(</span><span class="va">tmp</span>, recursive<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "stuff/child-1/simple.csv.gz"      "stuff/child-1/simple.csv.gz.json"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [3] "stuff/list.json.gz"               "stuff/list.json.gz.json"         </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [5] "whee/simple.csv.gz"               "whee/simple.csv.gz.json"         </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [7] "whoop.json"                      </span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
