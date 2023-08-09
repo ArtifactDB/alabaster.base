@@ -60,13 +60,22 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">checkValidDirectory</span><span class="op">(</span><span class="va">dir</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">checkValidDirectory</span><span class="op">(</span><span class="va">dir</span>, validate.metadata <span class="op">=</span> <span class="cn">TRUE</span>, schema.locations <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>dir</dt>
 <dd><p>String containing the path to a staging directory.</p></dd>
+
+
+<dt>validate.metadata</dt>
+<dd><p>Whether to validate each metadata JSON file against the schema.</p></dd>
+
+
+<dt>schema.locations</dt>
+<dd><p>Character vector containing the name of the package containing the JSON schemas.
+Only used if <code>validate.metadata=TRUE</code>; if <code>NULL</code>, defaults to <code><a href="loadObject.html">schemaLocations</a></code>.</p></dd>
 
 </dl></div>
     <div id="value">
@@ -84,7 +93,9 @@
 <li><p>Each child object is referenced exactly once in its parent object's metadata.</p></li>
 </ul><p>This function will also check that redirections are valid:</p><ul><li><p>The <code>path</code> property of the redirection does <em>not</em> exist and is consistent with the path of the redirection document.</p></li>
 <li><p>The redirection target location exists in the directory.</p></li>
-</ul></div>
+</ul><p>If <code>validate.metadata=TRUE</code>, this function will validate each metadata file against its specified JSON schema.
+Applications may set <code>schema.locations</code> to point to an appropriate set of schemas other than the defaults in <span class="pkg">alabaster.base</span>.</p>
+    </div>
     <div id="author">
     <h2>Author</h2>
     <p>Aaron Lun</p>
