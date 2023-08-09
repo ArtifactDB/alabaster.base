@@ -23,6 +23,13 @@
 #'
 #' If \code{rename.redirections=TRUE}, this function will additionally move the redirection files so that they are named as \code{to}.
 #' In the unusual case where \code{from} is the target of multiple redirection files, the renaming process will clobber all of them such that only one of them will be present after the move.
+#'
+#' @section Safety of moving operations:
+#' In general, \pkg{alabaster.*} representations are safe to move as only the parent object's \code{resource.path} metadata properties will contain links to the children's paths.
+#' These links are updated with the new \code{to} path after running \code{moveObject} on the parent \code{from}.
+#'
+#' However, alabaster applications may define custom data structures where the paths are present elsewhere, e.g., in the data file itself or in other metadata properties.
+#' If so, applications are reponsible for updating those paths to reflect the naming to \code{to}.
 #' 
 #' @examples
 #' tmp <- tempfile()
@@ -79,6 +86,7 @@ moveObject <- function(dir, from, to, rename.redirections = TRUE) {
             if (renamed) {
                 if (rename.redirections) {
                     meta$path <- to
+                    unlink(redpath)
                 }
                 meta[["redirection"]][["targets"]] <- survivors
                 .writeMetadata(meta, dir)
@@ -90,7 +98,7 @@ moveObject <- function(dir, from, to, rename.redirections = TRUE) {
 }
 
 .replace_path <- function(path, from_slash, to_slash) {
-    if (!startsWith(resmeta$path, from_slash)) {
+    if (!startsWith(path, from_slash)) {
         NULL
     } else {
         paste0(to_slash, substr(path, nchar(from_slash) + 1, nchar(path)))
@@ -112,27 +120,24 @@ moveObject <- function(dir, from, to, rename.redirections = TRUE) {
         full <- file.path(location, x)
         if (file.info(full)$isdir) {
             nested.ref <- .recursive_move(dir, paste0(from_slash, x), paste0(to_slash, x))
-            unlink(full, recursive=TRUE)
-            next
-        }
 
-        if (endsWith(x, ".json")) {
+        } else if (endsWith(x, ".json")) {
             meta <- fromJSON(full, simplifyVector=FALSE)
             meta$path <- .replace_path(meta$path, from_slash, to_slash)
-            if (!is.null(meta$path)) {
+            if (is.null(meta$path)) {
                 stop("'path' in metadata is expected to start with '", from_slash, "'")
             }
 
             updated <- .update_resource_paths(meta, from_slash, to_slash)
-            write(file=jpath, toJSON(updated$metadata, pretty=TRUE, auto_unbox=TRUE, digits=NA))
+            write(file=file.path(target, x), toJSON(updated$metadata, pretty=TRUE, auto_unbox=TRUE, digits=NA))
             new.ref <- meta$path
-        }
 
-        if (!file.rename(full, file.path(target, x))) {
+        } else if (!file.rename(full, file.path(target, x))) {
             stop("failed to rename '", x, "' from '", from, "' to '", to, "'")
         }
     }
 
+    unlink(location, recursive=TRUE)
     new.ref
 }
 
@@ -150,7 +155,7 @@ moveObject <- function(dir, from, to, rename.redirections = TRUE) {
                     resmeta$path <- new.path
                     modified <- TRUE
                     replace.resource <- TRUE
-                    meta$resource <- 1234
+                    meta$resource <- FALSE # avoid needless recursion below.
                 }
             }
         }
