@@ -48,3 +48,62 @@ test_that("removeObject works correctly for redirected calls", {
     expect_false(file.exists(file.path(tmp, "whee/simple.csv.gz.json")))
     expect_false(file.exists(file.path(tmp, "whoop.json")))
 })
+
+test_that("moveObject works correctly for children", {
+    tmp <- populate()
+    expect_true(file.exists(file.path(tmp, "stuff/list.json.gz")))
+    expect_true(file.exists(file.path(tmp, "stuff/child-1/simple.csv.gz")))
+
+    moveObject(tmp, "stuff/list.json.gz", "mikasa")
+    expect_false(file.exists(file.path(tmp, "stuff/list.json.gz")))
+    expect_false(file.exists(file.path(tmp, "stuff/child-1/simple.csv.gz")))
+    expect_true(file.exists(file.path(tmp, "mikasa/list.json.gz")))
+    expect_true(file.exists(file.path(tmp, "mikasa/child-1/simple.csv.gz")))
+
+    meta <- acquireMetadata(tmp, "mikasa/list.json.gz")
+    out <- loadObject(meta, tmp)
+    expect_identical(out, ll)
+})
+
+test_that("moveObject works correctly for direct calls", {
+    tmp <- populate()
+    expect_true(file.exists(file.path(tmp, "stuff/list.json.gz")))
+    expect_true(file.exists(file.path(tmp, "whee/simple.csv.gz")))
+    expect_true(file.exists(file.path(tmp, "whee/simple.csv.gz.json")))
+    expect_true(file.exists(file.path(tmp, "whoop.json")))
+
+    moveObject(tmp, "whee/simple.csv.gz", "YAY")
+    expect_true(file.exists(file.path(tmp, "stuff/list.json.gz")))
+    expect_false(file.exists(file.path(tmp, "whee/simple.csv.gz")))
+    expect_false(file.exists(file.path(tmp, "whee/simple.csv.gz.json")))
+    expect_false(file.exists(file.path(tmp, "whoop.json")))
+    expect_true(file.exists(file.path(tmp, "YAY/simple.csv.gz")))
+    expect_true(file.exists(file.path(tmp, "YAY/simple.csv.gz.json")))
+    expect_true(file.exists(file.path(tmp, "YAY.json")))
+
+    meta <- acquireMetadata(tmp, "YAY")
+    out <- loadObject(meta, tmp)
+    expect_identical(out, df)
+})
+
+test_that("moveObject works correctly for redirected calls", {
+    tmp <- populate()
+    expect_true(file.exists(file.path(tmp, "stuff/list.json.gz")))
+    expect_true(file.exists(file.path(tmp, "whee/simple.csv.gz")))
+    expect_true(file.exists(file.path(tmp, "whee/simple.csv.gz.json")))
+    expect_true(file.exists(file.path(tmp, "whoop.json")))
+
+    moveObject(tmp, "whoop", "YAY")
+    expect_true(file.exists(file.path(tmp, "stuff/list.json.gz")))
+    expect_false(file.exists(file.path(tmp, "whee/simple.csv.gz")))
+    expect_false(file.exists(file.path(tmp, "whee/simple.csv.gz.json")))
+    expect_false(file.exists(file.path(tmp, "whoop.json")))
+    expect_true(file.exists(file.path(tmp, "YAY/simple.csv.gz")))
+    expect_true(file.exists(file.path(tmp, "YAY/simple.csv.gz.json")))
+    expect_true(file.exists(file.path(tmp, "YAY.json")))
+
+    meta <- acquireMetadata(tmp, "YAY")
+    out <- loadObject(meta, tmp)
+    expect_identical(out, df)
+})
+
