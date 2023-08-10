@@ -11,12 +11,12 @@ df$Z <- DataFrame(AA = sample(ncols))
 
 test_that("validateDirectory works as expected", {
     tmp <- tempfile()
-    dircreate(tmp, recursive=TRUE)
+    dir.create(tmp, recursive=TRUE)
 
     # Mocking up a directory.
     writeMetadata(stageObject(df, tmp, "foo"), tmp)
     writeMetadata(stageObject(df, tmp, "bar"), tmp)
-    dircreate(file.path(tmp, "whee"))
+    dir.create(file.path(tmp, "whee"))
     writeMetadata(stageObject(df, tmp, "whee/stuff"), tmp)
     writeMetadata(createRedirection(tmp, "whee/stuff", "whee/stuff/simple.csv.gz"), tmp)
 
@@ -25,7 +25,7 @@ test_that("validateDirectory works as expected", {
 
 test_that("validateDirectory throws with invalid metadata", {
     tmp <- tempfile()
-    dircreate(tmp, recursive=TRUE)
+    dir.create(tmp, recursive=TRUE)
     info <- stageObject(df, tmp, "foo")
 
     info2 <- info
@@ -38,7 +38,7 @@ test_that("validateDirectory throws with invalid metadata", {
 
 test_that("validateDirectory throws with invalid objects", {
     tmp <- tempfile()
-    dircreate(tmp, recursive=TRUE)
+    dir.create(tmp, recursive=TRUE)
     info <- stageObject(df, tmp, "foo")
     writeMetadata(info, tmp)
     write(file=file.path(tmp, info$path), "YAAAA")
@@ -50,7 +50,7 @@ test_that("validateDirectory throws with invalid objects", {
 test_that("validateDirectory throws with inconsistent paths", {
     {
         tmp <- tempfile()
-        dircreate(tmp, recursive=TRUE)
+        dir.create(tmp, recursive=TRUE)
 
         # Path does not match the JSON file name.
         writeMetadata(stageObject(df, tmp, "foo"), tmp)
@@ -61,7 +61,7 @@ test_that("validateDirectory throws with inconsistent paths", {
 
     {
         tmp <- tempfile()
-        dircreate(tmp, recursive=TRUE)
+        dir.create(tmp, recursive=TRUE)
 
         # Path does not exist.
         writeMetadata(stageObject(df, tmp, "foo"), tmp)
@@ -74,7 +74,7 @@ test_that("validateDirectory throws with inconsistent paths", {
 test_that("validateDirectory throws with non-nested children", {
     {
         tmp <- tempfile()
-        dircreate(tmp, recursive=TRUE)
+        dir.create(tmp, recursive=TRUE)
 
         meta <- stageObject(df, tmp, "foo")
         oldnest <- meta$data_frame$columns[[3]]$resource$path
@@ -91,7 +91,7 @@ test_that("validateDirectory throws with non-nested children", {
     # This time, a more subtle error because it doesn't belong in a subdirectory.
     {
         tmp <- tempfile()
-        dircreate(tmp, recursive=TRUE)
+        dir.create(tmp, recursive=TRUE)
 
         meta <- stageObject(df, tmp, "foo")
         oldnest <- meta$data_frame$columns[[3]]$resource$path
@@ -109,7 +109,7 @@ test_that("validateDirectory throws with non-nested children", {
 
 test_that("validateDirectory throws with non-child references", {
     tmp <- tempfile()
-    dircreate(tmp, recursive=TRUE)
+    dir.create(tmp, recursive=TRUE)
 
     meta <- stageObject(df, tmp, "foo")
     writeMetadata(meta, tmp)
@@ -123,7 +123,7 @@ test_that("validateDirectory throws with non-child references", {
 
 test_that("validateDirectory throws with multiple child references", {
     tmp <- tempfile()
-    dircreate(tmp, recursive=TRUE)
+    dir.create(tmp, recursive=TRUE)
 
     meta <- stageObject(df, tmp, "foo")
     meta$data_frame$columns <- meta$data_frame$columns[c(1,2,3,3)]
@@ -134,7 +134,7 @@ test_that("validateDirectory throws with multiple child references", {
 
 test_that("validateDirectory throws with missing child object", {
     tmp <- tempfile()
-    dircreate(tmp, recursive=TRUE)
+    dir.create(tmp, recursive=TRUE)
 
     meta <- stageObject(df, tmp, "foo")
     writeMetadata(meta, tmp)
@@ -145,7 +145,7 @@ test_that("validateDirectory throws with missing child object", {
 
 test_that("validateDirectory throws with extra child object", {
     tmp <- tempfile()
-    dircreate(tmp, recursive=TRUE)
+    dir.create(tmp, recursive=TRUE)
 
     meta <- stageObject(df, tmp, "foo")
     meta$data_frame$columns <- meta$data_frame$columns[c(1,2)]
@@ -156,7 +156,7 @@ test_that("validateDirectory throws with extra child object", {
 
 test_that("validateDirectory throws with nested non-child object", {
     tmp <- tempfile()
-    dircreate(tmp, recursive=TRUE)
+    dir.create(tmp, recursive=TRUE)
 
     meta <- stageObject(df, tmp, "foo")
     child <- meta$data_frame$columns[[3]]$resource$path
@@ -172,7 +172,7 @@ test_that("validateDirectory throws with nested non-child object", {
 
 test_that("validateDirectory throws with random extra objects", {
     tmp <- tempfile()
-    dircreate(tmp, recursive=TRUE)
+    dir.create(tmp, recursive=TRUE)
 
     meta <- stageObject(df, tmp, "foo")
     writeMetadata(meta, tmp)
@@ -184,7 +184,7 @@ test_that("validateDirectory throws with random extra objects", {
 test_that("validateDirectory handles redirects correctly", {
     {
         tmp <- tempfile()
-        dircreate(tmp, recursive=TRUE)
+        dir.create(tmp, recursive=TRUE)
 
         # Mocking up a directory.
         writeMetadata(stageObject(df, tmp, "foo"), tmp)
@@ -198,7 +198,7 @@ test_that("validateDirectory handles redirects correctly", {
 
     {
         tmp <- tempfile()
-        dircreate(tmp, recursive=TRUE)
+        dir.create(tmp, recursive=TRUE)
 
         # Mocking up a directory.
         writeMetadata(stageObject(df, tmp, "foo"), tmp)
@@ -211,7 +211,7 @@ test_that("validateDirectory handles redirects correctly", {
 
     {
         tmp <- tempfile()
-        dircreate(tmp, recursive=TRUE)
+        dir.create(tmp, recursive=TRUE)
 
         # Mocking up a directory.
         writeMetadata(stageObject(df, tmp, "foo"), tmp)
