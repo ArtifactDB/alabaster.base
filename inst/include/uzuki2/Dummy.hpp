@@ -76,7 +76,7 @@ struct DummyList : public List {
 struct DummyProvisioner {
     static Nothing* new_Nothing() { return (new DummyNothing); }
 
-    static External* new_External(void* p) { return (new DummyExternal); }
+    static External* new_External(void*) { return (new DummyExternal); }
 
     static List* new_List(size_t l) { return (new DummyList(l)); }
 
@@ -98,7 +98,7 @@ struct DummyProvisioner {
 struct DummyExternals {
     DummyExternals(size_t n) : number(n) {}
 
-    void* get(size_t i) const {
+    void* get(size_t) const {
         return nullptr;
     }
 

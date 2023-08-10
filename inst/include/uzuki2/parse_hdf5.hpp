@@ -46,7 +46,7 @@ std::string load_string_attribute(const H5Object& handle, const std::string& fie
 }
 
 template<class Function>
-void load_string_dataset(const H5::DataSet& handle, hsize_t full_length, const std::string& path, Function fun) {
+void load_string_dataset(const H5::DataSet& handle, hsize_t full_length, Function fun) {
     auto dtype = handle.getDataType();
 
     // TODO: read this in chunks.
@@ -149,7 +149,7 @@ void parse_string_like(const H5::DataSet& handle, Host* ptr, const std::string& 
         missing_val = load_string_attribute(ahandle, placeholder, path);
     }
 
-    load_string_dataset(handle, ptr->size(), path, [&](size_t i, std::string x) -> void {
+    load_string_dataset(handle, ptr->size(), [&](size_t i, std::string x) -> void {
         if (has_missing && x == missing_val) {
             ptr->set_missing(i);
         } else {
@@ -204,7 +204,7 @@ void parse_names(const H5::Group& handle, Host* ptr, const std::string& path, co
             throw std::runtime_error("length of '" + npath + "' should be equal to length of '" + dpath + "'");
         }
 
-        load_string_dataset(nhandle, nlen, npath, [&](size_t i, std::string x) -> void { ptr->set_name(i, x); });
+        load_string_dataset(nhandle, nlen, [&](size_t i, std::string x) -> void { ptr->set_name(i, x); });
     }
 }
 
@@ -220,11 +220,11 @@ std::shared_ptr<Base> parse_inner(const H5::Group& handle, Externals& ext, const
             throw std::runtime_error("expected a group at '" + dpath + "'");
         }
         auto dhandle = handle.openGroup("data");
-        auto len = dhandle.getNumObjs();
+        size_t len = dhandle.getNumObjs();
         auto lptr = Provisioner::new_List(len);
         output.reset(lptr);
 
-        for (int i = 0; i < len; ++i) {
+        for (size_t i = 0; i < len; ++i) {
             auto istr = std::to_string(i);
             auto ipath = dpath + "/" + istr;
             if (!dhandle.exists(istr) || dhandle.childObjType(istr) != H5O_TYPE_GROUP) {
@@ -254,7 +254,7 @@ std::shared_ptr<Base> parse_inner(const H5::Group& handle, Externals& ext, const
         if (vector_type == "integer") {
             auto iptr = Provisioner::new_Integer(len);
             output.reset(iptr);
-            parse_integer_like(dhandle, iptr, dpath, [](int32_t x) -> void {});
+            parse_integer_like(dhandle, iptr, dpath, [](int32_t) -> void {});
             if (is_scalar) {
                 iptr->is_scalar();
             }
@@ -282,7 +282,7 @@ std::shared_ptr<Base> parse_inner(const H5::Group& handle, Externals& ext, const
             if (levtype.getClass() != H5T_STRING) {
                 throw std::runtime_error("expected a string dataset at '" + levpath + "'");
             }
-            auto levlen = check_1d_length(levhandle, levpath, false);
+            int32_t levlen = check_1d_length(levhandle, levpath, false); // use int-32 for comparison with the integer codes.
 
             // Then we can initialize the interface.
             auto fptr = Provisioner::new_Factor(len, levlen);
@@ -298,7 +298,7 @@ std::shared_ptr<Base> parse_inner(const H5::Group& handle, Externals& ext, const
             });
 
             std::unordered_set<std::string> present;
-            load_string_dataset(levhandle, levlen, levpath, [&](size_t i, std::string x) -> void { 
+            load_string_dataset(levhandle, levlen, [&](size_t i, std::string x) -> void { 
                 if (present.find(x) != present.end()) {
                     throw std::runtime_error("levels should be unique at '" + levpath + "'");
                 }
@@ -309,7 +309,7 @@ std::shared_ptr<Base> parse_inner(const H5::Group& handle, Externals& ext, const
         } else if (vector_type == "string") {
             auto sptr = Provisioner::new_String(len);
             output.reset(sptr);
-            parse_string_like(dhandle, sptr, dpath, [](const std::string& x) -> void {});
+            parse_string_like(dhandle, sptr, dpath, [](const std::string&) -> void {});
             if (is_scalar) {
                 sptr->is_scalar();
             }
@@ -338,7 +338,7 @@ std::shared_ptr<Base> parse_inner(const H5::Group& handle, Externals& ext, const
         } else if (vector_type == "number") {
             auto dptr = Provisioner::new_Number(len);
             output.reset(dptr);
-            parse_numbers(dhandle, dptr, dpath, [](double x) -> void {});
+            parse_numbers(dhandle, dptr, dpath, [](double) -> void {});
             if (is_scalar) {
                 dptr->is_scalar();
             }

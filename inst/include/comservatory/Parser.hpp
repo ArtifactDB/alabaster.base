@@ -401,10 +401,10 @@ public:
     template<class Reader>
     void parse(Reader& reader, Contents& info, bool parallel) {
         if (parallel) {
-            byteme::PerByteParallel input(reader);
+            byteme::PerByteParallel input(&reader);
             parse_loop(input, info);
         } else {
-            byteme::PerByte input(reader);
+            byteme::PerByte input(&reader);
             parse_loop(input, info);
         }
     }

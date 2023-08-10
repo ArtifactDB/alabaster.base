@@ -32,7 +32,7 @@ public:
         unsigned char header[3];
         size_t read;
         {
-            RawFileReader::SelfClosingFILE file(path);
+            SelfClosingFILE file(path, "rb");
             read = std::fread(header, sizeof(unsigned char), 3, file.handle);
         }
 
@@ -49,8 +49,8 @@ public:
      */
     SomeFileReader(const std::string& path, size_t buffer_size = 65536) : SomeFileReader(path.c_str(), buffer_size) {}
 
-    bool operator()() {
-        return source->operator()();
+    bool load() {
+        return source->load();
     }
 
     const unsigned char* buffer() const {

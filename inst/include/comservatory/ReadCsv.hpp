@@ -7,11 +7,7 @@
 #include "Field.hpp"
 #include "Parser.hpp"
 
-#ifdef COMSERVATORY_USE_ZLIB
-#include "byteme/SomeFileReader.hpp"
-#else
-#include "byteme/RawFileReader.hpp"
-#endif
+#include "byteme/byteme.hpp"
 
 /**
  * @file ReadCsv.hpp
@@ -112,11 +108,10 @@ public:
      *
      * @return The `Contents` of the CSV file.
      *
-     * Gzip support requires the `COMSERVATORY_USE_ZLIB` macro to be defined,
-     * and for the library to be linked against Zlib.
+     * Gzip support requires linking to the Zlib library.
      */
     Contents read(const char* path) const {
-#ifdef COMSERVATORY_USE_ZLIB
+#if __has_include("zlib.h")
         byteme::SomeFileReader reader(path);
 #else
         byteme::RawFileReader reader(path);
@@ -129,8 +124,7 @@ public:
      *
      * @return The `Contents` of the CSV file.
      *
-     * Gzip support requires the `COMSERVATORY_USE_ZLIB` macro to be defined,
-     * and for the library to be linked against Zlib.
+     * Gzip support requires linking to the Zlib library.
      */
     Contents read(std::string path) const {
         return read(path.c_str());

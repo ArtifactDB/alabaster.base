@@ -37,7 +37,7 @@ private:
              * https://stackoverflow.com/questions/1838699/how-can-i-decompress-a-gzip-stream-with-zlib
              * https://stackoverflow.com/questions/29003909/why-is-a-different-zlib-window-bits-value-required-for-extraction-compared-with
              */
-            int ret;
+            int ret = 0;
             if (mode == 0) { // DEFLATE
                 ret = inflateInit2(&strm, -MAX_WBITS); 
             } else if (mode == 1) { // Zlib
@@ -46,7 +46,9 @@ private:
                 ret = inflateInit2(&strm, 16+MAX_WBITS); 
             } else if (mode == 3) { // Gzip/Zlib auto-detected
                 ret = inflateInit2(&strm, 32+MAX_WBITS); 
-            } 
+            } else {
+                throw std::runtime_error("mode must be 0 (DEFLATE), 1 (Zlib), 2 (Gzip) or 3 (automatic");
+            }
 
             if (ret != Z_OK) {
                 throw 1;
@@ -83,11 +85,15 @@ public:
         zstr.strm.next_in = const_cast<unsigned char*>(buffer); // cast is purely for C compatibility.
     }
 
-    bool operator()() {
+    bool load() {
         /* This function is stolen from the loop in 'inf()' at
          * http://www.zlib.net/zpipe.c, with some shuffling of code to make it
          * a bit more C++-like.
          */
+
+        if (!okay) {
+            return false;
+        }
 
         // Not entirely sure why we need to check for this, but
         // https://zlib.net/zpipe.c does it, and so will we; because not doing
@@ -106,11 +112,13 @@ public:
             case Z_DATA_ERROR:
             case Z_MEM_ERROR:
                 throw std::runtime_error("zlib error");
+            case Z_STREAM_END:
+                okay = false;
+                break;
         }
 
         read = buffer_.size() - zstr.strm.avail_out;
-
-        return (ret != Z_STREAM_END);
+        return true;
     }
 
     const unsigned char* buffer() const {
@@ -125,6 +133,7 @@ private:
     ZStream zstr;
     std::vector<unsigned char> buffer_;
     size_t read = 0;
+    bool okay = true;
 };
 
 }

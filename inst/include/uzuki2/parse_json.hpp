@@ -374,10 +374,10 @@ public:
     std::shared_ptr<Base> parse(byteme::Reader& reader, Externals ext) {
         std::shared_ptr<millijson::Base> contents;
         if (parallel) {
-            byteme::PerByte bytestream(reader);
+            byteme::PerByte bytestream(&reader);
             contents = millijson::parse(bytestream);
         } else {
-            byteme::PerByteParallel bytestream(reader);
+            byteme::PerByteParallel bytestream(&reader);
             contents = millijson::parse(bytestream);
         }
 
