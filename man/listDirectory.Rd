@@ -2,7 +2,7 @@
 % Please edit documentation in R/listDirectory.R
 \name{listDirectory}
 \alias{listDirectory}
-\alias{listAllObjects}
+\alias{listLocalObjects}
 \title{List staged objects in a directory}
 \usage{
 listDirectory(dir, ignore.children = TRUE)

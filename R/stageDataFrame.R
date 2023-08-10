@@ -63,10 +63,10 @@
 #' 
 #' @export
 #' @aliases
-#' addStringPlaceholderAttribute
-#' chooseStringPlaceholder
-#' .addStringPlaceholderAttribute
-#' .chooseStringPlaceholder
+#' addMissingStringPlaceholderAttribute
+#' chooseMissingStringPlaceholder
+#' .addMissingStringPlaceholderAttribute
+#' .chooseMissingStringPlaceholder
 #' 
 #' @rdname stageDataFrame
 #' @importFrom utils write.csv
@@ -248,7 +248,7 @@ setMethod("stageObject", "DataFrame", function(x, dir, path, child=FALSE, df.nam
 
         missing.placeholder <- NULL
         if (is.character(current) && anyNA(current)) {
-            missing.placeholder <- .chooseMissingStringPlaceholder(current)
+            missing.placeholder <- chooseMissingStringPlaceholder(current)
             current[is.na(current)] <- missing.placeholder
         }
 
@@ -256,7 +256,7 @@ setMethod("stageObject", "DataFrame", function(x, dir, path, child=FALSE, df.nam
         h5write(current, ofile, prefix(paste0("data/", data.name)))
 
         if (!is.null(missing.placeholder)) {
-            .addMissingStringPlaceholderAttribute(ofile, prefix(paste0("data/", data.name)), missing.placeholder)
+            addMissingStringPlaceholderAttribute(ofile, prefix(paste0("data/", data.name)), missing.placeholder)
         }
     }
 

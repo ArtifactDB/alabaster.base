@@ -32,7 +32,7 @@
 #' names(all.meta) 
 #'
 #' @export
-#' @aliases listAllObjects
+#' @aliases listLocalObjects 
 #' @importFrom jsonlite fromJSON
 listDirectory <- function(dir, ignore.children = TRUE) {
     all.json <- list.files(dir, pattern="\\.json$", recursive=TRUE)

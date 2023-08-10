@@ -19,8 +19,6 @@ quickStageObject(x, dir, path, ...)
 \item{...}{Further arguments to pass to \code{\link{loadObject}} (for \code{quickLoadObject}) or \code{\link{stageObject}} (for \code{quickStageObject}).}
 
 \item{x}{Object to be saved.}
-
-\item{includeChildren}{Logical scalar indicating whether child objects should be returned.}
 }
 \value{
 For \code{quickLoadObject}, the object at \code{path}.
@@ -28,9 +26,6 @@ For \code{quickLoadObject}, the object at \code{path}.
 For \code{quickStageObject}, the object is saved to \code{path} inside \code{dir}.
 All necessary directories are created if they are not already present.
 A \code{NULL} is returned invisibly.
-
-For \code{listLocalObjects}, a named list where each entry corresponds to an object and is named after the path to that object inside \code{dir}.
-The value of each element is another list containing the metadata for its corresponding object.
 }
 \description{
 Read and write objects from a local staging directory.

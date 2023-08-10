@@ -32,12 +32,12 @@
 #' redirect <- createRedirection(tmp, "whoop", "whee/simple.csv.gz")
 #' writeMetadata(redirect, tmp)
 #' 
-#' all.meta <- loadAllObjects(tmp)
+#' all.meta <- loadDirectory(tmp)
 #' str(all.meta) 
 #'
 #' @export
 loadDirectory <- function(dir, redirect.action = c("from", "to", "both")) {
-    all.meta <- loadAllMetadata(dir, ignore.children=TRUE)
+    all.meta <- listDirectory(dir, ignore.children=TRUE)
 
     collected <- list()
     redirects <- list()

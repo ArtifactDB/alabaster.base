@@ -95,4 +95,4 @@ setMethod("stageObject", "ANY", function(x, dir, path, child=FALSE, ...) {
 # Soft-deprecated back-compatibility fix.
 
 #' @export
-.searchForMethods <- function(...) searchMethods(...)
+.searchForMethods <- function(...) searchForMethods(...)

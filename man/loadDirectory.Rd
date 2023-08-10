@@ -40,7 +40,7 @@ writeMetadata(meta, tmp)
 redirect <- createRedirection(tmp, "whoop", "whee/simple.csv.gz")
 writeMetadata(redirect, tmp)
 
-all.meta <- loadAllObjects(tmp)
+all.meta <- loadDirectory(tmp)
 str(all.meta) 
 
 }
