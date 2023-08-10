@@ -4,11 +4,13 @@
 \alias{saveFormats}
 \alias{.saveDataFrameFormat}
 \alias{.saveBaseListFormat}
+\alias{saveDataFrameFormat}
+\alias{saveBaseListFormat}
 \title{Choose the format for certain objects}
 \usage{
-.saveDataFrameFormat(format)
+saveDataFrameFormat(format)
 
-.saveBaseListFormat(format)
+saveBaseListFormat(format)
 }
 \arguments{
 \item{format}{String containing the format to use.

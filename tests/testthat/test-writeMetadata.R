@@ -20,7 +20,7 @@ test_that("writing saves the MD5 sums", {
     dir.create(tmp)
 
     info <- stageObject(df, tmp, "rnaseq")
-    out <- .writeMetadata(info, tmp)
+    out <- writeMetadata(info, tmp)
 
     expect_identical(out$path, info$path) 
     round <- jsonlite::fromJSON(file.path(tmp, paste0(out$path, ".json")))
@@ -28,7 +28,7 @@ test_that("writing saves the MD5 sums", {
 
     # ... unless the MD5sum was already available, in which case it's just used.
     info$md5sum <- "WHEE"
-    out <- .writeMetadata(info, tmp)
+    out <- writeMetadata(info, tmp)
     round <- jsonlite::fromJSON(file.path(tmp, paste0(out$path, ".json")))
     expect_identical(round$md5sum, "WHEE")
 })
@@ -38,7 +38,7 @@ test_that("writing strips the dots", {
     dir.create(tmp)
 
     info <- stageObject(df, tmp, "./whee")
-    out <- .writeMetadata(info, tmp)
+    out <- writeMetadata(info, tmp)
 
     round <- jsonlite::fromJSON(file.path(tmp, paste0(out$path, ".json")))
     expect_identical(round$path, "whee/simple.csv.gz")
@@ -56,5 +56,5 @@ test_that("writing respects the package attribute", {
 
     info <- stageObject(df, tmp, "./whee")
     attr(info[["$schema"]], "package") <- "FOOBAR"
-    expect_error(.writeMetadata(info, tmp), "failed to find")
+    expect_error(writeMetadata(info, tmp), "failed to find")
 })

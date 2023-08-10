@@ -42,13 +42,13 @@
 #' tmp <- tempfile()
 #' dir.create(tmp)
 #' info <- stageObject(df, tmp, path="coldata")
-#' .writeMetadata(info, tmp)
+#' writeMetadata(info, tmp)
 #' cat(readLines(file.path(tmp, "coldata/simple.csv.gz.json")), sep="\n")
 #'
 #' @export
-#' @rdname writeMetadata
+#' @aliases .writeMetadata
 #' @importFrom jsonlite toJSON fromJSON
-.writeMetadata <- function(meta, dir, ignore.null=TRUE) { 
+writeMetadata <- function(meta, dir, ignore.null=TRUE) { 
     if (ignore.null) {
         meta <- .strip_null_from_list(meta)
     }
@@ -104,3 +104,8 @@
 
 schema.details <- new.env()
 schema.details$is.meta <- list()
+
+# Soft-deprecated back-compatibility fixes. 
+
+#' @export
+.writeMetadata <- function(...) writeMetadata(...)

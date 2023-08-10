@@ -5,7 +5,7 @@
 #' @param dir String containing the path to a staging directory.
 #' @param validate.metadata Whether to validate each metadata JSON file against the schema.
 #' @param schema.locations Character vector containing the name of the package containing the JSON schemas.
-#' Only used if \code{validate.metadata=TRUE}; if \code{NULL}, defaults to the locations described in \code{\link{loadObject}}.
+#' Only used if \code{validate.metadata=TRUE}; if \code{NULL}, defaults to the locations described in \code{?\link{loadObject}}.
 #' @param attempt.load Whether to validate each object by attempting to load it into memory.
 #'
 #' @return \code{NULL} invisibly on success, otherwise an error is raised.
@@ -30,7 +30,7 @@
 #' Applications may set \code{schema.locations} to point to an appropriate set of schemas other than the defaults in \pkg{alabaster.base}.
 #'
 #' If \code{attempt.load=TRUE}, this function will attempt to load each non-child object into memory.
-#' This serves as an additional validation step to check that the contents of each file are valid (at least, according to the \code{loadObject} functions).
+#' This serves as an additional validation step to check that the contents of each file are valid (at least, according to the current \code{\link{altLoadObject}} function).
 #' However, it may be time-consuming and so defaults to \code{FALSE}.
 #' Child objects are assumed to be loaded as part of their parents and are not explicitly checked.
 #'
@@ -48,13 +48,15 @@
 #' # Mocking up the directory:
 #' tmp <- tempfile()
 #' dir.create(tmp, recursive=TRUE)
-#' .writeMetadata(stageObject(df, tmp, "foo"), tmp)
+#' writeMetadata(stageObject(df, tmp, "foo"), tmp)
 #' 
 #' # Checking that it's valid:
-#' checkValidDirectory(tmp)
+#' validateDirectory(tmp)
+#'
 #' @export
+#' @aliases checkValidDirectory
 #' @importFrom jsonlite fromJSON
-checkValidDirectory <- function(dir, validate.metadata = TRUE, schema.locations = NULL, attempt.load = FALSE) {
+validateDirectory <- function(dir, validate.metadata = TRUE, schema.locations = NULL, attempt.load = FALSE) {
     all.files <- list.files(dir, recursive=TRUE)
     is.json <- endsWith(all.files, ".json")
     meta.files <- all.files[is.json]
@@ -119,7 +121,7 @@ checkValidDirectory <- function(dir, validate.metadata = TRUE, schema.locations 
             not.child <- c(not.child, meta$path)
             if (attempt.load) {
                 tryCatch(
-                    .loadObject(meta, dir),
+                    altLoadObject(meta, dir),
                     error=function(e) {
                         stop("failed to load non-child object at '", meta$path, "'\n  - ", e$message)
                     }
@@ -198,3 +200,8 @@ checkValidDirectory <- function(dir, validate.metadata = TRUE, schema.locations 
     }
     collected
 }
+
+# Soft-deprecated back-compatibility fixes.
+
+#' @export
+checkValidDirectory <- function(...) validateDirectory(...)

@@ -43,8 +43,8 @@ setMethod("stageObject", "DataFrameFactor", function(x, dir, path, child=FALSE, 
     stuff <- levels(x)
 
     lev.info <- tryCatch({
-        info <- .stageObject(stuff, dir, paste0(path, "/", level.name), child=TRUE)
-        .writeMetadata(info, dir)
+        info <- altStageObject(stuff, dir, paste0(path, "/", level.name), child=TRUE)
+        writeMetadata(info, dir)
     }, error=function(e) stop("failed to stage underlying DataFrame in a DataFrameFactor\n  - ", e$message))
 
     path2 <- paste0(path, "/", index.name)

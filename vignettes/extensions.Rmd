@@ -212,7 +212,7 @@ setMethod("stageObject", "dgTMatrix", function(x, dir, path, child=FALSE) {
     .quickWriteCsv(df, file.path(dir, outpath), compression="gzip")
 
     # Specifying the package name in the package attribute of the schema,
-    # to ensure that .writeMetadata() can find it for validation.
+    # to ensure that writeMetadata() can find it for validation.
     schema <- "sparse_triplet_matrix/v1.json"
     attr(schema, "package") <- "alabaster.foo"
 
@@ -260,7 +260,7 @@ meta <- stageObject(x, tmp, "test")
 str(meta)
 ```
 
-Running `.writeMetadata()` will then validate `meta` against the schema requirements, using the schema file that we put inside `r fake`.
+Running `writeMetadata()` will then validate `meta` against the schema requirements, using the schema file that we put inside `r fake`.
 
 ```{r, echo=FALSE, results="hide"}
 meta$md5sum <- digest::digest(meta$path)
@@ -282,7 +282,7 @@ loadSparseTripletMatrix <- function(info, project) {
 
     # This utility will check that the CSV is correctly formatted,
     # which is more stringent than read.csv.
-    df <- .quickReadCsv(path,
+    df <- quickReadCsv(path,
         expected.columns=c(i="integer", j="integer", x="double"),
         expected.nrows=info$sparse_triplet_matrix$num_elements,
         compression=info$sparse_triplet_matrix$compression,
@@ -336,24 +336,24 @@ setMethod("stageObject", "SummarizedExperiment", function(x, dir, path, child=FA
     dir.create(file.path(dir, path), showWarnings=FALSE)
 
     # Saving the colData.
-    info <- .stageObject(colData(x), dir, file.path(path, "coldata"), child=TRUE)
-    cd.info <- list(resource=.writeMetadata(info, dir=dir))
+    info <- stageObject(colData(x), dir, file.path(path, "coldata"), child=TRUE)
+    cd.info <- list(resource=writeMetadata(info, dir=dir))
 
     # Saving the rowData.
-    info <- .stageObject(rowData(x), dir, file.path(path, "rowdata"), child=TRUE)
-    rd.info <- list(resource=.writeMetadata(info, dir=dir))
+    info <- stageObject(rowData(x), dir, file.path(path, "rowdata"), child=TRUE)
+    rd.info <- list(resource=writeMetadata(info, dir=dir))
 
     # Saving the other metadata.
-    info <- .stageObject(metadata(x), dir, file.path(path, "metadata"), child=TRUE)
-    other.info <- list(resource=.writeMetadata(info, dir=dir))
+    info <- stageObject(metadata(x), dir, file.path(path, "metadata"), child=TRUE)
+    other.info <- list(resource=writeMetadata(info, dir=dir))
 
     # Saving the assays.
     assay.info <- list()
     for (a in assayNames(x)) {
         curmat <- assay(x, a)
         mat.path <- file.path(path, paste0("assay-", i))
-        meta <- .stageObject(curmat, path=mat.path, dir=dir, child=TRUE)
-        deets <- .writeMetadata(meta, dir=dir)
+        meta <- altStageObject(curmat, path=mat.path, dir=dir, child=TRUE)
+        deets <- writeMetadata(meta, dir=dir)
         assay.info <- c(assay.info, list(list(name=ass.names[i], resource=deets)))
     }
 
@@ -372,9 +372,9 @@ setMethod("stageObject", "SummarizedExperiment", function(x, dir, path, child=FA
 })
 ```
 
-When doing so, developers should use `.stageObject()` instead of calling `stageObject()` (note the period).
+When doing so, developers should use `altStageObject()` instead of calling `stageObject()` (note the period).
 The is a wrapper around ensures that the new staging method can respect application-specific overrides.
-Similarly, some loading methods should use `.loadObject()` when loading child objects:
+Similarly, some loading methods should use `altLoadObject()` when loading child objects:
 
 ```{r}
 # Abbreviated example from artificer.se:
@@ -385,15 +385,15 @@ loadSummarizedExperiment <- function(exp.info, project) {
         aname <- cur.ass$name
         apath <- cur.ass$resource$path
         ass.info <- acquireMetadata(project, apath)
-        all.assays[[aname]] <- .loadObject(ass.info, project=project)
+        all.assays[[aname]] <- altLoadObject(ass.info, project=project)
     }
 
     cd.info <- acquireMetadata(project, exp.info$summarized_experiment$column_data$resource$path)
-    cd <- .loadObject(cd.info, project=project)
+    cd <- altLoadObject(cd.info, project=project)
     rd.info <- acquireMetadata(project, exp.info$summarized_experiment$row_data$resource$path)
-    rd <- .loadObject(rd.info, project=project)
+    rd <- altLoadObject(rd.info, project=project)
     other.info <- acquireMetadata(project, exp.info$summarized_experiment$other_data$resource$path)
-    other <- .loadObject(other.info, project=project)
+    other <- altLoadObject(other.info, project=project)
 
     SummarizedExperiment(all.assays, colData=cd, rowData=rd, metadata=other, checkDimnames=FALSE)
 }

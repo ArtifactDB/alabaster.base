@@ -10,13 +10,13 @@ populate <- function() {
     dir.create(tmp)
 
     meta <- stageObject(df, tmp, path="whee")
-    .writeMetadata(meta, tmp)
+    writeMetadata(meta, tmp)
 
     meta <- stageObject(ll, tmp, path="stuff")
-    .writeMetadata(meta, tmp)
+    writeMetadata(meta, tmp)
 
-    redirect <- .createRedirection(tmp, "whoop", "whee/simple.csv.gz")
-    .writeMetadata(redirect, tmp)
+    redirect <- createRedirection(tmp, "whoop", "whee/simple.csv.gz")
+    writeMetadata(redirect, tmp)
 
     tmp
 }

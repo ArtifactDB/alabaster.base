@@ -20,7 +20,7 @@ test_that("lists handle complex types correctly", {
     expect_identical(length(info$simple_list$children), 0L) 
     expect_identical(info$json_simple_list$compression, "gzip")
 
-    resource <- .writeMetadata(info, tmp)
+    resource <- writeMetadata(info, tmp)
     expect_true(file.exists(file.path(tmp, resource$path)))
 
     roundtrip <- loadBaseList(info, tmp)
@@ -34,8 +34,8 @@ test_that("lists handle complex types correctly", {
 })
 
 test_that("lists work in HDF5 mode", {
-    old <- .saveBaseListFormat("hdf5")
-    on.exit(.saveBaseListFormat(old))
+    old <- saveBaseListFormat("hdf5")
+    on.exit(saveBaseListFormat(old))
 
     tmp <- tempfile()
     dir.create(tmp)
@@ -49,7 +49,7 @@ test_that("lists work in HDF5 mode", {
     attrs <- rhdf5::h5readAttributes(file.path(tmp, "stuff/list.h5"), "contents/data/3")
     expect_identical(attrs$uzuki_type, "factor")
 
-    resource <- .writeMetadata(info, tmp)
+    resource <- writeMetadata(info, tmp)
     expect_true(file.exists(file.path(tmp, resource$path)))
 
     roundtrip <- loadBaseList(info, tmp)
@@ -89,18 +89,18 @@ test_that("names are properly supported", {
 
     info <- stageObject(vals, tmp, path="stuff")
     expect_match(info[["$schema"]], "json_simple_list")
-    resource <- .writeMetadata(info, tmp)
+    resource <- writeMetadata(info, tmp)
     expect_true(file.exists(file.path(tmp, resource$path)))
 
     roundtrip <- loadBaseList(info, tmp)
     expect_identical(roundtrip, vals)
 
     # Works in HDF5 mode.
-    old <- .saveBaseListFormat("hdf5")
-    on.exit(.saveBaseListFormat(old))
+    old <- saveBaseListFormat("hdf5")
+    on.exit(saveBaseListFormat(old))
 
     info <- stageObject(vals, tmp, path="hstuff")
-    resource <- .writeMetadata(info, tmp)
+    resource <- writeMetadata(info, tmp)
     expect_match(info[["$schema"]], "hdf5_simple_list")
 
     roundtrip <- loadBaseList(info, tmp)
@@ -119,7 +119,7 @@ test_that("data.frames cause dispatch to external objects", {
 
     info <- stageObject(vals, tmp, path="stuff")
     expect_match(info[["$schema"]], "json_simple_list")
-    resource <- .writeMetadata(info, tmp)
+    resource <- writeMetadata(info, tmp)
     expect_true(file.exists(file.path(tmp, resource$path)))
 
     roundtrip <- loadBaseList(info, tmp)
@@ -130,11 +130,11 @@ test_that("data.frames cause dispatch to external objects", {
     expect_equal(roundtrip, vals)
 
     # Works in HDF5 mode.
-    old <- .saveBaseListFormat("hdf5")
-    on.exit(.saveBaseListFormat(old))
+    old <- saveBaseListFormat("hdf5")
+    on.exit(saveBaseListFormat(old))
 
     info <- stageObject(vals, tmp, path="hstuff")
-    resource <- .writeMetadata(info, tmp)
+    resource <- writeMetadata(info, tmp)
     expect_match(info[["$schema"]], "hdf5_simple_list")
 
     roundtrip <- loadBaseList(info, tmp)
@@ -155,18 +155,18 @@ test_that("unnamed lists are properly supported", {
     expect_match(info[["$schema"]], "json_simple_list")
     expect_identical(length(info$simple_list$children), 1L) 
 
-    resource <- .writeMetadata(info, tmp)
+    resource <- writeMetadata(info, tmp)
     expect_true(file.exists(file.path(tmp, resource$path)))
 
     roundtrip <- loadBaseList(info, tmp)
     expect_identical(roundtrip, vals)
 
     # Works in HDF5 mode.
-    old <- .saveBaseListFormat("hdf5")
-    on.exit(.saveBaseListFormat(old))
+    old <- saveBaseListFormat("hdf5")
+    on.exit(saveBaseListFormat(old))
 
     info <- stageObject(vals, tmp, path="hstuff")
-    resource <- .writeMetadata(info, tmp)
+    resource <- writeMetadata(info, tmp)
     expect_match(info[["$schema"]], "hdf5_simple_list")
 
     roundtrip <- loadBaseList(info, tmp)
@@ -202,11 +202,11 @@ test_that("external references work correctly", {
     expect_equal(roundtrip, vals)
 
     # Works in HDF5 mode.
-    old <- .saveBaseListFormat("hdf5")
-    on.exit(.saveBaseListFormat(old))
+    old <- saveBaseListFormat("hdf5")
+    on.exit(saveBaseListFormat(old))
 
     info <- stageObject(vals, tmp, path="hstuff")
-    resource <- .writeMetadata(info, tmp)
+    resource <- writeMetadata(info, tmp)
     expect_match(info[["$schema"]], "hdf5_simple_list")
 
     roundtrip <- loadBaseList(info, tmp)
@@ -221,7 +221,7 @@ test_that("we handle lists with NAs", {
     info <- stageObject(vals, tmp, path="stuff")
     expect_match(info[["$schema"]], "json_simple_list")
 
-    resource <- .writeMetadata(info, tmp)
+    resource <- writeMetadata(info, tmp)
     expect_true(file.exists(file.path(tmp, resource$path)))
 
     roundtrip <- loadBaseList(info, tmp)
@@ -234,18 +234,18 @@ test_that("we handle lists with NAs", {
     dir.create(tmp)
     info <- stageObject(vals, tmp, path="stuff")
 
-    resource <- .writeMetadata(info, tmp)
+    resource <- writeMetadata(info, tmp)
     expect_true(file.exists(file.path(tmp, resource$path)))
 
     roundtrip <- loadBaseList(info, tmp)
     expect_equal(roundtrip, vals)
 
     # Works in HDF5 mode.
-    old <- .saveBaseListFormat("hdf5")
-    on.exit(.saveBaseListFormat(old))
+    old <- saveBaseListFormat("hdf5")
+    on.exit(saveBaseListFormat(old))
 
     info <- stageObject(vals, tmp, path="hstuff")
-    resource <- .writeMetadata(info, tmp)
+    resource <- writeMetadata(info, tmp)
     expect_match(info[["$schema"]], "hdf5_simple_list")
 
     attrs <- rhdf5::h5readAttributes(file.path(tmp, "hstuff/list.h5"), "contents/data/3/data")
@@ -263,18 +263,18 @@ test_that("we handle the various float specials", {
     info <- stageObject(vals, tmp, path="stuff")
     expect_match(info[["$schema"]], "json_simple_list")
 
-    resource <- .writeMetadata(info, tmp)
+    resource <- writeMetadata(info, tmp)
     expect_true(file.exists(file.path(tmp, resource$path)))
 
     roundtrip <- loadBaseList(info, tmp)
     expect_equal(roundtrip, vals)
 
     # Same for HDF5.
-    old <- .saveBaseListFormat("hdf5")
-    on.exit(.saveBaseListFormat(old))
+    old <- saveBaseListFormat("hdf5")
+    on.exit(saveBaseListFormat(old))
 
     info <- stageObject(vals, tmp, path="hstuff")
-    resource <- .writeMetadata(info, tmp)
+    resource <- writeMetadata(info, tmp)
     expect_match(info[["$schema"]], "hdf5_simple_list")
 
     roundtrip <- loadBaseList(info, tmp)
@@ -289,18 +289,18 @@ test_that("we handle lists with NULLs", {
     info <- stageObject(vals, tmp, path="whee")
     expect_match(info[["$schema"]], "json_simple_list")
 
-    resource <- .writeMetadata(info, tmp)
+    resource <- writeMetadata(info, tmp)
     expect_true(file.exists(file.path(tmp, resource$path)))
 
     roundtrip <- loadBaseList(info, tmp)
     expect_identical(roundtrip, vals)
 
     # Works in HDF5 mode.
-    old <- .saveBaseListFormat("hdf5")
-    on.exit(.saveBaseListFormat(old))
+    old <- saveBaseListFormat("hdf5")
+    on.exit(saveBaseListFormat(old))
 
     info <- stageObject(vals, tmp, path="hstuff")
-    resource <- .writeMetadata(info, tmp)
+    resource <- writeMetadata(info, tmp)
     expect_match(info[["$schema"]], "hdf5_simple_list")
 
     roundtrip <- loadBaseList(info, tmp)
@@ -320,11 +320,11 @@ test_that("we handle lists with times", {
     expect_equal(roundtrip, vals)
 
     # Works in HDF5 mode.
-    old <- .saveBaseListFormat("hdf5")
-    on.exit(.saveBaseListFormat(old))
+    old <- saveBaseListFormat("hdf5")
+    on.exit(saveBaseListFormat(old))
 
     info <- stageObject(vals, tmp, path="hstuff")
-    resource <- .writeMetadata(info, tmp)
+    resource <- writeMetadata(info, tmp)
     expect_match(info[["$schema"]], "hdf5_simple_list")
 
     roundtrip <- loadBaseList(info, tmp)

@@ -48,13 +48,13 @@ We'll save this `DataFrame` to file inside a "staging directory":
 staging <- tempfile()
 
 library(alabaster.base)
-saveLocalObject(df, staging, "my_favorite_df")
+quickStageObject(df, staging, "my_favorite_df")
 ```
 
 And reading it back in:
 
 ```{r}
-readLocalObject(staging, "my_favorite_df")
+quickLoadObject(staging, "my_favorite_df")
 ```
 
 # Class-specific methods
@@ -71,7 +71,7 @@ meta <- stageObject(df, tmp, path="my_df")
 str(meta)
 
 # Writing the metadata to file.
-invisible(.writeMetadata(meta, tmp))
+invisible(writeMetadata(meta, tmp))
 
 list.files(tmp, recursive=TRUE)
 ```
@@ -127,8 +127,8 @@ Users can use the `.writeMetadata()` utility to quickly write the metadata to an
 
 ```{r}
 # Writing the metadata to file.
-invisible(.writeMetadata(meta, dir=tmp))
-invisible(.writeMetadata(meta2, dir=tmp))
+invisible(writeMetadata(meta, dir=tmp))
+invisible(writeMetadata(meta2, dir=tmp))
 
 # Reading a snippet.
 meta.path <- file.path(tmp, paste0(meta$path, ".json"))
@@ -142,7 +142,7 @@ This schema determines what fields can be stored and which are mandatory; the lo
 ```{r}
 meta.fail <- meta
 meta.fail[["data_frame"]][["columns"]] <- NULL
-try(.writeMetadata(meta.fail, dir=tmp))
+try(writeMetadata(meta.fail, dir=tmp))
 ```
 
 The schema will also list the exact R function that is required to load an object into memory.

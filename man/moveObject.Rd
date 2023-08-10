@@ -33,6 +33,15 @@ Redirections in other locations will not be removed automatically - these will b
 If \code{rename.redirections=TRUE}, this function will additionally move the redirection files so that they are named as \code{to}.
 In the unusual case where \code{from} is the target of multiple redirection files, the renaming process will clobber all of them such that only one of them will be present after the move.
 }
+\section{Safety of moving operations}{
+
+In general, \pkg{alabaster.*} representations are safe to move as only the parent object's \code{resource.path} metadata properties will contain links to the children's paths.
+These links are updated with the new \code{to} path after running \code{moveObject} on the parent \code{from}.
+
+However, alabaster applications may define custom data structures where the paths are present elsewhere, e.g., in the data file itself or in other metadata properties.
+If so, applications are reponsible for updating those paths to reflect the naming to \code{to}.
+}
+
 \examples{
 tmp <- tempfile()
 dir.create(tmp)
@@ -40,14 +49,14 @@ dir.create(tmp)
 library(S4Vectors)
 df <- DataFrame(A=1:10, B=LETTERS[1:10])
 meta <- stageObject(df, tmp, path="whee")
-.writeMetadata(meta, tmp)
+writeMetadata(meta, tmp)
 
 ll <- list(A=1, B=LETTERS, C=DataFrame(X=1:5))
 meta <- stageObject(ll, tmp, path="stuff")
-.writeMetadata(meta, tmp)
+writeMetadata(meta, tmp)
 
-redirect <- .createRedirection(tmp, "whoop", "whee/simple.csv.gz")
-.writeMetadata(redirect, tmp)
+redirect <- createRedirection(tmp, "whoop", "whee/simple.csv.gz")
+writeMetadata(redirect, tmp)
 
 list.files(tmp, recursive=TRUE)
 moveObject(tmp, "whoop", "YAY")

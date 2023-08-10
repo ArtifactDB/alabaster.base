@@ -33,14 +33,14 @@ dir.create(tmp)
 library(S4Vectors)
 df <- DataFrame(A=1:10, B=LETTERS[1:10])
 meta <- stageObject(df, tmp, path="whee")
-.writeMetadata(meta, tmp)
+writeMetadata(meta, tmp)
 
 ll <- list(A=1, B=LETTERS, C=DataFrame(X=1:5))
 meta <- stageObject(ll, tmp, path="stuff")
-.writeMetadata(meta, tmp)
+writeMetadata(meta, tmp)
 
-redirect <- .createRedirection(tmp, "whoop", "whee/simple.csv.gz")
-.writeMetadata(redirect, tmp)
+redirect <- createRedirection(tmp, "whoop", "whee/simple.csv.gz")
+writeMetadata(redirect, tmp)
 
 list.files(tmp, recursive=TRUE)
 removeObject(tmp, "whoop")

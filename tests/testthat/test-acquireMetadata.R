@@ -1,4 +1,4 @@
-# Test the .acquireMetadata handling of the redirection.
+# Test the acquireMetadata handling of the redirection.
 # library(testthat); library(alabaster.base); source("test-acquireMetadata.R")
 
 library(S4Vectors)
@@ -8,7 +8,7 @@ test_that("acquireMetadata works correctly in simple cases", {
     tmp <- tempfile()
     dir.create(tmp, recursive=TRUE)
     info <- stageObject(df, tmp, "rnaseq")
-    .writeMetadata(info, tmp)
+    writeMetadata(info, tmp)
 
     expect_identical(acquireFile(tmp, info$path), file.path(tmp, info$path))
     meta <- acquireMetadata(tmp, info$path)
@@ -24,10 +24,10 @@ test_that("acquireMetadata correctly redirects to other things", {
     tmp <- tempfile()
     dir.create(tmp, recursive=TRUE)
     info <- stageObject(df, tmp, "rnaseq")
-    .writeMetadata(info, tmp)
+    writeMetadata(info, tmp)
 
-    redirect <- .createRedirection(tmp, "rnaseq", "rnaseq/simple.csv.gz")
-    .writeMetadata(redirect, tmp)
+    redirect <- createRedirection(tmp, "rnaseq", "rnaseq/simple.csv.gz")
+    writeMetadata(redirect, tmp)
 
     check <- jsonlite::fromJSON(file.path(tmp, "rnaseq.json"), simplifyVector=FALSE)
     expect_identical(check$path, "rnaseq")

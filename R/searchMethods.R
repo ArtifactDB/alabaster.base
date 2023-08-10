@@ -37,13 +37,13 @@ warn.package.exists <- function(pkg, cls) {
     warning("consider installing ", pkg, " for a more appropriate stageObject method for '", cls, "' objects")
 }
 
-.searchMethods <- function(x) {
-    .searchForMethods(x, package.lookup, implementers)
+.search_methods <- function(x) {
+    searchForMethods(x, package.lookup, implementers)
 }
 
 #' @export
 #' @import methods
-.searchForMethods <- function(x, lookup, implements) {
+searchForMethods <- function(x, lookup, implements) {
     cls <- class(x)[1]
     ok <- FALSE
 
@@ -91,3 +91,8 @@ setMethod("stageObject", "ANY", function(x, dir, path, child=FALSE, ...) {
     # an ANY method, though, because otherwise the generic won't even run. 
     stop("no known method for 'stageObject' function with signature '", class(x)[1], "'")
 })
+
+# Soft-deprecated back-compatibility fix.
+
+#' @export
+.searchForMethods <- function(...) searchForMethods(...)

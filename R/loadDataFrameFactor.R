@@ -28,7 +28,7 @@
 #' @importFrom S4Vectors DataFrameFactor
 loadDataFrameFactor <- function(info, project) {
     lev.info <- acquireMetadata(project, info$data_frame_factor$levels$resource$path)
-    levels <- .loadObject(lev.info, project=project)
+    levels <- altLoadObject(lev.info, project=project)
 
     path <- acquireFile(project, info$path)
     has.names <- isTRUE(info$factor$names)

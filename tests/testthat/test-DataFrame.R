@@ -2,7 +2,7 @@
 # library(testthat); library(alabaster.base); source("test-DataFrame.R")
 
 library(S4Vectors)
-old <- .saveDataFrameFormat("csv.gz")
+old <- saveDataFrameFormat("csv.gz")
 
 test_that("DFs handle their column types correctly", {
     tmp <- tempfile()
@@ -27,7 +27,7 @@ test_that("DFs handle their column types correctly", {
     expect_false(is.null(info$csv_data_frame))
 
     # Should write without errors.
-    resource <- .writeMetadata(info, tmp)
+    resource <- writeMetadata(info, tmp)
     expect_true(file.exists(file.path(tmp, resource$path)))
 
     meta <- info$data_frame
@@ -64,7 +64,7 @@ test_that("staging of weird objects within DFs works correctly", {
     info <- stageObject(input, tmp, path="WHEE")
 
     # Should write without errors.
-    resource <- .writeMetadata(info, tmp)
+    resource <- writeMetadata(info, tmp)
     expect_true(file.exists(file.path(tmp, resource$path)))
 
     roundtrip <- loadDataFrame(info, project=tmp)
@@ -80,8 +80,8 @@ test_that("staging of uncompressed Gzip works correctly", {
 
     df <- DataFrame(A=sample(3, 100, replace=TRUE), B=sample(letters[1:3], 100, replace=TRUE))
 
-    old <- .saveDataFrameFormat("csv")
-    on.exit(.saveDataFrameFormat(old))
+    old <- saveDataFrameFormat("csv")
+    on.exit(saveDataFrameFormat(old))
     meta2 <- stageObject(df, tmp, path="WHEE")
 
     expect_identical(meta2$csv_data_frame$compression, "none")
@@ -89,7 +89,7 @@ test_that("staging of uncompressed Gzip works correctly", {
     expect_identical(meta2$`$schema`, "csv_data_frame/v1.json")
 
     # Should write without errors.
-    resource <- .writeMetadata(meta2, tmp)
+    resource <- writeMetadata(meta2, tmp)
     expect_true(file.exists(file.path(tmp, resource$path)))
 
     round2 <- loadDataFrame(meta2, project=tmp)
@@ -112,8 +112,8 @@ test_that("staging of HDF5-based DFs works correctly", {
 
     df <- DataFrame(A=sample(3, 100, replace=TRUE), B=sample(letters[1:3], 100, replace=TRUE))
 
-    old <- .saveDataFrameFormat("hdf5")
-    on.exit(.saveDataFrameFormat(old))
+    old <- saveDataFrameFormat("hdf5")
+    on.exit(saveDataFrameFormat(old))
     meta2 <- stageObject(df, tmp, path="WHEE")
 
     expect_match(meta2$path, ".h5$")
@@ -121,7 +121,7 @@ test_that("staging of HDF5-based DFs works correctly", {
     expect_false(is.null(meta2$hdf5_data_frame))
 
     # Should write without errors.
-    resource <- .writeMetadata(meta2, tmp)
+    resource <- writeMetadata(meta2, tmp)
     expect_true(file.exists(file.path(tmp, resource$path)))
 
     round2 <- loadDataFrame(meta2, project=tmp)
@@ -142,8 +142,8 @@ test_that("staging of complex HDF5-based DFs works correctly", {
     df <- DataFrame(A=sample(3, 100, replace=TRUE), B=sample(letters[1:3], 100, replace=TRUE))
     df$FOO <- DataFrame(X=1:100, Y=100:1 * 1.5)
 
-    old <- .saveDataFrameFormat("hdf5")
-    on.exit(.saveDataFrameFormat(old))
+    old <- saveDataFrameFormat("hdf5")
+    on.exit(saveDataFrameFormat(old))
     meta <- stageObject(df, tmp, path="WHEE")
 
     expect_match(meta$path, ".h5$")
@@ -155,7 +155,7 @@ test_that("staging of complex HDF5-based DFs works correctly", {
     expect_true("1" %in% names(contents))
     expect_false("2" %in% names(contents)) # complex column is not stored.
 
-    resource <- .writeMetadata(meta, tmp)
+    resource <- writeMetadata(meta, tmp)
     round <- loadDataFrame(meta, project=tmp)
     expect_identical(round, df)
 })
@@ -178,8 +178,8 @@ test_that("staging of empty objects works correctly", {
     expect_identical(round, df2)
 
     # Works for HDF5 as well.
-    old <- .saveDataFrameFormat("hdf5")
-    on.exit(.saveDataFrameFormat(old))
+    old <- saveDataFrameFormat("hdf5")
+    on.exit(saveDataFrameFormat(old))
 
     meta <- stageObject(df, tmp, path="WHEE_h5")
     round <- loadDataFrame(meta, project=tmp)
@@ -206,15 +206,15 @@ test_that("handling of NAs works correctly", {
 
     # Staged and validated correctly.
     meta <- stageObject(df, tmp, path="WHEE")
-    expect_error(.writeMetadata(meta, tmp), NA) 
+    expect_error(writeMetadata(meta, tmp), NA) 
 
     # Round trip works.
     round1 <- loadDataFrame(meta, project=tmp)
     expect_identical(df, round1)
 
     # Works for HDF5-based DFs.
-    old <- .saveDataFrameFormat("hdf5")
-    on.exit(.saveDataFrameFormat(old))
+    old <- saveDataFrameFormat("hdf5")
+    on.exit(saveDataFrameFormat(old))
     meta2 <- stageObject(df, tmp, path="WHEE.h5")
     expect_match(meta2[["$schema"]], "hdf5_data_frame")
 
@@ -235,7 +235,7 @@ test_that("stageObject works with extra mcols", {
     expect_false(is.null(out$data_frame$other_data))
 
     # Should write without errors.
-    resource <- .writeMetadata(out, tmp)
+    resource <- writeMetadata(out, tmp)
     expect_true(file.exists(file.path(tmp, resource$path)))
 
     df2 <- loadDataFrame(out, tmp)

@@ -181,8 +181,8 @@ setMethod("stageObject", "list", function(x, dir, path, child=FALSE, fname="list
         x <- DataFrame(x, check.names=FALSE)
     }
     tryCatch({
-        meta <- .stageObject(x, dir, paste0(path, paste0("/child-", n)), child=TRUE)
-        env$collected[[n]] <- list(resource=.writeMetadata(meta, dir=dir))
+        meta <- altStageObject(x, dir, paste0(path, paste0("/child-", n)), child=TRUE)
+        env$collected[[n]] <- list(resource=writeMetadata(meta, dir=dir))
     }, error=function(e) {
         stop("failed to stage '", class(x)[1], "' entry inside a list\n  - ", e$message)
     }) 
@@ -324,8 +324,8 @@ setMethod("stageObject", "list", function(x, dir, path, child=FALSE, fname="list
         x <- DataFrame(x, check.names=FALSE)
     }
     tryCatch({
-        meta <- .stageObject(x, dir, paste0(path, paste0("/child-", n)), child=TRUE)
-        env$collected[[n]] <- list(resource=.writeMetadata(meta, dir=dir))
+        meta <- altStageObject(x, dir, paste0(path, paste0("/child-", n)), child=TRUE)
+        env$collected[[n]] <- list(resource=writeMetadata(meta, dir=dir))
     }, error=function(e) {
         stop("failed to stage '", class(x)[1], "' entry inside a list\n  - ", e$message)
     }) 

@@ -95,7 +95,7 @@ setMethod("appStageObject", "ANY", function(x, dir, path, child=FALSE, ...) {
         meta$authors <- I(Sys.info()[["user"]])
     }
 
-    # Pointing .writeMetadata to the application package storing the schemas.
+    # Pointing writeMetadata to the application package storing the schemas.
     attr(meta[["$schema"]], "package") <- "APPLICATION_NAME_HERE"
 
     meta 
@@ -107,11 +107,11 @@ This is more convenient for the end-users of that application, who do not have t
 
 ```{r}
 appSave <- function(x, dir, path, child=FALSE) {
-    olds <- .altStageObject(appStageObject)
-    on.exit(.altStageObject(olds))
+    olds <- altStageObjectFunction(appStageObject)
+    on.exit(altStageObjectFunction(olds))
 
     meta <- appStageObject(x, dir, path, child=child)
-    written <- .writeMetadata(meta, dir) 
+    written <- writeMetadata(meta, dir) 
 
     written$path
 }
@@ -175,14 +175,14 @@ This wrapper may also create the application-specific `*Handler` class that will
 
 ```{r}
 appLoad <- function(project, path) {
-    oldl <- .altLoadObject(appLoadObject)
-    on.exit(.altLoadObject(oldl))
+    oldl <- altLoadObjectFunction(appLoadObject)
+    on.exit(altLoadObjectFunction(oldl))
     info <- acquireMetadata(project, path)
     appLoadObject(info, project, child=child)
 }
 ```
 
-Note that `.altLoadObject()` will override the loading for all objects.
+Note that `altLoadObject()` will override the loading for all objects.
 For overrides of specific objects, application developers can simply modify the `_attributes.restore.R` in the corresponding schema to point to a different function.
 
 # Session information {-}

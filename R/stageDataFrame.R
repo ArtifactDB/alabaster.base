@@ -63,8 +63,10 @@
 #' 
 #' @export
 #' @aliases
-#' .addStringPlaceholderAttribute
-#' .chooseStringPlaceholder
+#' addMissingStringPlaceholderAttribute
+#' chooseMissingStringPlaceholder
+#' .addMissingStringPlaceholderAttribute
+#' .chooseMissingStringPlaceholder
 #' 
 #' @rdname stageDataFrame
 #' @importFrom utils write.csv
@@ -104,8 +106,8 @@ setMethod("stageObject", "DataFrame", function(x, dir, path, child=FALSE, df.nam
                 }
 
                 tryCatch({
-                     lev.info <- .stageObject(DataFrame(levels=levels(col)), dir, paste0(path, "/column", z), df.name="levels", child=TRUE)
-                     out$levels <- list(resource=.writeMetadata(lev.info, dir=dir))
+                     lev.info <- altStageObject(DataFrame(levels=levels(col)), dir, paste0(path, "/column", z), df.name="levels", child=TRUE)
+                     out$levels <- list(resource=writeMetadata(lev.info, dir=dir))
                  }, error = function(e) stop("failed to stage levels of factor column '", out$name, "'\n  - ", e$message))
 
                 x[[z]] <- as.character(col)
@@ -137,8 +139,8 @@ setMethod("stageObject", "DataFrame", function(x, dir, path, child=FALSE, df.nam
             out$type <- "other"
 
             tryCatch({
-                other.info <- .stageObject(x[[z]], dir, paste0(path, "/column", z), child=TRUE)
-                out$resource <- .writeMetadata(other.info, dir=dir)
+                other.info <- altStageObject(x[[z]], dir, paste0(path, "/column", z), child=TRUE)
+                out$resource <- writeMetadata(other.info, dir=dir)
             }, error = function(e) stop("failed to stage column '", out$name, "'\n  - ", e$message))
 
             x[[z]] <- integer(nrow(x))
@@ -246,7 +248,7 @@ setMethod("stageObject", "DataFrame", function(x, dir, path, child=FALSE, df.nam
 
         missing.placeholder <- NULL
         if (is.character(current) && anyNA(current)) {
-            missing.placeholder <- .chooseMissingStringPlaceholder(current)
+            missing.placeholder <- chooseMissingStringPlaceholder(current)
             current[is.na(current)] <- missing.placeholder
         }
 
@@ -254,7 +256,7 @@ setMethod("stageObject", "DataFrame", function(x, dir, path, child=FALSE, df.nam
         h5write(current, ofile, prefix(paste0("data/", data.name)))
 
         if (!is.null(missing.placeholder)) {
-            .addMissingStringPlaceholderAttribute(ofile, prefix(paste0("data/", data.name)), missing.placeholder)
+            addMissingStringPlaceholderAttribute(ofile, prefix(paste0("data/", data.name)), missing.placeholder)
         }
     }
 
@@ -268,7 +270,7 @@ setMethod("stageObject", "DataFrame", function(x, dir, path, child=FALSE, df.nam
 # alabaster.matrix is probably the prime suspect here.
 
 #' @export
-.chooseMissingStringPlaceholder <- function(x) {
+chooseMissingStringPlaceholder <- function(x) {
     missing.placeholder <- "NA"
     search <- unique(x)
     while (missing.placeholder %in% search) {
@@ -279,10 +281,18 @@ setMethod("stageObject", "DataFrame", function(x, dir, path, child=FALSE, df.nam
 
 #' @export
 #' @importFrom rhdf5 H5Fopen H5Fclose H5Dopen H5Dclose h5writeAttribute
-.addMissingStringPlaceholderAttribute <- function(file, path, placeholder) {
+addMissingStringPlaceholderAttribute <- function(file, path, placeholder) {
     fhandle <- H5Fopen(file)
     on.exit(H5Fclose(fhandle), add=TRUE)
     dhandle <- H5Dopen(fhandle, path)
     on.exit(H5Dclose(dhandle), add=TRUE)
     h5writeAttribute(placeholder, h5obj=dhandle, name="missing-value-placeholder", asScalar=TRUE)
 }
+
+# Soft-deprecated back-compatibility fixes.
+
+#' @export
+.chooseMissingStringPlaceholder <- function(...) chooseMissingStringPlaceholder(...)
+
+#' @export
+.addMissingStringPlaceholderAttribute <- function(...) addMissingStringPlaceholderAttribute(...)

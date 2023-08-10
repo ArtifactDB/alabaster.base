@@ -31,9 +31,9 @@
 #' .quickReadCsv(temp, c(A="numeric", B="character"), 1, "gzip", FALSE)
 #' 
 #' @export
-#' @name quickReadCsv
+#' @aliases .quickReadCsv .quickWriteCsv
 #' @importFrom S4Vectors DataFrame
-.quickReadCsv <- function(path, expected.columns, expected.nrows, compression, row.names, parallel=TRUE) {
+quickReadCsv <- function(path, expected.columns, expected.nrows, compression, row.names, parallel=TRUE) {
     df <- read.csv3(path, compression, expected.nrows, parallel)
 
     if (row.names) {
@@ -80,7 +80,7 @@ read.csv3 <- function(path, compression, nrows, parallel=TRUE) {
 #' @export
 #' @rdname quickReadCsv
 #' @importFrom utils write.csv
-.quickWriteCsv <- function(df, path, ..., row.names=FALSE, compression="gzip") {
+quickWriteCsv <- function(df, path, ..., row.names=FALSE, compression="gzip") {
     .quick_write_csv(df=df, path=path, ..., row.names=row.names, compression=compression)
     check_csv(path, is_compressed=identical(compression, "gzip"), parallel=TRUE)
 }
@@ -100,3 +100,11 @@ read.csv3 <- function(path, compression, nrows, parallel=TRUE) {
         write.csv(as.data.frame(df), file=handle, row.names=row.names, ..., eol="\n")
     }
 }
+
+# Soft-deprecated back-compatibility fixes.
+
+#' @export
+.quickReadCsv <- function(...) quickReadCsv(...)
+
+#' @export
+.quickWriteCsv <- function(...) quickWriteCsv(...)

@@ -18,18 +18,23 @@
 #' \code{\link{.processMetadata}}, which does the staging.
 #'
 #' @export
-#' @rdname restoreMetadata
+#' @aliases .restoreMetadata
 #' @importFrom S4Vectors mcols<- metadata<-
-.restoreMetadata <- function(x, mcol.data, meta.data, project) { 
+restoreMetadata <- function(x, mcol.data, meta.data, project) { 
     if (!is.null(mcol.data)) {
         rd.info <- acquireMetadata(project, mcol.data$resource$path)
-        mcols(x) <- .loadObject(rd.info, project)
+        mcols(x) <- altLoadObject(rd.info, project)
     }
 
     if (!is.null(meta.data)) {
         meta.info <- acquireMetadata(project, meta.data$resource$path)
-        metadata(x) <- .loadObject(meta.info, project)
+        metadata(x) <- altLoadObject(meta.info, project)
     }
 
     x
 }
+
+# Soft-deprecated back-compatibility fixes
+
+#' @export
+.restoreMetadata <- function(...) restoreMetadata(...)
