@@ -68,12 +68,6 @@ restore.memory <- new.env()
 restore.memory$cache <- list()
 
 #' @export
-.loadObjectInternal <- function(...) {
-    .Deprecated(new=".loadObjectHelper")
-    customloadObjectHelper(...)
-}
-
-#' @export
 #' @rdname loadObject
 customloadObjectHelper <- function(info, project, ..., .locations, .memory, .fallback=NULL) {
     schema <- info[["$schema"]]
@@ -120,3 +114,8 @@ schemaLocations <- function() {
 
     schema.path
 }
+
+# Soft-deprecated backwards compatibility fixes.
+
+#' @export
+.loadObjectInternal <- function(...) customloadObjectHelper(...)

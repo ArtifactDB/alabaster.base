@@ -1,6 +1,7 @@
 #' Load all non-child objects in a directory
 #'
 #' As the title suggests, this function loads all non-child objects in a staging directory.
+#' All loading is performed using \code{\link{altLoadObject}} to respect any application-specific overrides.
 #' Children are used to assemble their parent objects and are not reported here.
 #'
 #' @param dir String containing a path to a staging directory.
@@ -22,20 +23,20 @@
 #' library(S4Vectors)
 #' df <- DataFrame(A=1:10, B=LETTERS[1:10])
 #' meta <- stageObject(df, tmp, path="whee")
-#' .writeMetadata(meta, tmp)
+#' writeMetadata(meta, tmp)
 #'
 #' ll <- list(A=1, B=LETTERS, C=DataFrame(X=1:5))
 #' meta <- stageObject(ll, tmp, path="stuff")
-#' .writeMetadata(meta, tmp)
+#' writeMetadata(meta, tmp)
 #'
-#' redirect <- .createRedirection(tmp, "whoop", "whee/simple.csv.gz")
-#' .writeMetadata(redirect, tmp)
+#' redirect <- createRedirection(tmp, "whoop", "whee/simple.csv.gz")
+#' writeMetadata(redirect, tmp)
 #' 
 #' all.meta <- loadAllObjects(tmp)
 #' str(all.meta) 
 #'
 #' @export
-loadAllObjects <- function(dir, redirect.action = c("from", "to", "both")) {
+loadDirectory <- function(dir, redirect.action = c("from", "to", "both")) {
     all.meta <- loadAllMetadata(dir, ignore.children=TRUE)
 
     collected <- list()
@@ -45,7 +46,7 @@ loadAllObjects <- function(dir, redirect.action = c("from", "to", "both")) {
         if (startsWith(m[["$schema"]], "redirection/")) {
             redirects[[m$path]] <- m$redirection$targets[[1]]$location
         } else if (!isTRUE(m$is_child)) {
-            collected[[m$path]] <- .loadObject(m, dir)
+            collected[[m$path]] <- altLoadObject(m, dir)
         }
     }
 

@@ -35,17 +35,18 @@ format.env$DataFrame <- NULL
 #' .saveDataFrameFormat(old)
 #'
 #' @name saveFormats
+#' @aliases .saveDataFrameFormat .saveBaseListFormat
 NULL
 
 #' @export
 #' @rdname saveFormats
-.saveDataFrameFormat <- function(format) {
+saveDataFrameFormat <- function(format) {
     .save_format(format, "DataFrame", c("csv", "csv.gz", "hdf5"))
 }
 
 #' @export
 #' @rdname saveFormats
-.saveBaseListFormat <- function(format) {
+saveBaseListFormat <- function(format) {
     .save_format(format, "BaseList", c("json.gz", "hdf5"))
 }
 
@@ -61,3 +62,11 @@ NULL
        invisible(previous)
    }
 }
+
+# Soft-deprecated back-compatibility fixes.
+
+#' @export
+.saveDataFrameFormat <- function(...) saveDataFrameFormat(...)
+
+#' @export
+.saveBaseListFormat <- function(...) saveBaseListFormat(...)

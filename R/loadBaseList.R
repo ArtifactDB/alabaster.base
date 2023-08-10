@@ -34,7 +34,7 @@ loadBaseList <- function(info, project, parallel=TRUE) {
     children <- info$simple_list$children
     for (i in seq_along(children)) {
         child.meta <- acquireMetadata(project, children[[i]]$resource$path) 
-        children[[i]] <- .loadObject(child.meta, project=project)
+        children[[i]] <- altLoadObject(child.meta, project=project)
     }
 
     lpath <- acquireFile(project, info$path)

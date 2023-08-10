@@ -4,9 +4,10 @@
 \alias{quickReadCsv}
 \alias{.quickReadCsv}
 \alias{.quickWriteCsv}
+\alias{quickWriteCsv}
 \title{Quickly read and write a CSV file}
 \usage{
-.quickReadCsv(
+quickReadCsv(
   path,
   expected.columns,
   expected.nrows,
@@ -15,7 +16,7 @@
   parallel = TRUE
 )
 
-.quickWriteCsv(df, path, ..., row.names = FALSE, compression = "gzip")
+quickWriteCsv(df, path, ..., row.names = FALSE, compression = "gzip")
 }
 \arguments{
 \item{path}{String containing a path to a CSV to read/write.}

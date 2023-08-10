@@ -8,7 +8,7 @@
 #' @param dest String containing the destination path relative to \code{dir}.
 #' This may be any path that can also be used in \code{\link{acquireMetadata}}.
 #'
-#' @return A list of metadata that can be processed by \code{\link{.writeMetadata}}.
+#' @return A list of metadata that can be processed by \code{\link{writeMetadata}}.
 #' 
 #' @details
 #' \code{src} should not correspond to an existing file inside \code{dir}.
@@ -26,19 +26,19 @@
 #' tmp <- tempfile()
 #' dir.create(tmp)
 #' info <- stageObject(df, tmp, path="coldata")
-#' .writeMetadata(info, tmp)
+#'writeMetadata(info, tmp)
 #'
 #' # Creating a redirection:
-#' redirect <- .createRedirection(tmp, "foobar", "coldata/simple.csv.gz")
-#' .writeMetadata(redirect, tmp)
+#' redirect <- createRedirection(tmp, "foobar", "coldata/simple.csv.gz")
+#'writeMetadata(redirect, tmp)
 #'
 #' # We can then use this redirect to pull out metadata:
 #' info2 <- acquireMetadata(tmp, "foobar")
 #' str(info2)
 #'
 #' @export
-#' @rdname createRedirection
-.createRedirection <- function(dir, src, dest) {
+#' @aliases .createRedirection
+createRedirection <- function(dir, src, dest) {
     json <- paste0(src, ".json")
     if (file.exists(file.path(dir, json))) {
         stop("cannot create a short-hand link over existing file '", json, "'")
@@ -57,3 +57,8 @@
         )
     )
 }
+
+# Soft-deprecated back-compatibility fixes.
+
+#' @export
+.createRedirection <- function(...) createRedirection(...)

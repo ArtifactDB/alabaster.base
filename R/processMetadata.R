@@ -26,14 +26,14 @@
 #' \code{.restoreMetadata}, which does the loading.
 #'
 #' @export
-#' @rdname processMetadata
+#' @aliases .processMetadata .processMcols
 #' @importFrom S4Vectors mcols
-.processMcols <- function(x, dir, path, mcols.name) {
-    if (!is.null(mcols.name) && !is.null(mcols(x)) && ncol(mcols(x))) {
+processMetadata <- function(x, dir, path, meta.name) {
+    if (!is.null(meta.name) && length(metadata(x))) {
         tryCatch({
-            meta <- .stageObject(mcols(x), dir, paste0(path, "/", mcols.name), child=TRUE)
-            list(resource=.writeMetadata(meta, dir=dir))
-        }, error=function(e) stop("failed to stage 'mcols(<", class(x)[1], ">)'\n  - ", e$message))
+            meta <- altStageObject(metadata(x), dir, paste0(path, "/", meta.name), child=TRUE)
+            list(resource=writeMetadata(meta, dir=dir))
+        }, error=function(e) stop("failed to stage 'metadata(<", class(x)[1], ">)'\n  - ", e$message))
     } else { 
         NULL
     }
@@ -42,13 +42,21 @@
 #' @export
 #' @rdname processMetadata
 #' @importFrom S4Vectors mcols metadata
-.processMetadata <- function(x, dir, path, meta.name) {
-    if (!is.null(meta.name) && length(metadata(x))) {
+processMcols <- function(x, dir, path, mcols.name) {
+    if (!is.null(mcols.name) && !is.null(mcols(x)) && ncol(mcols(x))) {
         tryCatch({
-            meta <- .stageObject(metadata(x), dir, paste0(path, "/", meta.name), child=TRUE)
-            list(resource=.writeMetadata(meta, dir=dir))
-        }, error=function(e) stop("failed to stage 'metadata(<", class(x)[1], ">)'\n  - ", e$message))
+            meta <- altStageObject(mcols(x), dir, paste0(path, "/", mcols.name), child=TRUE)
+            list(resource=writeMetadata(meta, dir=dir))
+        }, error=function(e) stop("failed to stage 'mcols(<", class(x)[1], ">)'\n  - ", e$message))
     } else { 
         NULL
     }
 }
+
+# Soft-deprecated back-compatibility fixes
+
+#' @export
+.processMetadata <- function(...) processMetadata(...)
+
+#' @export
+.processMcols <- function(...) processMcols(...)

@@ -58,7 +58,7 @@ df <- DataFrame(A=1:10, B=LETTERS[1:10])
 tmp <- tempfile()
 dir.create(tmp)
 info <- stageObject(df, tmp, path="coldata")
-.writeMetadata(info, tmp)
+writeMetadata(info, tmp)
 
 # Retrieving the metadata:
 meta <- acquireMetadata(tmp, "coldata/simple.csv.gz")

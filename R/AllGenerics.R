@@ -30,18 +30,18 @@
 #' }
 #'
 #' The return value of each method should be a named list of metadata, 
-#' which will (eventually) be passed to \code{\link{.writeMetadata}} to save a JSON metadata file inside the \code{path} subdirectory.
+#' which will (eventually) be passed to \code{\link{writeMetadata}} to save a JSON metadata file inside the \code{path} subdirectory.
 #' This list should contain at least:
 #' \itemize{
 #' \item \code{$schema}, a string specifying the schema to use to validate the metadata for the class of \code{x}.
-#' This may be decorated with the \code{package} attribute to help \code{\link{.writeMetadata}} find the package containing the schema.
+#' This may be decorated with the \code{package} attribute to help \code{\link{writeMetadata}} find the package containing the schema.
 #' \item \code{path}, a string containing the relative path to the object's file representation inside \code{dir}.
 #' For clarity, we will denote the input \code{path} argument as PATHIN and the output \code{path} property as PATHOUT.
 #' These are different as PATHIN refers to the directory while PATHOUT refers to a file inside the directory.
 #'
 #' If a data file exists, PATHOUT should contain the relative path to that file from \code{dir}.
 #' Otherwise, for metadata-only schemas, PATHOUT should be set to a relative path of a JSON file inside the PATHIN subdirectory,
-#' specifying the location in which the metadata is to be saved by \code{\link{.writeMetadata}}.
+#' specifying the location in which the metadata is to be saved by \code{\link{writeMetadata}}.
 #' \item \code{is_child}, a logical scalar equal to the input \code{child}. 
 #' }
 #'
@@ -59,11 +59,11 @@
 #' This allows developers to re-use the staging/loading code for DataFrames when reconstructing the complex parent object.
 #'
 #' If a \code{stageObject} method needs to save a child object, it should do so in a subdirectory of PATHIN (i.e., the input \code{path} argument).
-#' This is achieved by calling \code{\link{.stageObject}(child, dir, subpath)} where \code{child} is the child component of \code{x} and \code{subdir} is the desired subdirectory path.
+#' This is achieved by calling \code{\link{altStageObject}(child, dir, subpath)} where \code{child} is the child component of \code{x} and \code{subdir} is the desired subdirectory path.
 #' Note the period at the start of the function, which ensures that the method respects customizations from alabaster applications (see \code{\link{.altStageObject}} for details).
 #' We also suggest creating \code{subdir} with \code{paste0(path, "/", subname)} for a given subdirectory name, which avoids potential problems with non-\code{/} file separators.
 #'
-#' After creating the child object's subdirectory, the \code{stageObject} method should call \code{\link{.writeMetadata}} on the output of \code{.stageObject} to save the child's metadata.
+#' After creating the child object's subdirectory, the \code{stageObject} method should call \code{\link{writeMetadata}} on the output of \code{altStageObject} to save the child's metadata.
 #' This will return a list that can be inserted into the parent's metadata list for the method's return value.
 #' All child files created by a \code{stageObject} method should be referenced from the metadata list, 
 #' i.e., the child metadata's PATHOUT should be present in in the metadata list as a \code{resource} entry somewhere.
@@ -86,7 +86,7 @@
 #'
 #' @export
 #' @aliases stageObject,ANY-method
-#' .searchForMethods
+#' searchForMethods .searchForMethods
 #' @import methods
 #' @importFrom jsonlite fromJSON
 setGeneric("stageObject", function(x, dir, path, child=FALSE, ...) {
@@ -114,7 +114,7 @@ setGeneric("stageObject", function(x, dir, path, child=FALSE, ...) {
 
     # Need to search here to pick up any subclasses that might have better
     # stageObject methods in yet-to-be-loaded packages.
-    if (.searchMethods(x)) {
+    if (.search_methods(x)) {
         fun <- selectMethod("stageObject", class(x)[1], optional=TRUE)
         if (!is.null(fun)) {
             return(fun(x, dir, path, child=child, ...))
@@ -167,7 +167,7 @@ setGeneric("stageObject", function(x, dir, path, child=FALSE, ...) {
 #' tmp <- tempfile()
 #' dir.create(tmp)
 #' info <- stageObject(df, tmp, path="coldata")
-#' .writeMetadata(info, tmp)
+#' writeMetadata(info, tmp)
 #'
 #' # Retrieving the metadata:
 #' meta <- acquireMetadata(tmp, "coldata/simple.csv.gz")

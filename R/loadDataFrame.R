@@ -106,7 +106,7 @@ loadDataFrame <- function(info, project, include.nested=TRUE, parallel=TRUE) {
         col.type <- col.info[[i]]$type 
         if (col.type=="factor" || col.type=="ordered") {
             level.info <- acquireMetadata(project, col.info[[i]]$levels$resource$path)
-            level.df <- .loadObject(level.info, project=project)
+            level.df <- altLoadObject(level.info, project=project)
             df[[i]] <- factor(df[[i]], levels=level.df[,1], ordered=(col.type=="ordered"))
 
         } else if (col.type=="date") {
@@ -122,7 +122,7 @@ loadDataFrame <- function(info, project, include.nested=TRUE, parallel=TRUE) {
         } else if (col.type == "other") {
             current <- acquireMetadata(project, col.info[[i]]$resource$path)
             if (include.nested || !("data_frame" %in% names(current))) {
-                df[[i]] <- .loadObject(current, project=project)
+                df[[i]] <- altLoadObject(current, project=project)
             } else {
                 new.names[i] <- NA_character_
             }

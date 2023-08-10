@@ -1,6 +1,6 @@
-#' Load all metadata files in a directory
+#' List staged objects in a directory
 #'
-#' Pretty much what it says on the tin: loads all metadata JSON files present in a staging directory.
+#' List all objects in a staging directory by loading their metadata.
 #' 
 #' @param dir String containing a path to a staging directory.
 #' @param ignore.children Logical scalar indicating whether to ignore metadata for child objects.
@@ -19,21 +19,22 @@
 #' library(S4Vectors)
 #' df <- DataFrame(A=1:10, B=LETTERS[1:10])
 #' meta <- stageObject(df, tmp, path="whee")
-#' .writeMetadata(meta, tmp)
+#' writeMetadata(meta, tmp)
 #'
 #' ll <- list(A=1, B=LETTERS, C=DataFrame(X=1:5))
 #' meta <- stageObject(ll, tmp, path="stuff")
-#' .writeMetadata(meta, tmp)
+#' writeMetadata(meta, tmp)
 #'
-#' redirect <- .createRedirection(tmp, "whoop", "whee/simple.csv.gz")
-#' .writeMetadata(redirect, tmp)
+#' redirect <- createRedirection(tmp, "whoop", "whee/simple.csv.gz")
+#' writeMetadata(redirect, tmp)
 #' 
-#' all.meta <- loadAllMetadata(tmp)
+#' all.meta <- listDirectory(tmp)
 #' names(all.meta) 
 #'
 #' @export
+#' @aliases listAllObjects
 #' @importFrom jsonlite fromJSON
-loadAllMetadata <- function(dir, ignore.children = TRUE) {
+listDirectory <- function(dir, ignore.children = TRUE) {
     all.json <- list.files(dir, pattern="\\.json$", recursive=TRUE)
     out <- lapply(file.path(dir, all.json), fromJSON, simplifyVector=FALSE)
     names(out) <- vapply(out, function(x) x$path, "")
@@ -45,3 +46,8 @@ loadAllMetadata <- function(dir, ignore.children = TRUE) {
 
     out
 }
+
+# Soft-deprecated back-compatibility fixes.
+
+#' @export
+listLocalObjects <- function(..., ignoreChildren = TRUE) listDirectory(..., ignore.children = ignoreChildren)

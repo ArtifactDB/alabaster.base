@@ -17,7 +17,7 @@ checkValidDirectory(
 \item{validate.metadata}{Whether to validate each metadata JSON file against the schema.}
 
 \item{schema.locations}{Character vector containing the name of the package containing the JSON schemas.
-Only used if \code{validate.metadata=TRUE}; if \code{NULL}, defaults to the locations described in \code{\link{loadObject}}.}
+Only used if \code{validate.metadata=TRUE}; if \code{NULL}, defaults to the locations described in \code{?\link{loadObject}}.}
 
 \item{attempt.load}{Whether to validate each object by attempting to load it into memory.}
 }
@@ -47,7 +47,7 @@ If \code{validate.metadata=TRUE}, this function will validate each metadata file
 Applications may set \code{schema.locations} to point to an appropriate set of schemas other than the defaults in \pkg{alabaster.base}.
 
 If \code{attempt.load=TRUE}, this function will attempt to load each non-child object into memory.
-This serves as an additional validation step to check that the contents of each file are valid (at least, according to the \code{loadObject} functions).
+This serves as an additional validation step to check that the contents of each file are valid (at least, according to the current \code{\link{altLoadObject}} function).
 However, it may be time-consuming and so defaults to \code{FALSE}.
 Child objects are assumed to be loaded as part of their parents and are not explicitly checked.
 }
@@ -64,7 +64,7 @@ df$Z <- DataFrame(AA = sample(ncols))
 # Mocking up the directory:
 tmp <- tempfile()
 dir.create(tmp, recursive=TRUE)
-.writeMetadata(stageObject(df, tmp, "foo"), tmp)
+writeMetadata(stageObject(df, tmp, "foo"), tmp)
 
 # Checking that it's valid:
 checkValidDirectory(tmp)
