@@ -63,6 +63,8 @@
 #' 
 #' @export
 #' @aliases
+#' addStringPlaceholderAttribute
+#' chooseStringPlaceholder
 #' .addStringPlaceholderAttribute
 #' .chooseStringPlaceholder
 #' 
@@ -268,7 +270,7 @@ setMethod("stageObject", "DataFrame", function(x, dir, path, child=FALSE, df.nam
 # alabaster.matrix is probably the prime suspect here.
 
 #' @export
-.chooseMissingStringPlaceholder <- function(x) {
+chooseMissingStringPlaceholder <- function(x) {
     missing.placeholder <- "NA"
     search <- unique(x)
     while (missing.placeholder %in% search) {
@@ -279,10 +281,18 @@ setMethod("stageObject", "DataFrame", function(x, dir, path, child=FALSE, df.nam
 
 #' @export
 #' @importFrom rhdf5 H5Fopen H5Fclose H5Dopen H5Dclose h5writeAttribute
-.addMissingStringPlaceholderAttribute <- function(file, path, placeholder) {
+addMissingStringPlaceholderAttribute <- function(file, path, placeholder) {
     fhandle <- H5Fopen(file)
     on.exit(H5Fclose(fhandle), add=TRUE)
     dhandle <- H5Dopen(fhandle, path)
     on.exit(H5Dclose(dhandle), add=TRUE)
     h5writeAttribute(placeholder, h5obj=dhandle, name="missing-value-placeholder", asScalar=TRUE)
 }
+
+# Soft-deprecated back-compatibility fixes.
+
+#' @export
+.chooseMissingStringPlaceholder <- function(...) chooseMissingStringPlaceholder(...)
+
+#' @export
+.addMissingStringPlaceholderAttribute <- function(...) addMissingStringPlaceholderAttribute(...)

@@ -57,7 +57,7 @@ test_that("stageObject fails for saving non-child objects in other object's subd
     tmp <- tempfile()
     dir.create(tmp) 
     meta <- stageObject(a, tmp, "foo")
-    .writeMetadata(meta, tmp)
+    writeMetadata(meta, tmp)
 
     expect_error(stageObject(a, tmp, "foo/bar"), "non-child object")
 })

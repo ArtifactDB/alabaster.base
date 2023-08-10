@@ -51,10 +51,12 @@
 #' writeMetadata(stageObject(df, tmp, "foo"), tmp)
 #' 
 #' # Checking that it's valid:
-#' checkValidDirectory(tmp)
+#' validateDirectory(tmp)
+#'
 #' @export
+#' @aliases checkValidDirectory
 #' @importFrom jsonlite fromJSON
-checkValidDirectory <- function(dir, validate.metadata = TRUE, schema.locations = NULL, attempt.load = FALSE) {
+validateDirectory <- function(dir, validate.metadata = TRUE, schema.locations = NULL, attempt.load = FALSE) {
     all.files <- list.files(dir, recursive=TRUE)
     is.json <- endsWith(all.files, ".json")
     meta.files <- all.files[is.json]
@@ -198,3 +200,8 @@ checkValidDirectory <- function(dir, validate.metadata = TRUE, schema.locations 
     }
     collected
 }
+
+# Soft-deprecated back-compatibility fixes.
+
+#' @export
+checkValidDirectory <- function(...) validateDirectory(...)
