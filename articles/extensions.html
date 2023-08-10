@@ -291,7 +291,7 @@ either directly or as a child of another object (e.g., a
 <span>    <span class="fu"><a href="../reference/quickReadCsv.html">.quickWriteCsv</a></span><span class="op">(</span><span class="va">df</span>, <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">dir</span>, <span class="va">outpath</span><span class="op">)</span>, compression<span class="op">=</span><span class="st">"gzip"</span><span class="op">)</span></span>
 <span></span>
 <span>    <span class="co"># Specifying the package name in the package attribute of the schema,</span></span>
-<span>    <span class="co"># to ensure that .writeMetadata() can find it for validation.</span></span>
+<span>    <span class="co"># to ensure that writeMetadata() can find it for validation.</span></span>
 <span>    <span class="va">schema</span> <span class="op">&lt;-</span> <span class="st">"sparse_triplet_matrix/v1.json"</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">schema</span>, <span class="st">"package"</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="st">"alabaster.foo"</span></span>
 <span></span>
@@ -330,17 +330,17 @@ either directly or as a child of another object (e.g., a
 <span><span class="op">)</span></span>
 <span><span class="va">x</span></span></code></pre></div>
 <pre><code><span><span class="co">## 10 x 10 sparse Matrix of class "dgTMatrix"</span></span>
-<span><span class="co">##                                                           </span></span>
-<span><span class="co">##  [1,] .         . 0.9200071 . . .          . .         . .</span></span>
-<span><span class="co">##  [2,] .         . .         . . 0.08514701 . .         . .</span></span>
-<span><span class="co">##  [3,] 0.2476875 . .         . . .          . .         . .</span></span>
-<span><span class="co">##  [4,] .         . .         . . .          . .         . .</span></span>
-<span><span class="co">##  [5,] .         . 0.8246867 . . .          . .         . .</span></span>
-<span><span class="co">##  [6,] .         . .         . . .          . 0.7410036 . .</span></span>
-<span><span class="co">##  [7,] .         . .         . . .          . .         . .</span></span>
-<span><span class="co">##  [8,] .         . .         . . .          . .         . .</span></span>
-<span><span class="co">##  [9,] .         . .         . . .          . .         . .</span></span>
-<span><span class="co">## [10,] .         . .         . . .          . .         . .</span></span></code></pre>
+<span><span class="co">##                                                          </span></span>
+<span><span class="co">##  [1,] .         . 0.6711703 . . .         . .         . .</span></span>
+<span><span class="co">##  [2,] .         . .         . . 0.9612146 . .         . .</span></span>
+<span><span class="co">##  [3,] 0.9747313 . .         . . .         . .         . .</span></span>
+<span><span class="co">##  [4,] .         . .         . . .         . .         . .</span></span>
+<span><span class="co">##  [5,] .         . 0.8038779 . . .         . .         . .</span></span>
+<span><span class="co">##  [6,] .         . .         . . .         . 0.7424513 . .</span></span>
+<span><span class="co">##  [7,] .         . .         . . .         . .         . .</span></span>
+<span><span class="co">##  [8,] .         . .         . . .         . .         . .</span></span>
+<span><span class="co">##  [9,] .         . .         . . .         . .         . .</span></span>
+<span><span class="co">## [10,] .         . .         . . .         . .         . .</span></span></code></pre>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">tmp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/files2.html" class="external-link">dir.create</a></span><span class="op">(</span><span class="va">tmp</span><span class="op">)</span></span>
@@ -357,7 +357,7 @@ either directly or as a child of another object (e.g., a
 <span><span class="co">##  $ sparse_triplet_matrix:List of 2</span></span>
 <span><span class="co">##   ..$ num_elements: int 5</span></span>
 <span><span class="co">##   ..$ compression : chr "gzip"</span></span></code></pre>
-<p>Running <code><a href="../reference/writeMetadata.html">.writeMetadata()</a></code> will then validate
+<p>Running <code><a href="../reference/writeMetadata.html">writeMetadata()</a></code> will then validate
 <code>meta</code> against the schema requirements, using the schema file
 that we put inside <em>alabaster.foo</em>.</p>
 </div>
@@ -374,7 +374,7 @@ files. In this case, it’s fairly simple:</p>
 <span></span>
 <span>    <span class="co"># This utility will check that the CSV is correctly formatted,</span></span>
 <span>    <span class="co"># which is more stringent than read.csv.</span></span>
-<span>    <span class="va">df</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/quickReadCsv.html">.quickReadCsv</a></span><span class="op">(</span><span class="va">path</span>,</span>
+<span>    <span class="va">df</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/quickReadCsv.html">quickReadCsv</a></span><span class="op">(</span><span class="va">path</span>,</span>
 <span>        expected.columns<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>i<span class="op">=</span><span class="st">"integer"</span>, j<span class="op">=</span><span class="st">"integer"</span>, x<span class="op">=</span><span class="st">"double"</span><span class="op">)</span>,</span>
 <span>        expected.nrows<span class="op">=</span><span class="va">info</span><span class="op">$</span><span class="va">sparse_triplet_matrix</span><span class="op">$</span><span class="va">num_elements</span>,</span>
 <span>        compression<span class="op">=</span><span class="va">info</span><span class="op">$</span><span class="va">sparse_triplet_matrix</span><span class="op">$</span><span class="va">compression</span>,</span>
@@ -395,17 +395,17 @@ files. In this case, it’s fairly simple:</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">loadSparseTripletMatrix</span><span class="op">(</span><span class="va">meta</span>, <span class="va">tmp</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## 10 x 10 sparse Matrix of class "dgTMatrix"</span></span>
-<span><span class="co">##                                                           </span></span>
-<span><span class="co">##  [1,] .         . 0.9200071 . . .          . .         . .</span></span>
-<span><span class="co">##  [2,] .         . .         . . 0.08514701 . .         . .</span></span>
-<span><span class="co">##  [3,] 0.2476875 . .         . . .          . .         . .</span></span>
-<span><span class="co">##  [4,] .         . .         . . .          . .         . .</span></span>
-<span><span class="co">##  [5,] .         . 0.8246867 . . .          . .         . .</span></span>
-<span><span class="co">##  [6,] .         . .         . . .          . 0.7410036 . .</span></span>
-<span><span class="co">##  [7,] .         . .         . . .          . .         . .</span></span>
-<span><span class="co">##  [8,] .         . .         . . .          . .         . .</span></span>
-<span><span class="co">##  [9,] .         . .         . . .          . .         . .</span></span>
-<span><span class="co">## [10,] .         . .         . . .          . .         . .</span></span></code></pre>
+<span><span class="co">##                                                          </span></span>
+<span><span class="co">##  [1,] .         . 0.6711703 . . .         . .         . .</span></span>
+<span><span class="co">##  [2,] .         . .         . . 0.9612146 . .         . .</span></span>
+<span><span class="co">##  [3,] 0.9747313 . .         . . .         . .         . .</span></span>
+<span><span class="co">##  [4,] .         . .         . . .         . .         . .</span></span>
+<span><span class="co">##  [5,] .         . 0.8038779 . . .         . .         . .</span></span>
+<span><span class="co">##  [6,] .         . .         . . .         . 0.7424513 . .</span></span>
+<span><span class="co">##  [7,] .         . .         . . .         . .         . .</span></span>
+<span><span class="co">##  [8,] .         . .         . . .         . .         . .</span></span>
+<span><span class="co">##  [9,] .         . .         . . .         . .         . .</span></span>
+<span><span class="co">## [10,] .         . .         . . .         . .         . .</span></span></code></pre>
 <p>To register this method with <em><a href="https://github.com/alabaster.base" class="external-link">alabaster.base</a></em>,
 <em>alabaster.foo</em> should add itself to the known schema locations
 upon load:</p>
@@ -445,24 +445,24 @@ the parent object:</p>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/files2.html" class="external-link">dir.create</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">dir</span>, <span class="va">path</span><span class="op">)</span>, showWarnings<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span></span>
 <span></span>
 <span>    <span class="co"># Saving the colData.</span></span>
-<span>    <span class="va">info</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/altStageObject.html">.stageObject</a></span><span class="op">(</span><span class="fu">colData</span><span class="op">(</span><span class="va">x</span><span class="op">)</span>, <span class="va">dir</span>, <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">path</span>, <span class="st">"coldata"</span><span class="op">)</span>, child<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span>
-<span>    <span class="va">cd.info</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>resource<span class="op">=</span><span class="fu"><a href="../reference/writeMetadata.html">.writeMetadata</a></span><span class="op">(</span><span class="va">info</span>, dir<span class="op">=</span><span class="va">dir</span><span class="op">)</span><span class="op">)</span></span>
+<span>    <span class="va">info</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/stageObject.html">stageObject</a></span><span class="op">(</span><span class="fu">colData</span><span class="op">(</span><span class="va">x</span><span class="op">)</span>, <span class="va">dir</span>, <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">path</span>, <span class="st">"coldata"</span><span class="op">)</span>, child<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span>
+<span>    <span class="va">cd.info</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>resource<span class="op">=</span><span class="fu"><a href="../reference/writeMetadata.html">writeMetadata</a></span><span class="op">(</span><span class="va">info</span>, dir<span class="op">=</span><span class="va">dir</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span>    <span class="co"># Saving the rowData.</span></span>
-<span>    <span class="va">info</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/altStageObject.html">.stageObject</a></span><span class="op">(</span><span class="fu">rowData</span><span class="op">(</span><span class="va">x</span><span class="op">)</span>, <span class="va">dir</span>, <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">path</span>, <span class="st">"rowdata"</span><span class="op">)</span>, child<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span>
-<span>    <span class="va">rd.info</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>resource<span class="op">=</span><span class="fu"><a href="../reference/writeMetadata.html">.writeMetadata</a></span><span class="op">(</span><span class="va">info</span>, dir<span class="op">=</span><span class="va">dir</span><span class="op">)</span><span class="op">)</span></span>
+<span>    <span class="va">info</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/stageObject.html">stageObject</a></span><span class="op">(</span><span class="fu">rowData</span><span class="op">(</span><span class="va">x</span><span class="op">)</span>, <span class="va">dir</span>, <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">path</span>, <span class="st">"rowdata"</span><span class="op">)</span>, child<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span>
+<span>    <span class="va">rd.info</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>resource<span class="op">=</span><span class="fu"><a href="../reference/writeMetadata.html">writeMetadata</a></span><span class="op">(</span><span class="va">info</span>, dir<span class="op">=</span><span class="va">dir</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span>    <span class="co"># Saving the other metadata.</span></span>
-<span>    <span class="va">info</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/altStageObject.html">.stageObject</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Annotated-class.html" class="external-link">metadata</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span>, <span class="va">dir</span>, <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">path</span>, <span class="st">"metadata"</span><span class="op">)</span>, child<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span>
-<span>    <span class="va">other.info</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>resource<span class="op">=</span><span class="fu"><a href="../reference/writeMetadata.html">.writeMetadata</a></span><span class="op">(</span><span class="va">info</span>, dir<span class="op">=</span><span class="va">dir</span><span class="op">)</span><span class="op">)</span></span>
+<span>    <span class="va">info</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/stageObject.html">stageObject</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Annotated-class.html" class="external-link">metadata</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span>, <span class="va">dir</span>, <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">path</span>, <span class="st">"metadata"</span><span class="op">)</span>, child<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span>
+<span>    <span class="va">other.info</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>resource<span class="op">=</span><span class="fu"><a href="../reference/writeMetadata.html">writeMetadata</a></span><span class="op">(</span><span class="va">info</span>, dir<span class="op">=</span><span class="va">dir</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span>    <span class="co"># Saving the assays.</span></span>
 <span>    <span class="va">assay.info</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span></span>
 <span>    <span class="kw">for</span> <span class="op">(</span><span class="va">a</span> <span class="kw">in</span> <span class="fu">assayNames</span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
 <span>        <span class="va">curmat</span> <span class="op">&lt;-</span> <span class="fu">assay</span><span class="op">(</span><span class="va">x</span>, <span class="va">a</span><span class="op">)</span></span>
 <span>        <span class="va">mat.path</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">path</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"assay-"</span>, <span class="va">i</span><span class="op">)</span><span class="op">)</span></span>
-<span>        <span class="va">meta</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/altStageObject.html">.stageObject</a></span><span class="op">(</span><span class="va">curmat</span>, path<span class="op">=</span><span class="va">mat.path</span>, dir<span class="op">=</span><span class="va">dir</span>, child<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span>
-<span>        <span class="va">deets</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/writeMetadata.html">.writeMetadata</a></span><span class="op">(</span><span class="va">meta</span>, dir<span class="op">=</span><span class="va">dir</span><span class="op">)</span></span>
+<span>        <span class="va">meta</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/altStageObject.html">altStageObject</a></span><span class="op">(</span><span class="va">curmat</span>, path<span class="op">=</span><span class="va">mat.path</span>, dir<span class="op">=</span><span class="va">dir</span>, child<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span>
+<span>        <span class="va">deets</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/writeMetadata.html">writeMetadata</a></span><span class="op">(</span><span class="va">meta</span>, dir<span class="op">=</span><span class="va">dir</span><span class="op">)</span></span>
 <span>        <span class="va">assay.info</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">assay.info</span>, <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>name<span class="op">=</span><span class="va">ass.names</span><span class="op">[</span><span class="va">i</span><span class="op">]</span>, resource<span class="op">=</span><span class="va">deets</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span>    <span class="op">}</span></span>
 <span></span>
@@ -479,11 +479,11 @@ the parent object:</p>
 <span>        is_child<span class="op">=</span><span class="va">child</span></span>
 <span>    <span class="op">)</span></span>
 <span><span class="op">}</span><span class="op">)</span></span></code></pre></div>
-<p>When doing so, developers should use <code><a href="../reference/altStageObject.html">.stageObject()</a></code>
+<p>When doing so, developers should use <code><a href="../reference/altStageObject.html">altStageObject()</a></code>
 instead of calling <code><a href="../reference/stageObject.html">stageObject()</a></code> (note the period). The is
 a wrapper around ensures that the new staging method can respect
 application-specific overrides. Similarly, some loading methods should
-use <code><a href="../reference/altLoadObject.html">.loadObject()</a></code> when loading child objects:</p>
+use <code><a href="../reference/altLoadObject.html">altLoadObject()</a></code> when loading child objects:</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Abbreviated example from artificer.se:</span></span>
 <span><span class="va">loadSummarizedExperiment</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">exp.info</span>, <span class="va">project</span><span class="op">)</span> <span class="op">{</span></span>
@@ -493,15 +493,15 @@ use <code><a href="../reference/altLoadObject.html">.loadObject()</a></code> whe
 <span>        <span class="va">aname</span> <span class="op">&lt;-</span> <span class="va">cur.ass</span><span class="op">$</span><span class="va">name</span></span>
 <span>        <span class="va">apath</span> <span class="op">&lt;-</span> <span class="va">cur.ass</span><span class="op">$</span><span class="va">resource</span><span class="op">$</span><span class="va">path</span></span>
 <span>        <span class="va">ass.info</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/acquireFile.html">acquireMetadata</a></span><span class="op">(</span><span class="va">project</span>, <span class="va">apath</span><span class="op">)</span></span>
-<span>        <span class="va">all.assays</span><span class="op">[[</span><span class="va">aname</span><span class="op">]</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/altLoadObject.html">.loadObject</a></span><span class="op">(</span><span class="va">ass.info</span>, project<span class="op">=</span><span class="va">project</span><span class="op">)</span></span>
+<span>        <span class="va">all.assays</span><span class="op">[[</span><span class="va">aname</span><span class="op">]</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/altLoadObject.html">altLoadObject</a></span><span class="op">(</span><span class="va">ass.info</span>, project<span class="op">=</span><span class="va">project</span><span class="op">)</span></span>
 <span>    <span class="op">}</span></span>
 <span></span>
 <span>    <span class="va">cd.info</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/acquireFile.html">acquireMetadata</a></span><span class="op">(</span><span class="va">project</span>, <span class="va">exp.info</span><span class="op">$</span><span class="va">summarized_experiment</span><span class="op">$</span><span class="va">column_data</span><span class="op">$</span><span class="va">resource</span><span class="op">$</span><span class="va">path</span><span class="op">)</span></span>
-<span>    <span class="va">cd</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/altLoadObject.html">.loadObject</a></span><span class="op">(</span><span class="va">cd.info</span>, project<span class="op">=</span><span class="va">project</span><span class="op">)</span></span>
+<span>    <span class="va">cd</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/altLoadObject.html">altLoadObject</a></span><span class="op">(</span><span class="va">cd.info</span>, project<span class="op">=</span><span class="va">project</span><span class="op">)</span></span>
 <span>    <span class="va">rd.info</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/acquireFile.html">acquireMetadata</a></span><span class="op">(</span><span class="va">project</span>, <span class="va">exp.info</span><span class="op">$</span><span class="va">summarized_experiment</span><span class="op">$</span><span class="va">row_data</span><span class="op">$</span><span class="va">resource</span><span class="op">$</span><span class="va">path</span><span class="op">)</span></span>
-<span>    <span class="va">rd</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/altLoadObject.html">.loadObject</a></span><span class="op">(</span><span class="va">rd.info</span>, project<span class="op">=</span><span class="va">project</span><span class="op">)</span></span>
+<span>    <span class="va">rd</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/altLoadObject.html">altLoadObject</a></span><span class="op">(</span><span class="va">rd.info</span>, project<span class="op">=</span><span class="va">project</span><span class="op">)</span></span>
 <span>    <span class="va">other.info</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/acquireFile.html">acquireMetadata</a></span><span class="op">(</span><span class="va">project</span>, <span class="va">exp.info</span><span class="op">$</span><span class="va">summarized_experiment</span><span class="op">$</span><span class="va">other_data</span><span class="op">$</span><span class="va">resource</span><span class="op">$</span><span class="va">path</span><span class="op">)</span></span>
-<span>    <span class="va">other</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/altLoadObject.html">.loadObject</a></span><span class="op">(</span><span class="va">other.info</span>, project<span class="op">=</span><span class="va">project</span><span class="op">)</span></span>
+<span>    <span class="va">other</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/altLoadObject.html">altLoadObject</a></span><span class="op">(</span><span class="va">other.info</span>, project<span class="op">=</span><span class="va">project</span><span class="op">)</span></span>
 <span></span>
 <span>    <span class="fu">SummarizedExperiment</span><span class="op">(</span><span class="va">all.assays</span>, colData<span class="op">=</span><span class="va">cd</span>, rowData<span class="op">=</span><span class="va">rd</span>, metadata<span class="op">=</span><span class="va">other</span>, checkDimnames<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span></span>
 <span><span class="op">}</span></span></code></pre></div>

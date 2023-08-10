@@ -96,9 +96,18 @@ A <code>NULL</code> is invisibly returned.</p>
     <p>This function will look around <code>path</code> for JSON files containing redirections to <code>from</code>, and update them to point to <code>to</code>.
 More specifically, if <code>path</code> is a subdirectory, it will search in the same directory containing <code>path</code>;
 otherwise, it will search in the directory containing <code>dirname(path)</code>.
-Redirections in other locations will not be removed automatically - these will be caught by <code><a href="checkValidDirectory.html">checkValidDirectory</a></code> and should be manually updated.</p>
+Redirections in other locations will not be removed automatically - these will be caught by <code><a href="validateDirectory.html">checkValidDirectory</a></code> and should be manually updated.</p>
 <p>If <code>rename.redirections=TRUE</code>, this function will additionally move the redirection files so that they are named as <code>to</code>.
 In the unusual case where <code>from</code> is the target of multiple redirection files, the renaming process will clobber all of them such that only one of them will be present after the move.</p>
+    </div>
+    <div id="safety-of-moving-operations">
+    <h2>Safety of moving operations</h2>
+    
+
+<p>In general, <span class="pkg">alabaster.*</span> representations are safe to move as only the parent object's <code>resource.path</code> metadata properties will contain links to the children's paths.
+These links are updated with the new <code>to</code> path after running <code>moveObject</code> on the parent <code>from</code>.</p>
+<p>However, alabaster applications may define custom data structures where the paths are present elsewhere, e.g., in the data file itself or in other metadata properties.
+If so, applications are reponsible for updating those paths to reflect the naming to <code>to</code>.</p>
     </div>
     <div id="author">
     <h2>Author</h2>
@@ -113,7 +122,7 @@ In the unusual case where <code>from</code> is the target of multiple redirectio
 <span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://bioconductor.org/packages/S4Vectors" class="external-link">S4Vectors</a></span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/DataFrame-class.html" class="external-link">DataFrame</a></span><span class="op">(</span>A<span class="op">=</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span>, B<span class="op">=</span><span class="va">LETTERS</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">]</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">meta</span> <span class="op">&lt;-</span> <span class="fu"><a href="stageObject.html">stageObject</a></span><span class="op">(</span><span class="va">df</span>, <span class="va">tmp</span>, path<span class="op">=</span><span class="st">"whee"</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="writeMetadata.html">.writeMetadata</a></span><span class="op">(</span><span class="va">meta</span>, <span class="va">tmp</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="writeMetadata.html">writeMetadata</a></span><span class="op">(</span><span class="va">meta</span>, <span class="va">tmp</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $type</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "local"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -123,7 +132,7 @@ In the unusual case where <code>from</code> is the target of multiple redirectio
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">ll</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>A<span class="op">=</span><span class="fl">1</span>, B<span class="op">=</span><span class="va">LETTERS</span>, C<span class="op">=</span><span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/DataFrame-class.html" class="external-link">DataFrame</a></span><span class="op">(</span>X<span class="op">=</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">meta</span> <span class="op">&lt;-</span> <span class="fu"><a href="stageObject.html">stageObject</a></span><span class="op">(</span><span class="va">ll</span>, <span class="va">tmp</span>, path<span class="op">=</span><span class="st">"stuff"</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="writeMetadata.html">.writeMetadata</a></span><span class="op">(</span><span class="va">meta</span>, <span class="va">tmp</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="writeMetadata.html">writeMetadata</a></span><span class="op">(</span><span class="va">meta</span>, <span class="va">tmp</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $type</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "local"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -131,8 +140,8 @@ In the unusual case where <code>from</code> is the target of multiple redirectio
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "stuff/list.json.gz"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="va">redirect</span> <span class="op">&lt;-</span> <span class="fu"><a href="createRedirection.html">.createRedirection</a></span><span class="op">(</span><span class="va">tmp</span>, <span class="st">"whoop"</span>, <span class="st">"whee/simple.csv.gz"</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="writeMetadata.html">.writeMetadata</a></span><span class="op">(</span><span class="va">redirect</span>, <span class="va">tmp</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">redirect</span> <span class="op">&lt;-</span> <span class="fu"><a href="createRedirection.html">createRedirection</a></span><span class="op">(</span><span class="va">tmp</span>, <span class="st">"whoop"</span>, <span class="st">"whee/simple.csv.gz"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="writeMetadata.html">writeMetadata</a></span><span class="op">(</span><span class="va">redirect</span>, <span class="va">tmp</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $type</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "local"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>

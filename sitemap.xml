@@ -34,19 +34,13 @@
     <loc>/reference/altStageObject.html</loc>
   </url>
   <url>
-    <loc>/reference/checkValidDirectory.html</loc>
-  </url>
-  <url>
     <loc>/reference/createRedirection.html</loc>
   </url>
   <url>
     <loc>/reference/index.html</loc>
   </url>
   <url>
-    <loc>/reference/loadAllMetadata.html</loc>
-  </url>
-  <url>
-    <loc>/reference/loadAllObjects.html</loc>
+    <loc>/reference/listDirectory.html</loc>
   </url>
   <url>
     <loc>/reference/loadBaseList.html</loc>
@@ -58,6 +52,9 @@
     <loc>/reference/loadDataFrameFactor.html</loc>
   </url>
   <url>
+    <loc>/reference/loadDirectory.html</loc>
+  </url>
+  <url>
     <loc>/reference/loadObject.html</loc>
   </url>
   <url>
@@ -67,10 +64,10 @@
     <loc>/reference/processMetadata.html</loc>
   </url>
   <url>
-    <loc>/reference/quickReadCsv.html</loc>
+    <loc>/reference/quickLoadObject.html</loc>
   </url>
   <url>
-    <loc>/reference/readLocalObject.html</loc>
+    <loc>/reference/quickReadCsv.html</loc>
   </url>
   <url>
     <loc>/reference/removeObject.html</loc>
@@ -92,6 +89,9 @@
   </url>
   <url>
     <loc>/reference/stageObject.html</loc>
+  </url>
+  <url>
+    <loc>/reference/validateDirectory.html</loc>
   </url>
   <url>
     <loc>/reference/writeMetadata.html</loc>

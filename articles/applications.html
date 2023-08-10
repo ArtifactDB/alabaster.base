@@ -175,7 +175,7 @@ objects:</p>
 <span>        <span class="va">meta</span><span class="op">$</span><span class="va">authors</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/AsIs.html" class="external-link">I</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Sys.info.html" class="external-link">Sys.info</a></span><span class="op">(</span><span class="op">)</span><span class="op">[[</span><span class="st">"user"</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span>
 <span>    <span class="op">}</span></span>
 <span></span>
-<span>    <span class="co"># Pointing .writeMetadata to the application package storing the schemas.</span></span>
+<span>    <span class="co"># Pointing writeMetadata to the application package storing the schemas.</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">meta</span><span class="op">[[</span><span class="st">"$schema"</span><span class="op">]</span><span class="op">]</span>, <span class="st">"package"</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="st">"APPLICATION_NAME_HERE"</span></span>
 <span></span>
 <span>    <span class="va">meta</span> </span>
@@ -186,11 +186,11 @@ convenient for the end-users of that application, who do not have to
 remember what to set:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">appSave</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span>, <span class="va">dir</span>, <span class="va">path</span>, <span class="va">child</span><span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span>
-<span>    <span class="va">olds</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/altStageObject.html">.altStageObject</a></span><span class="op">(</span><span class="va">appStageObject</span><span class="op">)</span></span>
-<span>    <span class="fu"><a href="https://rdrr.io/r/base/on.exit.html" class="external-link">on.exit</a></span><span class="op">(</span><span class="fu"><a href="../reference/altStageObject.html">.altStageObject</a></span><span class="op">(</span><span class="va">olds</span><span class="op">)</span><span class="op">)</span></span>
+<span>    <span class="va">olds</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/altStageObject.html">altStageObjectFunction</a></span><span class="op">(</span><span class="va">appStageObject</span><span class="op">)</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/on.exit.html" class="external-link">on.exit</a></span><span class="op">(</span><span class="fu"><a href="../reference/altStageObject.html">altStageObjectFunction</a></span><span class="op">(</span><span class="va">olds</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span>    <span class="va">meta</span> <span class="op">&lt;-</span> <span class="fu">appStageObject</span><span class="op">(</span><span class="va">x</span>, <span class="va">dir</span>, <span class="va">path</span>, child<span class="op">=</span><span class="va">child</span><span class="op">)</span></span>
-<span>    <span class="va">written</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/writeMetadata.html">.writeMetadata</a></span><span class="op">(</span><span class="va">meta</span>, <span class="va">dir</span><span class="op">)</span> </span>
+<span>    <span class="va">written</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/writeMetadata.html">writeMetadata</a></span><span class="op">(</span><span class="va">meta</span>, <span class="va">dir</span><span class="op">)</span> </span>
 <span></span>
 <span>    <span class="va">written</span><span class="op">$</span><span class="va">path</span></span>
 <span><span class="op">}</span></span></code></pre></div>
@@ -256,12 +256,12 @@ that will be used to override <code>acquireFile</code> and
 <code>acquireMetadata</code>.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">appLoad</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">project</span>, <span class="va">path</span><span class="op">)</span> <span class="op">{</span></span>
-<span>    <span class="va">oldl</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/altLoadObject.html">.altLoadObject</a></span><span class="op">(</span><span class="va">appLoadObject</span><span class="op">)</span></span>
-<span>    <span class="fu"><a href="https://rdrr.io/r/base/on.exit.html" class="external-link">on.exit</a></span><span class="op">(</span><span class="fu"><a href="../reference/altLoadObject.html">.altLoadObject</a></span><span class="op">(</span><span class="va">oldl</span><span class="op">)</span><span class="op">)</span></span>
+<span>    <span class="va">oldl</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/altLoadObject.html">altLoadObjectFunction</a></span><span class="op">(</span><span class="va">appLoadObject</span><span class="op">)</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/on.exit.html" class="external-link">on.exit</a></span><span class="op">(</span><span class="fu"><a href="../reference/altLoadObject.html">altLoadObjectFunction</a></span><span class="op">(</span><span class="va">oldl</span><span class="op">)</span><span class="op">)</span></span>
 <span>    <span class="va">info</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/acquireFile.html">acquireMetadata</a></span><span class="op">(</span><span class="va">project</span>, <span class="va">path</span><span class="op">)</span></span>
 <span>    <span class="fu">appLoadObject</span><span class="op">(</span><span class="va">info</span>, <span class="va">project</span>, child<span class="op">=</span><span class="va">child</span><span class="op">)</span></span>
 <span><span class="op">}</span></span></code></pre></div>
-<p>Note that <code><a href="../reference/altLoadObject.html">.altLoadObject()</a></code> will override the loading for
+<p>Note that <code><a href="../reference/altLoadObject.html">altLoadObject()</a></code> will override the loading for
 all objects. For overrides of specific objects, application developers
 can simply modify the <code>_attributes.restore.R</code> in the
 corresponding schema to point to a different function.</p>

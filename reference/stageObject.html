@@ -108,15 +108,15 @@ Each child object should be saved in its own subdirectory within <code>dir</code
 which can have any name that does not conflict with the data file (if present) and does not end with <code>.json</code>.
 This allows developers to decompose complex <code>x</code> into their components for more flexible staging/loading.</p></li>
 </ul><p>The return value of each method should be a named list of metadata, 
-which will (eventually) be passed to <code><a href="writeMetadata.html">.writeMetadata</a></code> to save a JSON metadata file inside the <code>path</code> subdirectory.
+which will (eventually) be passed to <code><a href="writeMetadata.html">writeMetadata</a></code> to save a JSON metadata file inside the <code>path</code> subdirectory.
 This list should contain at least:</p><ul><li><p><code>$schema</code>, a string specifying the schema to use to validate the metadata for the class of <code>x</code>.
-This may be decorated with the <code>package</code> attribute to help <code><a href="writeMetadata.html">.writeMetadata</a></code> find the package containing the schema.</p></li>
+This may be decorated with the <code>package</code> attribute to help <code><a href="writeMetadata.html">writeMetadata</a></code> find the package containing the schema.</p></li>
 <li><p><code>path</code>, a string containing the relative path to the object's file representation inside <code>dir</code>.
 For clarity, we will denote the input <code>path</code> argument as PATHIN and the output <code>path</code> property as PATHOUT.
 These are different as PATHIN refers to the directory while PATHOUT refers to a file inside the directory.</p>
 <p>If a data file exists, PATHOUT should contain the relative path to that file from <code>dir</code>.
 Otherwise, for metadata-only schemas, PATHOUT should be set to a relative path of a JSON file inside the PATHIN subdirectory,
-specifying the location in which the metadata is to be saved by <code><a href="writeMetadata.html">.writeMetadata</a></code>.</p></li>
+specifying the location in which the metadata is to be saved by <code><a href="writeMetadata.html">writeMetadata</a></code>.</p></li>
 <li><p><code>is_child</code>, a logical scalar equal to the input <code>child</code>.</p></li>
 </ul><p>This list will usually contain more useful elements to describe <code>x</code>.
 The exact nature of those elements will depend on the specified schema for the class of <code>x</code>.</p>
@@ -133,10 +133,10 @@ For example, if one <a href="https://rdrr.io/pkg/S4Vectors/man/DataFrame-class.h
 A list of multiple <a href="https://rdrr.io/pkg/S4Vectors/man/DataFrame-class.html" class="external-link">DataFrame</a>s will also represent each DataFrame as a child object.
 This allows developers to re-use the staging/loading code for DataFrames when reconstructing the complex parent object.</p>
 <p>If a <code>stageObject</code> method needs to save a child object, it should do so in a subdirectory of PATHIN (i.e., the input <code>path</code> argument).
-This is achieved by calling <code><a href="altStageObject.html">.stageObject</a>(child, dir, subpath)</code> where <code>child</code> is the child component of <code>x</code> and <code>subdir</code> is the desired subdirectory path.
+This is achieved by calling <code><a href="altStageObject.html">altStageObject</a>(child, dir, subpath)</code> where <code>child</code> is the child component of <code>x</code> and <code>subdir</code> is the desired subdirectory path.
 Note the period at the start of the function, which ensures that the method respects customizations from alabaster applications (see <code><a href="altStageObject.html">.altStageObject</a></code> for details).
 We also suggest creating <code>subdir</code> with <code>paste0(path, "/", subname)</code> for a given subdirectory name, which avoids potential problems with non-<code>/</code> file separators.</p>
-<p>After creating the child object's subdirectory, the <code>stageObject</code> method should call <code><a href="writeMetadata.html">.writeMetadata</a></code> on the output of <code>.stageObject</code> to save the child's metadata.
+<p>After creating the child object's subdirectory, the <code>stageObject</code> method should call <code><a href="writeMetadata.html">writeMetadata</a></code> on the output of <code>altStageObject</code> to save the child's metadata.
 This will return a list that can be inserted into the parent's metadata list for the method's return value.
 All child files created by a <code>stageObject</code> method should be referenced from the metadata list, 
 i.e., the child metadata's PATHOUT should be present in in the metadata list as a <code>resource</code> entry somewhere.</p>
@@ -145,7 +145,7 @@ This ensures that PATHIN contains all and only the contents of <code>x</code>.</
     </div>
     <div id="see-also">
     <h2>See also</h2>
-    <div class="dont-index"><p><code><a href="checkValidDirectory.html">checkValidDirectory</a></code>, for validation of the staged contents.</p></div>
+    <div class="dont-index"><p><code><a href="validateDirectory.html">checkValidDirectory</a></code>, for validation of the staged contents.</p></div>
     </div>
     <div id="author">
     <h2>Author</h2>
