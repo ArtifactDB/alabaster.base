@@ -25,7 +25,7 @@ struct RFilledField : public comservatory::TypedField<T, tt> {
     ::SEXP SEXP() const { return store; }
 
     void push_back(T in) {
-        if (position >= store.size()) {
+        if (position >= static_cast<size_t>(store.size())) {
             throw std::runtime_error("more records than specified in preallocation");
         }
         store[position] = in;
@@ -34,7 +34,7 @@ struct RFilledField : public comservatory::TypedField<T, tt> {
     }
 
     void add_missing() {
-        if (position >= store.size()) {
+        if (position >= static_cast<size_t>(store.size())) {
             throw std::runtime_error("more records than specified in preallocation");
         }
         set_NA(store, position);
