@@ -82,7 +82,7 @@ Check out the [user's guide](https://artifactdb.github.io/alabaster.base/article
 
 The staging/loading process can be applied to a range of data structures, provided the appropriate **alabaster** package is installed.
 
-| Package | Object types | BioC-release | BioC-devel |
+| Package | Object types | BioC-devel | BioC-release |
 |-----|-----|----|----|
 | [**alabaster.base**](https://github.com/ArtifactDB/alabaster.base) | `DataFrame`, list, `List` | [![](http://bioconductor.org/shields/build/devel/bioc/alabaster.base.svg)](http://bioconductor.org/checkResults/devel/bioc-LATEST/alabaster.base) | [![](http://bioconductor.org/shields/build/release/bioc/alabaster.base.svg)](http://bioconductor.org/checkResults/release/bioc-LATEST/alabaster.base) |
 | [**alabaster.matrix**](https://github.com/ArtifactDB/alabaster.matrix) | Ordinary matrix, `Matrix` instance, [`DelayedArray`](https://bioconductor.org/packages/DelayedArray) | [![](http://bioconductor.org/shields/build/devel/bioc/alabaster.matrix.svg)](http://bioconductor.org/checkResults/devel/bioc-LATEST/alabaster.matrix) | [![](http://bioconductor.org/shields/build/release/bioc/alabaster.matrix.svg)](http://bioconductor.org/checkResults/release/bioc-LATEST/alabaster.matrix) |
