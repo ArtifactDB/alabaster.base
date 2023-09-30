@@ -112,19 +112,16 @@ setMethod("stageObject", "DataFrame", function(x, dir, path, child=FALSE, df.nam
 
                 x[[z]] <- as.character(col)
 
-            } else if (is.character(col)) {
-                out$type <- "string"
-
-            } else if (is(col, "POSIXct") || is(col, "POSIXlt")) {
+            } else if (.is_datetime(col)) {
                 out$type <- "date-time"
                 x[[z]] <- .sanitize_datetime(col)
 
             } else if (is(col, "Date")) {
                 out$type <- "date"
-                x[[z]] <- format(col, "%Y-%m-%d")
+                x[[z]] <- .sanitize_date(col)
 
             } else if (is.atomic(col)) {
-                coerced <- .remap_type(col)
+                coerced <- .remap_atomic_type(col)
                 out$type <- coerced$type
                 x[[z]] <- coerced$values
 
@@ -207,25 +204,6 @@ setMethod("stageObject", "DataFrame", function(x, dir, path, child=FALSE, df.nam
     meta <- c(meta, extra)
     meta
 })
-
-.sanitize_datetime <- function(x) {
-    sub("([0-9]{2})$", ":\\1", strftime(x, "%Y-%m-%dT%H:%M:%S%z"))
-}
-
-.remap_type <- function(x) {
-    y <- typeof(x)
-
-    # Forcibly coercing the types, just to make sure that
-    # we don't get tricked by classes that might do something
-    # different inside write.csv or whatever.
-    switch(y,
-        integer=list(type="integer", values=as.integer(x)),
-        double=list(type="number", values=as.double(x)),
-        numeric=list(type="number", values=as.double(x)),
-        logical=list(type="boolean", values=as.logical(x)),
-        stop("type '", y, "' is not supported")
-    )
-}
 
 #' @importFrom rhdf5 h5write h5createGroup h5createFile
 .write_hdf5_data_frame <- function(x, skippable, host, ofile) {

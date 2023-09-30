@@ -98,7 +98,6 @@ loadDataFrame <- function(info, project, include.nested=TRUE, parallel=TRUE) {
 
     # Make sure everyone is of the right type.
     new.names <- character(ncol(df))
-    atomics <- c(integer="integer", number="double", string="character", boolean="logical")
 
     for (i in seq_along(col.info)) {
         new.names[i] <- col.info[[i]]$name
@@ -114,10 +113,10 @@ loadDataFrame <- function(info, project, include.nested=TRUE, parallel=TRUE) {
 
         } else if (col.type=="date-time") {
             # Remove colon in the timezone, which confuses as.POSIXct().
-            df[[i]] <- as.POSIXct(sub(":([0-9]{2})$", "\\1", df[[i]]), format="%Y-%m-%dT%H:%M:%S%z")
+            df[[i]] <- .cast_datetime(df[[i]])
 
-        } else if (col.type %in% names(atomics)) {
-            df[[i]] <- as(df[[i]], as.character(atomics[col.type]))
+        } else if (.is_atomic(col.type)) {
+            df[[i]] <- .cast_atomic(df[[i]], col.type)
 
         } else if (col.type == "other") {
             current <- acquireMetadata(project, col.info[[i]]$resource$path)

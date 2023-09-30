@@ -151,7 +151,7 @@ setMethod("stageObject", "list", function(x, dir, path, child=FALSE, fname="list
             return(NULL)
 
         } else if (is.atomic(x)) {
-            coerced <- .remap_type(x)
+            coerced <- .remap_atomic_type(x)
 
             .label_hdf5_group(fpath, name, 
                 uzuki_object="vector",
@@ -191,7 +191,7 @@ setMethod("stageObject", "list", function(x, dir, path, child=FALSE, fname="list
 .is_stringlike <- function(x) {
     if (is(x, "Date")) {
         return("date")
-    } else if (is(x, "POSIXct") || is(x, "POSIXlt")) {
+    } else if (.is_datetime(x)) {
         return("date-time")
     } else if (is.character(x)) {
         return("string")
@@ -283,7 +283,7 @@ setMethod("stageObject", "list", function(x, dir, path, child=FALSE, fname="list
             return(formatted)
 
         } else if (is.atomic(x)) {
-            formatted <- .remap_type(x)
+            formatted <- .remap_atomic_type(x)
 
             y <- formatted$values
             if (is.numeric(y) && !all(is.finite(y))) {
