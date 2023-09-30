@@ -43,6 +43,12 @@
     <loc>/reference/listDirectory.html</loc>
   </url>
   <url>
+    <loc>/reference/loadAtomicVector.html</loc>
+  </url>
+  <url>
+    <loc>/reference/loadBaseFactor.html</loc>
+  </url>
+  <url>
     <loc>/reference/loadBaseList.html</loc>
   </url>
   <url>
@@ -77,6 +83,12 @@
   </url>
   <url>
     <loc>/reference/saveFormats.html</loc>
+  </url>
+  <url>
+    <loc>/reference/stageAtomicVector.html</loc>
+  </url>
+  <url>
+    <loc>/reference/stageBaseFactor.html</loc>
   </url>
   <url>
     <loc>/reference/stageBaseList.html</loc>
