@@ -100,34 +100,53 @@ loadDataFrame <- function(info, project, include.nested=TRUE, parallel=TRUE) {
     new.names <- character(ncol(df))
 
     for (i in seq_along(col.info)) {
-        new.names[i] <- col.info[[i]]$name
+        current.info <- col.info[[i]]
+        new.names[i] <- current.info$name
 
-        col.type <- col.info[[i]]$type 
+        col.type <- current.info$type 
+        col <- df[[i]]
+
         if (col.type=="factor" || col.type=="ordered") {
-            level.info <- acquireMetadata(project, col.info[[i]]$levels$resource$path)
-            level.df <- altLoadObject(level.info, project=project)
-            df[[i]] <- factor(df[[i]], levels=level.df[,1], ordered=(col.type=="ordered"))
+            level.info <- acquireMetadata(project, current.info$levels$resource$path)
+            levels <- altLoadObject(level.info, project=project)
+            if (is(levels, "DataFrame")) { # account for old objects that store levels as a DF.
+                levels <- levels[,1]
+            }
+            if (is.numeric(col)) {
+                col <- levels[col]
+            }
+            ordered <- col.type == "ordered" || isTRUE(current.info$ordered)
+            col <- factor(col, levels=levels, ordered=ordered)
 
         } else if (col.type=="date") {
-            df[[i]] <- as.Date(df[[i]])
+            col <- as.Date(col)
 
         } else if (col.type=="date-time") {
-            # Remove colon in the timezone, which confuses as.POSIXct().
-            df[[i]] <- .cast_datetime(df[[i]])
+            col <- .cast_datetime(col)
 
         } else if (.is_atomic(col.type)) {
-            df[[i]] <- .cast_atomic(df[[i]], col.type)
+            col <- .cast_atomic(col, col.type)
+            if (col.type == "string") {
+                f <- current.info$format
+                if (identical(f, "date")) {
+                    col <- as.Date(col)
+                } else if (identical(f, "date-time")) {
+                    col <- .cast_datetime(col)
+                }
+            }
 
         } else if (col.type == "other") {
-            current <- acquireMetadata(project, col.info[[i]]$resource$path)
+            current <- acquireMetadata(project, current.info$resource$path)
             if (include.nested || !("data_frame" %in% names(current))) {
-                df[[i]] <- altLoadObject(current, project=project)
+                col <- altLoadObject(current, project=project)
             } else {
                 new.names[i] <- NA_character_
             }
         } else {
             stop("unsupported column type '", col.type, "'")
         }
+
+        df[[i]] <- col
     }
 
     # Removing nested DFs.

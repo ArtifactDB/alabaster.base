@@ -33,11 +33,14 @@ test_that("DFs handle their column types correctly", {
     meta <- info$data_frame
     expect_identical(meta$columns[[1]]$type, "string")
     expect_identical(read.csv(file.path(tmp, meta$columns[[2]]$levels$resource$path))[,1], LETTERS[10:1])
+    expect_null(meta$columns[[2]]$ordered)
     expect_identical(meta$columns[[3]]$type, "integer")
     expect_identical(meta$columns[[4]]$type, "number")
-    expect_identical(meta$columns[[5]]$type, "ordered")
+    expect_identical(meta$columns[[5]]$type, "factor")
+    expect_true(meta$columns[[5]]$ordered)
     expect_identical(read.csv(file.path(tmp, meta$columns[[5]]$levels$resource$path))[,1], LETTERS[1:3])
-    expect_identical(meta$columns[[6]]$type, "date")
+    expect_identical(meta$columns[[6]]$type, "string")
+    expect_identical(meta$columns[[6]]$format, "date")
 
     # Round-tripping to make sure it's okay.
     out <- loadDataFrame(info, tmp)
@@ -272,8 +275,10 @@ test_that("DFs handle POSIX times correctly", {
 
     info <- stageObject(df, tmp, "rnaseq")
     meta <- info$data_frame
-    expect_identical(meta$columns[[1]]$type, "date-time")
-    expect_identical(meta$columns[[2]]$type, "date-time")
+    expect_identical(meta$columns[[1]]$type, "string")
+    expect_identical(meta$columns[[1]]$format, "date-time")
+    expect_identical(meta$columns[[2]]$type, "string")
+    expect_identical(meta$columns[[2]]$format, "date-time")
 
     # Round-tripping to make sure it's okay.
     out <- loadDataFrame(info, tmp)
@@ -281,3 +286,41 @@ test_that("DFs handle POSIX times correctly", {
     expect_identical(df$bar, as.POSIXct(out$bar))
 })
 
+test_that("DFs handle their column types correctly (legacy)", {
+    tmp <- tempfile()
+    dir.create(tmp, recursive=TRUE)
+
+    ncols <- 123
+    df <- DataFrame(
+        stuff = rep(LETTERS[1:3], length.out=ncols),
+        blah = 0, # placeholder
+        foo = seq_len(ncols),
+        whee = as.numeric(10 + seq_len(ncols)),
+        rabbit = 1,
+        birthday = rep(Sys.Date(), ncols) - sample(100, ncols, replace=TRUE),
+        birthtime = round(rep(Sys.time(), ncols) - sample(100, ncols, replace=TRUE))
+    )
+    df$blah <- factor(df$stuff, LETTERS[10:1])
+    df$rabbit <- factor(df$stuff, LETTERS[1:3], ordered=TRUE)
+
+    info <- stageObject(df, tmp, "rnaseq", .version=1)
+
+    # Should write without errors.
+    resource <- writeMetadata(info, tmp)
+    expect_true(file.exists(file.path(tmp, resource$path)))
+
+    meta <- info$data_frame
+    expect_identical(meta$columns[[5]]$type, "ordered")
+    expect_identical(meta$columns[[6]]$type, "date")
+    expect_identical(meta$columns[[7]]$type, "date-time")
+
+    # Round-tripping to make sure it's okay.
+    out <- loadDataFrame(info, tmp)
+    expect_identical(out$stuff, df$stuff)
+    expect_identical(out$blah, df$blah)
+    expect_identical(out$foo, df$foo)
+    expect_identical(out$whee, df$whee)
+    expect_identical(out$rabbit, df$rabbit)
+    expect_identical(out$birthday, df$birthday)
+    expect_equal(out$birthtime, df$birthtime)
+})

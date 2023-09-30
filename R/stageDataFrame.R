@@ -11,6 +11,7 @@
 #' If \code{NULL}, per-element metadata is not saved.
 #' @param meta.name String specifying the name of the directory inside \code{path} to save \code{\link{metadata}(x)}.
 #' If \code{NULL}, object metadata is not saved.
+#' @param .version Internal use only.
 #'
 #' @return
 #' A named list containing the metadata for \code{x}.
@@ -71,7 +72,7 @@
 #' @rdname stageDataFrame
 #' @importFrom utils write.csv
 #' @importFrom S4Vectors DataFrame
-setMethod("stageObject", "DataFrame", function(x, dir, path, child=FALSE, df.name="simple", mcols.name="mcols", meta.name="other") {
+setMethod("stageObject", "DataFrame", function(x, dir, path, child=FALSE, df.name="simple", mcols.name="mcols", meta.name="other", .version=2) {
     dir.create(file.path(dir, path), showWarnings=FALSE)
 
     true.colnames <- colnames(x)
@@ -95,29 +96,50 @@ setMethod("stageObject", "DataFrame", function(x, dir, path, child=FALSE, df.nam
 
         if (length(dim(col)) < 2) { # only vectors or 1-d arrays.
             if (is.factor(col)) {
-                if (is.ordered(col)) {
-                    out$type <- "ordered"
-                } else { 
+                if (.version == 1) {
+                    if (is.ordered(col)) {
+                        out$type <- "ordered"
+                    } else { 
+                        out$type <- "factor"
+                    }
+
+                    tryCatch({
+                         lev.info <- altStageObject(DataFrame(levels=levels(col)), dir, paste0(path, "/column", z), df.name="levels", child=TRUE)
+                         out$levels <- list(resource=writeMetadata(lev.info, dir=dir))
+                     }, error = function(e) stop("failed to stage levels of factor column '", out$name, "'\n  - ", e$message))
+
+                    x[[z]] <- as.character(col)
+
+                } else {
                     out$type <- "factor"
+                    if (is.ordered(col)) {
+                        out$ordered <- TRUE
+                    }
+
+                    tryCatch({
+                         lev.info <- altStageObject(levels(col), dir, paste0(path, "/column", z), df.name="levels", child=TRUE)
+                         out$levels <- list(resource=writeMetadata(lev.info, dir=dir))
+                     }, error = function(e) stop("failed to stage levels of factor column '", out$name, "'\n  - ", e$message))
+
+                    x[[z]] <- as.integer(col)
                 }
-
-                if (anyNA(col) && any(levels(col) == "NA")) {
-                    stop("cannot have both missing values and 'NA' levels")
-                }
-
-                tryCatch({
-                     lev.info <- altStageObject(DataFrame(levels=levels(col)), dir, paste0(path, "/column", z), df.name="levels", child=TRUE)
-                     out$levels <- list(resource=writeMetadata(lev.info, dir=dir))
-                 }, error = function(e) stop("failed to stage levels of factor column '", out$name, "'\n  - ", e$message))
-
-                x[[z]] <- as.character(col)
 
             } else if (.is_datetime(col)) {
-                out$type <- "date-time"
+                if (.version == 1) {
+                    out$type <- "date-time"
+                } else {
+                    out$type <- "string"
+                    out$format <- "date-time"
+                }
                 x[[z]] <- .sanitize_datetime(col)
 
             } else if (is(col, "Date")) {
-                out$type <- "date"
+                if (.version == 1) {
+                    out$type <- "date"
+                } else {
+                    out$type <- "string"
+                    out$format <- "date"
+                }
                 x[[z]] <- .sanitize_date(col)
 
             } else if (is.atomic(col)) {
