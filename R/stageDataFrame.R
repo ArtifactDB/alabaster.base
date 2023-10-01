@@ -213,6 +213,7 @@ setMethod("stageObject", "DataFrame", function(x, dir, path, child=FALSE, df.nam
         `$schema`=schema,
         path=opath,
         is_child=child,
+        version=if (.version != 1) .version else NULL,
         data_frame=list(
             columns=meta,
             row_names=!is.null(rownames(x)),
