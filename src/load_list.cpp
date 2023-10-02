@@ -8,30 +8,23 @@ struct RBase {
     virtual Rcpp::RObject extract_object() = 0;
 };
 
-template<typename T, uzuki2::Type tt, class RVector>
-struct RTypedVector : public uzuki2::TypedVector<T, tt>, public RBase {
-    RTypedVector(size_t s) : vec(s) {}
+struct RIntegerVector : public uzuki2::IntegerVector, public RBase {
+    RIntegerVector(size_t l, bool n, bool) : vec(l), named(n), names(n ? l : 0) {}
 
     size_t size() const { 
         return vec.size();
     }
 
-    void set(size_t i, T val) {
+    void set(size_t i, int32_t val) {
         vec[i] = val;
-        return;
     }
 
-    void set_missing(size_t);
-
-    void use_names() {
-        named = true;
-        names = Rcpp::CharacterVector(vec.size());
-        return;
+    void set_missing(size_t i) {
+        vec[i] = NA_INTEGER;
     }
 
     void set_name(size_t i, std::string nm) {
         names[i] = nm;
-        return;
     }
 
     Rcpp::RObject extract_object() { 
@@ -41,63 +34,137 @@ struct RTypedVector : public uzuki2::TypedVector<T, tt>, public RBase {
         return vec; 
     }
 
-    void is_scalar() {}
-
-    RVector vec;
+    Rcpp::IntegerVector vec;
     bool named = false;
     Rcpp::CharacterVector names;
 };
 
-typedef RTypedVector<int32_t, uzuki2::INTEGER, Rcpp::IntegerVector> RIntegerVector; 
+struct RNumberVector : public uzuki2::NumberVector, public RBase {
+    RNumberVector(size_t l, bool n, bool) : vec(l), named(n), names(n ? l : 0) {}
 
-template<>
-void RIntegerVector::set_missing(size_t i) {
-    vec[i] = NA_INTEGER;
-    return;
-}
+    size_t size() const { 
+        return vec.size();
+    }
 
-typedef RTypedVector<double, uzuki2::NUMBER, Rcpp::NumericVector> RNumberVector;
+    void set(size_t i, double val) {
+        vec[i] = val;
+    }
 
-template<>
-void RNumberVector::set_missing(size_t i) {
-    vec[i] = NA_REAL;
-    return;
-}
+    void set_missing(size_t i) {
+        vec[i] = NA_REAL;
+    }
 
-typedef RTypedVector<std::string, uzuki2::STRING, Rcpp::CharacterVector> RStringVector;
+    void set_name(size_t i, std::string nm) {
+        names[i] = nm;
+    }
 
-template<>
-void RStringVector::set_missing(size_t i) {
-    vec[i] = NA_STRING;
-    return;
-}
+    Rcpp::RObject extract_object() { 
+        if (named) {
+            vec.names() = names;
+        }
+        return vec; 
+    }
 
-typedef RTypedVector<unsigned char, uzuki2::BOOLEAN, Rcpp::LogicalVector> RBooleanVector;
+    Rcpp::NumericVector vec;
+    bool named = false;
+    Rcpp::CharacterVector names;
+};
 
-template<>
-void RBooleanVector::set_missing(size_t i) {
-    vec[i] = NA_LOGICAL;
-    return;
-}
+struct RBooleanVector : public uzuki2::BooleanVector, public RBase {
+    RBooleanVector(size_t l, bool n, bool) : vec(l), named(n), names(n ? l : 0) {}
 
-typedef RTypedVector<std::string, uzuki2::DATE, Rcpp::DateVector> RDateVector;
+    size_t size() const { 
+        return vec.size();
+    }
 
-template<>
-void RDateVector::set(size_t i, std::string val) {
-    vec[i] = Rcpp::Date(val);
-    return;
-}
+    void set(size_t i, bool val) {
+        vec[i] = val;
+    }
 
-template<>
-void RDateVector::set_missing(size_t i) {
-    vec[i] = Rcpp::Date(NA_STRING);
-    return;
-}
+    void set_missing(size_t i) {
+        vec[i] = NA_LOGICAL;
+    }
 
-/** Date-time vector requires a bit more effort. **/
+    void set_name(size_t i, std::string nm) {
+        names[i] = nm;
+    }
 
-struct RDateTimeVector : public uzuki2::TypedVector<std::string, uzuki2::DATETIME>, public RBase {
-    RDateTimeVector(size_t s) : vec(s) {}
+    Rcpp::RObject extract_object() { 
+        if (named) {
+            vec.names() = names;
+        }
+        return vec; 
+    }
+
+    Rcpp::LogicalVector vec;
+    bool named = false;
+    Rcpp::CharacterVector names;
+};
+
+struct RStringVector : public uzuki2::StringVector, public RBase {
+    RStringVector(size_t l, bool n, bool) : vec(l), named(n), names(n ? l : 0) {}
+
+    size_t size() const { 
+        return vec.size();
+    }
+
+    void set(size_t i, std::string val) {
+        vec[i] = val;
+    }
+
+    void set_missing(size_t i) {
+        vec[i] = NA_STRING;
+    }
+
+    void set_name(size_t i, std::string nm) {
+        names[i] = nm;
+    }
+
+    Rcpp::RObject extract_object() { 
+        if (named) {
+            vec.names() = names;
+        }
+        return vec; 
+    }
+
+    Rcpp::StringVector vec;
+    bool named = false;
+    Rcpp::CharacterVector names;
+};
+
+struct RDateVector : public uzuki2::StringVector, public RBase {
+    RDateVector(size_t l, bool n, bool) : vec(l), named(n), names(n ? l : 0) {}
+
+    size_t size() const { 
+        return vec.size();
+    }
+
+    void set(size_t i, std::string val) {
+        vec[i] = Rcpp::Date(val);
+    }
+
+    void set_missing(size_t i) {
+        vec[i] = Rcpp::Date(NA_STRING);
+    }
+
+    void set_name(size_t i, std::string nm) {
+        names[i] = nm;
+    }
+
+    Rcpp::RObject extract_object() { 
+        if (named) {
+            vec.names() = names;
+        }
+        return vec; 
+    }
+
+    Rcpp::DateVector vec;
+    bool named = false;
+    Rcpp::CharacterVector names;
+};
+
+struct RDateTimeVector : public uzuki2::StringVector, public RBase {
+    RDateTimeVector(size_t l, bool n, bool) : vec(l), named(n), names(n ? l : 0) {}
 
     size_t size() const { 
         return vec.size();
@@ -115,12 +182,6 @@ struct RDateTimeVector : public uzuki2::TypedVector<std::string, uzuki2::DATETIM
         vec[i] = NA_STRING;
     }
 
-    void use_names() {
-        named = true;
-        names = Rcpp::CharacterVector(vec.size());
-        return;
-    }
-
     void set_name(size_t i, std::string nm) {
         names[i] = nm;
         return;
@@ -130,11 +191,9 @@ struct RDateTimeVector : public uzuki2::TypedVector<std::string, uzuki2::DATETIM
         if (named) {
             vec.names() = names;
         }
-        Rcpp::Function f("as.POSIXct");   
+        Rcpp::Function f("as.POSIXct");
         return f(vec, Rcpp::Named("format", "%Y-%m-%dT%H:%M:%S%z"));
     }
-
-    void is_scalar() {}
 
     Rcpp::StringVector vec;
     bool named = false;
@@ -144,39 +203,24 @@ struct RDateTimeVector : public uzuki2::TypedVector<std::string, uzuki2::DATETIM
 /** As do factors. **/
 
 struct RFactor : public uzuki2::Factor, public RBase {
-    RFactor(size_t s, size_t l) : vec(s), levels(l) {}
+    RFactor(size_t l, bool n, bool, size_t ll, bool o) : vec(l), named(n), names(n ? l : 0), levels(ll), ordered(o) {}
 
     size_t size() const { return vec.size(); }
 
     void set(size_t i, size_t l) {
         vec[i] = l;
-        return;
     }
 
     void set_missing(size_t i) {
         vec[i] = NA_INTEGER;
-        return;
-    }
-   
-    void use_names() {
-        named = true;
-        names = Rcpp::CharacterVector(vec.size());
-        return;
     }
 
     void set_name(size_t i, std::string n) {
         names[i] = n;
-        return;
     }
 
     void set_level(size_t l, std::string lev) {
         levels[l] = lev;
-        return;
-    }
-
-    void is_ordered() {
-        ordered = true;
-        return;
     }
 
     Rcpp::RObject extract_object() {
@@ -203,8 +247,8 @@ private:
     bool named = false;
     Rcpp::CharacterVector names;
 
-    bool ordered = false;
     Rcpp::CharacterVector levels;
+    bool ordered = false;
 };
 
 /** Defining the structural elements. **/
@@ -228,25 +272,17 @@ struct RExternal : public uzuki2::External, public RBase {
 };
 
 struct RList : public uzuki2::List, public RBase {
-    RList(size_t n) : elements(n) {}
+    RList(size_t l, bool n) : elements(l), named(n), names(n ? l : 0) {}
 
     size_t size() const { return elements.size(); }
 
     void set(size_t i, std::shared_ptr<Base> ptr) {
         auto rptr = dynamic_cast<RBase*>(ptr.get());
         elements[i] = rptr->extract_object();
-        return;
-    }
-
-    void use_names() {
-        named = true;
-        names = Rcpp::CharacterVector(elements.size());
-        return;
     }
 
     void set_name(size_t i, std::string n) {
         names[i] = n;
-        return;
     }
 
     Rcpp::RObject extract_object() { 
@@ -269,21 +305,30 @@ struct RProvisioner {
 
     static uzuki2::External* new_External(void *p) { return (new RExternal(p)); }
 
-    static uzuki2::List* new_List(size_t l) { return (new RList(l)); }
+    template<class ... Args_>
+    static uzuki2::List* new_List(Args_&& ... args) { return (new RList(std::forward<Args_>(args)...)); }
 
-    static uzuki2::IntegerVector* new_Integer(size_t l) { return (new RIntegerVector(l)); }
+    template<class ... Args_>
+    static uzuki2::IntegerVector* new_Integer(Args_&& ... args) { return (new RIntegerVector(std::forward<Args_>(args)...)); }
 
-    static uzuki2::NumberVector* new_Number(size_t l) { return (new RNumberVector(l)); }
+    template<class ... Args_>
+    static uzuki2::NumberVector* new_Number(Args_&& ... args) { return (new RNumberVector(std::forward<Args_>(args)...)); }
 
-    static uzuki2::StringVector* new_String(size_t l) { return (new RStringVector(l)); }
+    static uzuki2::StringVector* new_String(size_t l, bool n, bool s, uzuki2::StringVector::Format f) {
+        if (f == uzuki2::StringVector::DATE) {
+            return (new RDateVector(l, n, s)); 
+        } else if (f == uzuki2::StringVector::DATETIME) {
+            return (new RDateTimeVector(l, n, s)); 
+        } else {
+            return (new RStringVector(l, n, s)); 
+        }
+    }
 
-    static uzuki2::BooleanVector* new_Boolean(size_t l) { return (new RBooleanVector(l)); }
+    template<class ... Args_>
+    static uzuki2::BooleanVector* new_Boolean(Args_&& ... args) { return (new RBooleanVector(std::forward<Args_>(args)...)); }
 
-    static uzuki2::DateVector* new_Date(size_t l) { return (new RDateVector(l)); }
-
-    static uzuki2::DateTimeVector* new_DateTime(size_t l) { return (new RDateTimeVector(l)); }
-
-    static uzuki2::Factor* new_Factor(size_t l, size_t ll) { return (new RFactor(l, ll)); }
+    template<class ... Args_>
+    static uzuki2::Factor* new_Factor(Args_&& ... args) { return (new RFactor(std::forward<Args_>(args)...)); }
 };
 
 struct RExternals {
@@ -310,15 +355,15 @@ struct RExternals {
 // [[Rcpp::export(rng=false)]]
 Rcpp::RObject load_list_hdf5(std::string file, std::string name, Rcpp::List obj) {
     RExternals others(obj);
-    auto ptr = uzuki2::Hdf5Parser().parse<RProvisioner>(file, name, std::move(others));
+    auto ptr = uzuki2::hdf5::parse<RProvisioner>(file, name, std::move(others));
     return dynamic_cast<RBase*>(ptr.get())->extract_object();
 }
 
 // [[Rcpp::export(rng=false)]]
 Rcpp::RObject load_list_json(std::string file, Rcpp::List obj, bool parallel) {
-    uzuki2::JsonParser parser;
-    parser.parallel = parallel;
+    uzuki2::json::Options opt;
+    opt.parallel = parallel;
     RExternals others(obj);
-    auto ptr = parser.parse_file<RProvisioner>(file, std::move(others));
+    auto ptr = uzuki2::json::parse_file<RProvisioner>(file, std::move(others));
     return dynamic_cast<RBase*>(ptr.get())->extract_object();
 }
