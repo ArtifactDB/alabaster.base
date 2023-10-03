@@ -2,8 +2,9 @@
 % Please edit documentation in R/stageDataFrame.R
 \name{stageObject,DataFrame-method}
 \alias{stageObject,DataFrame-method}
-\alias{addMissingStringPlaceholderAttribute}
+\alias{addMissingPlaceholderAttribute}
 \alias{chooseMissingStringPlaceholder}
+\alias{addMissingStringPlaceholderAttribute}
 \alias{.addMissingStringPlaceholderAttribute}
 \alias{.chooseMissingStringPlaceholder}
 \title{Stage a DataFrame}
@@ -15,7 +16,8 @@
   child = FALSE,
   df.name = "simple",
   mcols.name = "mcols",
-  meta.name = "other"
+  meta.name = "other",
+  .version = 2
 )
 }
 \arguments{
@@ -35,6 +37,8 @@ If \code{NULL}, per-element metadata is not saved.}
 
 \item{meta.name}{String specifying the name of the directory inside \code{path} to save \code{\link{metadata}(x)}.
 If \code{NULL}, object metadata is not saved.}
+
+\item{.version}{Internal use only.}
 }
 \value{
 A named list containing the metadata for \code{x}.

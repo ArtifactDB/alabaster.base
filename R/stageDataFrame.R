@@ -64,8 +64,9 @@
 #' 
 #' @export
 #' @aliases
-#' addMissingStringPlaceholderAttribute
+#' addMissingPlaceholderAttribute
 #' chooseMissingStringPlaceholder
+#' addMissingStringPlaceholderAttribute
 #' .addMissingStringPlaceholderAttribute
 #' .chooseMissingStringPlaceholder
 #' 
@@ -180,7 +181,7 @@ setMethod("stageObject", "DataFrame", function(x, dir, path, child=FALSE, df.nam
         opath <- paste0(opath, ".h5")
         ofile <- file.path(dir, opath)
         skippable <- vapply(meta, function(x) x$type == "other", TRUE)
-        .write_hdf5_data_frame(x, skippable, "contents", ofile)
+        .write_hdf5_data_frame(x, skippable, "contents", ofile, .version=.version)
         schema <- "hdf5_data_frame/v1.json"
         extra[[1]]$group <- "contents"
 
@@ -229,7 +230,7 @@ setMethod("stageObject", "DataFrame", function(x, dir, path, child=FALSE, df.nam
 })
 
 #' @importFrom rhdf5 h5write h5createGroup h5createFile
-.write_hdf5_data_frame <- function(x, skippable, host, ofile) {
+.write_hdf5_data_frame <- function(x, skippable, host, ofile, .version) {
     h5createFile(ofile)
     prefix <- function(x) paste0(host, "/", x)
     h5createGroup(ofile, host)
@@ -248,16 +249,20 @@ setMethod("stageObject", "DataFrame", function(x, dir, path, child=FALSE, df.nam
         }
 
         missing.placeholder <- NULL
-        if (is.character(current) && anyNA(current)) {
-            missing.placeholder <- chooseMissingStringPlaceholder(current)
-            current[is.na(current)] <- missing.placeholder
+        if (anyNA(current)) {
+            if (is.character(current) && anyNA(current)) {
+                missing.placeholder <- chooseMissingStringPlaceholder(current)
+                current[is.na(current)] <- missing.placeholder
+            } else if (.version > 1) {
+                missing.placeholder <- as(NA, storage.mode(current))
+            }
         }
 
         data.name <- as.character(i - 1L)
         h5write(current, ofile, prefix(paste0("data/", data.name)))
 
         if (!is.null(missing.placeholder)) {
-            addMissingStringPlaceholderAttribute(ofile, prefix(paste0("data/", data.name)), missing.placeholder)
+            addMissingPlaceholderAttribute(ofile, prefix(paste0("data/", data.name)), missing.placeholder)
         }
     }
 
@@ -282,7 +287,7 @@ chooseMissingStringPlaceholder <- function(x) {
 
 #' @export
 #' @importFrom rhdf5 H5Fopen H5Fclose H5Dopen H5Dclose h5writeAttribute
-addMissingStringPlaceholderAttribute <- function(file, path, placeholder) {
+addMissingPlaceholderAttribute <- function(file, path, placeholder) {
     fhandle <- H5Fopen(file)
     on.exit(H5Fclose(fhandle), add=TRUE)
     dhandle <- H5Dopen(fhandle, path)
@@ -294,6 +299,9 @@ addMissingStringPlaceholderAttribute <- function(file, path, placeholder) {
 
 #' @export
 .chooseMissingStringPlaceholder <- function(...) chooseMissingStringPlaceholder(...)
+
+#' @export
+addMissingStringPlaceholderAttribute <- function(...) addMissingPlaceholderAttribute(...)
 
 #' @export
 .addMissingStringPlaceholderAttribute <- function(...) addMissingStringPlaceholderAttribute(...)

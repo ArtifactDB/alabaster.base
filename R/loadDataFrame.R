@@ -56,14 +56,15 @@ loadDataFrame <- function(info, project, include.nested=TRUE, parallel=TRUE) {
             df <- make_zero_col_DFrame(nrow=nrows)
         } else {
             raw <- h5read(path, prefix("data"))
+            version_above_1 <- isTRUE(info$data_frame$version > 1)
 
-            # Replacing NAs for strings.
+            # Replacing placeholders with NAs.
             for (i in names(raw)) {
                 current <- raw[[i]]
-                if (is.character(current)) {
+                if (version_above_1 || is.character(current)) {
                     attr <- h5readAttributes(path, prefix(paste0("data/", i)))
                     replace.na <- attr[["missing-value-placeholder"]]
-                    if (!is.null(replace.na)) {
+                    if (!is.null(replace.na) && !is.na(replace.na)) {
                         raw[[i]][current == replace.na] <- NA
                     }
                 }
