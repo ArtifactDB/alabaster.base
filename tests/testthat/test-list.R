@@ -244,15 +244,38 @@ test_that("we handle lists with NAs", {
     old <- saveBaseListFormat("hdf5")
     on.exit(saveBaseListFormat(old))
 
+    tmp <- tempfile()
+    dir.create(tmp)
     info <- stageObject(vals, tmp, path="hstuff")
     resource <- writeMetadata(info, tmp)
     expect_match(info[["$schema"]], "hdf5_simple_list")
 
+    attrs <- rhdf5::h5readAttributes(file.path(tmp, "hstuff/list.h5"), "contents/data/1/data")
+    place <- attrs[["missing-value-placeholder"]]
+    expect_true(is.na(place) && !is.nan(place))
     attrs <- rhdf5::h5readAttributes(file.path(tmp, "hstuff/list.h5"), "contents/data/3/data")
     expect_identical(attrs[["missing-value-placeholder"]], "_NA")
 
     roundtrip <- loadBaseList(info, tmp)
     expect_identical(roundtrip, vals)
+
+    # Avoid unnecessary NA attributes for NaNs.
+    revals <- list(A=c(NaN, 1.0, 3, NaN), B=c(NaN, 1.0, NA, NaN))
+
+    tmp <- tempfile()
+    dir.create(tmp)
+    info <- stageObject(revals, tmp, path="hstuff2")
+    resource <- writeMetadata(info, tmp)
+
+    attrs <- rhdf5::h5readAttributes(file.path(tmp, "hstuff2/list.h5"), "contents/data/0/data")
+    place <- attrs[["missing-value-placeholder"]]
+    expect_null(place) # avoid saving an unnecessary placeholder.
+    attrs <- rhdf5::h5readAttributes(file.path(tmp, "hstuff2/list.h5"), "contents/data/1/data")
+    place <- attrs[["missing-value-placeholder"]]
+    expect_true(is.na(place) && !is.nan(place))
+
+    roundtrip <- loadBaseList(info, tmp)
+    expect_identical(roundtrip, revals)
 })
 
 test_that("we handle the various float specials", {
