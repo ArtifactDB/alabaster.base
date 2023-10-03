@@ -64,8 +64,15 @@ loadDataFrame <- function(info, project, include.nested=TRUE, parallel=TRUE) {
                 if (version_above_1 || is.character(current)) {
                     attr <- h5readAttributes(path, prefix(paste0("data/", i)))
                     replace.na <- attr[["missing-value-placeholder"]]
-                    if (!is.null(replace.na) && !is.na(replace.na)) {
-                        raw[[i]][current == replace.na] <- NA
+
+                    if (is.null(replace.na) || (is.na(replace.na) && !is.nan(replace.na))) {
+                        # No-op as there are no NAs or the placeholder is already R's NA.
+                    } else if (is.nan(replace.na)) {
+                        # In case we have an NaN as a placeholder for NA.
+                        raw[[i]][is.nan(current)] <- NA
+                    } else {
+                        # Using which() to avoid problems with existing NAs.
+                        raw[[i]][which(current == replace.na)] <- NA
                     }
                 }
             }

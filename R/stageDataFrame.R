@@ -250,11 +250,11 @@ setMethod("stageObject", "DataFrame", function(x, dir, path, child=FALSE, df.nam
 
         missing.placeholder <- NULL
         if (anyNA(current)) {
-            if (is.character(current) && anyNA(current)) {
+            if (is.character(current)) {
                 missing.placeholder <- chooseMissingStringPlaceholder(current)
                 current[is.na(current)] <- missing.placeholder
             } else if (.version > 1) {
-                missing.placeholder <- as(NA, storage.mode(current))
+                missing.placeholder <- .choose_numeric_missing_placeholder(current)
             }
         }
 
