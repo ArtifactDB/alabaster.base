@@ -56,16 +56,16 @@ setMethod("stageObject", "list", function(x, dir, path, child=FALSE, fname="list
         meta[["$schema"]] <- "hdf5_simple_list/v1.json"
         meta$hdf5_simple_list <- list(group=dname)
 
-        .transform_list_hdf5(x, dir=dir, path=path, fpath=fpath, name=dname, env=env)
+        .transform_list_hdf5(x, dir=dir, path=path, fpath=fpath, name=dname, env=env, .version=.version)
         if (.version > 1) {
-            .label_hdf5_group(fpath, dname, version="1.1")
+            .label_hdf5_group(fpath, dname, uzuki_version="1.1")
         }
 
         check_list_hdf5(fpath, dname, length(env$collected)) # Check that we did it correctly.
 
     } else {
         target <- paste0(path, "/", fname, ".json.gz")
-        formatted <- .transform_list_json(x, dir=dir, path=path, env=env)
+        formatted <- .transform_list_json(x, dir=dir, path=path, env=env, .version=.version)
         if (.version > 1) {
             formatted$version <- "1.1"
         }
@@ -94,7 +94,7 @@ setMethod("stageObject", "list", function(x, dir, path, child=FALSE, fname="list
 
 #' @importFrom S4Vectors DataFrame
 #' @importFrom rhdf5 h5createGroup h5write
-.transform_list_hdf5 <- function(x, dir, path, fpath, name, env) {
+.transform_list_hdf5 <- function(x, dir, path, fpath, name, env, .version) {
     h5createGroup(fpath, name)
 
     if (is.list(x) && !is.data.frame(x) && !is(x, "POSIXlt")) {
@@ -110,7 +110,7 @@ setMethod("stageObject", "list", function(x, dir, path, child=FALSE, fname="list
         for (i in seq_along(x)) {
             newname <- paste0(name, "/data/", i - 1L)
             tryCatch({
-                .transform_list_hdf5(x[[i]], dir=dir, path=path, fpath=fpath, name=newname, env=env)
+                .transform_list_hdf5(x[[i]], dir=dir, path=path, fpath=fpath, name=newname, env=env, .version=.version)
             }, error=function(e) {
                 s <- if (is.null(nn)) i else paste0("'", nn[i], "'")
                 stop("failed to stage list element ", s, "\n  - ", e$message)
@@ -140,7 +140,7 @@ setMethod("stageObject", "list", function(x, dir, path, child=FALSE, fname="list
 
             h5write(levels(x), fpath, paste0(name, "/levels"))
             if (.version > 1 && is.ordered(x)) {
-                .write_scalar_dataset(fpath, name, "ordered", 1, "H5T_NATIVE_UINT8")
+                write_integer_scalar(fpath, name, "ordered", 1)
             }
 
             .add_hdf5_names(x, fpath, name)
@@ -153,7 +153,7 @@ setMethod("stageObject", "list", function(x, dir, path, child=FALSE, fname="list
             )
 
             if (.version > 1 && sltype != "string") {
-                .write_scalar_dataset(fpath, name, "format", sltype, "H5T_C_S1")
+                write_string_scalar(fpath, name, "format", sltype)
             }
 
             y <- .sanitize_stringlike(x, sltype)
@@ -187,11 +187,11 @@ setMethod("stageObject", "list", function(x, dir, path, child=FALSE, fname="list
                     # Force the use of a regular integer to avoid confusion.
                     y <- as.integer(y)
                     if (anyNA(y)) {
-                        placeholder <- -1
+                        placeholder <- -1L
                         y[is.na(y)] <- placeholder
                     }
                 } else if (anyNA(y)) {
-                    placeholder <- y[is.na(y)][1]
+                    placeholder <- as(NA, storage.mode(y))
                 }
             } else {
                 if (is.logical(y) && anyNA(y)) {
@@ -268,7 +268,7 @@ setMethod("stageObject", "list", function(x, dir, path, child=FALSE, fname="list
     h5writeAttribute(value, h5obj=dhandle, name="missing-value-placeholder", asScalar=TRUE)
 }
 
-#' @importFrom rhdf5 H5Fopen H5Fclose H5Gopen H5Gclose h5writeAttribute H5Dopen H5Dclose H5Dwrite H5Screate H5Sclose
+#' @importFrom rhdf5 H5Fopen H5Fclose H5Gopen H5Gclose h5writeAttribute H5Dcreate H5Dclose H5Dwrite H5Screate H5Sclose
 .write_scalar_dataset <- function(file, parent, name, value, datatype) {
     fhandle <- H5Fopen(file)
     on.exit(H5Fclose(fhandle), add=TRUE)
@@ -277,10 +277,10 @@ setMethod("stageObject", "list", function(x, dir, path, child=FALSE, fname="list
 
     shandle <- H5Screate("H5S_SCALAR")
     on.exit(H5Sclose(shandle), add=TRUE)
-    dhandle <- H5Dcreate(ghandle, name, dtype_id=datatype, space=shandle)
+    dhandle <- H5Dcreate(ghandle, name, dtype_id=datatype, h5space=shandle)
     on.exit(H5Dclose(dhandle), add=TRUE)
 
-    H5Dwrite(value, dhandle) 
+    H5Dwrite(dhandle, value) 
 }
 
 #' @importFrom rhdf5 h5write
@@ -299,7 +299,7 @@ setMethod("stageObject", "list", function(x, dir, path, child=FALSE, fname="list
     }
 }
 
-.transform_list_json <- function(x, dir, path, env) {
+.transform_list_json <- function(x, dir, path, env, .version) {
     if (is.list(x) && !is.data.frame(x)) {
         formatted <- list(type="list")
 
@@ -312,7 +312,7 @@ setMethod("stageObject", "list", function(x, dir, path, child=FALSE, fname="list
         values <- vector("list", length(x))
         for (i in seq_along(x)) {
             values[[i]] <- tryCatch({
-                .transform_list_json(x[[i]], dir=dir, path=path, env=env)
+                .transform_list_json(x[[i]], dir=dir, path=path, env=env, .version=.version)
             }, error=function(e) {
                 s <- if (is.null(nn)) i else paste0("'", nn[i], "'")
                 stop("failed to stage list element ", s, "\n  - ", e$message)

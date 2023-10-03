@@ -29,3 +29,7 @@ write_integer_scalar <- function(path, host, name, val) {
     .Call(`_alabaster_base_write_integer_scalar`, path, host, name, val)
 }
 
+write_string_scalar <- function(path, host, name, val) {
+    .Call(`_alabaster_base_write_string_scalar`, path, host, name, val)
+}
+
