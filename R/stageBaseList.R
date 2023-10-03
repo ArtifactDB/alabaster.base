@@ -6,6 +6,7 @@
 #' @inheritParams stageObject
 #' @param fname String containing the name of the file to use to save \code{x}. 
 #' Note that this should not have a \code{.json} suffix, so as to avoid confusion with the JSON-formatted metadata.
+#' @param .version Internal use only.
 #' 
 #' @return
 #' A named list containing the metadata for \code{x}, where \code{x} itself is written to a JSON file.
@@ -38,7 +39,7 @@
 #' @rdname stageBaseList
 #' @importFrom rhdf5 h5createFile
 #' @importFrom jsonlite toJSON
-setMethod("stageObject", "list", function(x, dir, path, child=FALSE, fname="list") {
+setMethod("stageObject", "list", function(x, dir, path, child=FALSE, fname="list", .version=2) {
     dir.create(file.path(dir, path), showWarnings=FALSE)
 
     env <- new.env()
@@ -56,11 +57,18 @@ setMethod("stageObject", "list", function(x, dir, path, child=FALSE, fname="list
         meta$hdf5_simple_list <- list(group=dname)
 
         .transform_list_hdf5(x, dir=dir, path=path, fpath=fpath, name=dname, env=env)
+        if (.version > 1) {
+            .label_hdf5_group(fpath, dname, version="1.1")
+        }
+
         check_list_hdf5(fpath, dname, length(env$collected)) # Check that we did it correctly.
 
     } else {
         target <- paste0(path, "/", fname, ".json.gz")
         formatted <- .transform_list_json(x, dir=dir, path=path, env=env)
+        if (.version > 1) {
+            formatted$version <- "1.1"
+        }
         str <- toJSON(formatted, auto_unbox=TRUE, ident=4, null="null", na="null")
 
         fpath <- file.path(dir, target)
@@ -121,19 +129,32 @@ setMethod("stageObject", "list", function(x, dir, path, child=FALSE, fname="list
         if (is.factor(x)) {
             .label_hdf5_group(fpath, name, 
                 uzuki_object="vector",
-                uzuki_type=if (is.ordered(x)) "ordered" else "factor"
+                uzuki_type=if (.version == 1 && is.ordered(x)) "ordered" else "factor"
             )
 
-            h5write(as.integer(x) - 1L, fpath, paste0(name, "/data"))
+            dataname <- paste0(name, "/data")
+            h5write(as.integer(x) - 1L, fpath, dataname)
+            if (.version > 1 && anyNA(x)) {
+                .add_missing_value_placeholder(fpath, dataname, -1L)
+            }
+
             h5write(levels(x), fpath, paste0(name, "/levels"))
+            if (.version > 1 && is.ordered(x)) {
+                .write_scalar_dataset(fpath, name, "ordered", 1, "H5T_NATIVE_UINT8")
+            }
+
             .add_hdf5_names(x, fpath, name)
             return(NULL)
 
         } else if (!is.null(sltype <- .is_stringlike(x))) {
             .label_hdf5_group(fpath, name, 
                 uzuki_object="vector",
-                uzuki_type=sltype
+                uzuki_type=if (.version == 1) sltype else "string"
             )
+
+            if (.version > 1 && sltype != "string") {
+                .write_scalar_dataset(fpath, name, "format", sltype, "H5T_C_S1")
+            }
 
             y <- .sanitize_stringlike(x, sltype)
             missing.placeholder <- NULL
@@ -159,13 +180,31 @@ setMethod("stageObject", "list", function(x, dir, path, child=FALSE, fname="list
             )
 
             y <- coerced$values
-            if (is.logical(y) && anyNA(y)) {
-                # Force the use of a regular integer for missing values.
-                y <- as.integer(y)
+
+            placeholder <- NULL
+            if (.version > 1) {
+                if (is.logical(y)) {
+                    # Force the use of a regular integer to avoid confusion.
+                    y <- as.integer(y)
+                    if (anyNA(y)) {
+                        placeholder <- -1
+                        y[is.na(y)] <- placeholder
+                    }
+                } else if (anyNA(y)) {
+                    placeholder <- y[is.na(y)][1]
+                }
+            } else {
+                if (is.logical(y) && anyNA(y)) {
+                    y <- as.integer(y)
+                }
             }
 
-            h5write(y, fpath, paste0(name, "/data"))
+            dataname <- paste0(name, "/data")
+            h5write(y, fpath, dataname)
             .add_hdf5_names(x, fpath, name)
+            if (.version > 1 && !is.null(placeholder)) {
+                .add_missing_value_placeholder(fpath, dataname, placeholder)
+            }
 
             return(NULL)
        }
@@ -207,7 +246,7 @@ setMethod("stageObject", "list", function(x, dir, path, child=FALSE, fname="list
     }
 }
 
-#' @importFrom rhdf5 H5Fopen H5Fclose H5Gopen H5Gclose h5writeAttribute H5Dopen H5Dclose
+#' @importFrom rhdf5 H5Fopen H5Fclose H5Gopen H5Gclose h5writeAttribute 
 .label_hdf5_group <- function(file, name, ...) {
     fhandle <- H5Fopen(file)
     on.exit(H5Fclose(fhandle), add=TRUE)
@@ -218,6 +257,30 @@ setMethod("stageObject", "list", function(x, dir, path, child=FALSE, fname="list
     for (a in names(attrs)) {
         h5writeAttribute(attrs[[a]], h5obj=ghandle, name=a, asScalar=TRUE)
     }
+}
+
+#' @importFrom rhdf5 H5Fopen H5Fclose h5writeAttribute H5Dopen H5Dclose
+.add_missing_value_placeholder <- function(file, name, value) {
+    fhandle <- H5Fopen(file)
+    on.exit(H5Fclose(fhandle), add=TRUE)
+    dhandle <- H5Dopen(fhandle, name)
+    on.exit(H5Dclose(dhandle), add=TRUE)
+    h5writeAttribute(value, h5obj=dhandle, name="missing-value-placeholder", asScalar=TRUE)
+}
+
+#' @importFrom rhdf5 H5Fopen H5Fclose H5Gopen H5Gclose h5writeAttribute H5Dopen H5Dclose H5Dwrite H5Screate H5Sclose
+.write_scalar_dataset <- function(file, parent, name, value, datatype) {
+    fhandle <- H5Fopen(file)
+    on.exit(H5Fclose(fhandle), add=TRUE)
+    ghandle <- H5Gopen(fhandle, parent)
+    on.exit(H5Gclose(ghandle), add=TRUE)
+
+    shandle <- H5Screate("H5S_SCALAR")
+    on.exit(H5Sclose(shandle), add=TRUE)
+    dhandle <- H5Dcreate(ghandle, name, dtype_id=datatype, space=shandle)
+    on.exit(H5Dclose(dhandle), add=TRUE)
+
+    H5Dwrite(value, dhandle) 
 }
 
 #' @importFrom rhdf5 h5write
@@ -267,18 +330,28 @@ setMethod("stageObject", "list", function(x, dir, path, child=FALSE, fname="list
     if (is.null(dim(x))) {
         if (is.factor(x)) {
             formatted <- list(
-                type=if (is.ordered(x)) "ordered" else "factor",
+                type=if (.version == 1 && is.ordered(x)) "ordered" else "factor",
                 levels=I(levels(x)),
                 values=I(as.integer(x) - 1L)
             )
+
+            if (.version > 1 && is.ordered(x)) {
+                formatted$ordered <- TRUE
+            }
+
             formatted <- .add_json_names(x, formatted)
             return(formatted)
 
         } else if (!is.null(sltype <- .is_stringlike(x))) {
             formatted <- list(
-                type=sltype,
+                type=if (.version == 1) sltype else "string",
                 values=I(.sanitize_stringlike(x, sltype))
             )
+
+            if (.version > 1 && sltype != "string") {
+                formatted$format <- sltype
+            }
+
             formatted <- .add_json_names(x, formatted)
             return(formatted)
 
