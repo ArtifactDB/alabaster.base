@@ -40,3 +40,15 @@
 .cast_atomic <- function(x, type) {
     as(x, as.character(.atomics[type]))
 }
+
+.choose_numeric_missing_placeholder <- function(x) {
+    if (is.double(x)) {
+        if (sum(is.na(x)) > sum(is.nan(x))) {
+            return(NA_real_)
+        } else {
+            return(NULL)
+        }
+    } else {
+        return(as(NA, storage.mode(x)))
+    }
+}

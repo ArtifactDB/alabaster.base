@@ -221,6 +221,19 @@ test_that("handling of NAs works correctly", {
     meta2 <- stageObject(df, tmp, path="WHEE.h5")
     expect_match(meta2[["$schema"]], "hdf5_data_frame")
 
+    fpath <- file.path(tmp, meta2$path)
+    attrs <- rhdf5::h5readAttributes(fpath, "contents/data/0")
+    expect_identical(attrs[["missing-value-placeholder"]], "NA")
+    attrs <- rhdf5::h5readAttributes(fpath, "contents/data/1")
+    expect_identical(attrs[["missing-value-placeholder"]], "_NA")
+    attrs <- rhdf5::h5readAttributes(fpath, "contents/data/4")
+    expect_true(is.na(attrs[["missing-value-placeholder"]]))
+    attrs <- rhdf5::h5readAttributes(fpath, "contents/data/5")
+    place <- attrs[["missing-value-placeholder"]]
+    expect_true(is.na(place) && !is.nan(place))
+    attrs <- rhdf5::h5readAttributes(fpath, "contents/data/6")
+    expect_true(is.na(attrs[["missing-value-placeholder"]]))
+
     round2 <- loadDataFrame(meta2, project=tmp)
     expect_identical(df, round2)
 })

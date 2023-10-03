@@ -191,14 +191,7 @@ setMethod("stageObject", "list", function(x, dir, path, child=FALSE, fname="list
                         y[is.na(y)] <- placeholder
                     }
                 } else if (anyNA(y)) {
-                    if (is.double(y)) {
-                        # Avoid unnecessary NA checks if they are all actually NaNs.
-                        if (sum(is.na(y)) > sum(is.nan(y))) {
-                            placeholder <- NA_real_
-                        }
-                    } else {
-                        placeholder <- as(NA, storage.mode(y))
-                    }
+                    placeholder <- .choose_numeric_missing_placeholder(y)
                 }
             } else {
                 if (is.logical(y) && anyNA(y)) {
