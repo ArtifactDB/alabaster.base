@@ -18,7 +18,7 @@
 #' stageObject(factor(1:10, 1:30), tmp, path="foo")
 #' list.files(tmp, recursive=TRUE)
 #' 
-#' @name stageBaseFactor
+#' @rdname stageBaseFactor
 #' @importFrom S4Vectors DataFrame
 setMethod("stageObject", "factor", function(x, dir, path, child = FALSE, ...) {
     dir.create(file.path(dir, path), showWarnings=FALSE)
