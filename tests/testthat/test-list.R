@@ -338,3 +338,26 @@ test_that("we handle lists with times", {
     roundtrip2 <- loadBaseList(info2, tmp)
     expect_equal(roundtrip2, vals)
 })
+
+test_that("lists work correctly in legacy mode (JSON)", {
+    tmp <- tempfile()
+    dir.create(tmp)
+    info <- stageObject(vals, tmp, path="stuff", .version=1)
+    writeMetadata(info, tmp)
+
+    roundtrip <- loadBaseList(info, tmp)
+    expect_identical(roundtrip, vals)
+})
+
+test_that("lists work correctly in legacy mode (HDF5)", {
+    old <- saveBaseListFormat("hdf5")
+    on.exit(saveBaseListFormat(old))
+
+    tmp <- tempfile()
+    dir.create(tmp)
+    info <- stageObject(vals, tmp, path="stuff", .version=1)
+    writeMetadata(info, tmp)
+
+    roundtrip <- loadBaseList(info, tmp)
+    expect_identical(roundtrip, vals)
+})

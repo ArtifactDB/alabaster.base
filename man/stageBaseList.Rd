@@ -5,7 +5,7 @@
 \alias{stageObject,List-method}
 \title{Stage a base list}
 \usage{
-\S4method{stageObject}{list}(x, dir, path, child = FALSE, fname = "list")
+\S4method{stageObject}{list}(x, dir, path, child = FALSE, fname = "list", .version = 2)
 
 \S4method{stageObject}{List}(x, dir, path, child = FALSE, fname = "list")
 }
@@ -21,6 +21,8 @@ The actual path used to save \code{x} may include additional components, see Det
 
 \item{fname}{String containing the name of the file to use to save \code{x}. 
 Note that this should not have a \code{.json} suffix, so as to avoid confusion with the JSON-formatted metadata.}
+
+\item{.version}{Internal use only.}
 }
 \value{
 A named list containing the metadata for \code{x}, where \code{x} itself is written to a JSON file.

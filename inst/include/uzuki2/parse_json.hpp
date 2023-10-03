@@ -9,6 +9,7 @@
 #include <cmath>
 #include <unordered_map>
 #include <unordered_set>
+#include <type_traits>
 
 #include "byteme/PerByte.hpp"
 #include "byteme/SomeFileReader.hpp"
@@ -18,6 +19,7 @@
 #include "interfaces.hpp"
 #include "Dummy.hpp"
 #include "utils.hpp"
+#include "ParsedList.hpp"
 
 /**
  * @file parse_json.hpp
@@ -27,10 +29,18 @@
 namespace uzuki2 {
 
 /**
- * @cond
+ * @namespace uzuki2::json
+ * @brief Parse an R list from a JSON file.
+ *
+ * JSON provides an alternative to the HDF5 format handled by `hdf5::parse()` and friends.
+ * JSON is simpler to parse and has less formatting-related overhead.
+ * However, it does not support random access and discards some precision for floating-point numbers.
  */
 namespace json {
 
+/**
+ * @cond
+ */
 inline const std::vector<std::shared_ptr<millijson::Base> >& extract_array(
     const std::unordered_map<std::string, std::shared_ptr<millijson::Base> >& properties, 
     const std::string& name, 
@@ -49,8 +59,36 @@ inline const std::vector<std::shared_ptr<millijson::Base> >& extract_array(
     return static_cast<const millijson::Array*>(values_ptr.get())->values;
 }
 
+inline const millijson::Array* has_names(const std::unordered_map<std::string, std::shared_ptr<millijson::Base> >& properties, const std::string& path) {
+    auto nIt = properties.find("names");
+    if (nIt == properties.end()) {
+        return NULL;
+    }
+
+    const auto name_ptr = nIt->second;
+    if (name_ptr->type() != millijson::ARRAY) {
+        throw std::runtime_error("expected an array in '" + path + ".names'"); 
+    }
+    return static_cast<const millijson::Array*>(name_ptr.get());
+}
+
+template<class Destination>
+void fill_names(const millijson::Array* names_ptr, Destination* dest, const std::string& path) {
+    const auto& names = names_ptr->values;
+    if (names.size() != dest->size()) {
+        throw std::runtime_error("length of 'names' and 'values' should be the same in '" + path + "'"); 
+    }
+
+    for (size_t i = 0; i < names.size(); ++i) {
+        if (names[i]->type() != millijson::STRING) {
+            throw std::runtime_error("expected a string at '" + path + ".names[" + std::to_string(i) + "]'");
+        }
+        dest->set_name(i, static_cast<const millijson::String*>(names[i].get())->value);
+    }
+}
+
 template<class Function>
-void process_array_or_scalar_values(
+auto process_array_or_scalar_values(
     const std::unordered_map<std::string, std::shared_ptr<millijson::Base> >& properties, 
     const std::string& path,
     Function fun)
@@ -60,18 +98,27 @@ void process_array_or_scalar_values(
         throw std::runtime_error("expected 'values' property for object at '" + path + "'");
     }
 
+    auto names_ptr = has_names(properties, path);
+    bool has_names = names_ptr != NULL;
+
+    typename std::invoke_result<Function,std::vector<std::shared_ptr<millijson::Base> >,bool,bool>::type out_ptr;
+
     const auto& values_ptr = vIt->second;
     if (values_ptr->type() == millijson::ARRAY) {
-        fun(static_cast<const millijson::Array*>(values_ptr.get())->values);
+        out_ptr = fun(static_cast<const millijson::Array*>(values_ptr.get())->values, has_names, false);
     } else {
         std::vector<std::shared_ptr<millijson::Base> > temp { values_ptr };
-        auto ptr = fun(temp);
-        ptr->is_scalar();
+        out_ptr = fun(temp, has_names, true);
     }
+
+    if (has_names) {
+        fill_names(names_ptr, out_ptr, path);
+    }
+    return out_ptr;
 }
 
 template<class Destination, class Function>
-void extract_integers(const std::vector<std::shared_ptr<millijson::Base> >& values, Destination* dest, Function check, const std::string& path) {
+void extract_integers(const std::vector<std::shared_ptr<millijson::Base> >& values, Destination* dest, Function check, const std::string& path, const Version& version) {
     for (size_t i = 0; i < values.size(); ++i) {
         if (values[i]->type() == millijson::NOTHING) {
             dest->set_missing(i);
@@ -94,7 +141,7 @@ void extract_integers(const std::vector<std::shared_ptr<millijson::Base> >& valu
         }
 
         int32_t ival = val;
-        if (val == -2147483648) {
+        if (version.equals(1, 0) && val == -2147483648) {
             dest->set_missing(i);
             continue;
         }
@@ -122,34 +169,8 @@ void extract_strings(const std::vector<std::shared_ptr<millijson::Base> >& value
     }
 }
 
-template<class Destination>
-void extract_names(const std::unordered_map<std::string, std::shared_ptr<millijson::Base> >& properties, Destination* dest, const std::string& path) {
-    auto nIt = properties.find("names");
-    if (nIt == properties.end()) {
-        return;
-    }
-
-    const auto name_ptr = nIt->second;
-    if (name_ptr->type() != millijson::ARRAY) {
-        throw std::runtime_error("expected an array in '" + path + ".names'"); 
-    }
-
-    const auto& names = static_cast<const millijson::Array*>(name_ptr.get())->values;
-    if (names.size() != dest->size()) {
-        throw std::runtime_error("length of 'names' and 'values' should be the same in '" + path + "'"); 
-    }
-    dest->use_names();
-
-    for (size_t i = 0; i < names.size(); ++i) {
-        if (names[i]->type() != millijson::STRING) {
-            throw std::runtime_error("expected a string at '" + path + ".names[" + std::to_string(i) + "]'");
-        }
-        dest->set_name(i, static_cast<const millijson::String*>(names[i].get())->value);
-    }
-}
-
 template<class Provisioner, class Externals>
-std::shared_ptr<Base> parse_object(const millijson::Base* contents, Externals& ext, const std::string& path) {
+std::shared_ptr<Base> parse_object(const millijson::Base* contents, Externals& ext, const std::string& path, const Version& version) {
     if (contents->type() != millijson::OBJECT) {
         throw std::runtime_error("each R object should be represented by a JSON object at '" + path + "'");
     }
@@ -190,30 +211,40 @@ std::shared_ptr<Base> parse_object(const millijson::Base* contents, Externals& e
         output.reset(Provisioner::new_External(ext.get(index)));
 
     } else if (type == "integer") {
-        process_array_or_scalar_values(map, path, [&](const auto& vals) -> auto {
-            auto ptr = Provisioner::new_Integer(vals.size());
+        process_array_or_scalar_values(map, path, [&](const auto& vals, bool named, bool scalar) -> auto {
+            auto ptr = Provisioner::new_Integer(vals.size(), named, scalar);
             output.reset(ptr);
-            extract_integers(vals, ptr, [](int32_t) -> void {}, path);
-            extract_names(map, ptr, path);
+            extract_integers(vals, ptr, [](int32_t) -> void {}, path, version);
             return ptr;
         });
 
-    } else if (type == "factor" || type == "ordered") {
-        const auto& vals = extract_array(map, "values", path);
-        const auto& lvals = extract_array(map, "levels", path);
-
-        auto ptr = Provisioner::new_Factor(vals.size(), lvals.size());
-        output.reset(ptr);
+    } else if (type == "factor" || (version.equals(1, 0) && type == "ordered")) {
+        bool ordered = false;
         if (type == "ordered") {
-            ptr->is_ordered();
+            ordered = true;
+        } else {
+            auto oIt = map.find("ordered");
+            if (oIt != map.end()) {
+                if (oIt->second->type() != millijson::BOOLEAN) {
+                    throw std::runtime_error("expected a boolean at '" + path + ".ordered'");
+                }
+                auto optr = static_cast<const millijson::Boolean*>((oIt->second).get());
+                ordered = optr->value;
+            }
         }
 
+        const auto& lvals = extract_array(map, "levels", path);
         int32_t nlevels = lvals.size();
-        extract_integers(vals, ptr, [&](int32_t x) -> void {
-            if (x < 0 || x >= nlevels) {
-                throw std::runtime_error("factor indices of out of range of levels in '" + path + "'");
-            }
-        }, path);
+        auto fptr = process_array_or_scalar_values(map, path, [&](const auto& vals, bool named, bool scalar) -> auto {
+            auto ptr = Provisioner::new_Factor(vals.size(), named, scalar, nlevels, ordered);
+            output.reset(ptr);
+            extract_integers(vals, ptr, [&](int32_t x) -> void {
+                if (x < 0 || x >= nlevels) {
+                    throw std::runtime_error("factor indices of out of range of levels in '" + path + "'");
+                }
+            }, path, version);
+            return ptr;
+        });
 
         std::unordered_set<std::string> existing;
         for (size_t l = 0; l < lvals.size(); ++l) {
@@ -225,15 +256,13 @@ std::shared_ptr<Base> parse_object(const millijson::Base* contents, Externals& e
             if (existing.find(level) != existing.end()) {
                 throw std::runtime_error("detected duplicate string at '" + path + ".levels[" + std::to_string(l) + "]'");
             }
-            ptr->set_level(l, level);
+            fptr->set_level(l, level);
             existing.insert(level);
         }
 
-        extract_names(map, ptr, path);
-
     } else if (type == "boolean") {
-        process_array_or_scalar_values(map, path, [&](const auto& vals) -> auto {
-            auto ptr = Provisioner::new_Boolean(vals.size());
+        process_array_or_scalar_values(map, path, [&](const auto& vals, bool named, bool scalar) -> auto {
+            auto ptr = Provisioner::new_Boolean(vals.size(), named, scalar);
             output.reset(ptr);
 
             for (size_t i = 0; i < vals.size(); ++i) {
@@ -248,13 +277,12 @@ std::shared_ptr<Base> parse_object(const millijson::Base* contents, Externals& e
                 ptr->set(i, static_cast<const millijson::Boolean*>(vals[i].get())->value);
             }
 
-            extract_names(map, ptr, path);
             return ptr;
         });
 
     } else if (type == "number") {
-        process_array_or_scalar_values(map, path, [&](const auto& vals) -> auto {
-            auto ptr = Provisioner::new_Number(vals.size());
+        process_array_or_scalar_values(map, path, [&](const auto& vals, bool named, bool scalar) -> auto {
+            auto ptr = Provisioner::new_Number(vals.size(), named, scalar);
             output.reset(ptr);
 
             for (size_t i = 0; i < vals.size(); ++i) {
@@ -281,51 +309,72 @@ std::shared_ptr<Base> parse_object(const millijson::Base* contents, Externals& e
                 }
             }
 
-            extract_names(map, ptr, path);
             return ptr;
         });
 
-    } else if (type == "string") {
-        process_array_or_scalar_values(map, path, [&](const auto& vals) -> auto {
-            auto ptr = Provisioner::new_String(vals.size());
-            output.reset(ptr);
-            extract_strings(vals, ptr, [](const std::string&) -> void {}, path);
-            extract_names(map, ptr, path);
-            return ptr;
-        });
-
-    } else if (type == "date") {
-        process_array_or_scalar_values(map, path, [&](const auto& vals) -> auto {
-            auto ptr = Provisioner::new_Date(vals.size());
-            output.reset(ptr);
-            extract_strings(vals, ptr, [&](const std::string& x) -> void {
-                if (!is_date(x)) {
-                     throw std::runtime_error("dates should follow YYYY-MM-DD formatting in '" + path + ".values'");
-                }
-            }, path);
-            extract_names(map, ptr, path);
-            return ptr;
-        });
-
-    } else if (type == "date-time") {
-        const auto& vals = extract_array(map, "values", path);
-        auto ptr = Provisioner::new_DateTime(vals.size());
-        output.reset(ptr);
-        extract_strings(vals, ptr, [&](const std::string& x) -> void {
-            if (!is_rfc3339(x)) {
-                 throw std::runtime_error("date-times should follow the Internet Date/Time format in '" + path + ".values'");
+    } else if (type == "string" || (version.equals(1, 0) && (type == "date" || type == "date-time"))) {
+        StringVector::Format format = StringVector::NONE;
+        if (version.equals(1, 0)) {
+            if (type == "date") {
+                format = StringVector::DATE;
+            } else if (type == "date-time") {
+                format = StringVector::DATETIME;
             }
-        }, path);
-        extract_names(map, ptr, path);
+        } else {
+            auto fIt = map.find("format");
+            if (fIt != map.end()) {
+                if (fIt->second->type() != millijson::STRING) {
+                    throw std::runtime_error("expected a string at '" + path + ".format'");
+                }
+                auto fptr = static_cast<const millijson::String*>(fIt->second.get());
+                if (fptr->value == "date") {
+                    format = StringVector::DATE;
+                } else if (fptr->value == "date-time") {
+                    format = StringVector::DATETIME;
+                } else {
+                    throw std::runtime_error("unsupported format '" + fptr->value + "' at '" + path + ".format'");
+                }
+            }
+        }
+
+        process_array_or_scalar_values(map, path, [&](const auto& vals, bool named, bool scalar) -> auto {
+            auto ptr = Provisioner::new_String(vals.size(), named, scalar, format);
+            output.reset(ptr);
+
+            if (format == StringVector::NONE) {
+                extract_strings(vals, ptr, [](const std::string&) -> void {}, path);
+            } else if (format == StringVector::DATE) {
+                extract_strings(vals, ptr, [&](const std::string& x) -> void {
+                    if (!is_date(x)) {
+                         throw std::runtime_error("dates should follow YYYY-MM-DD formatting in '" + path + ".values'");
+                    }
+                }, path);
+            } else if (format == StringVector::DATETIME) {
+                extract_strings(vals, ptr, [&](const std::string& x) -> void {
+                    if (!is_rfc3339(x)) {
+                         throw std::runtime_error("date-times should follow the Internet Date/Time format in '" + path + ".values'");
+                    }
+                }, path);
+            }
+
+            return ptr;
+        });
 
     } else if (type == "list") {
+        auto names_ptr = has_names(map, path);
+        bool has_names = names_ptr != NULL;
+
         const auto& vals = extract_array(map, "values", path);
-        auto ptr = Provisioner::new_List(vals.size());
+        auto ptr = Provisioner::new_List(vals.size(), has_names);
         output.reset(ptr);
+
         for (size_t i = 0; i < vals.size(); ++i) {
-            ptr->set(i, parse_object<Provisioner>(vals[i].get(), ext, path + ".values[" + std::to_string(i) + "]"));
+            ptr->set(i, parse_object<Provisioner>(vals[i].get(), ext, path + ".values[" + std::to_string(i) + "]", version));
         }
-        extract_names(map, ptr, path);
+
+        if (has_names) {
+            fill_names(names_ptr, ptr, path);
+        }
 
     } else {
         throw std::runtime_error("unknown object type '" + type + "' at '" + path + ".type'");
@@ -333,206 +382,221 @@ std::shared_ptr<Base> parse_object(const millijson::Base* contents, Externals& e
 
     return output;
 }
-
-}
 /**
  * @endcond
  */
 
 /**
- * @brief Parse JSON file contents using the **uzuki2** specification.
- *
- * JSON provides an alternative to the HDF5 format that is handled by `Hdf5Parser`.
- * JSON is simpler to parse and has less formatting-related overhead.
- * However, it does not support random access and discards some precision for floating-point numbers.
+ * @brief Options for JSON file parsing.
  */
-class JsonParser {
-public:
+struct Options {
     /**
      * Whether parsing should be done in parallel to file I/O.
      * If true, an extra thread is used to avoid blocking I/O operations.
      */
     bool parallel = false;
-
-    /**
-     * Parse JSON file contents using the **uzuki2** specification, given an arbitrary input source of bytes.
-     *
-     * @tparam Provisioner A class namespace defining static methods for creating new `Base` objects.
-     * See `Hdf5Parser::parse()` for more details. 
-     * @tparam Externals Class describing how to resolve external references for type `EXTERNAL`.
-     * See `Hdf5Parser::parse()` for more details. 
-     *
-     * @param reader Instance of a `byteme::Reader` providing the contents of the JSON file.
-     * @param ext Instance of an external reference resolver class.
-     *
-     * @return Pointer to the root `Base` object.
-     * Depending on `Provisioner`, this may contain references to all nested objects.
-     *
-     * Any invalid representations in `reader` will cause an error to be thrown.
-     */
-    template<class Provisioner, class Externals>
-    std::shared_ptr<Base> parse(byteme::Reader& reader, Externals ext) {
-        std::shared_ptr<millijson::Base> contents;
-        if (parallel) {
-            byteme::PerByte bytestream(&reader);
-            contents = millijson::parse(bytestream);
-        } else {
-            byteme::PerByteParallel bytestream(&reader);
-            contents = millijson::parse(bytestream);
-        }
-
-        ExternalTracker etrack(std::move(ext));
-        auto output = json::parse_object<Provisioner>(contents.get(), etrack, "");
-        etrack.validate();
-        return output;
-    }
-
-    /**
-     * Overload of `parse()` assuming that there are no external references.
-     *
-     * @tparam Provisioner A class namespace defining static methods for creating new `Base` objects.
-     * See `Hdf5Parser::parse()` for more details. 
-     *
-     * @param reader Instance of a `byteme::Reader` providing the contents of the JSON file.
-     *
-     * @return Pointer to the root `Base` object.
-     * Depending on `Provisioner`, this may contain references to all nested objects.
-     *
-     * Any invalid representations in `reader` will cause an error to be thrown.
-     */
-    template<class Provisioner>
-    std::shared_ptr<Base> parse(byteme::Reader& reader) {
-        DummyExternals ext(0);
-        return parse<Provisioner>(reader, std::move(ext));
-    }
-
-public:
-    /**
-     * Parse JSON file contents using the **uzuki2** specification, given the file path.
-     *
-     * @tparam Provisioner A class namespace defining static methods for creating new `Base` objects.
-     * See `Hdf5Parser::parse()` for more details. 
-     * @tparam Externals Class describing how to resolve external references for type `EXTERNAL`.
-     * See `Hdf5Parser::parse()` for more details. 
-     *
-     * @param file Path to a (possibly Gzip-compressed) JSON file.
-     * @param ext Instance of an external reference resolver class.
-     *
-     * @return Pointer to the root `Base` object.
-     * Depending on `Provisioner`, this may contain references to all nested objects.
-     *
-     * Any invalid representations in `reader` will cause an error to be thrown.
-     */
-    template<class Provisioner, class Externals>
-    std::shared_ptr<Base> parse_file(const std::string& file, Externals ext) {
-        byteme::SomeFileReader reader(file.c_str());
-        return parse<Provisioner>(reader, std::move(ext));
-    }
-
-    /**
-     * Overload of `parse_file()` assuming that there are no external references.
-     *
-     * @tparam Provisioner A class namespace defining static methods for creating new `Base` objects.
-     * See `Hdf5Parser::parse()` for more details. 
-     *
-     * @param file Path to a (possibly Gzip-compressed) JSON file.
-     *
-     * @return Pointer to the root `Base` object.
-     * Depending on `Provisioner`, this may contain references to all nested objects.
-     *
-     * Any invalid representations in `reader` will cause an error to be thrown.
-     */
-    template<class Provisioner>
-    std::shared_ptr<Base> parse_file(const std::string& file) {
-        DummyExternals ext(0);
-        return parse_file<Provisioner>(file, std::move(ext));
-    }
-
-public:
-    /**
-     * Parse a buffer containing JSON file contents using the **uzuki2** specification. 
-     *
-     * @tparam Provisioner A class namespace defining static methods for creating new `Base` objects.
-     * See `Hdf5Parser::parse()` for more details. 
-     * @tparam Externals Class describing how to resolve external references for type `EXTERNAL`.
-     * See `Hdf5Parser::parse()` for more details. 
-     *
-     * @param[in] buffer Pointer to an array containing the JSON file contents (possibly Gzip/Zlib-compressed).
-     * @param len Length of the buffer in bytes.
-     * @param ext Instance of an external reference resolver class.
-     *
-     * @return Pointer to the root `Base` object.
-     * Depending on `Provisioner`, this may contain references to all nested objects.
-     *
-     * Any invalid representations in `reader` will cause an error to be thrown.
-     */
-    template<class Provisioner, class Externals>
-    std::shared_ptr<Base> parse_buffer(const unsigned char* buffer, size_t len, Externals ext) {
-        byteme::SomeBufferReader reader(buffer, len);
-        return parse<Provisioner>(reader, std::move(ext));
-    }
-
-    /**
-     * Overload of `parse_buffer()` assuming that there are no external references.
-     *
-     * @tparam Provisioner A class namespace defining static methods for creating new `Base` objects.
-     * See `Hdf5Parser::parse()` for more details. 
-     *
-     * @param[in] buffer Pointer to an array containing the JSON file contents (possibly Gzip/Zlib-compressed).
-     * @param len Length of the buffer in bytes.
-     *
-     * @return Pointer to the root `Base` object.
-     * Depending on `Provisioner`, this may contain references to all nested objects.
-     *
-     * Any invalid representations in `reader` will cause an error to be thrown.
-     */
-    template<class Provisioner>
-    std::shared_ptr<Base> parse_buffer(const unsigned char* buffer, size_t len) {
-        DummyExternals ext(0);
-        return parse_buffer<Provisioner>(buffer, len, std::move(ext));
-    }
-
-public:
-    /**
-     * Validate JSON file contents against the **uzuki2** specification, given a source of bytes.
-     * Any invalid representations will cause an error to be thrown.
-     *
-     * @param reader Instance of a `byteme::Reader` providing the contents of the JSON file.
-     * @param num_external Expected number of external references. 
-     */
-    void validate(byteme::Reader& reader, int num_external = 0) {
-        DummyExternals ext(num_external);
-        parse<DummyProvisioner>(reader, std::move(ext));
-        return;
-    }
-
-    /**
-     * Validate JSON file contents against the **uzuki2** specification, given a path to the file.
-     * Any invalid representations will cause an error to be thrown.
-     *
-     * @param file Path to a (possible Gzip-compressed) JSON file.
-     * @param num_external Expected number of external references. 
-     */
-    void validate_file(const std::string& file, int num_external = 0) {
-        DummyExternals ext(num_external);
-        parse_file<DummyProvisioner>(file, std::move(ext));
-        return;
-    }
-
-    /**
-     * Validate JSON file contents against the **uzuki2** specification, given a buffer containing the file contents.
-     * Any invalid representations will cause an error to be thrown.
-     *
-     * @param[in] buffer Pointer to an array containing the JSON file contents (possibly Gzip/Zlib-compressed).
-     * @param len Length of the buffer in bytes.
-     * @param num_external Expected number of external references. 
-     */
-    void validate_buffer(const unsigned char* buffer, size_t len, int num_external = 0) {
-        DummyExternals ext(num_external);
-        parse_buffer<DummyProvisioner>(buffer, len, std::move(ext));
-        return;
-    }
 };
+
+/**
+ * Parse JSON file contents using the **uzuki2** specification, given an arbitrary input source of bytes.
+ *
+ * @tparam Provisioner A class namespace defining static methods for creating new `Base` objects.
+ * See `hdf5::parse()` for more details. 
+ * @tparam Externals Class describing how to resolve external references for type `EXTERNAL`.
+ * See `hdf5::parse()` for more details. 
+ *
+ * @param reader Instance of a `byteme::Reader` providing the contents of the JSON file.
+ * @param ext Instance of an external reference resolver class.
+ * @param options Options for parsing.
+ *
+ * @return Pointer to the root `Base` object.
+ * Depending on `Provisioner`, this may contain references to all nested objects.
+ *
+ * Any invalid representations in `reader` will cause an error to be thrown.
+ */
+template<class Provisioner, class Externals>
+ParsedList parse(byteme::Reader& reader, Externals ext, Options options = Options()) {
+    std::shared_ptr<millijson::Base> contents;
+    if (options.parallel) {
+        byteme::PerByte bytestream(&reader);
+        contents = millijson::parse(bytestream);
+    } else {
+        byteme::PerByteParallel bytestream(&reader);
+        contents = millijson::parse(bytestream);
+    }
+
+    Version version;
+    if (contents->type() == millijson::OBJECT) {
+        auto optr = static_cast<const millijson::Object*>(contents.get());
+        const auto& map = optr->values;
+        auto vIt = map.find("version");
+        if (vIt != map.end()) {
+            if (vIt->second->type() != millijson::STRING) {
+                throw std::runtime_error("expected a string in 'version'");
+            }
+            auto vptr = static_cast<const millijson::String*>(vIt->second.get());
+            version = parse_version_string(vptr->value);
+        }
+    }
+
+    ExternalTracker etrack(std::move(ext));
+    auto output = parse_object<Provisioner>(contents.get(), etrack, "", version);
+    etrack.validate();
+    return ParsedList(std::move(output), std::move(version));
+}
+
+/**
+ * Overload of `json::parse()` assuming that there are no external references.
+ *
+ * @tparam Provisioner A class namespace defining static methods for creating new `Base` objects.
+ * See `hdf5::parse()` for more details. 
+ *
+ * @param reader Instance of a `byteme::Reader` providing the contents of the JSON file.
+ * @param options Options for parsing.
+ *
+ * @return Pointer to the root `Base` object.
+ * Depending on `Provisioner`, this may contain references to all nested objects.
+ *
+ * Any invalid representations in `reader` will cause an error to be thrown.
+ */
+template<class Provisioner>
+ParsedList parse(byteme::Reader& reader, Options options = Options()) {
+    DummyExternals ext(0);
+    return parse<Provisioner>(reader, std::move(ext), std::move(options));
+}
+
+/**
+ * Parse JSON file contents using the **uzuki2** specification, given the file path.
+ *
+ * @tparam Provisioner A class namespace defining static methods for creating new `Base` objects.
+ * See `hdf5::parse()` for more details. 
+ * @tparam Externals Class describing how to resolve external references for type `EXTERNAL`.
+ * See `hdf5::parse()` for more details. 
+ *
+ * @param file Path to a (possibly Gzip-compressed) JSON file.
+ * @param ext Instance of an external reference resolver class.
+ * @param options Options for parsing.
+ *
+ * @return Pointer to the root `Base` object.
+ * Depending on `Provisioner`, this may contain references to all nested objects.
+ *
+ * Any invalid representations in `reader` will cause an error to be thrown.
+ */
+template<class Provisioner, class Externals>
+ParsedList parse_file(const std::string& file, Externals ext, Options options = Options()) {
+    byteme::SomeFileReader reader(file.c_str());
+    return parse<Provisioner>(reader, std::move(ext), std::move(options));
+}
+
+/**
+ * Overload of `json::parse_file()` assuming that there are no external references.
+ *
+ * @tparam Provisioner A class namespace defining static methods for creating new `Base` objects.
+ * See `hdf5::parse()` for more details. 
+ *
+ * @param file Path to a (possibly Gzip-compressed) JSON file.
+ * @param options Options for parsing.
+ *
+ * @return Pointer to the root `Base` object.
+ * Depending on `Provisioner`, this may contain references to all nested objects.
+ *
+ * Any invalid representations in `reader` will cause an error to be thrown.
+ */
+template<class Provisioner>
+ParsedList parse_file(const std::string& file, Options options = Options()) {
+    DummyExternals ext(0);
+    return parse_file<Provisioner>(file, std::move(ext), std::move(options));
+}
+
+/**
+ * Parse a buffer containing JSON file contents using the **uzuki2** specification. 
+ *
+ * @tparam Provisioner A class namespace defining static methods for creating new `Base` objects.
+ * See `hdf5::parse()` for more details. 
+ * @tparam Externals Class describing how to resolve external references for type `EXTERNAL`.
+ * See `hdf5::parse()` for more details. 
+ *
+ * @param[in] buffer Pointer to an array containing the JSON file contents (possibly Gzip/Zlib-compressed).
+ * @param len Length of the buffer in bytes.
+ * @param ext Instance of an external reference resolver class.
+ * @param options Options for parsing.
+ *
+ * @return Pointer to the root `Base` object.
+ * Depending on `Provisioner`, this may contain references to all nested objects.
+ *
+ * Any invalid representations in `reader` will cause an error to be thrown.
+ */
+template<class Provisioner, class Externals>
+ParsedList parse_buffer(const unsigned char* buffer, size_t len, Externals ext, Options options = Options()) {
+    byteme::SomeBufferReader reader(buffer, len);
+    return parse<Provisioner>(reader, std::move(ext), std::move(options));
+}
+
+/**
+ * Overload of `json::parse_buffer()` assuming that there are no external references.
+ *
+ * @tparam Provisioner A class namespace defining static methods for creating new `Base` objects.
+ * See `hdf5::parse()` for more details. 
+ *
+ * @param[in] buffer Pointer to an array containing the JSON file contents (possibly Gzip/Zlib-compressed).
+ * @param len Length of the buffer in bytes.
+ * @param options Options for parsing.
+ *
+ * @return Pointer to the root `Base` object.
+ * Depending on `Provisioner`, this may contain references to all nested objects.
+ *
+ * Any invalid representations in `reader` will cause an error to be thrown.
+ */
+template<class Provisioner>
+ParsedList parse_buffer(const unsigned char* buffer, size_t len, Options options = Options()) {
+    DummyExternals ext(0);
+    return parse_buffer<Provisioner>(buffer, len, std::move(ext), std::move(options));
+}
+
+/**
+ * Validate JSON file contents against the **uzuki2** specification, given a source of bytes.
+ * Any invalid representations will cause an error to be thrown.
+ *
+ * @param reader Instance of a `byteme::Reader` providing the contents of the JSON file.
+ * @param num_external Expected number of external references. 
+ * @param options Options for parsing.
+ */
+inline void validate(byteme::Reader& reader, int num_external = 0, Options options = Options()) {
+    DummyExternals ext(num_external);
+    parse<DummyProvisioner>(reader, std::move(ext), std::move(options));
+    return;
+}
+
+/**
+ * Validate JSON file contents against the **uzuki2** specification, given a path to the file.
+ * Any invalid representations will cause an error to be thrown.
+ *
+ * @param file Path to a (possible Gzip-compressed) JSON file.
+ * @param num_external Expected number of external references. 
+ * @param options Options for parsing.
+ */
+inline void validate_file(const std::string& file, int num_external = 0, Options options = Options()) {
+    DummyExternals ext(num_external);
+    parse_file<DummyProvisioner>(file, std::move(ext), std::move(options));
+    return;
+}
+
+/**
+ * Validate JSON file contents against the **uzuki2** specification, given a buffer containing the file contents.
+ * Any invalid representations will cause an error to be thrown.
+ *
+ * @param[in] buffer Pointer to an array containing the JSON file contents (possibly Gzip/Zlib-compressed).
+ * @param len Length of the buffer in bytes.
+ * @param num_external Expected number of external references. 
+ * @param options Options for parsing.
+ */
+inline void validate_buffer(const unsigned char* buffer, size_t len, int num_external = 0, Options options = Options()) {
+    DummyExternals ext(num_external);
+    parse_buffer<DummyProvisioner>(buffer, len, std::move(ext), std::move(options));
+    return;
+}
+
+}
 
 }
 
