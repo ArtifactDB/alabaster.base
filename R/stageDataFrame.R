@@ -184,6 +184,7 @@ setMethod("stageObject", "DataFrame", function(x, dir, path, child=FALSE, df.nam
         .write_hdf5_data_frame(x, skippable, "contents", ofile, .version=.version)
         schema <- "hdf5_data_frame/v1.json"
         extra[[1]]$group <- "contents"
+        extra[[1]]$version <- if (.version != 1) .version else NULL
 
     } else {
         X <- data.frame(x, check.names=FALSE)
@@ -214,13 +215,13 @@ setMethod("stageObject", "DataFrame", function(x, dir, path, child=FALSE, df.nam
         `$schema`=schema,
         path=opath,
         is_child=child,
-        version=if (.version != 1) .version else NULL,
         data_frame=list(
             columns=meta,
             row_names=!is.null(rownames(x)),
             column_data=element_data,
             other_data=other_data,
-            dimensions=dim(x)
+            dimensions=dim(x),
+            version=if (.version != 1) .version else NULL
         )
     )
 
