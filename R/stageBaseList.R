@@ -135,7 +135,7 @@ setMethod("stageObject", "list", function(x, dir, path, child=FALSE, fname="list
             dataname <- paste0(name, "/data")
             h5write(as.integer(x) - 1L, fpath, dataname)
             if (.version > 1 && anyNA(x)) {
-                .add_missing_value_placeholder(fpath, dataname, -1L)
+                addMissingPlaceholderAttributeForHdf5(fpath, dataname, -1L)
             }
 
             h5write(levels(x), fpath, paste0(name, "/levels"))
@@ -157,16 +157,23 @@ setMethod("stageObject", "list", function(x, dir, path, child=FALSE, fname="list
             }
 
             y <- .sanitize_stringlike(x, sltype)
+
             missing.placeholder <- NULL
-            if (anyNA(y)) {
-                missing.placeholder <- .chooseMissingStringPlaceholder(x)
-                y[is.na(y)] <- missing.placeholder
+            if (.version > 1) {
+                transformed <- transformVectorForHdf5(y)
+                y <- transformed$transformed
+                missing.placeholder <- transformed$placeholder
+            } else if (is.character(y)) {
+                if (anyNA(y)) {
+                    missing.placeholder <- chooseMissingPlaceholderForHdf5(y)
+                    y[is.na(y)] <- missing.placeholder
+                }
             }
 
             dname <- paste0(name, "/data")
             h5write(y, fpath, dname)
             if (!is.null(missing.placeholder)) {
-                .addMissingStringPlaceholderAttribute(fpath, dname, missing.placeholder)
+                addMissingPlaceholderAttributeForHdf5(fpath, dname, missing.placeholder)
             }
             .add_hdf5_names(x, fpath, name)
             return(NULL)
@@ -181,18 +188,11 @@ setMethod("stageObject", "list", function(x, dir, path, child=FALSE, fname="list
 
             y <- coerced$values
 
-            placeholder <- NULL
+            missing.placeholder <- NULL
             if (.version > 1) {
-                if (is.logical(y)) {
-                    # Force the use of a regular integer to avoid confusion.
-                    y <- as.integer(y)
-                    if (anyNA(y)) {
-                        placeholder <- -1L
-                        y[is.na(y)] <- placeholder
-                    }
-                } else if (anyNA(y)) {
-                    placeholder <- .choose_numeric_missing_placeholder(y)
-                }
+                transformed <- transformVectorForHdf5(y)
+                y <- transformed$transformed
+                missing.placeholder <- transformed$placeholder
             } else {
                 if (is.logical(y) && anyNA(y)) {
                     y <- as.integer(y)
@@ -202,8 +202,8 @@ setMethod("stageObject", "list", function(x, dir, path, child=FALSE, fname="list
             dataname <- paste0(name, "/data")
             h5write(y, fpath, dataname)
             .add_hdf5_names(x, fpath, name)
-            if (.version > 1 && !is.null(placeholder)) {
-                .add_missing_value_placeholder(fpath, dataname, placeholder)
+            if (.version > 1 && !is.null(missing.placeholder)) {
+                addMissingPlaceholderAttributeForHdf5(fpath, dataname, missing.placeholder)
             }
 
             return(NULL)
@@ -257,15 +257,6 @@ setMethod("stageObject", "list", function(x, dir, path, child=FALSE, fname="list
     for (a in names(attrs)) {
         h5writeAttribute(attrs[[a]], h5obj=ghandle, name=a, asScalar=TRUE)
     }
-}
-
-#' @importFrom rhdf5 H5Fopen H5Fclose h5writeAttribute H5Dopen H5Dclose
-.add_missing_value_placeholder <- function(file, name, value) {
-    fhandle <- H5Fopen(file)
-    on.exit(H5Fclose(fhandle), add=TRUE)
-    dhandle <- H5Dopen(fhandle, name)
-    on.exit(H5Dclose(dhandle), add=TRUE)
-    h5writeAttribute(value, h5obj=dhandle, name="missing-value-placeholder", asScalar=TRUE)
 }
 
 #' @importFrom rhdf5 H5Fopen H5Fclose H5Gopen H5Gclose h5writeAttribute H5Dcreate H5Dclose H5Dwrite H5Screate H5Sclose
@@ -418,4 +409,3 @@ setMethod("stageObject", "list", function(x, dir, path, child=FALSE, fname="list
 setMethod("stageObject", "List", function(x, dir, path, child=FALSE, fname="list") {
     stageObject(as.list(x), dir, path, child=child, fname=fname)
 })
-

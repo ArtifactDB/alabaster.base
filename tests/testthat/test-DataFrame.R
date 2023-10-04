@@ -232,7 +232,7 @@ test_that("handling of NAs works correctly", {
     place <- attrs[["missing-value-placeholder"]]
     expect_true(is.na(place) && !is.nan(place))
     attrs <- rhdf5::h5readAttributes(fpath, "contents/data/6")
-    expect_true(is.na(attrs[["missing-value-placeholder"]]))
+    expect_equal(attrs[["missing-value-placeholder"]], -1L)
 
     round2 <- loadDataFrame(meta2, project=tmp)
     expect_identical(df, round2)

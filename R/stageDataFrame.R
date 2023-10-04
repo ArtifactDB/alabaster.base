@@ -62,14 +62,7 @@
 #'
 #' list.files(tmp, recursive=TRUE)
 #' 
-#' @export
-#' @aliases
-#' addMissingPlaceholderAttribute
-#' chooseMissingStringPlaceholder
-#' addMissingStringPlaceholderAttribute
-#' .addMissingStringPlaceholderAttribute
-#' .chooseMissingStringPlaceholder
-#' 
+#' @export 
 #' @rdname stageDataFrame
 #' @importFrom utils write.csv
 #' @importFrom S4Vectors DataFrame
@@ -241,29 +234,31 @@ setMethod("stageObject", "DataFrame", function(x, dir, path, child=FALSE, df.nam
         if (skippable[i]) {
             next
         }
-
         current <- x[[i]]
-        if (is.logical(current)) {
-            # The logical'ness of this column is preserved in the metadata,
-            # so we can always convert it back later.
-            current <- as.integer(current) 
-        }
 
         missing.placeholder <- NULL
-        if (anyNA(current)) {
+        if (.version > 1) {
+            transformed <- transformVectorForHdf5(current)
+            current <- transformed$transformed
+            missing.placeholder <- transformed$placeholder
+        } else {
             if (is.character(current)) {
-                missing.placeholder <- chooseMissingStringPlaceholder(current)
-                current[is.na(current)] <- missing.placeholder
-            } else if (.version > 1) {
-                missing.placeholder <- .choose_numeric_missing_placeholder(current)
-            }
+                if (anyNA(current)) {
+                    missing.placeholder <- chooseMissingPlaceholderForHdf5(current)
+                    current[is.na(current)] <- missing.placeholder
+                }
+            } else if (is.logical(current)) {
+                # The logical'ness of this column is preserved in the metadata,
+                # so we can always convert it back later.
+                current <- as.integer(current) 
+            } 
         }
 
         data.name <- as.character(i - 1L)
         h5write(current, ofile, prefix(paste0("data/", data.name)))
 
         if (!is.null(missing.placeholder)) {
-            addMissingPlaceholderAttribute(ofile, prefix(paste0("data/", data.name)), missing.placeholder)
+            addMissingPlaceholderAttributeForHdf5(ofile, prefix(paste0("data/", data.name)), missing.placeholder)
         }
     }
 
@@ -273,36 +268,3 @@ setMethod("stageObject", "DataFrame", function(x, dir, path, child=FALSE, df.nam
     }
 }
 
-# Exported for re-use in anything that saves possibly-missing strings to HDF5.
-# alabaster.matrix is probably the prime suspect here.
-
-#' @export
-chooseMissingStringPlaceholder <- function(x) {
-    missing.placeholder <- "NA"
-    search <- unique(x)
-    while (missing.placeholder %in% search) {
-        missing.placeholder <- paste0("_", missing.placeholder)
-    }
-    missing.placeholder
-}
-
-#' @export
-#' @importFrom rhdf5 H5Fopen H5Fclose H5Dopen H5Dclose h5writeAttribute
-addMissingPlaceholderAttribute <- function(file, path, placeholder) {
-    fhandle <- H5Fopen(file)
-    on.exit(H5Fclose(fhandle), add=TRUE)
-    dhandle <- H5Dopen(fhandle, path)
-    on.exit(H5Dclose(dhandle), add=TRUE)
-    h5writeAttribute(placeholder, h5obj=dhandle, name="missing-value-placeholder", asScalar=TRUE)
-}
-
-# Soft-deprecated back-compatibility fixes.
-
-#' @export
-.chooseMissingStringPlaceholder <- function(...) chooseMissingStringPlaceholder(...)
-
-#' @export
-addMissingStringPlaceholderAttribute <- function(...) addMissingPlaceholderAttribute(...)
-
-#' @export
-.addMissingStringPlaceholderAttribute <- function(...) addMissingStringPlaceholderAttribute(...)
