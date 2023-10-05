@@ -42,7 +42,7 @@
 transformVectorForHdf5 <- function(x) {
     placeholder <- NULL
     if (is.logical(x)) {
-        x <- as.integer(x)
+        storage.mode(x) <- "integer"
         if (anyNA(x)) {
             placeholder <- -1L
             x[is.na(x)] <- placeholder
