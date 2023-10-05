@@ -2,8 +2,6 @@
 % Please edit documentation in R/transformVectorForHdf5.R
 \name{transformVectorForHdf5}
 \alias{transformVectorForHdf5}
-\alias{chooseMissingStringPlaceholder}
-\alias{addMissingStringPlaceholderAttribute}
 \alias{.addMissingStringPlaceholderAttribute}
 \alias{.chooseMissingStringPlaceholder}
 \alias{chooseMissingPlaceholderForHdf5}

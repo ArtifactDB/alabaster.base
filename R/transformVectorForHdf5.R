@@ -35,8 +35,6 @@
 #' transformVectorForHdf5(c("FOO", NA, "NA"))
 #'
 #' @aliases
-#' chooseMissingStringPlaceholder
-#' addMissingStringPlaceholderAttribute
 #' .addMissingStringPlaceholderAttribute
 #' .chooseMissingStringPlaceholder
 #'
@@ -109,7 +107,4 @@ addMissingPlaceholderAttributeForHdf5 <- function(file, name, placeholder) {
 .chooseMissingStringPlaceholder <- function(...) chooseMissingPlaceholderForHdf5(...)
 
 #' @export
-addMissingStringPlaceholderAttribute <- function(...) addMissingPlaceholderAttributeForHdf5(...)
-
-#' @export
-.addMissingStringPlaceholderAttribute <- function(...) addMissingStringPlaceholderAttributeForHdf5(...)
+.addMissingStringPlaceholderAttribute <- function(...) addMissingPlaceholderAttributeForHdf5(...)
