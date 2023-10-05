@@ -97,7 +97,24 @@ quickWriteCsv <- function(df, path, ..., row.names=FALSE, compression="gzip") {
         # Avoid creating an empty header.
         writeLines(character(nrow(df) + 1L), sep="\n", con=handle)
     } else {
-        write.csv(as.data.frame(df), file=handle, row.names=row.names, ..., eol="\n")
+        to_quote <- !logical(ncol(df))
+
+        # write.table saves NaNs as NA, and setting na= will convert all NA's,
+        # so we have to convert to string here and then refuse quoting for those columns.
+        for (i in seq_len(ncol(df))) {
+            col <- df[[i]]
+            if (is.double(col) && anyNA(col) && sum(is.nan(col)) > 0) {
+                df[[i]] <- as.character(col)
+                to_quote[i] <- FALSE
+            }
+        }
+
+        if (all(to_quote)) {
+            quote <- TRUE
+        } else {
+            quote <- which(to_quote)
+        }
+        write.csv(as.data.frame(df), file=handle, row.names=row.names, quote=quote, ..., eol="\n")
     }
 }
 

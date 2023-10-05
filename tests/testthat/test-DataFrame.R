@@ -204,7 +204,10 @@ test_that("handling of NAs works correctly", {
         d=factor(c("A", "B", "NA")),
         e=c(1L,2L,NA),
         f=c(1.5,2.5,NA),
-        g=c(TRUE,FALSE,NA)
+        g=c(TRUE,FALSE,NA),
+        h=1:3,
+        i=c(TRUE,FALSE,TRUE),
+        j=letters[1:3]
     )
 
     # Staged and validated correctly.
@@ -226,6 +229,12 @@ test_that("handling of NAs works correctly", {
     expect_identical(attrs[["missing-value-placeholder"]], "NA")
     attrs <- rhdf5::h5readAttributes(fpath, "contents/data/1")
     expect_identical(attrs[["missing-value-placeholder"]], "_NA")
+
+    attrs <- rhdf5::h5readAttributes(fpath, "contents/data/2")
+    expect_identical(attrs[["missing-value-placeholder"]], NA_integer_)
+    attrs <- rhdf5::h5readAttributes(fpath, "contents/data/3")
+    expect_null(attrs[["missing-value-placeholder"]])
+
     attrs <- rhdf5::h5readAttributes(fpath, "contents/data/4")
     expect_true(is.na(attrs[["missing-value-placeholder"]]))
     attrs <- rhdf5::h5readAttributes(fpath, "contents/data/5")
@@ -234,8 +243,47 @@ test_that("handling of NAs works correctly", {
     attrs <- rhdf5::h5readAttributes(fpath, "contents/data/6")
     expect_equal(attrs[["missing-value-placeholder"]], -1L)
 
+    attrs <- rhdf5::h5readAttributes(fpath, "contents/data/7")
+    expect_null(attrs[["missing-value-placeholder"]])
+    attrs <- rhdf5::h5readAttributes(fpath, "contents/data/8")
+    expect_null(attrs[["missing-value-placeholder"]])
+    attrs <- rhdf5::h5readAttributes(fpath, "contents/data/9")
+    expect_null(attrs[["missing-value-placeholder"]])
+
     round2 <- loadDataFrame(meta2, project=tmp)
     expect_identical(df, round2)
+})
+
+test_that("handling of IEEE special values work correctly", {
+    tmp <- tempfile()
+    dir.create(tmp)
+
+    df <- DataFrame(specials=c(NaN, 1, 2.12345678, Inf, NA, -Inf))
+    meta <- stageObject(df, tmp, path="FOO1")
+    round <- loadDataFrame(meta, project=tmp)
+    expect_identical(round, df)
+
+    df2 <- cbind(df, normals=1:6) # check that quoting works
+    meta <- stageObject(df2, tmp, path="FOO2")
+    round <- loadDataFrame(meta, project=tmp)
+    expect_identical(round, df2)
+
+    df3 <- cbind(df2, more_normals=LETTERS[1:6])
+    meta <- stageObject(df3, tmp, path="FOO3")
+    round <- loadDataFrame(meta, project=tmp)
+    expect_identical(round, df3)
+
+    # Works for HDF5.
+    old <- saveDataFrameFormat("hdf5")
+    on.exit(saveDataFrameFormat(old))
+
+    meta <- stageObject(df, tmp, path="hFOO1")
+    round <- loadDataFrame(meta, project=tmp)
+    expect_identical(round, df)
+
+    meta <- stageObject(df2, tmp, path="hFOO2")
+    round <- loadDataFrame(meta, project=tmp)
+    expect_identical(round, df2)
 })
 
 test_that("loaders work correctly from HDF5 with non-default placeholders", {
