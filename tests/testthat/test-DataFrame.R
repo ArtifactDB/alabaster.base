@@ -238,6 +238,32 @@ test_that("handling of NAs works correctly", {
     expect_identical(df, round2)
 })
 
+test_that("loaders work correctly from HDF5 with non-default placeholders", {
+    tmp <- tempfile()
+    dir.create(tmp)
+
+    old <- saveDataFrameFormat("hdf5")
+    on.exit(saveDataFrameFormat(old))
+
+    df <- DataFrame(
+        a=c(1L,2L,3L),
+        b=c(1.5,2.5,3.5),
+        c=c(1.5,2.5,NaN)
+    )
+
+    meta2 <- stageObject(df, tmp, path="WHEE.h5")
+
+    fpath <- file.path(tmp, meta2$path)
+    addMissingPlaceholderAttributeForHdf5(fpath, "contents/data/0", 1L)
+    addMissingPlaceholderAttributeForHdf5(fpath, "contents/data/1", 2.5)
+    addMissingPlaceholderAttributeForHdf5(fpath, "contents/data/2", NaN)
+
+    round <- loadDataFrame(meta2, project=tmp)
+    expect_identical(round$a, c(NA, 2L, 3L))
+    expect_identical(round$b, c(1.5, NA, 3.5))
+    expect_identical(round$c, c(1.5, 2.5, NA))
+})
+
 test_that("stageObject works with extra mcols", {
     df <- DataFrame(A=sample(3, 100, replace=TRUE), B=sample(letters[1:3], 100, replace=TRUE))
     mcols(df)$stuff <- runif(ncol(df))

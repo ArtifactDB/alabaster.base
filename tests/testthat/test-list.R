@@ -278,6 +278,28 @@ test_that("we handle lists with NAs", {
     expect_identical(roundtrip, revals)
 })
 
+test_that("loaders work correctly from HDF5 with non-default placeholders", {
+    vals <- list(a=c(1,2,3), b=c(4L, 5L, 6L), c=c(7, 8, NaN))
+
+    old <- saveBaseListFormat("hdf5")
+    on.exit(saveBaseListFormat(old))
+
+    tmp <- tempfile()
+    dir.create(tmp)
+    info <- stageObject(vals, tmp, path="hstuff2")
+    resource <- writeMetadata(info, tmp)
+
+    fpath <- file.path(tmp, info$path)
+    addMissingPlaceholderAttributeForHdf5(fpath, "contents/data/0/data", 1)
+    addMissingPlaceholderAttributeForHdf5(fpath, "contents/data/1/data", 5L)
+    addMissingPlaceholderAttributeForHdf5(fpath, "contents/data/2/data", NaN)
+
+    roundtrip <- loadBaseList(info, tmp)
+    expect_identical(roundtrip$a, c(NA, 2, 3))
+    expect_identical(roundtrip$b, c(4L, NA, 6L))
+    expect_identical(roundtrip$c, c(7, 8, NA))
+})
+
 test_that("we handle the various float specials", {
     vals <- list(XXX=c(1.2, Inf, 2.3, -Inf, 3.4, NaN, 4.5, NA))
 
