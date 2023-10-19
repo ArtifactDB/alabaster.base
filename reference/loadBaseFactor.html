@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">alabaster.base</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.1.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.1.6</span>
       </span>
     </div>
 
@@ -86,7 +86,7 @@ By default, this should be a string containing the path to a staging directory.<
     </div>
     <div id="see-also">
     <h2>See also</h2>
-    <div class="dont-index"><p><code>"stageObject,factor-method"</code>, for the staging method.</p></div>
+    <div class="dont-index"><p><code>"<a href="stageBaseFactor.html">stageObject,factor-method</a>"</code>, for the staging method.</p></div>
     </div>
     <div id="author">
     <h2>Author</h2>
@@ -98,9 +98,9 @@ By default, this should be a string containing the path to a staging directory.<
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">tmp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/files2.html" class="external-link">dir.create</a></span><span class="op">(</span><span class="va">tmp</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">meta</span> <span class="op">&lt;-</span> <span class="fu"><a href="stageObject.html">stageObject</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">letters</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">]</span>, <span class="va">letters</span><span class="op">)</span>, <span class="va">tmp</span>, path<span class="op">=</span><span class="st">"bar"</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in writeMetadata(level_meta, dir):</span> failed to find 'atomic_vector/v1.json' in package 'alabaster.schemas'</span>
 <span class="r-in"><span><span class="fu">loadBaseFactor</span><span class="op">(</span><span class="va">meta</span>, <span class="va">tmp</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in eval(expr, envir, enclos):</span> object 'meta' not found</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [1] a b c d e f g h i j</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Levels: a b c d e f g h i j k l m n o p q r s t u v w x y z</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

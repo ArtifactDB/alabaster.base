@@ -18,7 +18,7 @@ This uses the uzuki2 specification to ensure that appropriate types are declared
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">alabaster.base</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.1.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.1.6</span>
       </span>
     </div>
 
@@ -63,7 +63,7 @@ This uses the <a href="https://github.com/LTLA/uzuki2" class="external-link">uzu
 
     <div id="ref-usage">
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="co"># S4 method for list</span></span>
-<span><span class="fu"><a href="stageObject.html">stageObject</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">dir</span>, <span class="va">path</span>, child <span class="op">=</span> <span class="cn">FALSE</span>, fname <span class="op">=</span> <span class="st">"list"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="stageObject.html">stageObject</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">dir</span>, <span class="va">path</span>, child <span class="op">=</span> <span class="cn">FALSE</span>, fname <span class="op">=</span> <span class="st">"list"</span>, .version <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S4 method for List</span></span>
 <span><span class="fu"><a href="stageObject.html">stageObject</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">dir</span>, <span class="va">path</span>, child <span class="op">=</span> <span class="cn">FALSE</span>, fname <span class="op">=</span> <span class="st">"list"</span><span class="op">)</span></span></code></pre></div>
@@ -91,6 +91,10 @@ The actual path used to save <code>x</code> may include additional components, s
 <dt>fname</dt>
 <dd><p>String containing the name of the file to use to save <code>x</code>. 
 Note that this should not have a <code>.json</code> suffix, so as to avoid confusion with the JSON-formatted metadata.</p></dd>
+
+
+<dt>.version</dt>
+<dd><p>Internal use only.</p></dd>
 
 </dl></div>
     <div id="value">
