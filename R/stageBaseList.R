@@ -58,7 +58,7 @@ setMethod("stageObject", "list", function(x, dir, path, child=FALSE, fname="list
 
         .transform_list_hdf5(x, dir=dir, path=path, fpath=fpath, name=dname, env=env, .version=.version)
         if (.version > 1) {
-            .label_hdf5_group(fpath, dname, uzuki_version="1.1")
+            .label_hdf5_group(fpath, dname, uzuki_version="1.2")
         }
 
         check_list_hdf5(fpath, dname, length(env$collected)) # Check that we did it correctly.
@@ -67,7 +67,7 @@ setMethod("stageObject", "list", function(x, dir, path, child=FALSE, fname="list
         target <- paste0(path, "/", fname, ".json.gz")
         formatted <- .transform_list_json(x, dir=dir, path=path, env=env, .version=.version)
         if (.version > 1) {
-            formatted$version <- "1.1"
+            formatted$version <- "1.2"
         }
         str <- toJSON(formatted, auto_unbox=TRUE, ident=4, null="null", na="null")
 
