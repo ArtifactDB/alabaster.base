@@ -31,5 +31,6 @@ harvester() {
 
 harvester millijson https://github.com/ArtifactDB/millijson v1.0.0 
 harvester byteme https://github.com/LTLA/byteme v1.0.1
-harvester uzuki2 https://github.com/ArtifactDB/uzuki2 v1.1.0 
+harvester ritsuko https://github.com/ArtifactDB/ritsuko v0.2.0
+harvester uzuki2 https://github.com/ArtifactDB/uzuki2 v1.2.0 
 harvester comservatory https://github.com/ArtifactDB/comservatory v1.0.0 
