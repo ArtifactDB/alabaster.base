@@ -278,6 +278,35 @@ test_that("we handle lists with NAs", {
     expect_identical(roundtrip, revals)
 })
 
+test_that("we handle lists with minimum integers", {
+    vals <- list(A=c(1L,2L,3L,NA))
+
+    tmp <- tempfile()
+    dir.create(tmp)
+
+    info <- stageObject(vals, tmp, path="stuff")
+    expect_match(info[["$schema"]], "json_simple_list")
+
+    fpath <- file.path(tmp, info$path)
+    x <- jsonlite::fromJSON(fpath, simplifyVector=FALSE)
+    x$values[[1]]$values[4] <- -2^31
+    write(jsonlite::toJSON(x, auto_unbox=TRUE), file=gzfile(fpath))
+
+    roundtrip <- loadBaseList(info, tmp)
+    expect_equal(roundtrip$A, c(1,2,3,-2^31))
+
+    # Works for HDF5.
+    old <- saveBaseListFormat("hdf5")
+    on.exit(saveBaseListFormat(old))
+
+    info <- stageObject(vals, tmp, path="stuff2")
+    fpath <- file.path(tmp, info$path)
+    rhdf5::h5deleteAttribute(fpath, "contents/data/0/data", "missing-value-placeholder")
+
+    roundtrip <- loadBaseList(info, tmp)
+    expect_equal(roundtrip$A, c(1,2,3,-2^31))
+})
+
 test_that("loaders work correctly from HDF5 with non-default placeholders", {
     vals <- list(a=c(1,2,3), b=c(4L, 5L, 6L), c=c(7, 8, NaN))
 

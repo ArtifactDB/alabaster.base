@@ -254,6 +254,44 @@ test_that("handling of NAs works correctly", {
     expect_identical(df, round2)
 })
 
+test_that("handling of the integer minimum limit works correctly", {
+    tmp <- tempfile()
+    dir.create(tmp)
+
+    df <- DataFrame(foobar=c(1L,2L,NA))
+    actual <- c(1, 2, -2^31)
+
+    # For CSV:
+    meta <- stageObject(df, tmp, path="exceptions")
+    expect_identical(meta[["$schema"]], "csv_data_frame/v1.json")
+    fpath <- file.path(tmp, meta$path)
+    write(paste0(c("\"foobar\"", actual), collapse="\n"), file=gzfile(fpath))
+
+    round <- loadDataFrame(meta, project=tmp)
+    expect_identical(round$foobar, actual)
+
+    # For HDF5: 
+    old <- saveDataFrameFormat("hdf5")
+    on.exit(saveDataFrameFormat(old))
+
+    meta <- stageObject(df, tmp, path="hdf5")
+    fpath <- file.path(tmp, meta$path)
+    rhdf5::h5deleteAttribute(fpath, "contents/data/0", "missing-value-placeholder")
+
+    round <- loadDataFrame(meta, project=tmp)
+    expect_identical(round$foobar, actual)
+
+    # Trying again.
+    fhandle <- rhdf5::H5Fopen(fpath)
+    dhandle <- rhdf5::H5Dopen(fhandle, "contents/data/0")
+    rhdf5::h5writeAttribute(1, dhandle, "missing-value-placeholder", asScalar=TRUE)
+    rhdf5::H5Dclose(dhandle)
+    rhdf5::H5Fclose(fhandle)
+
+    round <- loadDataFrame(meta, project=tmp)
+    expect_identical(round$foobar, c(NA, 2, -2^31))
+})
+
 test_that("handling of IEEE special values work correctly", {
     tmp <- tempfile()
     dir.create(tmp)

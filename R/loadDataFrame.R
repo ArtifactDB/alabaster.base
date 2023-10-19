@@ -65,14 +65,24 @@ loadDataFrame <- function(info, project, include.nested=TRUE, parallel=TRUE) {
                     attr <- h5readAttributes(path, prefix(paste0("data/", i)))
                     replace.na <- attr[["missing-value-placeholder"]]
 
-                    if (is.null(replace.na) || (is.na(replace.na) && !is.nan(replace.na))) {
-                        # No-op as there are no NAs or the placeholder is already R's NA.
+                    restore_min_integer <- function(y) {
+                        if (is.integer(y) && anyNA(y)) { # promote integer NAs back to the actual number.
+                            y <- as.double(y)
+                            y[is.na(y)] <- -2^31
+                        }
+                        y
+                    }
+
+                    if (is.null(replace.na)) {
+                        raw[[i]] <- restore_min_integer(current)
+                    } else if (is.na(replace.na) && !is.nan(replace.na)) {
+                        # No-op as the placeholder is already R's NA.
                     } else if (is.nan(replace.na)) {
-                        # In case we have an NaN as a placeholder for NA.
-                        raw[[i]][is.nan(current)] <- NA
+                        raw[[i]][is.nan(current)] <- NA # avoid equality checks to an NaN.
                     } else {
-                        # Using which() to avoid problems with existing NAs.
-                        raw[[i]][which(current == replace.na)] <- NA
+                        current <- restore_min_integer(current)
+                        current[which(current == replace.na)] <- NA # Using which() to avoid problems with existing NAs.
+                        raw[[i]] <- current
                     }
                 }
             }
@@ -133,14 +143,21 @@ loadDataFrame <- function(info, project, include.nested=TRUE, parallel=TRUE) {
             col <- .cast_datetime(col)
 
         } else if (.is_atomic(col.type)) {
-            col <- .cast_atomic(col, col.type)
-            if (col.type == "string") {
+            if (col.type == "integer") {
+                if (is.double(col) && any(col == -2^31, na.rm=TRUE)) {
+                    # Don't cast to an integer if there's the special -2^31 value.
+                } else {
+                    col <- .cast_atomic(col, col.type)
+                }
+            } else if (col.type == "string") {
                 f <- current.info$format
                 if (identical(f, "date")) {
                     col <- as.Date(col)
                 } else if (identical(f, "date-time")) {
                     col <- .cast_datetime(col)
                 }
+            } else {
+                col <- .cast_atomic(col, col.type)
             }
 
         } else if (col.type == "other") {

@@ -17,10 +17,14 @@ struct RIntegerVector : public uzuki2::IntegerVector, public RBase {
 
     void set(size_t i, int32_t val) {
         vec[i] = val;
+        if (val == NA_INTEGER) {
+            has_placeholder = true;
+        }
     }
 
     void set_missing(size_t i) {
         vec[i] = NA_INTEGER;
+        true_missing.push_back(i);
     }
 
     void set_name(size_t i, std::string nm) {
@@ -31,10 +35,26 @@ struct RIntegerVector : public uzuki2::IntegerVector, public RBase {
         if (named) {
             vec.names() = names;
         }
-        return vec; 
+        if (!has_placeholder) {
+            return vec;
+        }
+
+        // If we see that the missing placeholder is present and it's not a
+        // true missing value, we promote it to a double-precision vector.
+        Rcpp::NumericVector alt(vec.size());
+        std::copy(vec.begin(), vec.end(), alt.begin());
+        for (auto i : true_missing) {
+            alt[i] = R_NaReal;
+        }
+        if (named) {
+            alt.names() = names;
+        }
+        return alt; 
     }
 
     Rcpp::IntegerVector vec;
+    std::vector<size_t> true_missing;
+    bool has_placeholder = false;
     bool named = false;
     Rcpp::CharacterVector names;
 };
