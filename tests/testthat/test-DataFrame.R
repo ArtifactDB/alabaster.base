@@ -343,17 +343,25 @@ test_that("DF staging preserves odd colnames", {
         check.names=FALSE
     )
 
+    # Correct in the CSV:
     meta <- stageObject(df, tmp, path="WHEE")
     resource <- writeMetadata(meta, tmp)
-    expect_equal(loadDataFrame(out, tmp), df)
+    expect_equal(loadDataFrame(meta, tmp), df)
 
-    #TODO: check consistency in the CSV file.
+    fpath <- file.path(tmp, meta$path)
+    first <- readLines(fpath, n=1)
+    expect_identical(first, "\"foo bar\",\"rabbit+2+3/5\"")
 
+    # Correct in the HDF5:
     old <- saveDataFrameFormat("hdf5")
     on.exit(saveDataFrameFormat(old))
-    meta <- stageObject(df, tmp, path="WHEE")
+
+    meta <- stageObject(df, tmp, path="WHEE2")
     resource <- writeMetadata(meta, tmp)
-    expect_identical(loadDataFrame(out, tmp), df)
+    expect_identical(loadDataFrame(meta, tmp), df)
+
+    fpath <- file.path(tmp, meta$path)
+    expect_identical(as.vector(rhdf5::h5read(fpath, "contents/column_names")), colnames(df))
 })
 
 test_that("DFs fails with duplicate or empty colnames", {
