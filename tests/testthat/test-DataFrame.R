@@ -332,6 +332,30 @@ test_that("stageObject works with extra mcols", {
     expect_equal(df, df2)
 })
 
+test_that("DF staging preserves odd colnames", {
+    tmp <- tempfile()
+    dir.create(tmp)
+
+    ncols <- 123
+    df <- DataFrame(
+        `foo bar` = seq_len(ncols),
+        `rabbit+2+3/5` = as.numeric(10 + seq_len(ncols)),
+        check.names=FALSE
+    )
+
+    meta <- stageObject(df, tmp, path="WHEE")
+    resource <- writeMetadata(meta, tmp)
+    expect_equal(loadDataFrame(out, tmp), df)
+
+    #TODO: check consistency in the CSV file.
+
+    old <- saveDataFrameFormat("hdf5")
+    on.exit(saveDataFrameFormat(old))
+    meta <- stageObject(df, tmp, path="WHEE")
+    resource <- writeMetadata(meta, tmp)
+    expect_identical(loadDataFrame(out, tmp), df)
+})
+
 test_that("DFs fails with duplicate or empty colnames", {
     tmp <- tempfile()
     dir.create(tmp)
