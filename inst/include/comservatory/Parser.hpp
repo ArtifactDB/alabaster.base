@@ -189,7 +189,7 @@ private:
     }
 
     template<class Input>
-    void store_number_or_complex(Input& input, Contents& info, size_t column, size_t line, bool negative) {
+    void store_number_or_complex(Input& input, Contents& info, size_t column, size_t line, bool negative) const {
         auto first = to_number(input, column, line);
         if (negative) {
             first *= -1;
@@ -231,7 +231,7 @@ private:
 
 private:
     template<class Input>
-    void parse_loop(Input& input, Contents& info) {
+    void parse_loop(Input& input, Contents& info) const {
         if (!input.valid()) {
             throw std::runtime_error("CSV file is empty");
         }
@@ -253,13 +253,14 @@ private:
         }
 
         // Processing the header.
+        std::vector<std::string> header_names;
         while (1) {
             char c = input.get();
             if (c != '"') {
                 throw std::runtime_error("all headers should be quoted strings");
             }
 
-            info.names.push_back(to_string(input, info.names.size(), 0)); // no need to check validity, as to_string always leaves us on a valid position (or throws itself).
+            header_names.push_back(to_string(input, info.names.size(), 0)); // no need to check validity, as to_string always leaves us on a valid position (or throws itself).
 
             char next = input.get();
             input.advance();
@@ -270,17 +271,38 @@ private:
             }
         } 
 
-        auto copy = info.names;
-        std::sort(copy.begin(), copy.end());
-        for (size_t s = 1; s < copy.size(); ++s) {
-            if (copy[s] == copy[s-1]) {
-                throw std::runtime_error("detected duplicated header names");
+        {
+            std::unordered_set<std::string> copy;
+            for (const auto& x : header_names) {
+                if (copy.find(x) != copy.end()) {
+                    throw std::runtime_error("detected duplicated header name '" + x + "'");
+                }
+                copy.insert(x);
             }
         }
 
-        info.fields.resize(info.names.size());
-        for (auto& o : info.fields) {
-            o.reset(new UnknownField);
+        // If information isn't already provided, we fill it in from the file,
+        // otherwise we check its consistency.
+        if (info.names.empty()) {
+            info.names.swap(header_names);
+        } else {
+            if (info.names.size() != header_names.size()) {
+                throw std::runtime_error("provided number of names is not equal to the number of header names");
+            }
+            for (size_t i = 0, end = header_names.size(); i < end; ++i) {
+                if (info.names[i] != header_names[i]) {
+                    throw std::runtime_error("mismatch between provided and observed header name for column " + std::to_string(i + 1) + " ('" + info.names[i] + "', '" + header_names[i] + "')");
+                }
+            }
+        }
+
+        if (info.fields.empty()) {
+            info.fields.resize(info.names.size());
+            for (auto& o : info.fields) {
+                o.reset(new UnknownField);
+            }
+        } else if (info.fields.size() != info.names.size()) {
+            throw std::runtime_error("provided number of fields is not equal to the number of header names");
         }
 
         // Special case if there are no records, i.e., it's header-only.
@@ -399,7 +421,7 @@ private:
 
 public:
     template<class Reader>
-    void parse(Reader& reader, Contents& info, bool parallel) {
+    void parse(Reader& reader, Contents& info, bool parallel) const {
         if (parallel) {
             byteme::PerByteParallel input(&reader);
             parse_loop(input, info);

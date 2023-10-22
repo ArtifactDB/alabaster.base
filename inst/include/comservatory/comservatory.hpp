@@ -14,5 +14,6 @@
 namespace comservatory {}
 
 #include "ReadCsv.hpp"
+#include "read.hpp"
 
 #endif

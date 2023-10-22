@@ -107,6 +107,51 @@ public:
     size_t position() const {
         return overall + current;
     }
+
+    /**
+     * Extract up to `n` bytes from the `Reader` source and store them in the `buffer`.
+     * This is equivalent to calling `get()` and then `advance()` up to `n` times,
+     * only iterating while the return value of `advance()` is still true.
+     * The number of successful iterations is returned in the output as the first pair element,
+     * while the return value of the final `advance()` is returned as the second pair element.
+     *
+     * @param n Number of bytes to extract.
+     * @param[out] output Pointer to an output buffer of length `n`.
+     * This is filled with up to `n` bytes from the source.
+     *
+     * @return Pair containing (1) the number of bytes that were successfully read into `output`,
+     * and (2) whether there are any more bytes available in the source for future `get()` or `extract()` calls.
+     */
+    std::pair<size_t, bool> extract(size_t n, Type_* output) {
+        size_t original = n;
+        bool okay = true;
+
+        while (1) {
+            auto start = ptr + current;
+            auto leftover = available - current;
+
+            if (leftover > n) {
+                current += n;
+                n = 0;
+                std::copy(start, ptr + current, output);
+                break;
+
+            } else {
+                n -= leftover;
+                std::copy(start, ptr + available, output);
+                overall += available;
+                refill();
+
+                okay = (available > 0);
+                if (n == 0 || !okay) {
+                    break;
+                }
+                output += leftover;
+            }
+        }
+
+        return std::make_pair(original - n, okay);
+    }
 };
 
 /**
@@ -156,6 +201,14 @@ private:
         current = 0;
     }
 
+    void join_and_refill() {
+        meanwhile.join();
+        if (thread_err) {
+            std::rethrow_exception(thread_err);
+        }
+        refill();
+    }
+
 public:
     /**
      * @copydoc PerByte::PerByte()
@@ -199,12 +252,8 @@ public:
         if (!use_meanwhile) {
             return false;
         }
+        join_and_refill();
 
-        meanwhile.join();
-        if (thread_err) {
-            std::rethrow_exception(thread_err);
-        }
-        refill();
         return available > 0; // confirm there's actually bytes to extract in the next round.
     }
 
@@ -220,6 +269,56 @@ public:
      */
     size_t position() const {
         return overall + current;
+    }
+
+    /**
+     * Extract up to `n` bytes from the `Reader` source and store them in the `output`.
+     * This is equivalent to calling `get()` and then `advance()` up to `n` times,
+     * only iterating while the return value of `advance()` is still true.
+     * The number of successful iterations is returned in the output as the first pair element,
+     * while the return value of the final `advance()` is returned as the second pair element.
+     *
+     * @param n Number of bytes to extract.
+     * @param[out] output Pointer to an output buffer of length `n`.
+     * This is filled with up to `n` bytes from the source.
+     *
+     * @return Pair containing (1) the number of bytes that were successfully read into `output`,
+     * and (2) whether there are any more bytes available in the source for future `get()` or `extract()` calls.
+     */
+    std::pair<size_t, bool> extract(size_t n, Type_* output) {
+        size_t original = n;
+        bool okay = true;
+
+        while (1) {
+            auto start = buffer.data() + current;
+            auto leftover = available - current;
+
+            if (leftover > n) {
+                current += n;
+                n = 0;
+                std::copy(start, buffer.data() + current, output);
+                break;
+
+            } else {
+                n -= leftover;
+                std::copy(start, buffer.data() + available, output);
+
+                overall += available;
+                if (!use_meanwhile) {
+                    okay = false;
+                    break;
+                }
+                join_and_refill();
+
+                okay = (available > 0);
+                if (n == 0 || !okay) {
+                    break;
+                }
+                output += leftover;
+            }
+        }
+
+        return std::make_pair(original - n, okay);
     }
 };
 
