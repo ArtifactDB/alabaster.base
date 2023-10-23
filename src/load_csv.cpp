@@ -95,37 +95,21 @@ void RFilledComplexField::push_back(std::complex<double> in) {
 struct RFieldCreator : public comservatory::FieldCreator {
     RFieldCreator(size_t n) : num_records(n) {}
 
-    comservatory::Field* create(comservatory::Type observed, size_t n = 0, bool dummy = false) const {
+    comservatory::Field* create(comservatory::Type observed, size_t n, bool) const {
         comservatory::Field* ptr;
         
         switch (observed) {
             case comservatory::STRING:
-                if (dummy) {
-                    ptr = new comservatory::DummyStringField(n);
-                } else {
-                    ptr = new RFilledStringField(n, num_records);
-                }
+                ptr = new RFilledStringField(n, num_records);
                 break;
             case comservatory::NUMBER:
-                if (dummy) {
-                    ptr = new comservatory::DummyNumberField(n);
-                } else {
-                    ptr = new RFilledNumberField(n, num_records);
-                }
+                ptr = new RFilledNumberField(n, num_records);
                 break;
             case comservatory::BOOLEAN:
-                if (dummy) {
-                    ptr = new comservatory::DummyBooleanField(n);
-                } else {
-                    ptr = new RFilledBooleanField(n, num_records);
-                }
+                ptr = new RFilledBooleanField(n, num_records);
                 break;
             case comservatory::COMPLEX:
-                if (dummy) {
-                    ptr = new comservatory::DummyComplexField(n);
-                } else {
-                    ptr = new RFilledComplexField(n, num_records);
-                }
+                ptr = new RFilledComplexField(n, num_records);
                 break;
             default:
                 throw std::runtime_error("unrecognized type during field creation");
