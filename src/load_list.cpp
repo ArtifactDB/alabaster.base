@@ -5,6 +5,7 @@
 /** Defining the simple vectors first. **/
 
 struct RBase {
+    virtual ~RBase() = default;
     virtual Rcpp::RObject extract_object() = 0;
 };
 
@@ -296,7 +297,7 @@ struct RList : public uzuki2::List, public RBase {
 
     size_t size() const { return elements.size(); }
 
-    void set(size_t i, std::shared_ptr<Base> ptr) {
+    void set(size_t i, std::shared_ptr<uzuki2::Base> ptr) {
         auto rptr = dynamic_cast<RBase*>(ptr.get());
         elements[i] = rptr->extract_object();
     }
