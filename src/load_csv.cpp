@@ -1,5 +1,5 @@
 #include "Rcpp.h"
-#include "comservatory/ReadCsv.hpp"
+#include "comservatory/comservatory.hpp"
 #include "byteme/GzipFileReader.hpp"
 
 /** Defining the R fields. **/
@@ -143,17 +143,17 @@ private:
 // [[Rcpp::export(rng=false)]]
 Rcpp::List load_csv(std::string path, bool is_compressed, int nrecords, bool parallel) {
     RFieldCreator creator(nrecords);
-    comservatory::ReadCsv fun;
-    fun.creator = &creator;
-    fun.parallel = parallel;
+    comservatory::ReadOptions opt;
+    opt.creator = &creator;
+    opt.parallel = parallel;
 
     comservatory::Contents output;
     if (is_compressed) {
         byteme::GzipFileReader reader(path);
-        output = fun.read(reader);
+        output = comservatory::read(reader, opt);
     } else {
         byteme::RawFileReader reader(path);
-        output = fun.read(reader);
+        output = comservatory::read(reader, opt);
     }
 
     Rcpp::List listed(output.num_fields());

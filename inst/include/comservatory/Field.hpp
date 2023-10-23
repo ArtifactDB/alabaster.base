@@ -221,12 +221,12 @@ typedef TypedField<char, BOOLEAN> BooleanField;
 /**
  * Boolean `Field` with a backing `std::vector<char>`.
  */
-typedef FilledField<char, BOOLEAN> FilledBooleanField;
+typedef FilledField<bool, BOOLEAN> FilledBooleanField;
 
 /**
  * Dummy boolean `Field`.
  */
-typedef DummyField<char, BOOLEAN> DummyBooleanField;
+typedef DummyField<bool, BOOLEAN> DummyBooleanField;
 
 /**
  * Virtual class for a `Field` of complex numbers.
