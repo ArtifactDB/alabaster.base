@@ -131,7 +131,7 @@ loadDataFrame <- function(info, project, include.nested=TRUE, parallel=TRUE) {
                 levels <- levels[,1]
             }
             if (is.numeric(col)) {
-                col <- levels[col]
+                col <- levels[col + 1L]
             }
             ordered <- col.type == "ordered" || isTRUE(current.info$ordered)
             col <- factor(col, levels=levels, ordered=ordered)

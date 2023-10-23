@@ -81,6 +81,10 @@ setMethod("stageObject", "DataFrame", function(x, dir, path, child=FALSE, df.nam
     # otherwise any [[<- will call make.names.
     colnames(x) <- sprintf("V%s", seq_len(ncol(x)))
 
+    all_column_types <- integer(ncol(x))
+    all_string_formats <- integer(ncol(x))
+    all_factor_levels <- vector("list", ncol(x))
+
     # Returning the metadata about the column type.
     meta <- vector("list", ncol(x))
     for (z in seq_along(meta)) {
@@ -115,8 +119,10 @@ setMethod("stageObject", "DataFrame", function(x, dir, path, child=FALSE, df.nam
                          out$levels <- list(resource=writeMetadata(lev.info, dir=dir))
                      }, error = function(e) stop("failed to stage levels of factor column '", out$name, "'\n  - ", e$message))
 
-                    x[[z]] <- as.integer(col)
+                    x[[z]] <- as.integer(col) - 1L
                 }
+                all_factor_levels[[z]] <- levels(col)
+                all_column_types[z] <- 4L
 
             } else if (.is_datetime(col)) {
                 if (.version == 1) {
@@ -126,6 +132,8 @@ setMethod("stageObject", "DataFrame", function(x, dir, path, child=FALSE, df.nam
                     out$format <- "date-time"
                 }
                 x[[z]] <- .sanitize_datetime(col)
+                all_string_formats[z] <- 2L
+                all_column_types[z] <- 2L
 
             } else if (is(col, "Date")) {
                 if (.version == 1) {
@@ -135,17 +143,32 @@ setMethod("stageObject", "DataFrame", function(x, dir, path, child=FALSE, df.nam
                     out$format <- "date"
                 }
                 x[[z]] <- .sanitize_date(col)
+                all_string_formats[z] <- 1L
+                all_column_types[z] <- 2L
 
             } else if (is.atomic(col)) {
                 coerced <- .remap_atomic_type(col)
                 out$type <- coerced$type
                 x[[z]] <- coerced$values
+                if (coerced$type == "integer") {
+                    all_column_types[z] <- 0L
+                } else if (coerced$type == "number") {
+                    all_column_types[z] <- 1L
+                } else if (coerced$type == "boolean") {
+                    all_column_types[z] <- 3L
+                } else if (coerced$type == "string") {
+                    all_column_types[z] <- 2L
+                } else {
+                    stop("unknown type '", coerced$type, "'")
+                }
 
             } else {
                 is.other <- TRUE
+                all_column_types[z] <- 5L
             }
         } else {
             is.other <- TRUE
+            all_column_types[z] <- 5L
         }
 
         if (is.other) {
@@ -169,6 +192,8 @@ setMethod("stageObject", "DataFrame", function(x, dir, path, child=FALSE, df.nam
     format <- .saveDataFrameFormat()
     opath <- paste0(path, "/", df.name)
     extra <- list(list())
+    has_row_names = !is.null(rownames(x))
+    vge1_or_null <- if (.version != 1) .version else NULL 
 
     if (!is.null(format) && format=="hdf5") {
         opath <- paste0(opath, ".h5")
@@ -177,11 +202,23 @@ setMethod("stageObject", "DataFrame", function(x, dir, path, child=FALSE, df.nam
         .write_hdf5_data_frame(x, skippable, "contents", ofile, .version=.version)
         schema <- "hdf5_data_frame/v1.json"
         extra[[1]]$group <- "contents"
-        extra[[1]]$version <- if (.version != 1) .version else NULL
+        extra[[1]]$version <- vge1_or_null
+
+        check_hdf5_df(ofile, 
+            name=extra[[1]]$group,
+            nrows=nrow(x), 
+            has_row_names=has_row_names,
+            column_names=true.colnames,
+            column_types=all_column_types,
+            string_formats=all_string_formats,
+            factor_levels=all_factor_levels,
+            df_version=.version,
+            hdf5_version=.version
+        )
 
     } else {
         X <- data.frame(x, check.names=FALSE)
-        if (!is.null(rownames(x))) {
+        if (has_row_names) {
             # Using the 'row_names' name for back-compatibility.
             X <- cbind(row_names=rownames(x), X)
         }
@@ -189,16 +226,27 @@ setMethod("stageObject", "DataFrame", function(x, dir, path, child=FALSE, df.nam
         if (!is.null(format) && format=="csv") {
             opath <- paste0(opath, ".csv")
             ofile <- file.path(dir, opath)
-            .quickWriteCsv(X, ofile, row.names=FALSE, compression="none")
+            .quickWriteCsv(X, ofile, row.names=FALSE, compression="none", validate=FALSE)
             extra[[1]]$compression <- "none"
         } else {
             opath <- paste0(opath, ".csv.gz")
             ofile <- file.path(dir, opath)
-            .quickWriteCsv(X, ofile, row.names=FALSE, compression="gzip")
+            .quickWriteCsv(X, ofile, row.names=FALSE, compression="gzip", validate=FALSE)
             extra[[1]]$compression <- "gzip"
         }
 
         schema <- "csv_data_frame/v1.json"
+        check_csv_df(ofile, 
+            nrows=nrow(x), 
+            has_row_names=has_row_names,
+            column_names=true.colnames,
+            column_types=all_column_types,
+            string_formats=all_string_formats,
+            factor_levels=all_factor_levels,
+            df_version=.version,
+            is_compressed=extra[[1]]$compression == "gzip",
+            parallel=TRUE
+        )
     }
 
     element_data <- .processMcols(x, dir, path, mcols.name)
@@ -210,11 +258,11 @@ setMethod("stageObject", "DataFrame", function(x, dir, path, child=FALSE, df.nam
         is_child=child,
         data_frame=list(
             columns=meta,
-            row_names=!is.null(rownames(x)),
+            row_names=has_row_names,
             column_data=element_data,
             other_data=other_data,
             dimensions=dim(x),
-            version=if (.version != 1) .version else NULL
+            version=vge1_or_null
         )
     )
 

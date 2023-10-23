@@ -16,7 +16,14 @@ quickReadCsv(
   parallel = TRUE
 )
 
-quickWriteCsv(df, path, ..., row.names = FALSE, compression = "gzip")
+quickWriteCsv(
+  df,
+  path,
+  ...,
+  row.names = FALSE,
+  compression = "gzip",
+  validate = TRUE
+)
 }
 \arguments{
 \item{path}{String containing a path to a CSV to read/write.}
@@ -28,15 +35,17 @@ quickWriteCsv(df, path, ..., row.names = FALSE, compression = "gzip")
 \item{compression}{String specifying the compression that was/will be used.
 This should be either \code{"none"}, \code{"gzip"}.}
 
-\item{row.names}{For \code{.quickReadCsv}, a logical scalar indicating whether the CSV contains row names.}
-
-\item{parallel}{Whether reading and parsing should be performed concurrently.
+\item{row.names}{For \code{.quickReadCsv}, a logical scalar indicating whether the CSV contains row names. 
 
 For \code{.quickWriteCsv}, a logical scalar indicating whether to save the row names of \code{df}.}
+
+\item{parallel}{Whether reading and parsing should be performed concurrently.}
 
 \item{df}{A \linkS4class{DataFrame} or data.frame object, containing only atomic columns.}
 
 \item{...}{Further arguments to pass to \code{\link{write.csv}}.}
+
+\item{validate}{Whether to double-check that the generated CSV complies with the comservatory specification.}
 }
 \value{
 For \code{.quickReadCsv}, a \linkS4class{DataFrame} containing the contents of \code{path}.

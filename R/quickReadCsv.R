@@ -6,14 +6,15 @@
 #' @param path String containing a path to a CSV to read/write.
 #' @param expected.columns Named character vector specifying the type of each column in the CSV (excluding the first column containing row names, if \code{row.names=TRUE}).
 #' @param row.names For \code{.quickReadCsv}, a logical scalar indicating whether the CSV contains row names. 
-#' @param parallel Whether reading and parsing should be performed concurrently.
 #'
 #' For \code{.quickWriteCsv}, a logical scalar indicating whether to save the row names of \code{df}.
+#' @param parallel Whether reading and parsing should be performed concurrently.
 #' @param expected.nrows Integer scalar specifying the expected number of rows in the CSV.
 #' @param compression String specifying the compression that was/will be used.
 #' This should be either \code{"none"}, \code{"gzip"}.
 #' @param df A \linkS4class{DataFrame} or data.frame object, containing only atomic columns.
 #' @param ... Further arguments to pass to \code{\link{write.csv}}.
+#' @param validate Whether to double-check that the generated CSV complies with the comservatory specification.
 #'
 #' @author Aaron Lun
 #' 
@@ -80,9 +81,11 @@ read.csv3 <- function(path, compression, nrows, parallel=TRUE) {
 #' @export
 #' @rdname quickReadCsv
 #' @importFrom utils write.csv
-quickWriteCsv <- function(df, path, ..., row.names=FALSE, compression="gzip") {
+quickWriteCsv <- function(df, path, ..., row.names=FALSE, compression="gzip", validate=TRUE) {
     .quick_write_csv(df=df, path=path, ..., row.names=row.names, compression=compression)
-    check_csv(path, is_compressed=identical(compression, "gzip"), parallel=TRUE)
+    if (validate) {
+        check_csv(path, is_compressed=identical(compression, "gzip"), parallel=TRUE)
+    }
 }
 
 .quick_write_csv <- function(df, path, ..., row.names=FALSE, compression="gzip") {

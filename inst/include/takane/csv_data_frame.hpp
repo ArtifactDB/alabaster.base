@@ -179,21 +179,9 @@ struct TakaneFactorV2Field : public comservatory::NumberField {
         return false;
     }
 };
-/**
- * @endcond
- */
 
-/**
- * Checks if a CSV data frame is correctly formatted.
- * An error is raised if the file does not meet the specifications.
- *
- * @param path Path to the CSV file.
- * @param num_rows Number of rows in the data frame.
- * @param has_row_names Whether the data frame contains row names.
- * @param columns Details about the expected columns of the data frame, in order.
- * @param df_version Version of the `data_frame` format.
- */
-inline void validate_csv(const char* path, size_t num_rows, bool has_row_names, const std::vector<ColumnDetails>& columns, int df_version = 2) {
+template<class ParseCommand>
+void validate_base(ParseCommand parse, size_t num_rows, bool has_row_names, const std::vector<ColumnDetails>& columns, int df_version = 2) {
     comservatory::Contents contents;
     if (has_row_names) {
         contents.fields.emplace_back(new TakaneRowNamesField);
@@ -240,7 +228,7 @@ inline void validate_csv(const char* path, size_t num_rows, bool has_row_names, 
         }
     }
 
-    comservatory::read_file(path, contents, comservatory::ReadOptions());
+    parse(contents);
     if (contents.num_records() != num_rows) {
         throw std::runtime_error("number of records in the CSV file does not match the expected number of rows");
     }
@@ -251,6 +239,68 @@ inline void validate_csv(const char* path, size_t num_rows, bool has_row_names, 
             throw std::runtime_error("observed and expected header names do not match");
         }
     }
+}
+/**
+ * @endcond
+ */
+
+/**
+ * Checks if a CSV data frame is correctly formatted.
+ * An error is raised if the file does not meet the specifications.
+ *
+ * @tparam Reader A **byteme** reader class.
+ *
+ * @param reader A stream of bytes from the CSV file.
+ * @param num_rows Number of rows in the data frame.
+ * @param has_row_names Whether the data frame contains row names.
+ * @param columns Details about the expected columns of the data frame, in order.
+ * @param options Reading options.
+ * @param df_version Version of the `data_frame` format.
+ */
+template<class Reader>
+void validate_csv(
+    Reader& reader, 
+    size_t num_rows, 
+    bool has_row_names, 
+    const std::vector<ColumnDetails>& columns, 
+    const comservatory::ReadOptions& options,
+    int df_version = 2)
+{
+    validate_base(
+        [&](comservatory::Contents& contents) -> void { comservatory::read(reader, contents, options); },
+        num_rows,
+        has_row_names,
+        columns,
+        df_version
+    );
+}
+
+/**
+ * Checks if a CSV data frame is correctly formatted.
+ * An error is raised if the file does not meet the specifications.
+ *
+ * @param path Path to the CSV file.
+ * @param num_rows Number of rows in the data frame.
+ * @param has_row_names Whether the data frame contains row names.
+ * @param columns Details about the expected columns of the data frame, in order.
+ * @param options Reading options.
+ * @param df_version Version of the `data_frame` format.
+ */
+inline void validate_csv(
+    const char* path, 
+    size_t num_rows, 
+    bool has_row_names, 
+    const std::vector<ColumnDetails>& columns, 
+    const comservatory::ReadOptions& options,
+    int df_version = 2)
+{
+    validate_base(
+        [&](comservatory::Contents& contents) -> void { comservatory::read_file(path, contents, options); },
+        num_rows,
+        has_row_names,
+        columns,
+        df_version
+    );
 }
 
 }

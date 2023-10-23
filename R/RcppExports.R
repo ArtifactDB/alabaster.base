@@ -5,6 +5,14 @@ check_csv <- function(path, is_compressed, parallel) {
     .Call(`_alabaster_base_check_csv`, path, is_compressed, parallel)
 }
 
+check_csv_df <- function(path, nrows, has_row_names, column_names, column_types, string_formats, factor_levels, df_version, is_compressed, parallel) {
+    .Call(`_alabaster_base_check_csv_df`, path, nrows, has_row_names, column_names, column_types, string_formats, factor_levels, df_version, is_compressed, parallel)
+}
+
+check_hdf5_df <- function(path, name, nrows, has_row_names, column_names, column_types, string_formats, factor_levels, df_version, hdf5_version) {
+    .Call(`_alabaster_base_check_hdf5_df`, path, name, nrows, has_row_names, column_names, column_types, string_formats, factor_levels, df_version, hdf5_version)
+}
+
 check_list_hdf5 <- function(file, name, num_external) {
     .Call(`_alabaster_base_check_list_hdf5`, file, name, num_external)
 }

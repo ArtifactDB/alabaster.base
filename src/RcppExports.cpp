@@ -22,6 +22,44 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// check_csv_df
+Rcpp::RObject check_csv_df(std::string path, int nrows, bool has_row_names, Rcpp::CharacterVector column_names, Rcpp::IntegerVector column_types, Rcpp::IntegerVector string_formats, Rcpp::List factor_levels, int df_version, bool is_compressed, bool parallel);
+RcppExport SEXP _alabaster_base_check_csv_df(SEXP pathSEXP, SEXP nrowsSEXP, SEXP has_row_namesSEXP, SEXP column_namesSEXP, SEXP column_typesSEXP, SEXP string_formatsSEXP, SEXP factor_levelsSEXP, SEXP df_versionSEXP, SEXP is_compressedSEXP, SEXP parallelSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::traits::input_parameter< std::string >::type path(pathSEXP);
+    Rcpp::traits::input_parameter< int >::type nrows(nrowsSEXP);
+    Rcpp::traits::input_parameter< bool >::type has_row_names(has_row_namesSEXP);
+    Rcpp::traits::input_parameter< Rcpp::CharacterVector >::type column_names(column_namesSEXP);
+    Rcpp::traits::input_parameter< Rcpp::IntegerVector >::type column_types(column_typesSEXP);
+    Rcpp::traits::input_parameter< Rcpp::IntegerVector >::type string_formats(string_formatsSEXP);
+    Rcpp::traits::input_parameter< Rcpp::List >::type factor_levels(factor_levelsSEXP);
+    Rcpp::traits::input_parameter< int >::type df_version(df_versionSEXP);
+    Rcpp::traits::input_parameter< bool >::type is_compressed(is_compressedSEXP);
+    Rcpp::traits::input_parameter< bool >::type parallel(parallelSEXP);
+    rcpp_result_gen = Rcpp::wrap(check_csv_df(path, nrows, has_row_names, column_names, column_types, string_formats, factor_levels, df_version, is_compressed, parallel));
+    return rcpp_result_gen;
+END_RCPP
+}
+// check_hdf5_df
+Rcpp::RObject check_hdf5_df(std::string path, std::string name, int nrows, bool has_row_names, Rcpp::CharacterVector column_names, Rcpp::IntegerVector column_types, Rcpp::IntegerVector string_formats, Rcpp::List factor_levels, int df_version, int hdf5_version);
+RcppExport SEXP _alabaster_base_check_hdf5_df(SEXP pathSEXP, SEXP nameSEXP, SEXP nrowsSEXP, SEXP has_row_namesSEXP, SEXP column_namesSEXP, SEXP column_typesSEXP, SEXP string_formatsSEXP, SEXP factor_levelsSEXP, SEXP df_versionSEXP, SEXP hdf5_versionSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::traits::input_parameter< std::string >::type path(pathSEXP);
+    Rcpp::traits::input_parameter< std::string >::type name(nameSEXP);
+    Rcpp::traits::input_parameter< int >::type nrows(nrowsSEXP);
+    Rcpp::traits::input_parameter< bool >::type has_row_names(has_row_namesSEXP);
+    Rcpp::traits::input_parameter< Rcpp::CharacterVector >::type column_names(column_namesSEXP);
+    Rcpp::traits::input_parameter< Rcpp::IntegerVector >::type column_types(column_typesSEXP);
+    Rcpp::traits::input_parameter< Rcpp::IntegerVector >::type string_formats(string_formatsSEXP);
+    Rcpp::traits::input_parameter< Rcpp::List >::type factor_levels(factor_levelsSEXP);
+    Rcpp::traits::input_parameter< int >::type df_version(df_versionSEXP);
+    Rcpp::traits::input_parameter< int >::type hdf5_version(hdf5_versionSEXP);
+    rcpp_result_gen = Rcpp::wrap(check_hdf5_df(path, name, nrows, has_row_names, column_names, column_types, string_formats, factor_levels, df_version, hdf5_version));
+    return rcpp_result_gen;
+END_RCPP
+}
 // check_list_hdf5
 SEXP check_list_hdf5(std::string file, std::string name, int num_external);
 RcppExport SEXP _alabaster_base_check_list_hdf5(SEXP fileSEXP, SEXP nameSEXP, SEXP num_externalSEXP) {
@@ -112,6 +150,8 @@ END_RCPP
 
 static const R_CallMethodDef CallEntries[] = {
     {"_alabaster_base_check_csv", (DL_FUNC) &_alabaster_base_check_csv, 3},
+    {"_alabaster_base_check_csv_df", (DL_FUNC) &_alabaster_base_check_csv_df, 10},
+    {"_alabaster_base_check_hdf5_df", (DL_FUNC) &_alabaster_base_check_hdf5_df, 10},
     {"_alabaster_base_check_list_hdf5", (DL_FUNC) &_alabaster_base_check_list_hdf5, 3},
     {"_alabaster_base_check_list_json", (DL_FUNC) &_alabaster_base_check_list_json, 3},
     {"_alabaster_base_load_csv", (DL_FUNC) &_alabaster_base_load_csv, 4},
