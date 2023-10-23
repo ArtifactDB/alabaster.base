@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">alabaster.base</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.1.7</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.1.8</span>
       </span>
     </div>
 
@@ -331,16 +331,16 @@ either directly or as a child of another object (e.g., a
 <span><span class="va">x</span></span></code></pre></div>
 <pre><code><span><span class="co">## 10 x 10 sparse Matrix of class "dgTMatrix"</span></span>
 <span><span class="co">##                                                          </span></span>
-<span><span class="co">##  [1,] .         . 0.1818803 . . .         . .         . .</span></span>
-<span><span class="co">##  [2,] .         . .         . . 0.5801232 . .         . .</span></span>
-<span><span class="co">##  [3,] 0.5187608 . .         . . .         . .         . .</span></span>
-<span><span class="co">##  [4,] .         . .         . . .         . .         . .</span></span>
-<span><span class="co">##  [5,] .         . 0.3792578 . . .         . .         . .</span></span>
-<span><span class="co">##  [6,] .         . .         . . .         . 0.5326084 . .</span></span>
-<span><span class="co">##  [7,] .         . .         . . .         . .         . .</span></span>
-<span><span class="co">##  [8,] .         . .         . . .         . .         . .</span></span>
-<span><span class="co">##  [9,] .         . .         . . .         . .         . .</span></span>
-<span><span class="co">## [10,] .         . .         . . .         . .         . .</span></span></code></pre>
+<span><span class="co">##  [1,] .         . 0.8949090 . . .        . .          . .</span></span>
+<span><span class="co">##  [2,] .         . .         . . 0.424594 . .          . .</span></span>
+<span><span class="co">##  [3,] 0.5407789 . .         . . .        . .          . .</span></span>
+<span><span class="co">##  [4,] .         . .         . . .        . .          . .</span></span>
+<span><span class="co">##  [5,] .         . 0.7870461 . . .        . .          . .</span></span>
+<span><span class="co">##  [6,] .         . .         . . .        . 0.09158138 . .</span></span>
+<span><span class="co">##  [7,] .         . .         . . .        . .          . .</span></span>
+<span><span class="co">##  [8,] .         . .         . . .        . .          . .</span></span>
+<span><span class="co">##  [9,] .         . .         . . .        . .          . .</span></span>
+<span><span class="co">## [10,] .         . .         . . .        . .          . .</span></span></code></pre>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">tmp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/files2.html" class="external-link">dir.create</a></span><span class="op">(</span><span class="va">tmp</span><span class="op">)</span></span>
@@ -396,16 +396,16 @@ files. In this case, it’s fairly simple:</p>
 <code class="sourceCode R"><span><span class="fu">loadSparseTripletMatrix</span><span class="op">(</span><span class="va">meta</span>, <span class="va">tmp</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## 10 x 10 sparse Matrix of class "dgTMatrix"</span></span>
 <span><span class="co">##                                                          </span></span>
-<span><span class="co">##  [1,] .         . 0.1818803 . . .         . .         . .</span></span>
-<span><span class="co">##  [2,] .         . .         . . 0.5801232 . .         . .</span></span>
-<span><span class="co">##  [3,] 0.5187608 . .         . . .         . .         . .</span></span>
-<span><span class="co">##  [4,] .         . .         . . .         . .         . .</span></span>
-<span><span class="co">##  [5,] .         . 0.3792578 . . .         . .         . .</span></span>
-<span><span class="co">##  [6,] .         . .         . . .         . 0.5326084 . .</span></span>
-<span><span class="co">##  [7,] .         . .         . . .         . .         . .</span></span>
-<span><span class="co">##  [8,] .         . .         . . .         . .         . .</span></span>
-<span><span class="co">##  [9,] .         . .         . . .         . .         . .</span></span>
-<span><span class="co">## [10,] .         . .         . . .         . .         . .</span></span></code></pre>
+<span><span class="co">##  [1,] .         . 0.8949090 . . .        . .          . .</span></span>
+<span><span class="co">##  [2,] .         . .         . . 0.424594 . .          . .</span></span>
+<span><span class="co">##  [3,] 0.5407789 . .         . . .        . .          . .</span></span>
+<span><span class="co">##  [4,] .         . .         . . .        . .          . .</span></span>
+<span><span class="co">##  [5,] .         . 0.7870461 . . .        . .          . .</span></span>
+<span><span class="co">##  [6,] .         . .         . . .        . 0.09158138 . .</span></span>
+<span><span class="co">##  [7,] .         . .         . . .        . .          . .</span></span>
+<span><span class="co">##  [8,] .         . .         . . .        . .          . .</span></span>
+<span><span class="co">##  [9,] .         . .         . . .        . .          . .</span></span>
+<span><span class="co">## [10,] .         . .         . . .        . .          . .</span></span></code></pre>
 <p>To register this method with <em><a href="https://github.com/alabaster.base" class="external-link">alabaster.base</a></em>,
 <em>alabaster.foo</em> should add itself to the known schema locations
 upon load:</p>
@@ -564,7 +564,7 @@ called even if the user hasn’t loaded your package.</p>
 <span><span class="co">## [8] base     </span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## other attached packages:</span></span>
-<span><span class="co">## [1] S4Vectors_0.39.3     BiocGenerics_0.47.0  alabaster.base_1.1.7</span></span>
+<span><span class="co">## [1] S4Vectors_0.39.3     BiocGenerics_0.47.0  alabaster.base_1.1.8</span></span>
 <span><span class="co">## [4] Matrix_1.6-1.1       BiocStyle_2.29.2    </span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## loaded via a namespace (and not attached):</span></span>
