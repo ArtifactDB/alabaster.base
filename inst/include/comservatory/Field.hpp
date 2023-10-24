@@ -216,10 +216,10 @@ typedef DummyField<double, NUMBER> DummyNumberField;
 /**
  * @brief Virtual class for a `Field` of booleans.
  */
-typedef TypedField<char, BOOLEAN> BooleanField;
+typedef TypedField<bool, BOOLEAN> BooleanField;
 
 /**
- * Boolean `Field` with a backing `std::vector<char>`.
+ * Boolean `Field` with a backing `std::vector<bool>`.
  */
 typedef FilledField<bool, BOOLEAN> FilledBooleanField;
 

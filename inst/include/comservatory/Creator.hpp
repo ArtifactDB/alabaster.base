@@ -24,7 +24,10 @@ struct FieldCreator {
     /**
      * @param t Type of the field.
      * @param n Number of existing (missing) records in the field.
-     * @param dummy Whether to create a dummy field. 
+     * This should be used to specify that the first `n` values of the field's contents are missing.
+     * @param dummy Whether to create a dummy field.
+     * This is used to create placeholders for fields that are not of interest when `ReadOptions::keep_subset` is set,
+     * i.e., not in `ReadOptions::keep_subset_names` or `ReadOptions::keep_subset_indices`.
      *
      * @return An appropriate instance of a `Field` subclass.
      */
