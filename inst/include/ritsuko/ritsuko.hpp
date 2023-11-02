@@ -3,6 +3,7 @@
 
 #include "r_missing_value.hpp"
 #include "is_date_time.hpp"
+#include "choose_missing_placeholder.hpp"
 
 /**
  * @file ritsuko.hpp
