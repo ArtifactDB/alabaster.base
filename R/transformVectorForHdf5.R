@@ -7,6 +7,7 @@
 #' @param file String containing the path to a HDF5 file.
 #' @param name String containing the name of a HDF5 dataset.
 #' @param placeholder Scalar value representing a placeholder for missing values.
+#' @param .version Internal use only.
 #' 
 #' @return
 #' \code{chooseMissingPlaceholderForHdf5} returns a placeholder value for missing values in \code{x},
@@ -39,7 +40,7 @@
 #' .chooseMissingStringPlaceholder
 #'
 #' @export
-transformVectorForHdf5 <- function(x) {
+transformVectorForHdf5 <- function(x, .version=3) {
     placeholder <- NULL
     if (is.logical(x)) {
         storage.mode(x) <- "integer"
@@ -55,8 +56,11 @@ transformVectorForHdf5 <- function(x) {
         }
 
     } else if (is.double(x)) {
-        if (anyNA(x) && sum(is.nan(x)) < sum(is.na(x))) {
-            placeholder <- NA_real_
+        if (any_actually_numeric_na(x)) {
+            placeholder <- chooseMissingPlaceholderForHdf5(x, .version=.version)
+            if (!any_actually_numeric_na(placeholder)) {
+                x[is_actually_numeric_na(x)] <- placeholder
+            }
         }
 
     } else {
@@ -70,7 +74,7 @@ transformVectorForHdf5 <- function(x) {
 
 #' @export
 #' @rdname transformVectorForHdf5
-chooseMissingPlaceholderForHdf5 <- function(x) {
+chooseMissingPlaceholderForHdf5 <- function(x, .version=3) {
     missing.placeholder <- NULL
 
     if (is.logical(x)) {
@@ -81,6 +85,13 @@ chooseMissingPlaceholderForHdf5 <- function(x) {
         search <- unique(x)
         while (missing.placeholder %in% search) {
             missing.placeholder <- paste0("_", missing.placeholder)
+        }
+
+    } else if (is.double(x)) {
+        if (.version < 3) {
+            missing.placeholder <- NA_real_
+        } else {
+            missing.placeholder <- choose_numeric_missing_placeholder(x)
         }
 
     } else {

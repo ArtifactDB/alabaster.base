@@ -460,7 +460,7 @@ test_that("DFs handle their column types correctly (legacy)", {
     df$blah <- factor(df$stuff, LETTERS[10:1])
     df$rabbit <- factor(df$stuff, LETTERS[1:3], ordered=TRUE)
 
-    info <- stageObject(df, tmp, "rnaseq", .version=1)
+    info <- stageObject(df, tmp, "rnaseq", .version.df=1)
 
     # Should write without errors.
     resource <- writeMetadata(info, tmp)
@@ -480,4 +480,28 @@ test_that("DFs handle their column types correctly (legacy)", {
     expect_identical(out$rabbit, df$rabbit)
     expect_identical(out$birthday, df$birthday)
     expect_equal(out$birthtime, df$birthtime)
+})
+
+test_that("DFs handle missing values correctly (legacy)", {
+    old <- saveDataFrameFormat("hdf5")
+    on.exit(saveDataFrameFormat(old))
+
+    tmp <- tempfile()
+    dir.create(tmp, recursive=TRUE)
+
+    ncols <- 123
+    df <- DataFrame(
+        stuff = c(NA, 1:5),
+        whee = c(NA, 0.5 + 1:5),
+        whee = rep(c(NA, NaN), 3)
+    )
+
+    info <- stageObject(df, tmp, "rnaseq", .version.hdf5=1)
+    out <- loadDataFrame(info, tmp)
+    expect_identical(out, df)
+
+    info <- stageObject(df, tmp, "rnaseq", .version.hdf5=2)
+    out <- loadDataFrame(info, tmp)
+    expect_identical(out, df)
+    print(tmp)
 })

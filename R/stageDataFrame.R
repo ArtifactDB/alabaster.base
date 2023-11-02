@@ -11,7 +11,7 @@
 #' If \code{NULL}, per-element metadata is not saved.
 #' @param meta.name String specifying the name of the directory inside \code{path} to save \code{\link{metadata}(x)}.
 #' If \code{NULL}, object metadata is not saved.
-#' @param .version Internal use only.
+#' @param .version.df,.version.hdf5 Internal use only.
 #'
 #' @return
 #' A named list containing the metadata for \code{x}.
@@ -66,7 +66,7 @@
 #' @rdname stageDataFrame
 #' @importFrom utils write.csv
 #' @importFrom S4Vectors DataFrame
-setMethod("stageObject", "DataFrame", function(x, dir, path, child=FALSE, df.name="simple", mcols.name="mcols", meta.name="other", .version=2) {
+setMethod("stageObject", "DataFrame", function(x, dir, path, child=FALSE, df.name="simple", mcols.name="mcols", meta.name="other", .version.df=2, .version.hdf5=3) {
     dir.create(file.path(dir, path), showWarnings=FALSE)
 
     true.colnames <- colnames(x)
@@ -94,7 +94,7 @@ setMethod("stageObject", "DataFrame", function(x, dir, path, child=FALSE, df.nam
 
         if (length(dim(col)) < 2) { # only vectors or 1-d arrays.
             if (is.factor(col)) {
-                if (.version == 1) {
+                if (.version.df == 1) {
                     if (is.ordered(col)) {
                         out$type <- "ordered"
                     } else { 
@@ -125,7 +125,7 @@ setMethod("stageObject", "DataFrame", function(x, dir, path, child=FALSE, df.nam
                 all_column_types[z] <- 4L
 
             } else if (.is_datetime(col)) {
-                if (.version == 1) {
+                if (.version.df == 1) {
                     out$type <- "date-time"
                 } else {
                     out$type <- "string"
@@ -136,7 +136,7 @@ setMethod("stageObject", "DataFrame", function(x, dir, path, child=FALSE, df.nam
                 all_column_types[z] <- 2L
 
             } else if (is(col, "Date")) {
-                if (.version == 1) {
+                if (.version.df == 1) {
                     out$type <- "date"
                 } else {
                     out$type <- "string"
@@ -193,16 +193,17 @@ setMethod("stageObject", "DataFrame", function(x, dir, path, child=FALSE, df.nam
     opath <- paste0(path, "/", df.name)
     extra <- list(list())
     has_row_names = !is.null(rownames(x))
-    vge1_or_null <- if (.version != 1) .version else NULL 
 
     if (!is.null(format) && format=="hdf5") {
         opath <- paste0(opath, ".h5")
         ofile <- file.path(dir, opath)
         skippable <- vapply(meta, function(x) x$type == "other", TRUE)
-        .write_hdf5_data_frame(x, skippable, "contents", ofile, .version=.version)
+        .write_hdf5_data_frame(x, skippable, "contents", ofile, .version.hdf5=.version.hdf5)
         schema <- "hdf5_data_frame/v1.json"
         extra[[1]]$group <- "contents"
-        extra[[1]]$version <- vge1_or_null
+        if (.version.hdf5 != 1) {
+            extra[[1]]$version <- .version.hdf5
+        }
 
         check_hdf5_df(ofile, 
             name=extra[[1]]$group,
@@ -212,8 +213,8 @@ setMethod("stageObject", "DataFrame", function(x, dir, path, child=FALSE, df.nam
             column_types=all_column_types,
             string_formats=all_string_formats,
             factor_levels=all_factor_levels,
-            df_version=.version,
-            hdf5_version=.version
+            df_version=.version.df,
+            hdf5_version=.version.hdf5
         )
 
     } else {
@@ -243,7 +244,7 @@ setMethod("stageObject", "DataFrame", function(x, dir, path, child=FALSE, df.nam
             column_types=all_column_types,
             string_formats=all_string_formats,
             factor_levels=all_factor_levels,
-            df_version=.version,
+            df_version=.version.df,
             is_compressed=extra[[1]]$compression == "gzip",
             parallel=TRUE
         )
@@ -262,7 +263,7 @@ setMethod("stageObject", "DataFrame", function(x, dir, path, child=FALSE, df.nam
             column_data=element_data,
             other_data=other_data,
             dimensions=dim(x),
-            version=vge1_or_null
+            version=if (.version.df != 1) .version.df else NULL 
         )
     )
 
@@ -272,7 +273,7 @@ setMethod("stageObject", "DataFrame", function(x, dir, path, child=FALSE, df.nam
 })
 
 #' @importFrom rhdf5 h5write h5createGroup h5createFile
-.write_hdf5_data_frame <- function(x, skippable, host, ofile, .version) {
+.write_hdf5_data_frame <- function(x, skippable, host, ofile, .version.hdf5) {
     h5createFile(ofile)
     prefix <- function(x) paste0(host, "/", x)
     h5createGroup(ofile, host)
@@ -285,8 +286,8 @@ setMethod("stageObject", "DataFrame", function(x, dir, path, child=FALSE, df.nam
         current <- x[[i]]
 
         missing.placeholder <- NULL
-        if (.version > 1) {
-            transformed <- transformVectorForHdf5(current)
+        if (.version.hdf5 > 1) {
+            transformed <- transformVectorForHdf5(current, .version=.version.hdf5)
             current <- transformed$transformed
             missing.placeholder <- transformed$placeholder
         } else {

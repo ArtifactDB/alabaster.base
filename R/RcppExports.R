@@ -21,6 +21,18 @@ check_list_json <- function(file, num_external, parallel) {
     .Call(`_alabaster_base_check_list_json`, file, num_external, parallel)
 }
 
+any_actually_numeric_na <- function(x) {
+    .Call(`_alabaster_base_any_actually_numeric_na`, x)
+}
+
+is_actually_numeric_na <- function(x) {
+    .Call(`_alabaster_base_is_actually_numeric_na`, x)
+}
+
+choose_numeric_missing_placeholder <- function(x) {
+    .Call(`_alabaster_base_choose_numeric_missing_placeholder`, x)
+}
+
 load_csv <- function(path, is_compressed, nrecords, parallel) {
     .Call(`_alabaster_base_load_csv`, path, is_compressed, nrecords, parallel)
 }

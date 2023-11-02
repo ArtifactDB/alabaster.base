@@ -75,16 +75,19 @@ Rcpp::RObject check_csv_df(
     bool is_compressed, 
     bool parallel) 
 {
-    comservatory::ReadOptions opt;
-    opt.parallel = parallel;
-    auto columns = configure_columns(column_names, column_types, string_formats, factor_levels);
+    takane::csv_data_frame::Parameters params;
+    params.num_rows = nrows;
+    params.has_row_names = has_row_names;
+    params.columns = configure_columns(column_names, column_types, string_formats, factor_levels);
+    params.df_version = df_version;
+    params.parallel = parallel;
 
     if (is_compressed) {
         byteme::GzipFileReader reader(path);
-        takane::data_frame::validate_csv(reader, nrows, has_row_names, columns, opt, df_version);
+        takane::csv_data_frame::validate(reader, params);
     } else {
         byteme::RawFileReader reader(path);
-        takane::data_frame::validate_csv(reader, nrows, has_row_names, columns, opt, df_version);
+        takane::csv_data_frame::validate(reader, params);
     }
 
     return R_NilValue;
@@ -103,8 +106,13 @@ Rcpp::RObject check_hdf5_df(
     int df_version,
     int hdf5_version)
 {
-    auto columns = configure_columns(column_names, column_types, string_formats, factor_levels);
-    takane::data_frame::validate_hdf5(path, name, nrows, has_row_names, columns, df_version, hdf5_version);
+    takane::hdf5_data_frame::Parameters params(std::move(name));
+    params.num_rows = nrows;
+    params.has_row_names = has_row_names;
+    params.columns = configure_columns(column_names, column_types, string_formats, factor_levels);
+    params.df_version = df_version;
+    params.hdf5_version = hdf5_version;
+
+    takane::hdf5_data_frame::validate(path.c_str(), params);
     return R_NilValue;
 }
-

@@ -75,10 +75,12 @@ loadDataFrame <- function(info, project, include.nested=TRUE, parallel=TRUE) {
 
                     if (is.null(replace.na)) {
                         raw[[i]] <- restore_min_integer(current)
-                    } else if (is.na(replace.na) && !is.nan(replace.na)) {
-                        # No-op as the placeholder is already R's NA.
-                    } else if (is.nan(replace.na)) {
-                        raw[[i]][is.nan(current)] <- NA # avoid equality checks to an NaN.
+                    } else if (is.na(replace.na)) {
+                        if (!is.nan(replace.na)) {
+                            # No-op as the placeholder is already R's NA of the relevant type.
+                        } else { 
+                            raw[[i]][is.nan(current)] <- NA # avoid equality checks to an NaN.
+                        }
                     } else {
                         current <- restore_min_integer(current)
                         current[which(current == replace.na)] <- NA # Using which() to avoid problems with existing NAs.

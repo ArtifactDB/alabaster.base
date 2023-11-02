@@ -5,7 +5,7 @@
 \alias{stageObject,List-method}
 \title{Stage a base list}
 \usage{
-\S4method{stageObject}{list}(x, dir, path, child = FALSE, fname = "list", .version = 2)
+\S4method{stageObject}{list}(x, dir, path, child = FALSE, fname = "list", .version = NULL)
 
 \S4method{stageObject}{List}(x, dir, path, child = FALSE, fname = "list")
 }
