@@ -56,7 +56,7 @@ loadDataFrame <- function(info, project, include.nested=TRUE, parallel=TRUE) {
             df <- make_zero_col_DFrame(nrow=nrows)
         } else {
             raw <- h5read(path, prefix("data"))
-            version_above_1 <- isTRUE(info$data_frame$version > 1)
+            version_above_1 <- isTRUE(info$hdf5_data_frame$version > 1)
 
             # Replacing placeholders with NAs.
             for (i in names(raw)) {

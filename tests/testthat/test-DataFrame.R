@@ -500,8 +500,7 @@ test_that("DFs handle missing values correctly (legacy)", {
     out <- loadDataFrame(info, tmp)
     expect_identical(out, df)
 
-    info <- stageObject(df, tmp, "rnaseq", .version.hdf5=2)
+    info <- stageObject(df, tmp, "rnaseq2", .version.hdf5=2)
     out <- loadDataFrame(info, tmp)
     expect_identical(out, df)
-    print(tmp)
 })
