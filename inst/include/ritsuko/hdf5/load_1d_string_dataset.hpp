@@ -68,6 +68,44 @@ void load_1d_string_dataset(const H5::DataSet& handle, hsize_t full_length, hsiz
     }
 }
 
+/**
+ * Iterate across a string attribute, extracting each string and running a user-specified function.
+ * This works for both variable- and fixed-length strings.
+ *
+ * @tparam Function_ Function class that accepts `(hsize_t i, const char* start, size_t len)`
+ * where `i` is the index of the string from `[start, start + len)`.
+ *
+ * @param handle Handle to a string attribute.
+ * @param full_length Length of the attribute in `handle`, usually obtained by `get_1d_length()`.
+ * @param fun Function to be called on each string.
+ * It can be assumed that the consecutive calls to `fun` will operate on consecutive `i`.
+ */
+template<class Function_>
+void load_1d_string_attribute(const H5::Attribute& handle, hsize_t full_length, Function_ fun) {
+    auto dtype = handle.getDataType();
+
+    if (dtype.isVariableStr()) {
+        std::vector<char*> buffer(full_length);
+        handle.read(dtype, buffer.data());
+        for (hsize_t i = 0; i < full_length; ++i) {
+            fun(i, buffer[i], std::strlen(buffer[i]));
+        }
+        auto mspace = handle.getSpace();
+        H5Dvlen_reclaim(dtype.getId(), mspace.getId(), H5P_DEFAULT, buffer.data());
+
+    } else {
+        size_t len = dtype.getSize();
+        std::vector<char> buffer(len * full_length);
+        handle.read(dtype, buffer.data());
+        auto ptr = buffer.data();
+        for (size_t i = 0; i < full_length; ++i, ptr += len) {
+            size_t j = 0;
+            for (; j < len && ptr[j] != '\0'; ++j) {}
+            fun(i, ptr, j);
+        }
+    }
+}
+
 }
 
 }

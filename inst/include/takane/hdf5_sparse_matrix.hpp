@@ -1,6 +1,7 @@
 #ifndef TAKANE_HDF5_SPARSE_MATRIX_HPP
 #define TAKANE_HDF5_SPARSE_MATRIX_HPP
 
+#include "ritsuko/ritsuko.hpp"
 #include "ritsuko/hdf5/hdf5.hpp"
 
 #include "array.hpp"
@@ -56,6 +57,7 @@ struct Parameters {
 
     /**
      * Name of the group containing the dimension names.
+     * Ignored if a `version` attribute is present on the HDF5 group at `group`.
      */
     std::string dimnames_group;
 
@@ -66,6 +68,7 @@ struct Parameters {
 
     /**
      * Version of this file specification.
+     * Ignored if a `version` attribute is present on the HDF5 group at `group`.
      */
     int version = 2;
 };
@@ -73,14 +76,14 @@ struct Parameters {
 /**
  * @cond
  */
-inline void validate_shape(const H5::Group& dhandle, const Parameters& params) try {
+inline void validate_shape(const H5::Group& dhandle, const Parameters& params, const ritsuko::Version& version) try {
     const auto& dimensions = params.dimensions;
     if (!dhandle.exists("shape") || dhandle.childObjType("shape") != H5O_TYPE_DATASET) {
         throw std::runtime_error("expected a dataset");
     }
 
     auto shandle = dhandle.openDataSet("shape");
-    if (params.version >= 3) {
+    if (version.major) {
         if (ritsuko::hdf5::exceeds_integer_limit(shandle, 64, true)) {
             throw std::runtime_error("expected the datatype to be a subset of a 64-bit signed integer");
         }
@@ -107,58 +110,29 @@ inline void validate_shape(const H5::Group& dhandle, const Parameters& params) t
     throw std::runtime_error("failed to validate sparse matrix shape at '" + ritsuko::hdf5::get_name(dhandle) + "/shape'; " + std::string(e.what()));
 }
 
-inline size_t validate_data(const H5::Group& dhandle, const Parameters& params) try {
+inline size_t validate_data(const H5::Group& dhandle, const Parameters& params, const ritsuko::Version& version) try {
     if (!dhandle.exists("data") || dhandle.childObjType("data") != H5O_TYPE_DATASET) {
         throw std::runtime_error("expected a dataset");
     }
-
     auto ddhandle = dhandle.openDataSet("data");
-    size_t num_nonzero = ritsuko::hdf5::get_1d_length(ddhandle.getSpace(), false);
 
-    if (params.type == array::Type::INTEGER || params.type == array::Type::BOOLEAN) {
-        if (params.version >= 3) {
-            if (ritsuko::hdf5::exceeds_integer_limit(ddhandle, 32, true)) {
-                throw std::runtime_error("expected datatype to be a subset of a 32-bit signed integer");
-            }
-        } else {
-            if (ddhandle.getTypeClass() != H5T_INTEGER) {
-                throw std::runtime_error("expected an integer dataset");
-            }
-        }
-    } else if (params.type == array::Type::NUMBER) {
-        if (params.version >= 3) {
-            if (ritsuko::hdf5::exceeds_float_limit(ddhandle, 64)) {
-                throw std::runtime_error("expected datatype to be a subset of a 64-bit float");
-            }
-        } else {
-            auto tclass = ddhandle.getTypeClass();
-            if (tclass != H5T_INTEGER && tclass != H5T_FLOAT) {
-                throw std::runtime_error("expected an integer or floating-point dataset");
-            }
-        }
-    } else {
-        throw std::runtime_error("unexpected array type for a sparse matrix");
+    if (params.type == array::Type::STRING) {
+        throw std::runtime_error("sparse matrices of string type are not currently supported");
     }
+    array::check_data(ddhandle, params.type, version, params.version);
 
-    if (params.version >= 2) {
-        const char* missing_attr = "missing-value-placeholder";
-        if (ddhandle.attrExists(missing_attr)) {
-            ritsuko::hdf5::get_missing_placeholder_attribute(ddhandle, missing_attr);
-        }
-    }
-
-    return num_nonzero;
+    return ritsuko::hdf5::get_1d_length(ddhandle.getSpace(), false);
 } catch (std::exception& e) {
     throw std::runtime_error("failed to validate sparse matrix data at '" + ritsuko::hdf5::get_name(dhandle) + "/data'; " + std::string(e.what()));
 }
 
-inline std::vector<uint64_t> validate_indptrs(const H5::Group& dhandle, size_t primary_dim, size_t num_nonzero, const Parameters& params) try {
+inline std::vector<uint64_t> validate_indptrs(const H5::Group& dhandle, size_t primary_dim, size_t num_nonzero, const ritsuko::Version& version) try {
     if (!dhandle.exists("indptr") || dhandle.childObjType("indptr") != H5O_TYPE_DATASET) {
         throw std::runtime_error("expected a dataset");
     }
 
     auto iphandle = dhandle.openDataSet("indptr");
-    if (params.version >= 3) {
+    if (version.major) {
         if (ritsuko::hdf5::exceeds_integer_limit(iphandle, 64, false)) {
             throw std::runtime_error("expected datatype to be a subset of a 64-bit unsigned integer");
         }
@@ -194,7 +168,7 @@ inline std::vector<uint64_t> validate_indptrs(const H5::Group& dhandle, size_t p
     throw std::runtime_error("failed to validate sparse matrix pointers at '" + ritsuko::hdf5::get_name(dhandle) + "/indptr'; " + std::string(e.what()));
 }
 
-inline void validate_indices(const H5::Group& dhandle, const std::vector<uint64_t>& indptrs, uint64_t secondary_dim, const Parameters& params) try {
+inline void validate_indices(const H5::Group& dhandle, const std::vector<uint64_t>& indptrs, uint64_t secondary_dim, const Parameters& params, const ritsuko::Version& version) try {
     if (!dhandle.exists("indices") || dhandle.childObjType("indices") != H5O_TYPE_DATASET) {
         throw std::runtime_error("expected a dataset");
     }
@@ -205,7 +179,7 @@ inline void validate_indices(const H5::Group& dhandle, const std::vector<uint64_
         throw std::runtime_error("dataset length should be equal to the number of non-zero elements (expected " + std::to_string(indptrs.back()) + ", got " + std::to_string(len) + ")");
     }
 
-    if (params.version >= 3) {
+    if (version.major) {
         if (ritsuko::hdf5::exceeds_integer_limit(ixhandle, 64, false)) {
             throw std::runtime_error("expected datatype to be a subset of a 64-bit unsigned integer");
         }
@@ -271,12 +245,32 @@ inline void validate(const H5::H5File& handle, const Parameters& params) {
     }
     auto dhandle = handle.openGroup(group);
 
-    validate_shape(dhandle, params);
-    size_t num_nonzero = validate_data(dhandle, params);
-    std::vector<uint64_t> indptrs = validate_indptrs(dhandle, params.dimensions[1], num_nonzero, params);
-    validate_indices(dhandle, indptrs, params.dimensions[0], params);
+    ritsuko::Version version;
+    if (dhandle.attrExists("version")) {
+        auto vstring = ritsuko::hdf5::load_scalar_string_attribute(dhandle, "version");
+        version = ritsuko::parse_version_string(vstring.c_str(), vstring.size(), /* skip_patch = */ true);
+        if (version.major != 1) {
+            throw std::runtime_error("unsupported version '" + vstring + "' for the '" + params.group + "' group");
+        }
+    }
 
-    if (params.has_dimnames) {
+    if (version.major) {
+        auto format = ritsuko::hdf5::load_scalar_string_attribute(dhandle, "format");
+        if (format == "tenx_matrix") {
+            ;
+        } else {
+            throw std::runtime_error("unsupported format '" + format + "' for the '" + params.group + "' group");
+        }
+    }
+
+    validate_shape(dhandle, params, version);
+    size_t num_nonzero = validate_data(dhandle, params, version);
+    std::vector<uint64_t> indptrs = validate_indptrs(dhandle, params.dimensions[1], num_nonzero, version);
+    validate_indices(dhandle, indptrs, params.dimensions[0], params, version);
+
+    if (version.major) {
+        array::check_dimnames2(handle, dhandle, params.dimensions, false);
+    } else {
         array::check_dimnames(handle, params.dimnames_group, params.dimensions);
     }
 }
