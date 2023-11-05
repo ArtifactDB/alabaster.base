@@ -1,8 +1,8 @@
 #ifndef TAKANE_HDF5_DENSE_ARRAY_HPP
 #define TAKANE_HDF5_DENSE_ARRAY_HPP
 
-#include "H5Cpp.h"
 #include "ritsuko/hdf5/hdf5.hpp"
+#include "ritsuko/ritsuko.hpp"
 
 #include "array.hpp"
 
@@ -50,17 +50,15 @@ struct Parameters {
     array::Type type = array::Type::INTEGER;
 
     /**
-     * Whether the array has dimension names.
-     */
-    bool has_dimnames = false;
-
-    /**
      * Name of the group containing the dimension names.
+     * If empty, it is assumed that no dimension names are present.
+     * Ignored if a `version` attribute is present on the HDF5 dataset at `dataset`.
      */
     std::string dimnames_group;
 
     /**
      * Version of this file specification.
+     * Ignored if a `version` attribute is present on the HDF5 dataset at `dataset`.
      */
     int version = 2;
 };
@@ -78,6 +76,15 @@ inline void validate(const H5::H5File& handle, const Parameters& params) {
         throw std::runtime_error("expected a '" + dataset + "' dataset");
     }
     auto dhandle = handle.openDataSet(dataset);
+
+    ritsuko::Version version;
+    if (dhandle.attrExists("version")) {
+        auto vstring = ritsuko::hdf5::load_scalar_string_attribute(dhandle, "version");
+        version = ritsuko::parse_version_string(vstring.c_str(), vstring.size(), /* skip_patch = */ true);
+        if (version.major != 1) {
+            throw std::runtime_error("unsupported version '" + vstring + "' for the '" + params.dataset + "' dataset");
+        }
+    }
 
     {
         const auto& dimensions = params.dimensions;
@@ -100,47 +107,11 @@ inline void validate(const H5::H5File& handle, const Parameters& params) {
         }
     }
 
-    {
-        if (params.type == array::Type::INTEGER || params.type == array::Type::BOOLEAN) {
-            if (params.version >= 3) {
-                if (ritsuko::hdf5::exceeds_integer_limit(dhandle, 32, true)) {
-                    throw std::runtime_error("expected datatype to be a subset of a 32-bit signed integer");
-                }
-            } else {
-                if (dhandle.getTypeClass() != H5T_INTEGER) {
-                    throw std::runtime_error("expected an integer type for '" + dataset + "'");
-                }
-            }
+    array::check_data(dhandle, params.type, version, params.version);
 
-        } else if (params.type == array::Type::NUMBER) {
-            if (params.version >= 3) {
-                if (ritsuko::hdf5::exceeds_float_limit(dhandle, 64)) {
-                    throw std::runtime_error("expected datatype to be a subset of a 64-bit float");
-                }
-            } else {
-                auto tclass = dhandle.getTypeClass();
-                if (tclass != H5T_FLOAT && tclass != H5T_INTEGER) {
-                    throw std::runtime_error("expected an integer or floating-point type for '" + dataset + "'");
-                }
-            }
-
-        } else if (params.type == array::Type::STRING) {
-            if (dhandle.getTypeClass() != H5T_STRING) {
-                throw std::runtime_error("expected a string type for '" + dataset + "'");
-            }
-        } else {
-            throw std::runtime_error("not-yet-supported array type (" + std::to_string(static_cast<int>(params.type)) + ") for '" + dataset + "'");
-        }
-    }
-
-    if (params.version >= 2) {
-        const char* missing_attr = "missing-value-placeholder";
-        if (dhandle.attrExists(missing_attr)) {
-            ritsuko::hdf5::get_missing_placeholder_attribute(dhandle, missing_attr, dataset.c_str());
-        }
-    }
-
-    if (params.has_dimnames) {
+    if (version.major) {
+        array::check_dimnames2(handle, dhandle, params.dimensions, true);
+    } else {
         array::check_dimnames(handle, params.dimnames_group, params.dimensions);
     }
 }

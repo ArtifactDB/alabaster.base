@@ -68,24 +68,18 @@ struct ColumnDetails {
     /**
      * Format of string columns, only used if `type == ColumnType::STRING`.
      */
-    StringFormat format = StringFormat::NONE;
+    StringFormat string_format = StringFormat::NONE;
+
+    /**
+     * Whether the factor levels are ordered, only used if `type == ColumnType::FACTOR`.
+     */
+    bool factor_ordered = false;
 
     /**
      * Unique factor levels, only used if `type == ColumnType::FACTOR`.
+     * This may be ignored by specific validation functions if the factor levels are available elsewhere.
      */
     WrappedOption<std::unordered_set<std::string> > factor_levels;
-
-    /**
-     * Add a unique level to `factor_levels`, throwing an error if it already exists.
-     * @param x Factor level to be added.
-     */
-    void add_factor_level(std::string x) {
-        auto& levels = factor_levels.mutable_ref();
-        if (levels.find(x) != levels.end()) {
-            throw std::runtime_error("factor level '" + x + "' already exists in this column");
-        }
-        levels.insert(std::move(x));
-    }
 };
 
 }

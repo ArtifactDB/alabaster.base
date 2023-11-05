@@ -93,12 +93,12 @@ CsvContents validate_base(ParseCommand parse, const Parameters& params, CsvField
             contents.fields.emplace_back(creator->number());
 
         } else if (col.type == data_frame::ColumnType::STRING) {
-            if (col.format == data_frame::StringFormat::DATE) {
+            if (col.string_format == data_frame::StringFormat::DATE) {
                 auto ptr = creator->string();
                 output.fields.emplace_back(ptr); 
                 contents.fields.emplace_back(new CsvDateField(c, ptr));
 
-            } else if (col.format == data_frame::StringFormat::DATE_TIME) {
+            } else if (col.string_format == data_frame::StringFormat::DATE_TIME) {
                 auto ptr = creator->string();
                 output.fields.emplace_back(ptr); 
                 contents.fields.emplace_back(new CsvDateTimeField(c, ptr));
