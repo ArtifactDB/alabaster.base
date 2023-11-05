@@ -4,10 +4,11 @@
 #include "byteme/GzipFileReader.hpp"
 
 static std::vector<takane::data_frame::ColumnDetails> configure_columns(
-    Rcpp::CharacterVector column_names,
-    Rcpp::IntegerVector column_types,
-    Rcpp::IntegerVector string_formats,
-    Rcpp::List factor_levels) 
+    const Rcpp::CharacterVector& column_names,
+    const Rcpp::CharacterVector& column_types,
+    const Rcpp::CharacterVector& string_formats,
+    const Rcpp::LogicalVector& factor_ordered,
+    const Rcpp::List& factor_levels) 
 {
     size_t ncols = column_names.size();
     if (ncols != column_types.size()) {
@@ -25,38 +26,39 @@ static std::vector<takane::data_frame::ColumnDetails> configure_columns(
         auto& curcol = columns[c];
         curcol.name = Rcpp::as<std::string>(column_names[c]);
 
-        auto curtype = column_types[c];
-        if (curtype == 0) {
+        auto curtype = Rcpp::as<std::string>(column_types[c]);
+        if (curtype == "integer") {
             curcol.type = takane::data_frame::ColumnType::INTEGER;
 
-        } else if (curtype == 1) {
+        } else if (curtype == "number") {
             curcol.type = takane::data_frame::ColumnType::NUMBER;
 
-        } else if (curtype == 2) {
+        } else if (curtype == "string") {
             curcol.type = takane::data_frame::ColumnType::STRING;
-            auto curformat = string_formats[c];
-            if (curformat == 1) {
+            auto curformat = Rcpp::as<std::string>(string_formats[c]);
+            if (curformat == "date") {
                 curcol.string_format = takane::data_frame::StringFormat::DATE;
-            } else if (curformat == 2) {
+            } else if (curformat == "date-time") {
                 curcol.string_format = takane::data_frame::StringFormat::DATE_TIME;
             }
 
-        } else if (curtype == 3) {
+        } else if (curtype == "boolean") {
             curcol.type = takane::data_frame::ColumnType::BOOLEAN;
 
-        } else if (curtype == 4) {
+        } else if (curtype == "factor") {
             curcol.type = takane::data_frame::ColumnType::FACTOR;
+            curcol.factor_ordered = factor_ordered[c];
             Rcpp::CharacterVector levels(factor_levels[c]);
             auto& flevels = curcol.factor_levels.mutable_ref();
             for (size_t l = 0, end = levels.size(); l < end; ++l) {
                 flevels.insert(Rcpp::as<std::string>(levels[l]));
             }
 
-        } else if (curtype == 5) {
+        } else if (curtype == "other") {
             curcol.type = takane::data_frame::ColumnType::OTHER;
 
         } else {
-            throw std::runtime_error("unknown type code '" + std::to_string(curtype) + "'");
+            throw std::runtime_error("unknown type code '" + curtype + "'");
         }
     }
 
@@ -69,8 +71,9 @@ Rcpp::RObject check_csv_df(
     int nrows,
     bool has_row_names,
     Rcpp::CharacterVector column_names,
-    Rcpp::IntegerVector column_types,
-    Rcpp::IntegerVector string_formats,
+    Rcpp::CharacterVector column_types,
+    Rcpp::CharacterVector string_formats,
+    Rcpp::LogicalVector factor_ordered,
     Rcpp::List factor_levels,
     int df_version,
     bool is_compressed, 
@@ -79,7 +82,7 @@ Rcpp::RObject check_csv_df(
     takane::csv_data_frame::Parameters params;
     params.num_rows = nrows;
     params.has_row_names = has_row_names;
-    params.columns = configure_columns(column_names, column_types, string_formats, factor_levels);
+    params.columns = configure_columns(column_names, column_types, string_formats, factor_ordered, factor_levels);
     params.df_version = df_version;
     params.parallel = parallel;
 
@@ -101,8 +104,9 @@ Rcpp::RObject check_hdf5_df(
     int nrows,
     bool has_row_names,
     Rcpp::CharacterVector column_names,
-    Rcpp::IntegerVector column_types,
-    Rcpp::IntegerVector string_formats,
+    Rcpp::CharacterVector column_types,
+    Rcpp::CharacterVector string_formats,
+    Rcpp::LogicalVector factor_ordered,
     Rcpp::List factor_levels,
     int df_version,
     int hdf5_version)
@@ -110,7 +114,7 @@ Rcpp::RObject check_hdf5_df(
     takane::hdf5_data_frame::Parameters params(std::move(name));
     params.num_rows = nrows;
     params.has_row_names = has_row_names;
-    params.columns = configure_columns(column_names, column_types, string_formats, factor_levels);
+    params.columns = configure_columns(column_names, column_types, string_formats, factor_ordered, factor_levels);
     params.df_version = df_version;
     params.hdf5_version = hdf5_version;
 

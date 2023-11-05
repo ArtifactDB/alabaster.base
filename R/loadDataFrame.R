@@ -56,36 +56,17 @@ loadDataFrame <- function(info, project, include.nested=TRUE, parallel=TRUE) {
             df <- make_zero_col_DFrame(nrow=nrows)
         } else {
             raw <- h5read(path, prefix("data"))
-            version_above_1 <- isTRUE(info$hdf5_data_frame$version > 1)
 
-            # Replacing placeholders with NAs.
             for (i in names(raw)) {
                 current <- raw[[i]]
-                if (version_above_1 || is.character(current)) {
-                    attr <- h5readAttributes(path, prefix(paste0("data/", i)))
-                    replace.na <- attr[["missing-value-placeholder"]]
-
-                    restore_min_integer <- function(y) {
-                        if (is.integer(y) && anyNA(y)) { # promote integer NAs back to the actual number.
-                            y <- as.double(y)
-                            y[is.na(y)] <- -2^31
-                        }
-                        y
+                if (is.list(current)) { # Handling factors stored as lists in the new version.
+                    if (col.info[[i]]$type != "factor") {
+                        stop("HDF5 groups as columns are only supported for factor columns")
                     }
-
-                    if (is.null(replace.na)) {
-                        raw[[i]] <- restore_min_integer(current)
-                    } else if (is.na(replace.na)) {
-                        if (!is.nan(replace.na)) {
-                            # No-op as the placeholder is already R's NA of the relevant type.
-                        } else { 
-                            raw[[i]][is.nan(current)] <- NA # avoid equality checks to an NaN.
-                        }
-                    } else {
-                        current <- restore_min_integer(current)
-                        current[which(current == replace.na)] <- NA # Using which() to avoid problems with existing NAs.
-                        raw[[i]] <- current
-                    }
+                    codes <- .repopulate_missing_hdf5(current$codes, path, prefix(paste0("data/", i, "/codes")))
+                    raw[[i]] <- factor(current$levels[codes + 1L], current$levels, ordered=isTRUE(col.info[[i]]$ordered))
+                } else {
+                    raw[[i]] <- .repopulate_missing_hdf5(current, path, prefix(paste0("data/", i)))
                 }
             }
 
@@ -116,7 +97,50 @@ loadDataFrame <- function(info, project, include.nested=TRUE, parallel=TRUE) {
         } 
     }
 
-    # Make sure everyone is of the right type.
+    df <- .coerce_df_column_type(df, col.info, project)
+
+    # Removing nested DFs.
+    if (!all(keep <- !is.na(new.names))) {
+        df <- df[,keep,drop=FALSE]
+        new.names <- new.names[keep]
+    }
+
+    # Replacing the names with the values at input.
+    colnames(df) <- new.names
+
+    .restoreMetadata(df, mcol.data=info$data_frame$column_data, meta.data=info$data_frame$other_data, project=project)
+}
+
+#' @importFrom rhdf5 h5readAttributes
+.repopulate_missing_hdf5 <- function(current, path, name) {
+    attr <- h5readAttributes(path, name)
+    replace.na <- attr[["missing-value-placeholder"]]
+
+    restore_min_integer <- function(y) {
+        if (is.integer(y) && anyNA(y)) { # promote integer NAs back to the actual number.
+            y <- as.double(y)
+            y[is.na(y)] <- -2^31
+        }
+        y
+    }
+
+    if (is.null(replace.na)) {
+        current <- restore_min_integer(current)
+    } else if (is.na(replace.na)) {
+        if (!is.nan(replace.na)) {
+            # No-op as the placeholder is already R's NA of the relevant type.
+        } else { 
+            current[is.nan(current)] <- NA # avoid equality checks to an NaN.
+        }
+    } else {
+        current <- restore_min_integer(current)
+        current[which(current == replace.na)] <- NA # Using which() to avoid problems with existing NAs.
+    }
+
+    current
+}
+
+.coerce_df_column_type <- function(df, col.info, project) {
     new.names <- character(ncol(df))
 
     for (i in seq_along(col.info)) {
@@ -127,16 +151,18 @@ loadDataFrame <- function(info, project, include.nested=TRUE, parallel=TRUE) {
         col <- df[[i]]
 
         if (col.type=="factor" || col.type=="ordered") {
-            level.info <- acquireMetadata(project, current.info$levels$resource$path)
-            levels <- altLoadObject(level.info, project=project)
-            if (is(levels, "DataFrame")) { # account for old objects that store levels as a DF.
-                levels <- levels[,1]
+            if (!is.factor(col)) { # we may have already transformed the column to a factor, in which case we can skip this.
+                level.info <- acquireMetadata(project, current.info$levels$resource$path)
+                levels <- altLoadObject(level.info, project=project)
+                if (is(levels, "DataFrame")) { # account for old objects that store levels as a DF.
+                    levels <- levels[,1]
+                }
+                if (is.numeric(col)) {
+                    col <- levels[col + 1L]
+                }
+                ordered <- col.type == "ordered" || isTRUE(current.info$ordered)
+                col <- factor(col, levels=levels, ordered=ordered)
             }
-            if (is.numeric(col)) {
-                col <- levels[col + 1L]
-            }
-            ordered <- col.type == "ordered" || isTRUE(current.info$ordered)
-            col <- factor(col, levels=levels, ordered=ordered)
 
         } else if (col.type=="date") {
             col <- as.Date(col)
@@ -176,14 +202,5 @@ loadDataFrame <- function(info, project, include.nested=TRUE, parallel=TRUE) {
         df[[i]] <- col
     }
 
-    # Removing nested DFs.
-    if (!all(keep <- !is.na(new.names))) {
-        df <- df[,keep,drop=FALSE]
-        new.names <- new.names[keep]
-    }
-
-    # Replacing the names with the values at input.
-    colnames(df) <- new.names
-
-    .restoreMetadata(df, mcol.data=info$data_frame$column_data, meta.data=info$data_frame$other_data, project=project)
+    return df
 }

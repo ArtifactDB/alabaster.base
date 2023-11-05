@@ -19,7 +19,8 @@ addMissingPlaceholderAttributeForHdf5(file, name, placeholder)
 
 \item{.version}{Internal use only.}
 
-\item{file}{String containing the path to a HDF5 file.}
+\item{file}{String containing the path to a HDF5 file.
+This may also be an existing HDF5 file handle created with, e.g., \code{\link{H5Fopen}}.}
 
 \item{name}{String containing the name of a HDF5 dataset.}
 

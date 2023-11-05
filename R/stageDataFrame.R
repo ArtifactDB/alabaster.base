@@ -93,15 +93,13 @@ setMethod("stageObject", "DataFrame", function(x, dir, path, child=FALSE, df.nam
             meta <- sanitized$metadata
             factor.levels <- sanitized$levels
             .dump_df_to_hdf5(sanitized$x, meta, "contents", ofile, .version.hdf5=.version.hdf5)
+            extra[[1]]$version <- .version.hdf5
         } else {
             meta <- .write_hdf5_new(x, "contents", ofile)
         }
 
         schema <- "hdf5_data_frame/v1.json"
         extra[[1]]$group <- "contents"
-        if (.version.hdf5 %in% c(1, 2)) {
-            extra[[1]]$version <- .version.hdf5
-        }
 
         check_hdf5_df(ofile, 
             name=extra[[1]]$group,
@@ -314,7 +312,7 @@ setMethod("stageObject", "DataFrame", function(x, dir, path, child=FALSE, df.nam
     }
 }
 
-#' @importFrom rhdf5 h5write h5createGroup h5createFile
+#' @importFrom rhdf5 h5write h5createGroup h5createFile H5Gopen H5Gclose H5Acreate H5Aclose H5Awrite H5Fopen H5Fclose H5Dopen H5Dclose
 .write_hdf5_new <- function(x, host, ofile) {
     h5createFile(ofile)
     prefix <- function(x) paste0(host, "/", x)
