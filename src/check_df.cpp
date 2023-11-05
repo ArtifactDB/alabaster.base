@@ -36,9 +36,9 @@ static std::vector<takane::data_frame::ColumnDetails> configure_columns(
             curcol.type = takane::data_frame::ColumnType::STRING;
             auto curformat = string_formats[c];
             if (curformat == 1) {
-                curcol.format = takane::data_frame::StringFormat::DATE;
+                curcol.string_format = takane::data_frame::StringFormat::DATE;
             } else if (curformat == 2) {
-                curcol.format = takane::data_frame::StringFormat::DATE_TIME;
+                curcol.string_format = takane::data_frame::StringFormat::DATE_TIME;
             }
 
         } else if (curtype == 3) {
@@ -47,8 +47,9 @@ static std::vector<takane::data_frame::ColumnDetails> configure_columns(
         } else if (curtype == 4) {
             curcol.type = takane::data_frame::ColumnType::FACTOR;
             Rcpp::CharacterVector levels(factor_levels[c]);
+            auto& flevels = curcol.factor_levels.mutable_ref();
             for (size_t l = 0, end = levels.size(); l < end; ++l) {
-                curcol.add_factor_level(Rcpp::as<std::string>(levels[l]));
+                flevels.insert(Rcpp::as<std::string>(levels[l]));
             }
 
         } else if (curtype == 5) {

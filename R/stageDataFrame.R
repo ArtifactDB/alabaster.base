@@ -77,117 +77,6 @@ setMethod("stageObject", "DataFrame", function(x, dir, path, child=FALSE, df.nam
         stop("detected empty column name in a ", class(x)[1], " object")
     }
 
-    # Fix to ensure that DFs with invalid names are properly saved;
-    # otherwise any [[<- will call make.names.
-    colnames(x) <- sprintf("V%s", seq_len(ncol(x)))
-
-    all_column_types <- integer(ncol(x))
-    all_string_formats <- integer(ncol(x))
-    all_factor_levels <- vector("list", ncol(x))
-
-    # Returning the metadata about the column type.
-    meta <- vector("list", ncol(x))
-    for (z in seq_along(meta)) {
-        col <- x[[z]]
-        out <- list(name=true.colnames[z])
-        is.other <- FALSE
-
-        if (length(dim(col)) < 2) { # only vectors or 1-d arrays.
-            if (is.factor(col)) {
-                if (.version.df == 1) {
-                    if (is.ordered(col)) {
-                        out$type <- "ordered"
-                    } else { 
-                        out$type <- "factor"
-                    }
-
-                    tryCatch({
-                         lev.info <- altStageObject(DataFrame(levels=levels(col)), dir, paste0(path, "/column", z), df.name="levels", child=TRUE)
-                         out$levels <- list(resource=writeMetadata(lev.info, dir=dir))
-                     }, error = function(e) stop("failed to stage levels of factor column '", out$name, "'\n  - ", e$message))
-
-                    x[[z]] <- as.character(col)
-
-                } else {
-                    out$type <- "factor"
-                    if (is.ordered(col)) {
-                        out$ordered <- TRUE
-                    }
-
-                    tryCatch({
-                         lev.info <- altStageObject(levels(col), dir, paste0(path, "/column", z), df.name="levels", child=TRUE)
-                         out$levels <- list(resource=writeMetadata(lev.info, dir=dir))
-                     }, error = function(e) stop("failed to stage levels of factor column '", out$name, "'\n  - ", e$message))
-
-                    x[[z]] <- as.integer(col) - 1L
-                }
-                all_factor_levels[[z]] <- levels(col)
-                all_column_types[z] <- 4L
-
-            } else if (.is_datetime(col)) {
-                if (.version.df == 1) {
-                    out$type <- "date-time"
-                } else {
-                    out$type <- "string"
-                    out$format <- "date-time"
-                }
-                x[[z]] <- .sanitize_datetime(col)
-                all_string_formats[z] <- 2L
-                all_column_types[z] <- 2L
-
-            } else if (is(col, "Date")) {
-                if (.version.df == 1) {
-                    out$type <- "date"
-                } else {
-                    out$type <- "string"
-                    out$format <- "date"
-                }
-                x[[z]] <- .sanitize_date(col)
-                all_string_formats[z] <- 1L
-                all_column_types[z] <- 2L
-
-            } else if (is.atomic(col)) {
-                coerced <- .remap_atomic_type(col)
-                out$type <- coerced$type
-                x[[z]] <- coerced$values
-                if (coerced$type == "integer") {
-                    all_column_types[z] <- 0L
-                } else if (coerced$type == "number") {
-                    all_column_types[z] <- 1L
-                } else if (coerced$type == "boolean") {
-                    all_column_types[z] <- 3L
-                } else if (coerced$type == "string") {
-                    all_column_types[z] <- 2L
-                } else {
-                    stop("unknown type '", coerced$type, "'")
-                }
-
-            } else {
-                is.other <- TRUE
-                all_column_types[z] <- 5L
-            }
-        } else {
-            is.other <- TRUE
-            all_column_types[z] <- 5L
-        }
-
-        if (is.other) {
-            out$type <- "other"
-
-            tryCatch({
-                other.info <- altStageObject(x[[z]], dir, paste0(path, "/column", z), child=TRUE)
-                out$resource <- writeMetadata(other.info, dir=dir)
-            }, error = function(e) stop("failed to stage column '", out$name, "'\n  - ", e$message))
-
-            x[[z]] <- integer(nrow(x))
-        }
-
-        meta[[z]] <- out
-    }
-
-    # Restoring the true colnames.
-    colnames(x) <- true.colnames
-
     # Saving contents to file.
     format <- .saveDataFrameFormat()
     opath <- paste0(path, "/", df.name)
@@ -197,11 +86,20 @@ setMethod("stageObject", "DataFrame", function(x, dir, path, child=FALSE, df.nam
     if (!is.null(format) && format=="hdf5") {
         opath <- paste0(opath, ".h5")
         ofile <- file.path(dir, opath)
-        skippable <- vapply(meta, function(x) x$type == "other", TRUE)
-        .write_hdf5_data_frame(x, skippable, "contents", ofile, .version.hdf5=.version.hdf5)
+        factor.levels <- rep(list(character(0)), ncol(x))
+
+        if (.version.hdf5 < 3) {
+            sanitized <- .sanitize_df_columns(x, dir, path, .version.df)
+            meta <- sanitized$metadata
+            factor.levels <- sanitized$levels
+            .dump_df_to_hdf5(sanitized$x, meta, "contents", ofile, .version.hdf5=.version.hdf5)
+        } else {
+            meta <- .write_hdf5_new(x, "contents", ofile)
+        }
+
         schema <- "hdf5_data_frame/v1.json"
         extra[[1]]$group <- "contents"
-        if (.version.hdf5 != 1) {
+        if (.version.hdf5 %in% c(1, 2)) {
             extra[[1]]$version <- .version.hdf5
         }
 
@@ -210,18 +108,21 @@ setMethod("stageObject", "DataFrame", function(x, dir, path, child=FALSE, df.nam
             nrows=nrow(x), 
             has_row_names=has_row_names,
             column_names=true.colnames,
-            column_types=all_column_types,
-            string_formats=all_string_formats,
-            factor_levels=all_factor_levels,
+            column_types=vapply(meta, function(x) x$type, ""),
+            string_formats=vapply(meta, function(x) if (is.null(x$format)) "" else x$format, ""),
+            factor_levels=factor.levels,
+            factor_ordered=vapply(meta, function(x) if (is.null(x$ordered)) FALSE else x$ordered, TRUE),
             df_version=.version.df,
             hdf5_version=.version.hdf5
         )
 
     } else {
-        X <- data.frame(x, check.names=FALSE)
+        sanitized <- .sanitize_df_columns(x, dir, path, .version.df)
+        meta <- sanitized$metadata
+        X <- data.frame(sanitized$x, check.names=FALSE)
         if (has_row_names) {
             # Using the 'row_names' name for back-compatibility.
-            X <- cbind(row_names=rownames(x), X)
+            X <- cbind(row_names=rownames(sanitized$x), X)
         }
         
         if (!is.null(format) && format=="csv") {
@@ -241,9 +142,10 @@ setMethod("stageObject", "DataFrame", function(x, dir, path, child=FALSE, df.nam
             nrows=nrow(x), 
             has_row_names=has_row_names,
             column_names=true.colnames,
-            column_types=all_column_types,
-            string_formats=all_string_formats,
-            factor_levels=all_factor_levels,
+            column_types=vapply(meta, function(x) x$type, ""),
+            string_formats=vapply(meta, function(x) if (is.null(x$format)) "" else x$format, ""),
+            factor_levels=sanitized$levels,
+            factor_ordered=vapply(meta, function(x) if (is.null(x$ordered)) FALSE else x$ordered, TRUE),
             df_version=.version.df,
             is_compressed=extra[[1]]$compression == "gzip",
             parallel=TRUE
@@ -272,15 +174,110 @@ setMethod("stageObject", "DataFrame", function(x, dir, path, child=FALSE, df.nam
     meta
 })
 
+.sanitize_df_columns <- function(x, dir, path, .version.df) {
+    # Fix to ensure that DFs with invalid names are properly saved;
+    # otherwise any [[<- will call make.names.
+    true.colnames <- colnames(x)
+    colnames(x) <- sprintf("V%s", seq_len(ncol(x)))
+
+    meta <- vector("list", ncol(x))
+    all.levels <- rep(list(character(0)), ncol(x))
+
+    for (z in seq_along(meta)) {
+        col <- x[[z]]
+        out <- list(name=true.colnames[z])
+        is.other <- FALSE
+
+        if (length(dim(col)) > 1) {
+            is.other <- TRUE
+        } else if (is.factor(col)) {
+            if (.version.df == 1) {
+                if (is.ordered(col)) {
+                    out$type <- "ordered"
+                } else { 
+                    out$type <- "factor"
+                }
+
+                tryCatch({
+                     lev.info <- altStageObject(DataFrame(levels=levels(col)), dir, paste0(path, "/column", z), df.name="levels", child=TRUE)
+                     out$levels <- list(resource=writeMetadata(lev.info, dir=dir))
+                 }, error = function(e) stop("failed to stage levels of factor column '", out$name, "'\n  - ", e$message))
+
+                x[[z]] <- as.character(col)
+
+            } else {
+                out$type <- "factor"
+                if (is.ordered(col)) {
+                    out$ordered <- TRUE
+                }
+
+                tryCatch({
+                     lev.info <- altStageObject(levels(col), dir, paste0(path, "/column", z), df.name="levels", child=TRUE)
+                     out$levels <- list(resource=writeMetadata(lev.info, dir=dir))
+                 }, error = function(e) stop("failed to stage levels of factor column '", out$name, "'\n  - ", e$message))
+
+                x[[z]] <- as.integer(col) - 1L
+            }
+
+            all.levels[[z]] <- levels(col)
+
+        } else if (.is_datetime(col)) {
+            if (.version.df == 1) {
+                out$type <- "date-time"
+            } else {
+                out$type <- "string"
+                out$format <- "date-time"
+            }
+            x[[z]] <- .sanitize_datetime(col)
+
+        } else if (is(col, "Date")) {
+            if (.version.df == 1) {
+                out$type <- "date"
+            } else {
+                out$type <- "string"
+                out$format <- "date"
+            }
+            x[[z]] <- .sanitize_date(col)
+
+        } else if (is.atomic(col)) {
+            coerced <- .remap_atomic_type(col)
+            out$type <- coerced$type
+            x[[z]] <- coerced$values
+
+        } else {
+            is.other <- TRUE
+        }
+
+        if (is.other) {
+            out$type <- "other"
+
+            tryCatch({
+                other.info <- altStageObject(x[[z]], dir, paste0(path, "/column", z), child=TRUE)
+                out$resource <- writeMetadata(other.info, dir=dir)
+            }, error = function(e) stop("failed to stage column '", out$name, "'\n  - ", e$message))
+
+            x[[z]] <- integer(nrow(x))
+        }
+
+        meta[[z]] <- out
+    }
+
+    # Restoring the true colnames.
+    colnames(x) <- true.colnames
+
+    list(x=x, metadata=meta, levels=all.levels)
+}
+
 #' @importFrom rhdf5 h5write h5createGroup h5createFile
-.write_hdf5_data_frame <- function(x, skippable, host, ofile, .version.hdf5) {
+.dump_df_to_hdf5 <- function(x, column.meta, host, ofile, .version.hdf5) {
     h5createFile(ofile)
     prefix <- function(x) paste0(host, "/", x)
     h5createGroup(ofile, host)
     h5createGroup(ofile, prefix("data"))
 
     for (i in seq_along(x)) {
-        if (skippable[i]) {
+        curmeta <- column.meta[[i]]
+        if (curmeta$type == "other") {
             next
         }
         current <- x[[i]]
@@ -304,10 +301,10 @@ setMethod("stageObject", "DataFrame", function(x, dir, path, child=FALSE, df.nam
         }
 
         data.name <- as.character(i - 1L)
-        h5write(current, ofile, prefix(paste0("data/", data.name)))
-
+        full.data.name <- prefix(paste0("data/", data.name))
+        h5write(current, ofile, full.data.name)
         if (!is.null(missing.placeholder)) {
-            addMissingPlaceholderAttributeForHdf5(ofile, prefix(paste0("data/", data.name)), missing.placeholder)
+            addMissingPlaceholderAttributeForHdf5(ofile, full.data.name, missing.placeholder)
         }
     }
 
@@ -317,3 +314,113 @@ setMethod("stageObject", "DataFrame", function(x, dir, path, child=FALSE, df.nam
     }
 }
 
+#' @importFrom rhdf5 h5write h5createGroup h5createFile
+.write_hdf5_new <- function(x, host, ofile) {
+    h5createFile(ofile)
+    prefix <- function(x) paste0(host, "/", x)
+    h5createGroup(ofile, host)
+    h5createGroup(ofile, paste0(host, "/data"))
+
+    fhandle <- H5Fopen(ofile)
+    on.exit(H5Fclose(fhandle), add=TRUE)
+    (function (){
+        ghandle <- H5Gopen(fhandle, host)
+        on.exit(H5Gclose(ghandle), add=TRUE)
+        h5writeAttribute("1.0", ghandle, "version", asScalar=TRUE)
+        ahandle <- H5Acreate(ghandle, "row-count", "H5T_NATIVE_UINT32", H5Screate("H5S_SCALAR"))
+        on.exit(H5Aclose(ahandle), add=TRUE)
+        H5Awrite(ahandle, nrow(x))
+    })()
+
+    meta <- vector("list", ncol(x))
+    for (z in seq_along(meta)) {
+        col <- x[[z]]
+        data.name <- as.character(z - 1L)
+        colmeta <- list(name=true.colnames[z])
+        is.other <- FALSE
+        sanitized <- NULL
+
+        if (length(dim(col)) > 1) {
+            is.other <- TRUE
+
+        } else if (is.factor(col)) {
+            colmeta$type <- "factor"
+            if (is.ordered(col)) {
+                colmeta$ordered <- TRUE
+            }
+
+            full.data.name <- prefix(paste0("/data/", data.name))
+            h5createGroup(fhandle, data.name)
+            (function() {
+                ghandle <- H5Gopen(fhandle, data.name)
+                on.exit(H5Gclose(ghandle), add=TRUE)
+                h5writeAttribute("factor", ghandle, "type", asScalar=TRUE)
+                if (is.ordered(col)) {
+                    h5writeAttribute(1, ghandle, "ordered", asScalar=TRUE)
+                }
+            })()
+
+            code.name <- paste0(full.data.name, "/codes")
+            h5write(as.integer(col), fhandle, code.name)
+            h5write(levels(col), fhandle, paste0(full.data.name, "/levels"));
+            if (anyNA(col)) {
+                addMissingPlaceholderAttributeForHdf5(fhandle, code.name, -1L)
+            }
+
+        } else if (.is_datetime(col)) {
+            colmeta$type <- "string"
+            colmeta$format <- "date-time"
+            sanitized <- .sanitize_datetime(col)
+
+        } else if (is(col, "Date")) {
+            colmeta$type <- "string"
+            colmeta$format <- "date"
+            sanitized <- .sanitize_date(col)
+
+        } else if (is.atomic(col)) {
+            coerced <- .remap_atomic_type(col)
+            colmeta$type <- coerced$type
+            sanitized <- coerced$values
+
+        } else {
+            is.other <- TRUE
+        }
+
+        if (is.other) {
+            colmeta$type <- "other"
+            tryCatch({
+                other.info <- altStageObject(x[[z]], dir, paste0(path, "/column", z), child=TRUE)
+                colmeta$resource <- writeMetadata(other.info, dir=dir)
+            }, error = function(e) stop("failed to stage column '", colmeta$name, "'\n  - ", e$message))
+
+        } else if (!is.null(sanitized)) {
+            transformed <- transformVectorForHdf5(sanitized)
+            current <- transformed$transformed
+            missing.placeholder <- transformed$placeholder
+
+            full.data.name <- prefix(paste0("data/", data.name))
+            h5write(current, fhandle, full.data.name)
+            if (!is.null(missing.placeholder)) {
+                addMissingPlaceholderAttributeForHdf5(fhandle, full.data.name, missing.placeholder)
+            }
+
+            (function() {
+                dhandle <- H5Dopen(fhandle, full.data.name)
+                on.exit(H5Dclose(dhandle), add=TRUE)
+                h5writeAttribute(colmeta$type, dhandle, "type", asScalar=TRUE)
+                if (!is.null(colmeta$format)) {
+                    h5writeAttribute(colmeta$format, dhandle, "format", asScalar=TRUE)
+                }
+            })()
+        }
+
+        meta[[z]] <- colmeta
+    }
+
+    h5write(colnames(x), ofile, prefix("column_names"))
+    if (!is.null(rownames(x))) {
+        h5write(rownames(x), ofile, prefix("row_names"))
+    }
+
+    meta
+}

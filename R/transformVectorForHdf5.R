@@ -5,6 +5,7 @@
 #'
 #' @param x An atomic vector to be saved to HDF5.
 #' @param file String containing the path to a HDF5 file.
+#' This may also be an existing HDF5 file handle created with, e.g., \code{\link{H5Fopen}}.
 #' @param name String containing the name of a HDF5 dataset.
 #' @param placeholder Scalar value representing a placeholder for missing values.
 #' @param .version Internal use only.
@@ -105,9 +106,11 @@ chooseMissingPlaceholderForHdf5 <- function(x, .version=3) {
 #' @rdname transformVectorForHdf5
 #' @importFrom rhdf5 H5Fopen H5Fclose H5Dopen H5Dclose h5writeAttribute
 addMissingPlaceholderAttributeForHdf5 <- function(file, name, placeholder) {
-    fhandle <- H5Fopen(file)
-    on.exit(H5Fclose(fhandle), add=TRUE)
-    dhandle <- H5Dopen(fhandle, name)
+    if (is.character(file)) {
+        file <- H5Fopen(file)
+        on.exit(H5Fclose(file), add=TRUE)
+    }
+    dhandle <- H5Dopen(file, name)
     on.exit(H5Dclose(dhandle), add=TRUE)
     h5writeAttribute(placeholder, h5obj=dhandle, name="missing-value-placeholder", asScalar=TRUE)
 }
