@@ -73,7 +73,8 @@ while the expected layout of a HDF5 file is described in the <code>hdf5_data_fra
 <span>  df.name <span class="op">=</span> <span class="st">"simple"</span>,</span>
 <span>  mcols.name <span class="op">=</span> <span class="st">"mcols"</span>,</span>
 <span>  meta.name <span class="op">=</span> <span class="st">"other"</span>,</span>
-<span>  .version <span class="op">=</span> <span class="fl">2</span></span>
+<span>  .version.df <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>  .version.hdf5 <span class="op">=</span> <span class="fl">3</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -110,7 +111,7 @@ If <code>NULL</code>, per-element metadata is not saved.</p></dd>
 If <code>NULL</code>, object metadata is not saved.</p></dd>
 
 
-<dt>.version</dt>
+<dt>.version.df, .version.hdf5</dt>
 <dd><p>Internal use only.</p></dd>
 
 </dl></div>

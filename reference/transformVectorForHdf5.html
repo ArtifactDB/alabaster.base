@@ -62,9 +62,9 @@ alabaster.matrix is probably the main beneficiary here."><!-- mathjax --><script
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">transformVectorForHdf5</span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">transformVectorForHdf5</span><span class="op">(</span><span class="va">x</span>, .version <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">chooseMissingPlaceholderForHdf5</span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
+<span><span class="fu">chooseMissingPlaceholderForHdf5</span><span class="op">(</span><span class="va">x</span>, .version <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">addMissingPlaceholderAttributeForHdf5</span><span class="op">(</span><span class="va">file</span>, <span class="va">name</span>, <span class="va">placeholder</span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -75,8 +75,13 @@ alabaster.matrix is probably the main beneficiary here."><!-- mathjax --><script
 <dd><p>An atomic vector to be saved to HDF5.</p></dd>
 
 
+<dt>.version</dt>
+<dd><p>Internal use only.</p></dd>
+
+
 <dt>file</dt>
-<dd><p>String containing the path to a HDF5 file.</p></dd>
+<dd><p>String containing the path to a HDF5 file.
+This may also be an existing HDF5 file handle created with, e.g., <code>H5Fopen</code>.</p></dd>
 
 
 <dt>name</dt>

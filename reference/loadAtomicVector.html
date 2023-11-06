@@ -99,14 +99,16 @@ By default, this should be a string containing the path to a staging directory.<
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/files2.html" class="external-link">dir.create</a></span><span class="op">(</span><span class="va">tmp</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">meta</span> <span class="op">&lt;-</span> <span class="fu"><a href="stageObject.html">stageObject</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/setNames.html" class="external-link">setNames</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html" class="external-link">runif</a></span><span class="op">(</span><span class="fl">26</span><span class="op">)</span>, <span class="va">letters</span><span class="op">)</span>, <span class="va">tmp</span>, path<span class="op">=</span><span class="st">"bar"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">loadAtomicVector</span><span class="op">(</span><span class="va">meta</span>, <span class="va">tmp</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>          a          b          c          d          e          f          g </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 0.30023820 0.32305066 0.02231284 0.85630217 0.02890491 0.09624149 0.64310236 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>          h          i          j          k          l          m          n </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 0.24286169 0.20905423 0.77998908 0.51360842 0.23577732 0.13864953 0.76635888 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>          o          p          q          r          s          t          u </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 0.83408448 0.45810244 0.46825863 0.28132679 0.88083471 0.17438886 0.95124070 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>          v          w          x          y          z </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 0.39964047 0.02164273 0.96770380 0.80353722 0.12873304 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           a           b           c           d           e           f </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 0.546783763 0.561916860 0.247368630 0.132990278 0.692488262 0.313392203 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           g           h           i           j           k           l </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 0.448813412 0.637179186 0.736995126 0.545493158 0.007546707 0.612264418 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           m           n           o           p           q           r </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 0.147316838 0.851885090 0.999033186 0.012559897 0.609254251 0.306165266 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           s           t           u           v           w           x </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 0.252335458 0.922274537 0.466644358 0.707516395 0.680062089 0.309493623 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           y           z </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 0.424689987 0.108696216 </span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
