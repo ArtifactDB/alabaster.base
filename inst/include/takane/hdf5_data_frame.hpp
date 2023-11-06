@@ -108,6 +108,19 @@ inline void validate_column_names(const H5::Group& ghandle, const Parameters& pa
         throw std::runtime_error("length of 'column_names' should equal the expected number of columns");
     }
 
+    {
+        std::unordered_set<std::string> column_names;
+        for (const auto& col : columns) {
+            if (col.name.empty()) {
+                throw std::runtime_error("column names should not be empty strings");
+            }
+            if (column_names.find(col.name) != column_names.end()) {
+                throw std::runtime_error("duplicated column name '" + col.name + "'");
+            }
+            column_names.insert(col.name);
+        }
+    }
+
     ritsuko::hdf5::load_1d_string_dataset(
         cnhandle, 
         num_cols, 
@@ -120,13 +133,6 @@ inline void validate_column_names(const H5::Group& ghandle, const Parameters& pa
         }
     );
 
-    std::unordered_set<std::string> column_names;
-    for (const auto& col : columns) {
-        if (column_names.find(col.name) != column_names.end()) {
-            throw std::runtime_error("duplicated column name '" + col.name + "'");
-        }
-        column_names.insert(col.name);
-    }
 } catch (std::exception& e) {
     throw std::runtime_error("failed to validate the column names for '" + ritsuko::hdf5::get_name(ghandle) + "'; " + std::string(e.what()));
 }
