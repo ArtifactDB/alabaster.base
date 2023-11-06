@@ -12,7 +12,8 @@
   df.name = "simple",
   mcols.name = "mcols",
   meta.name = "other",
-  .version = 2
+  .version.df = 2,
+  .version.hdf5 = 3
 )
 }
 \arguments{
@@ -33,7 +34,7 @@ If \code{NULL}, per-element metadata is not saved.}
 \item{meta.name}{String specifying the name of the directory inside \code{path} to save \code{\link{metadata}(x)}.
 If \code{NULL}, object metadata is not saved.}
 
-\item{.version}{Internal use only.}
+\item{.version.df, .version.hdf5}{Internal use only.}
 }
 \value{
 A named list containing the metadata for \code{x}.

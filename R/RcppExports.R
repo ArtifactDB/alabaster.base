@@ -5,12 +5,12 @@ check_csv <- function(path, is_compressed, parallel) {
     .Call(`_alabaster_base_check_csv`, path, is_compressed, parallel)
 }
 
-check_csv_df <- function(path, nrows, has_row_names, column_names, column_types, string_formats, factor_levels, df_version, is_compressed, parallel) {
-    .Call(`_alabaster_base_check_csv_df`, path, nrows, has_row_names, column_names, column_types, string_formats, factor_levels, df_version, is_compressed, parallel)
+check_csv_df <- function(path, nrows, has_row_names, column_names, column_types, string_formats, factor_ordered, factor_levels, df_version, is_compressed, parallel) {
+    .Call(`_alabaster_base_check_csv_df`, path, nrows, has_row_names, column_names, column_types, string_formats, factor_ordered, factor_levels, df_version, is_compressed, parallel)
 }
 
-check_hdf5_df <- function(path, name, nrows, has_row_names, column_names, column_types, string_formats, factor_levels, df_version, hdf5_version) {
-    .Call(`_alabaster_base_check_hdf5_df`, path, name, nrows, has_row_names, column_names, column_types, string_formats, factor_levels, df_version, hdf5_version)
+check_hdf5_df <- function(path, name, nrows, has_row_names, column_names, column_types, string_formats, factor_ordered, factor_levels, df_version, hdf5_version) {
+    .Call(`_alabaster_base_check_hdf5_df`, path, name, nrows, has_row_names, column_names, column_types, string_formats, factor_ordered, factor_levels, df_version, hdf5_version)
 }
 
 check_list_hdf5 <- function(file, name, num_external) {
@@ -19,6 +19,18 @@ check_list_hdf5 <- function(file, name, num_external) {
 
 check_list_json <- function(file, num_external, parallel) {
     .Call(`_alabaster_base_check_list_json`, file, num_external, parallel)
+}
+
+any_actually_numeric_na <- function(x) {
+    .Call(`_alabaster_base_any_actually_numeric_na`, x)
+}
+
+is_actually_numeric_na <- function(x) {
+    .Call(`_alabaster_base_is_actually_numeric_na`, x)
+}
+
+choose_numeric_missing_placeholder <- function(x) {
+    .Call(`_alabaster_base_choose_numeric_missing_placeholder`, x)
 }
 
 load_csv <- function(path, is_compressed, nrecords, parallel) {

@@ -259,7 +259,7 @@ test_that("we handle lists with NAs", {
     roundtrip <- loadBaseList(info, tmp)
     expect_identical(roundtrip, vals)
 
-    # Avoid unnecessary NA attributes for NaNs.
+    # Avoid unnecessary NA attributes for NaNs, unless they're mixed in with NAs.
     revals <- list(A=c(NaN, 1.0, 3, NaN), B=c(NaN, 1.0, NA, NaN))
 
     tmp <- tempfile()
@@ -272,7 +272,7 @@ test_that("we handle lists with NAs", {
     expect_null(place) # avoid saving an unnecessary placeholder.
     attrs <- rhdf5::h5readAttributes(file.path(tmp, "hstuff2/list.h5"), "contents/data/1/data")
     place <- attrs[["missing-value-placeholder"]]
-    expect_true(is.na(place) && !is.nan(place))
+    expect_identical(place, Inf)
 
     roundtrip <- loadBaseList(info, tmp)
     expect_identical(roundtrip, revals)
@@ -434,4 +434,18 @@ test_that("lists work correctly in legacy mode (HDF5)", {
 
     roundtrip <- loadBaseList(info, tmp)
     expect_identical(roundtrip, vals)
+
+    # Where it gets really fun is with the NA/NaN mixtures.
+    vals$F <- c(NA, 1:5)
+    vals$G <- c(NA, NaN, 0.5)
+
+    info <- stageObject(vals, tmp, path="stuff2", .version=2)
+    writeMetadata(info, tmp)
+    roundtrip <- loadBaseList(info, tmp)
+    expect_identical(roundtrip, vals)
+
+    attrs <- rhdf5::h5readAttributes(file.path(tmp, "stuff2/list.h5"), "contents/data/6/data")
+    expect_identical(attrs[["missing-value-placeholder"]], NA_integer_)
+    attrs <- rhdf5::h5readAttributes(file.path(tmp, "stuff2/list.h5"), "contents/data/7/data")
+    expect_identical(attrs[["missing-value-placeholder"]], NA_real_) # still relying on the payloads.
 })

@@ -37,9 +37,13 @@ test_that("transformations work as expected", {
     expect_identical(chooseMissingPlaceholderForHdf5(1), NA_real_)
 
     input <- c(1, NA, NaN)
-    out <- transformVectorForHdf5(input)
+    out <- transformVectorForHdf5(input, .version=2)
     expect_identical(out$transformed, input)
     expect_identical(out$placeholder, NA_real_)
+
+    out <- transformVectorForHdf5(input, .version=3)
+    expect_identical(out$transformed, c(1, Inf, NaN))
+    expect_identical(out$placeholder, Inf)
 
     # String.
     out <- transformVectorForHdf5(c("FOO", "NA", "BAR"))

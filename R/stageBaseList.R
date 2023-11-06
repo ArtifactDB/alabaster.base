@@ -39,7 +39,7 @@
 #' @rdname stageBaseList
 #' @importFrom rhdf5 h5createFile
 #' @importFrom jsonlite toJSON
-setMethod("stageObject", "list", function(x, dir, path, child=FALSE, fname="list", .version=2) {
+setMethod("stageObject", "list", function(x, dir, path, child=FALSE, fname="list", .version=NULL) {
     dir.create(file.path(dir, path), showWarnings=FALSE)
 
     env <- new.env()
@@ -56,21 +56,32 @@ setMethod("stageObject", "list", function(x, dir, path, child=FALSE, fname="list
         meta[["$schema"]] <- "hdf5_simple_list/v1.json"
         meta$hdf5_simple_list <- list(group=dname)
 
+        if (is.null(.version)) {
+            .version <- 3
+        }
+
         .transform_list_hdf5(x, dir=dir, path=path, fpath=fpath, name=dname, env=env, .version=.version)
+
         if (.version > 1) {
-            .label_hdf5_group(fpath, dname, uzuki_version="1.2")
+            .label_hdf5_group(fpath, dname, uzuki_version=paste0("1.", .version))
         }
 
         check_list_hdf5(fpath, dname, length(env$collected)) # Check that we did it correctly.
 
     } else {
         target <- paste0(path, "/", fname, ".json.gz")
-        formatted <- .transform_list_json(x, dir=dir, path=path, env=env, .version=.version)
-        if (.version > 1) {
-            formatted$version <- "1.2"
-        }
-        str <- toJSON(formatted, auto_unbox=TRUE, ident=4, null="null", na="null")
 
+        if (is.null(.version)) {
+            .version <- 2
+        }
+
+        formatted <- .transform_list_json(x, dir=dir, path=path, env=env, .version=.version)
+
+        if (.version > 1) {
+            formatted$version <- paste0("1.", .version)
+        }
+
+        str <- toJSON(formatted, auto_unbox=TRUE, ident=4, null="null", na="null")
         fpath <- file.path(dir, target)
         con <- gzfile(fpath, open="wb")
         write(file=con, str)
@@ -160,12 +171,12 @@ setMethod("stageObject", "list", function(x, dir, path, child=FALSE, fname="list
 
             missing.placeholder <- NULL
             if (.version > 1) {
-                transformed <- transformVectorForHdf5(y)
+                transformed <- transformVectorForHdf5(y, .version=.version)
                 y <- transformed$transformed
                 missing.placeholder <- transformed$placeholder
             } else if (is.character(y)) {
                 if (anyNA(y)) {
-                    missing.placeholder <- chooseMissingPlaceholderForHdf5(y)
+                    missing.placeholder <- chooseMissingPlaceholderForHdf5(y, .version=.version)
                     y[is.na(y)] <- missing.placeholder
                 }
             }
@@ -190,7 +201,7 @@ setMethod("stageObject", "list", function(x, dir, path, child=FALSE, fname="list
 
             missing.placeholder <- NULL
             if (.version > 1) {
-                transformed <- transformVectorForHdf5(y)
+                transformed <- transformVectorForHdf5(y, .version=.version)
                 y <- transformed$transformed
                 missing.placeholder <- transformed$placeholder
             } else {

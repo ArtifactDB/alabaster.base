@@ -8,16 +8,19 @@
 \alias{addMissingPlaceholderAttributeForHdf5}
 \title{Utilities for saving vectors to HDF5}
 \usage{
-transformVectorForHdf5(x)
+transformVectorForHdf5(x, .version = 3)
 
-chooseMissingPlaceholderForHdf5(x)
+chooseMissingPlaceholderForHdf5(x, .version = 3)
 
 addMissingPlaceholderAttributeForHdf5(file, name, placeholder)
 }
 \arguments{
 \item{x}{An atomic vector to be saved to HDF5.}
 
-\item{file}{String containing the path to a HDF5 file.}
+\item{.version}{Internal use only.}
+
+\item{file}{String containing the path to a HDF5 file.
+This may also be an existing HDF5 file handle created with, e.g., \code{\link{H5Fopen}}.}
 
 \item{name}{String containing the name of a HDF5 dataset.}
 

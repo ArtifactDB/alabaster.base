@@ -1,4 +1,4 @@
-# Test stageObject on various bits and pieces.
+# Test stageObject on DataFrames.
 # library(testthat); library(alabaster.base); source("test-DataFrame.R")
 
 library(S4Vectors)
@@ -20,36 +20,62 @@ test_that("DFs handle their column types correctly", {
     df$blah <- factor(df$stuff, LETTERS[10:1])
     df$rabbit <- factor(df$stuff, LETTERS[1:3], ordered=TRUE)
 
-    info <- stageObject(df, tmp, "rnaseq")
-    expect_match(info$path, ".csv.gz$")
-    expect_identical(info$`$schema`, "csv_data_frame/v1.json")
-    expect_identical(info$csv_data_frame$compression, "gzip")
-    expect_false(is.null(info$csv_data_frame))
+    for (version in 1:2) {
+        info <- stageObject(df, tmp, paste0("rnaseq", version), .version.df=version)
+        expect_match(info$path, ".csv.gz$")
+        expect_identical(info$`$schema`, "csv_data_frame/v1.json")
+        expect_identical(info$csv_data_frame$compression, "gzip")
+        expect_false(is.null(info$csv_data_frame))
 
-    # Should write without errors.
-    resource <- writeMetadata(info, tmp)
-    expect_true(file.exists(file.path(tmp, resource$path)))
+        # Should write without errors.
+        resource <- writeMetadata(info, tmp)
+        expect_true(file.exists(file.path(tmp, resource$path)))
 
-    meta <- info$data_frame
-    expect_identical(meta$columns[[1]]$type, "string")
-    expect_identical(read.csv(file.path(tmp, meta$columns[[2]]$levels$resource$path))[,1], LETTERS[10:1])
-    expect_null(meta$columns[[2]]$ordered)
-    expect_identical(meta$columns[[3]]$type, "integer")
-    expect_identical(meta$columns[[4]]$type, "number")
-    expect_identical(meta$columns[[5]]$type, "factor")
-    expect_true(meta$columns[[5]]$ordered)
-    expect_identical(read.csv(file.path(tmp, meta$columns[[5]]$levels$resource$path))[,1], LETTERS[1:3])
-    expect_identical(meta$columns[[6]]$type, "string")
-    expect_identical(meta$columns[[6]]$format, "date")
+        meta <- info$data_frame
+        expect_identical(meta$columns[[1]]$type, "string")
+        expect_identical(read.csv(file.path(tmp, meta$columns[[2]]$levels$resource$path))[,1], LETTERS[10:1])
+        expect_null(meta$columns[[2]]$ordered)
+        expect_identical(meta$columns[[3]]$type, "integer")
+        expect_identical(meta$columns[[4]]$type, "number")
 
-    # Round-tripping to make sure it's okay.
-    out <- loadDataFrame(info, tmp)
-    expect_identical(out$stuff, df$stuff)
-    expect_identical(out$blah, df$blah)
-    expect_identical(out$foo, df$foo)
-    expect_identical(out$whee, df$whee)
-    expect_identical(out$rabbit, df$rabbit)
-    expect_identical(out$birthday, df$birthday)
+        if (version >= 2) {
+            expect_identical(meta$columns[[5]]$type, "factor")
+            expect_true(meta$columns[[5]]$ordered)
+            expect_identical(read.csv(file.path(tmp, meta$columns[[5]]$levels$resource$path))[,1], LETTERS[1:3])
+            expect_identical(meta$columns[[6]]$type, "string")
+            expect_identical(meta$columns[[6]]$format, "date")
+        } else {
+            expect_identical(meta$columns[[5]]$type, "ordered")
+            expect_identical(meta$columns[[6]]$type, "date")
+        }
+
+        # Round-tripping to make sure it's okay.
+        out <- loadDataFrame(info, tmp)
+        expect_identical(out$stuff, df$stuff)
+        expect_identical(out$blah, df$blah)
+        expect_identical(out$foo, df$foo)
+        expect_identical(out$whee, df$whee)
+        expect_identical(out$rabbit, df$rabbit)
+        expect_identical(out$birthday, df$birthday)
+    }
+
+    # Works for HDF5.
+    old <- saveDataFrameFormat("hdf5")
+    on.exit(saveDataFrameFormat(old))
+
+    for (version in 1:3) {
+        meta2 <- stageObject(df, tmp, path=paste0("WHEE-", version), .version.df=version, .version.hdf5=version)
+        expect_match(meta2$path, ".h5$")
+        expect_identical(meta2$`$schema`, "hdf5_data_frame/v1.json")
+        expect_false(is.null(meta2$hdf5_data_frame))
+
+        # Should write without errors.
+        resource <- writeMetadata(meta2, tmp)
+        expect_true(file.exists(file.path(tmp, resource$path)))
+
+        round2 <- loadDataFrame(meta2, project=tmp)
+        expect_identical(round2, df)
+    }
 })
 
 test_that("staging of weird objects within DFs works correctly", {
@@ -75,6 +101,25 @@ test_that("staging of weird objects within DFs works correctly", {
 
     roundtrip2 <- loadDataFrame(info, project=tmp, include.nested=FALSE)
     expect_identical(roundtrip2, input[,c("A", "B", "Y", "AA")])
+
+    # Works for HDF5.
+    old <- saveDataFrameFormat("hdf5")
+    on.exit(saveDataFrameFormat(old))
+
+    for (version in 1:3) {
+        meta <- stageObject(input, tmp, path=paste0("WHEE-", version), .version.df=version, .version.hdf5=version)
+
+        expect_match(meta$path, ".h5$")
+        expect_identical(meta$`$schema`, "hdf5_data_frame/v1.json")
+        expect_false(is.null(meta$hdf5_data_frame))
+
+        contents <- rhdf5::h5read(file.path(tmp, meta$path), paste0(meta$hdf5_data_frame$group, "/data"))
+        expect_identical(names(contents), c("0", "2")) # only simple columns are stored.
+
+        resource <- writeMetadata(meta, tmp)
+        round <- loadDataFrame(meta, project=tmp)
+        expect_identical(round, input)
+    }
 })
 
 test_that("staging of uncompressed Gzip works correctly", {
@@ -107,60 +152,16 @@ test_that("staging with row names works correctly", {
     meta <- stageObject(df, tmp, path="FOO")
     round1 <- loadDataFrame(meta, project=tmp)
     expect_identical(round1, df)
-})
 
-test_that("staging of HDF5-based DFs works correctly", {
-    tmp <- tempfile()
-    dir.create(tmp)
-
-    df <- DataFrame(A=sample(3, 100, replace=TRUE), B=sample(letters[1:3], 100, replace=TRUE))
-
+    # Works with HDF5.
     old <- saveDataFrameFormat("hdf5")
     on.exit(saveDataFrameFormat(old))
-    meta2 <- stageObject(df, tmp, path="WHEE")
 
-    expect_match(meta2$path, ".h5$")
-    expect_identical(meta2$`$schema`, "hdf5_data_frame/v1.json")
-    expect_false(is.null(meta2$hdf5_data_frame))
-
-    # Should write without errors.
-    resource <- writeMetadata(meta2, tmp)
-    expect_true(file.exists(file.path(tmp, resource$path)))
-
-    round2 <- loadDataFrame(meta2, project=tmp)
-    expect_identical(round2, df)
-
-    # Handles rownames correctly.
-    df <- DataFrame(rbind(setNames(1:26, LETTERS)))
-    meta2 <- stageObject(df, tmp, path="FOO")
-
-    round2 <- loadDataFrame(meta2, project=tmp)
-    expect_identical(round2, df)
-})
-
-test_that("staging of complex HDF5-based DFs works correctly", {
-    tmp <- tempfile()
-    dir.create(tmp)
-
-    df <- DataFrame(A=sample(3, 100, replace=TRUE), B=sample(letters[1:3], 100, replace=TRUE))
-    df$FOO <- DataFrame(X=1:100, Y=100:1 * 1.5)
-
-    old <- saveDataFrameFormat("hdf5")
-    on.exit(saveDataFrameFormat(old))
-    meta <- stageObject(df, tmp, path="WHEE")
-
-    expect_match(meta$path, ".h5$")
-    expect_identical(meta$`$schema`, "hdf5_data_frame/v1.json")
-    expect_false(is.null(meta$hdf5_data_frame))
-
-    contents <- rhdf5::h5read(file.path(tmp, meta$path), paste0(meta$hdf5_data_frame$group, "/data"))
-    expect_true("0" %in% names(contents)) 
-    expect_true("1" %in% names(contents))
-    expect_false("2" %in% names(contents)) # complex column is not stored.
-
-    resource <- writeMetadata(meta, tmp)
-    round <- loadDataFrame(meta, project=tmp)
-    expect_identical(round, df)
+    for (version in 1:3) {
+        meta2 <- stageObject(df, tmp, path=paste0("FOO-", version), .version.df=version, .version.hdf5=version)
+        round2 <- loadDataFrame(meta2, project=tmp)
+        expect_identical(round2, df)
+    }
 })
 
 test_that("staging of empty objects works correctly", {
@@ -184,13 +185,15 @@ test_that("staging of empty objects works correctly", {
     old <- saveDataFrameFormat("hdf5")
     on.exit(saveDataFrameFormat(old))
 
-    meta <- stageObject(df, tmp, path="WHEE_h5")
-    round <- loadDataFrame(meta, project=tmp)
-    expect_identical(round, df)
+    for (version in 1:3) {
+        meta <- stageObject(df, tmp, path=paste0("WHEE_h5", version), .version.df=version, .version.hdf5=version)
+        round <- loadDataFrame(meta, project=tmp)
+        expect_identical(round, df)
 
-    meta <- stageObject(df2, tmp, path="FOO_h5")
-    round <- loadDataFrame(meta, project=tmp)
-    expect_identical(round, df2)
+        meta <- stageObject(df2, tmp, path=paste0("FOO_h5", version), .version.df=version, .version.hdf5=version)
+        round <- loadDataFrame(meta, project=tmp)
+        expect_identical(round, df2)
+    }
 })
 
 test_that("handling of NAs works correctly", {
@@ -221,37 +224,47 @@ test_that("handling of NAs works correctly", {
     # Works for HDF5-based DFs.
     old <- saveDataFrameFormat("hdf5")
     on.exit(saveDataFrameFormat(old))
-    meta2 <- stageObject(df, tmp, path="WHEE.h5")
-    expect_match(meta2[["$schema"]], "hdf5_data_frame")
 
-    fpath <- file.path(tmp, meta2$path)
-    attrs <- rhdf5::h5readAttributes(fpath, "contents/data/0")
-    expect_identical(attrs[["missing-value-placeholder"]], "NA")
-    attrs <- rhdf5::h5readAttributes(fpath, "contents/data/1")
-    expect_identical(attrs[["missing-value-placeholder"]], "_NA")
+    for (version in 2:3) {
+        meta2 <- stageObject(df, tmp, path=paste0("WHEE-", version), .version.df=version, .version.hdf5=version)
+        expect_match(meta2[["$schema"]], "hdf5_data_frame")
 
-    attrs <- rhdf5::h5readAttributes(fpath, "contents/data/2")
-    expect_identical(attrs[["missing-value-placeholder"]], NA_integer_)
-    attrs <- rhdf5::h5readAttributes(fpath, "contents/data/3")
-    expect_null(attrs[["missing-value-placeholder"]])
+        fpath <- file.path(tmp, meta2$path)
+        attrs <- rhdf5::h5readAttributes(fpath, "contents/data/0")
+        expect_identical(attrs[["missing-value-placeholder"]], "NA")
+        attrs <- rhdf5::h5readAttributes(fpath, "contents/data/1")
+        expect_identical(attrs[["missing-value-placeholder"]], "_NA")
 
-    attrs <- rhdf5::h5readAttributes(fpath, "contents/data/4")
-    expect_true(is.na(attrs[["missing-value-placeholder"]]))
-    attrs <- rhdf5::h5readAttributes(fpath, "contents/data/5")
-    place <- attrs[["missing-value-placeholder"]]
-    expect_true(is.na(place) && !is.nan(place))
-    attrs <- rhdf5::h5readAttributes(fpath, "contents/data/6")
-    expect_equal(attrs[["missing-value-placeholder"]], -1L)
+        if (version >= 3) {
+            attrs <- rhdf5::h5readAttributes(fpath, "contents/data/2/codes")
+            expect_identical(attrs[["missing-value-placeholder"]], -1L)
+            attrs <- rhdf5::h5readAttributes(fpath, "contents/data/3/codes")
+            expect_null(attrs[["missing-value-placeholder"]])
+        } else {
+            attrs <- rhdf5::h5readAttributes(fpath, "contents/data/2")
+            expect_identical(attrs[["missing-value-placeholder"]], NA_integer_)
+            attrs <- rhdf5::h5readAttributes(fpath, "contents/data/3")
+            expect_null(attrs[["missing-value-placeholder"]])
+        }
 
-    attrs <- rhdf5::h5readAttributes(fpath, "contents/data/7")
-    expect_null(attrs[["missing-value-placeholder"]])
-    attrs <- rhdf5::h5readAttributes(fpath, "contents/data/8")
-    expect_null(attrs[["missing-value-placeholder"]])
-    attrs <- rhdf5::h5readAttributes(fpath, "contents/data/9")
-    expect_null(attrs[["missing-value-placeholder"]])
+        attrs <- rhdf5::h5readAttributes(fpath, "contents/data/4")
+        expect_true(is.na(attrs[["missing-value-placeholder"]]))
+        attrs <- rhdf5::h5readAttributes(fpath, "contents/data/5")
+        place <- attrs[["missing-value-placeholder"]]
+        expect_true(is.na(place) && !is.nan(place))
+        attrs <- rhdf5::h5readAttributes(fpath, "contents/data/6")
+        expect_equal(attrs[["missing-value-placeholder"]], -1L)
 
-    round2 <- loadDataFrame(meta2, project=tmp)
-    expect_identical(df, round2)
+        attrs <- rhdf5::h5readAttributes(fpath, "contents/data/7")
+        expect_null(attrs[["missing-value-placeholder"]])
+        attrs <- rhdf5::h5readAttributes(fpath, "contents/data/8")
+        expect_null(attrs[["missing-value-placeholder"]])
+        attrs <- rhdf5::h5readAttributes(fpath, "contents/data/9")
+        expect_null(attrs[["missing-value-placeholder"]])
+
+        round2 <- loadDataFrame(meta2, project=tmp)
+        expect_identical(df, round2)
+    }
 })
 
 test_that("handling of the integer minimum limit works correctly", {
@@ -274,22 +287,24 @@ test_that("handling of the integer minimum limit works correctly", {
     old <- saveDataFrameFormat("hdf5")
     on.exit(saveDataFrameFormat(old))
 
-    meta <- stageObject(df, tmp, path="hdf5")
-    fpath <- file.path(tmp, meta$path)
-    rhdf5::h5deleteAttribute(fpath, "contents/data/0", "missing-value-placeholder")
+    for (version in 1:3) { 
+        meta <- stageObject(df, tmp, path=paste0("hdf5-", version), .version.df=version, .version.hdf5=version)
+        fpath <- file.path(tmp, meta$path)
+        rhdf5::h5deleteAttribute(fpath, "contents/data/0", "missing-value-placeholder")
 
-    round <- loadDataFrame(meta, project=tmp)
-    expect_identical(round$foobar, actual)
+        round <- loadDataFrame(meta, project=tmp)
+        expect_identical(round$foobar, actual)
 
-    # Trying again.
-    fhandle <- rhdf5::H5Fopen(fpath)
-    dhandle <- rhdf5::H5Dopen(fhandle, "contents/data/0")
-    rhdf5::h5writeAttribute(1, dhandle, "missing-value-placeholder", asScalar=TRUE)
-    rhdf5::H5Dclose(dhandle)
-    rhdf5::H5Fclose(fhandle)
+        # Trying again.
+        fhandle <- rhdf5::H5Fopen(fpath)
+        dhandle <- rhdf5::H5Dopen(fhandle, "contents/data/0")
+        rhdf5::h5writeAttribute(1, dhandle, "missing-value-placeholder", asScalar=TRUE)
+        rhdf5::H5Dclose(dhandle)
+        rhdf5::H5Fclose(fhandle)
 
-    round <- loadDataFrame(meta, project=tmp)
-    expect_identical(round$foobar, c(NA, 2, -2^31))
+        round <- loadDataFrame(meta, project=tmp)
+        expect_identical(round$foobar, c(NA, 2, -2^31))
+    }
 })
 
 test_that("handling of IEEE special values work correctly", {
@@ -315,21 +330,20 @@ test_that("handling of IEEE special values work correctly", {
     old <- saveDataFrameFormat("hdf5")
     on.exit(saveDataFrameFormat(old))
 
-    meta <- stageObject(df, tmp, path="hFOO1")
-    round <- loadDataFrame(meta, project=tmp)
-    expect_identical(round, df)
+    for (version in 1:3) { 
+        meta <- stageObject(df, tmp, path=paste0("hFOO1-", version), .version.df=version, .version.hdf5=version)
+        round <- loadDataFrame(meta, project=tmp)
+        expect_identical(round, df)
 
-    meta <- stageObject(df2, tmp, path="hFOO2")
-    round <- loadDataFrame(meta, project=tmp)
-    expect_identical(round, df2)
+        meta <- stageObject(df2, tmp, path=paste0("hFOO2-", version), .version.df=version, .version.hdf5=version)
+        round <- loadDataFrame(meta, project=tmp)
+        expect_identical(round, df2)
+    }
 })
 
 test_that("loaders work correctly from HDF5 with non-default placeholders", {
     tmp <- tempfile()
     dir.create(tmp)
-
-    old <- saveDataFrameFormat("hdf5")
-    on.exit(saveDataFrameFormat(old))
 
     df <- DataFrame(
         a=c(1L,2L,3L),
@@ -337,17 +351,22 @@ test_that("loaders work correctly from HDF5 with non-default placeholders", {
         c=c(1.5,2.5,NaN)
     )
 
-    meta2 <- stageObject(df, tmp, path="WHEE.h5")
+    old <- saveDataFrameFormat("hdf5")
+    on.exit(saveDataFrameFormat(old))
 
-    fpath <- file.path(tmp, meta2$path)
-    addMissingPlaceholderAttributeForHdf5(fpath, "contents/data/0", 1L)
-    addMissingPlaceholderAttributeForHdf5(fpath, "contents/data/1", 2.5)
-    addMissingPlaceholderAttributeForHdf5(fpath, "contents/data/2", NaN)
+    for (version in 2:3) {
+        meta2 <- stageObject(df, tmp, path=paste0("WHEE-", version), .version.df=version, .version.hdf5=version)
 
-    round <- loadDataFrame(meta2, project=tmp)
-    expect_identical(round$a, c(NA, 2L, 3L))
-    expect_identical(round$b, c(1.5, NA, 3.5))
-    expect_identical(round$c, c(1.5, 2.5, NA))
+        fpath <- file.path(tmp, meta2$path)
+        addMissingPlaceholderAttributeForHdf5(fpath, "contents/data/0", 1L)
+        addMissingPlaceholderAttributeForHdf5(fpath, "contents/data/1", 2.5)
+        addMissingPlaceholderAttributeForHdf5(fpath, "contents/data/2", NaN)
+
+        round <- loadDataFrame(meta2, project=tmp)
+        expect_identical(round$a, c(NA, 2L, 3L))
+        expect_identical(round$b, c(1.5, NA, 3.5))
+        expect_identical(round$c, c(1.5, 2.5, NA))
+    }
 })
 
 test_that("stageObject works with extra mcols", {
@@ -381,7 +400,7 @@ test_that("DF staging preserves odd colnames", {
         check.names=FALSE
     )
 
-    # Correct in the CSV:
+    # Correct in the CSV file:
     meta <- stageObject(df, tmp, path="WHEE")
     resource <- writeMetadata(meta, tmp)
     expect_equal(loadDataFrame(meta, tmp), df)
@@ -390,16 +409,18 @@ test_that("DF staging preserves odd colnames", {
     first <- readLines(fpath, n=1)
     expect_identical(first, "\"foo bar\",\"rabbit+2+3/5\"")
 
-    # Correct in the HDF5:
+    # Correct in the HDF5 file:
     old <- saveDataFrameFormat("hdf5")
     on.exit(saveDataFrameFormat(old))
 
-    meta <- stageObject(df, tmp, path="WHEE2")
-    resource <- writeMetadata(meta, tmp)
-    expect_identical(loadDataFrame(meta, tmp), df)
+    for (version in 2:3) {
+        meta <- stageObject(df, tmp, path=paste0("WHEE2-", version), .version.df=version, .version.hdf5=version)
+        resource <- writeMetadata(meta, tmp)
+        expect_identical(loadDataFrame(meta, tmp), df)
 
-    fpath <- file.path(tmp, meta$path)
-    expect_identical(as.vector(rhdf5::h5read(fpath, "contents/column_names")), colnames(df))
+        fpath <- file.path(tmp, meta$path)
+        expect_identical(as.vector(rhdf5::h5read(fpath, "contents/column_names")), colnames(df))
+    }
 })
 
 test_that("DFs fails with duplicate or empty colnames", {
@@ -417,8 +438,9 @@ test_that("DFs fails with duplicate or empty colnames", {
     expect_error(info <- stageObject(df, tmp, "rnaseq"), "duplicate")
 
     unlink(file.path(tmp, "rnaseq"), recursive=TRUE)
-    colnames(df)[2] <- ""
-    expect_error(info <- stageObject(df, tmp, "rnaseq"), "empty")
+    df2 <- df
+    colnames(df2)[2] <- ""
+    expect_error(info <- stageObject(df2, tmp, "rnaseq"), "empty")
 })
 
 test_that("DFs handle POSIX times correctly", {
@@ -441,43 +463,15 @@ test_that("DFs handle POSIX times correctly", {
     out <- loadDataFrame(info, tmp)
     expect_identical(df$foo, as.POSIXct(out$foo))
     expect_identical(df$bar, as.POSIXct(out$bar))
-})
 
-test_that("DFs handle their column types correctly (legacy)", {
-    tmp <- tempfile()
-    dir.create(tmp, recursive=TRUE)
+    # Same for HDF5.
+    old <- saveDataFrameFormat("hdf5")
+    on.exit(saveDataFrameFormat(old))
 
-    ncols <- 123
-    df <- DataFrame(
-        stuff = rep(LETTERS[1:3], length.out=ncols),
-        blah = 0, # placeholder
-        foo = seq_len(ncols),
-        whee = as.numeric(10 + seq_len(ncols)),
-        rabbit = 1,
-        birthday = rep(Sys.Date(), ncols) - sample(100, ncols, replace=TRUE),
-        birthtime = round(rep(Sys.time(), ncols) - sample(100, ncols, replace=TRUE))
-    )
-    df$blah <- factor(df$stuff, LETTERS[10:1])
-    df$rabbit <- factor(df$stuff, LETTERS[1:3], ordered=TRUE)
-
-    info <- stageObject(df, tmp, "rnaseq", .version=1)
-
-    # Should write without errors.
-    resource <- writeMetadata(info, tmp)
-    expect_true(file.exists(file.path(tmp, resource$path)))
-
-    meta <- info$data_frame
-    expect_identical(meta$columns[[5]]$type, "ordered")
-    expect_identical(meta$columns[[6]]$type, "date")
-    expect_identical(meta$columns[[7]]$type, "date-time")
-
-    # Round-tripping to make sure it's okay.
-    out <- loadDataFrame(info, tmp)
-    expect_identical(out$stuff, df$stuff)
-    expect_identical(out$blah, df$blah)
-    expect_identical(out$foo, df$foo)
-    expect_identical(out$whee, df$whee)
-    expect_identical(out$rabbit, df$rabbit)
-    expect_identical(out$birthday, df$birthday)
-    expect_equal(out$birthtime, df$birthtime)
+    for (version in 1:3) {
+        info <- stageObject(df, tmp, paste0("bar-", version), .version.df=version, .version.hdf5=version)
+        out <- loadDataFrame(info, tmp)
+        expect_identical(df$foo, as.POSIXct(out$foo))
+        expect_identical(df$bar, as.POSIXct(out$bar))
+    }
 })
