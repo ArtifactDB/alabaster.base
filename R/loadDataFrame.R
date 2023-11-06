@@ -56,32 +56,31 @@ loadDataFrame <- function(info, project, include.nested=TRUE, parallel=TRUE) {
             df <- make_zero_col_DFrame(nrow=nrows)
         } else {
             raw <- h5read(path, prefix("data"))
+            df <- vector("list", length(col.info))
 
-            for (i in names(raw)) {
-                current <- raw[[i]]
+            for (i in seq_along(col.info)) {
+                curinfo <- col.info[[i]]
+                d <- as.character(i - 1L) # -1 to get back to 0-based indices.
+                current <- raw[[d]]
+
                 if (is.list(current)) { # Handling factors stored as lists in the new version.
-                    if (col.info[[i]]$type != "factor") {
+                    if (curinfo$type != "factor") {
                         stop("HDF5 groups as columns are only supported for factor columns")
                     }
-                    codes <- .repopulate_missing_hdf5(current$codes, path, prefix(paste0("data/", i, "/codes")))
-                    raw[[i]] <- factor(current$levels[codes + 1L], current$levels, ordered=isTRUE(col.info[[i]]$ordered))
+                    codes <- .repopulate_missing_hdf5(current$codes, path, prefix(paste0("data/", d, "/codes")))
+                    df[[i]] <- factor(current$levels[codes + 1L], current$levels, ordered=isTRUE(curinfo$ordered))
+
+                } else if (!is.null(current)) {
+                    current <- .repopulate_missing_hdf5(current, path, prefix(paste0("data/", d)))
+                    df[[i]] <- as.vector(current) # remove 1d arrays.
+
                 } else {
-                    raw[[i]] <- .repopulate_missing_hdf5(current, path, prefix(paste0("data/", i)))
+                    df[[i]] <- logical(nrows) # placeholders
                 }
             }
 
-            # Adding placeholders for type:"other".
-            indices <- as.integer(names(raw)) + 1L # get back to 1-based.
-            df <- vector("list", length(col.info))
-            df[indices] <- lapply(raw, as.vector) # remove 1d arrays.
-            for (i in seq_along(df)) {
-                if (is.null(df[[i]])) {
-                    df[[i]] <- logical(nrows) 
-                }
-            }
-
-            df <- DataFrame(df)
-            colnames(df) <- as.vector(h5read(path, prefix("column_names")))
+            names(df) <- as.vector(h5read(path, prefix("column_names")))
+            df <- DataFrame(df, check.names=FALSE)
         }
         if (has.rownames) {
             rownames(df) <- as.vector(h5read(path, prefix("row_names")))
@@ -97,17 +96,7 @@ loadDataFrame <- function(info, project, include.nested=TRUE, parallel=TRUE) {
         } 
     }
 
-    df <- .coerce_df_column_type(df, col.info, project)
-
-    # Removing nested DFs.
-    if (!all(keep <- !is.na(new.names))) {
-        df <- df[,keep,drop=FALSE]
-        new.names <- new.names[keep]
-    }
-
-    # Replacing the names with the values at input.
-    colnames(df) <- new.names
-
+    df <- .coerce_df_column_type(df, col.info, project, include.nested=include.nested)
     .restoreMetadata(df, mcol.data=info$data_frame$column_data, meta.data=info$data_frame$other_data, project=project)
 }
 
@@ -140,13 +129,13 @@ loadDataFrame <- function(info, project, include.nested=TRUE, parallel=TRUE) {
     current
 }
 
-.coerce_df_column_type <- function(df, col.info, project) {
-    new.names <- character(ncol(df))
+.coerce_df_column_type <- function(df, col.info, project, include.nested) {
+    stopifnot(length(df) == length(col.info))
+    true.names <- character(length(col.info))
 
     for (i in seq_along(col.info)) {
         current.info <- col.info[[i]]
-        new.names[i] <- current.info$name
-
+        true.names[i] <- current.info$name
         col.type <- current.info$type 
         col <- df[[i]]
 
@@ -193,7 +182,7 @@ loadDataFrame <- function(info, project, include.nested=TRUE, parallel=TRUE) {
             if (include.nested || !("data_frame" %in% names(current))) {
                 col <- altLoadObject(current, project=project)
             } else {
-                new.names[i] <- NA_character_
+                true.names[i] <- NA_character_
             }
         } else {
             stop("unsupported column type '", col.type, "'")
@@ -202,5 +191,13 @@ loadDataFrame <- function(info, project, include.nested=TRUE, parallel=TRUE) {
         df[[i]] <- col
     }
 
-    return df
+    # Removing nested DFs.
+    if (!all(keep <- !is.na(true.names))) {
+        df <- df[,keep,drop=FALSE]
+        true.names <- true.names[keep]
+    }
+
+    colnames(df) <- true.names
+
+    df
 }

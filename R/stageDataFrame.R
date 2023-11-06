@@ -93,9 +93,9 @@ setMethod("stageObject", "DataFrame", function(x, dir, path, child=FALSE, df.nam
             meta <- sanitized$metadata
             factor.levels <- sanitized$levels
             .dump_df_to_hdf5(sanitized$x, meta, "contents", ofile, .version.hdf5=.version.hdf5)
-            extra[[1]]$version <- .version.hdf5
+            extra[[1]]$version <- min(.version.hdf5, 3)
         } else {
-            meta <- .write_hdf5_new(x, "contents", ofile)
+            meta <- .write_hdf5_new(x, "contents", ofile, dir, path)
         }
 
         schema <- "hdf5_data_frame/v1.json"
@@ -163,7 +163,7 @@ setMethod("stageObject", "DataFrame", function(x, dir, path, child=FALSE, df.nam
             column_data=element_data,
             other_data=other_data,
             dimensions=dim(x),
-            version=if (.version.df != 1) .version.df else NULL 
+            version=if (.version.df != 1) min(.version.df, 2) else NULL 
         )
     )
 
@@ -313,7 +313,7 @@ setMethod("stageObject", "DataFrame", function(x, dir, path, child=FALSE, df.nam
 }
 
 #' @importFrom rhdf5 h5write h5createGroup h5createFile H5Gopen H5Gclose H5Acreate H5Aclose H5Awrite H5Fopen H5Fclose H5Dopen H5Dclose
-.write_hdf5_new <- function(x, host, ofile) {
+.write_hdf5_new <- function(x, host, ofile, dir, path) {
     h5createFile(ofile)
     prefix <- function(x) paste0(host, "/", x)
     h5createGroup(ofile, host)
@@ -326,7 +326,7 @@ setMethod("stageObject", "DataFrame", function(x, dir, path, child=FALSE, df.nam
         on.exit(H5Gclose(ghandle), add=TRUE)
         h5writeAttribute("1.0", ghandle, "version", asScalar=TRUE)
         ahandle <- H5Acreate(ghandle, "row-count", "H5T_NATIVE_UINT32", H5Screate("H5S_SCALAR"))
-        on.exit(H5Aclose(ahandle), add=TRUE)
+        on.exit(H5Aclose(ahandle), add=TRUE, after=FALSE)
         H5Awrite(ahandle, nrow(x))
     })()
 
@@ -334,7 +334,7 @@ setMethod("stageObject", "DataFrame", function(x, dir, path, child=FALSE, df.nam
     for (z in seq_along(meta)) {
         col <- x[[z]]
         data.name <- as.character(z - 1L)
-        colmeta <- list(name=true.colnames[z])
+        colmeta <- list(name=colnames(x)[z])
         is.other <- FALSE
         sanitized <- NULL
 
@@ -347,23 +347,26 @@ setMethod("stageObject", "DataFrame", function(x, dir, path, child=FALSE, df.nam
                 colmeta$ordered <- TRUE
             }
 
-            full.data.name <- prefix(paste0("/data/", data.name))
-            h5createGroup(fhandle, data.name)
+            full.data.name <- prefix(paste0("data/", data.name))
+            h5createGroup(fhandle, full.data.name)
             (function() {
-                ghandle <- H5Gopen(fhandle, data.name)
+                ghandle <- H5Gopen(fhandle, full.data.name)
                 on.exit(H5Gclose(ghandle), add=TRUE)
                 h5writeAttribute("factor", ghandle, "type", asScalar=TRUE)
                 if (is.ordered(col)) {
-                    h5writeAttribute(1, ghandle, "ordered", asScalar=TRUE)
+                    h5writeAttribute(1L, ghandle, "ordered", asScalar=TRUE)
                 }
             })()
 
             code.name <- paste0(full.data.name, "/codes")
-            h5write(as.integer(col), fhandle, code.name)
-            h5write(levels(col), fhandle, paste0(full.data.name, "/levels"));
+            transformed <- as.integer(col) - 1L
+            transformed[is.na(transformed)] <- -1L
+            h5write(transformed, fhandle, code.name)
             if (anyNA(col)) {
                 addMissingPlaceholderAttributeForHdf5(fhandle, code.name, -1L)
             }
+
+            h5write(levels(col), fhandle, paste0(full.data.name, "/levels"));
 
         } else if (.is_datetime(col)) {
             colmeta$type <- "string"
@@ -415,9 +418,9 @@ setMethod("stageObject", "DataFrame", function(x, dir, path, child=FALSE, df.nam
         meta[[z]] <- colmeta
     }
 
-    h5write(colnames(x), ofile, prefix("column_names"))
+    h5write(colnames(x), fhandle, prefix("column_names"))
     if (!is.null(rownames(x))) {
-        h5write(rownames(x), ofile, prefix("row_names"))
+        h5write(rownames(x), fhandle, prefix("row_names"))
     }
 
     meta

@@ -17,6 +17,9 @@ static std::vector<takane::data_frame::ColumnDetails> configure_columns(
     if (ncols != string_formats.size()) {
         throw std::runtime_error("'column_names' and 'string_formats' should have the same length");
     }
+    if (ncols != factor_ordered.size()) {
+        throw std::runtime_error("'column_names' and 'factor_ordered' should have the same length");
+    }
     if (ncols != factor_levels.size()) {
         throw std::runtime_error("'column_names' and 'factor_levels' should have the same length");
     }
@@ -42,12 +45,20 @@ static std::vector<takane::data_frame::ColumnDetails> configure_columns(
                 curcol.string_format = takane::data_frame::StringFormat::DATE_TIME;
             }
 
+        } else if (curtype == "date") {
+            curcol.type = takane::data_frame::ColumnType::STRING;
+            curcol.string_format = takane::data_frame::StringFormat::DATE;
+
+        } else if (curtype == "date-time") {
+            curcol.type = takane::data_frame::ColumnType::STRING;
+            curcol.string_format = takane::data_frame::StringFormat::DATE_TIME;
+
         } else if (curtype == "boolean") {
             curcol.type = takane::data_frame::ColumnType::BOOLEAN;
 
-        } else if (curtype == "factor") {
+        } else if (curtype == "factor" || curtype == "ordered") {
             curcol.type = takane::data_frame::ColumnType::FACTOR;
-            curcol.factor_ordered = factor_ordered[c];
+            curcol.factor_ordered = factor_ordered[c] || curtype == "ordered";
             Rcpp::CharacterVector levels(factor_levels[c]);
             auto& flevels = curcol.factor_levels.mutable_ref();
             for (size_t l = 0, end = levels.size(); l < end; ++l) {
