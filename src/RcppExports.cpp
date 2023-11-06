@@ -62,6 +62,21 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// check_factor
+Rcpp::RObject check_factor(std::string path, int length, int num_levels, bool has_names, bool is_compressed, bool parallel);
+RcppExport SEXP _alabaster_base_check_factor(SEXP pathSEXP, SEXP lengthSEXP, SEXP num_levelsSEXP, SEXP has_namesSEXP, SEXP is_compressedSEXP, SEXP parallelSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::traits::input_parameter< std::string >::type path(pathSEXP);
+    Rcpp::traits::input_parameter< int >::type length(lengthSEXP);
+    Rcpp::traits::input_parameter< int >::type num_levels(num_levelsSEXP);
+    Rcpp::traits::input_parameter< bool >::type has_names(has_namesSEXP);
+    Rcpp::traits::input_parameter< bool >::type is_compressed(is_compressedSEXP);
+    Rcpp::traits::input_parameter< bool >::type parallel(parallelSEXP);
+    rcpp_result_gen = Rcpp::wrap(check_factor(path, length, num_levels, has_names, is_compressed, parallel));
+    return rcpp_result_gen;
+END_RCPP
+}
 // check_list_hdf5
 SEXP check_list_hdf5(std::string file, std::string name, int num_external);
 RcppExport SEXP _alabaster_base_check_list_hdf5(SEXP fileSEXP, SEXP nameSEXP, SEXP num_externalSEXP) {
@@ -184,6 +199,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_alabaster_base_check_csv", (DL_FUNC) &_alabaster_base_check_csv, 3},
     {"_alabaster_base_check_csv_df", (DL_FUNC) &_alabaster_base_check_csv_df, 11},
     {"_alabaster_base_check_hdf5_df", (DL_FUNC) &_alabaster_base_check_hdf5_df, 11},
+    {"_alabaster_base_check_factor", (DL_FUNC) &_alabaster_base_check_factor, 6},
     {"_alabaster_base_check_list_hdf5", (DL_FUNC) &_alabaster_base_check_list_hdf5, 3},
     {"_alabaster_base_check_list_json", (DL_FUNC) &_alabaster_base_check_list_json, 3},
     {"_alabaster_base_any_actually_numeric_na", (DL_FUNC) &_alabaster_base_any_actually_numeric_na, 1},

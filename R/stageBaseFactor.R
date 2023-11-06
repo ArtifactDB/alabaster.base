@@ -24,12 +24,23 @@ setMethod("stageObject", "factor", function(x, dir, path, child = FALSE, ...) {
     dir.create(file.path(dir, path), showWarnings=FALSE)
     new_path <- paste0(path, "/indices.txt.gz")
 
-    contents <- as.integer(x)
+    contents <- as.integer(x) - 1L
     mock <- DataFrame(values=contents)
     if (!is.null(names(x))) {
         mock <- cbind(names=names(x), mock)
     }
-    quickWriteCsv(mock, file.path(dir, new_path), row.names=FALSE, compression="gzip")
+
+    ofile <- file.path(dir, new_path)
+    quickWriteCsv(mock, ofile, row.names=FALSE, compression="gzip", validate=FALSE)
+
+    check_factor(
+        ofile,
+        length=length(x),
+        num_levels=nlevels(x),
+        has_names=!is.null(names(x)),
+        is_compressed=TRUE,
+        parallel=TRUE
+    )
 
     level_meta <- stageObject(levels(x), dir, paste0(path, "/levels"), child=TRUE)
     level_stub <- writeMetadata(level_meta, dir)

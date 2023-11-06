@@ -13,6 +13,10 @@ check_hdf5_df <- function(path, name, nrows, has_row_names, column_names, column
     .Call(`_alabaster_base_check_hdf5_df`, path, name, nrows, has_row_names, column_names, column_types, string_formats, factor_ordered, factor_levels, df_version, hdf5_version)
 }
 
+check_factor <- function(path, length, num_levels, has_names, is_compressed, parallel) {
+    .Call(`_alabaster_base_check_factor`, path, length, num_levels, has_names, is_compressed, parallel)
+}
+
 check_list_hdf5 <- function(file, name, num_external) {
     .Call(`_alabaster_base_check_list_hdf5`, file, name, num_external)
 }

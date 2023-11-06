@@ -24,7 +24,7 @@ loadBaseFactor <- function(info, project, ...) {
     meta <- info$factor
 
     df <- read.csv3(fpath, compression=meta$compression, nrows=meta$length)
-    codes <- df[,ncol(df)]
+    codes <- df[,ncol(df)] + 1L
 
     smeta <- info$string_factor
     level_meta <- acquireMetadata(project, smeta$levels$resource$path)
