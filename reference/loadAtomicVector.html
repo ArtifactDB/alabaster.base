@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">alabaster.base</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.3.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.3.1</span>
       </span>
     </div>
 
@@ -99,16 +99,14 @@ By default, this should be a string containing the path to a staging directory.<
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/files2.html" class="external-link">dir.create</a></span><span class="op">(</span><span class="va">tmp</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">meta</span> <span class="op">&lt;-</span> <span class="fu"><a href="stageObject.html">stageObject</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/setNames.html" class="external-link">setNames</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html" class="external-link">runif</a></span><span class="op">(</span><span class="fl">26</span><span class="op">)</span>, <span class="va">letters</span><span class="op">)</span>, <span class="va">tmp</span>, path<span class="op">=</span><span class="st">"bar"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">loadAtomicVector</span><span class="op">(</span><span class="va">meta</span>, <span class="va">tmp</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>           a           b           c           d           e           f </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 0.856157022 0.013125205 0.882828881 0.011200336 0.501477734 0.631194325 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>           g           h           i           j           k           l </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 0.731306675 0.508257009 0.447464440 0.997392799 0.638650697 0.428804569 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>           m           n           o           p           q           r </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 0.956769035 0.183937066 0.452132476 0.781787345 0.686149575 0.283789597 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>           s           t           u           v           w           x </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 0.720350072 0.264583702 0.006659936 0.957506971 0.135710944 0.014151781 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>           y           z </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 0.526744340 0.680667456 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          a          b          c          d          e          f          g </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 0.92994262 0.53516210 0.28070126 0.91655007 0.75584903 0.37308103 0.84573519 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          h          i          j          k          l          m          n </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 0.13613726 0.07622938 0.83145071 0.25023114 0.89894510 0.11115640 0.13689441 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          o          p          q          r          s          t          u </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 0.39782046 0.28353072 0.57386633 0.66926787 0.99578604 0.50700365 0.73084344 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          v          w          x          y          z </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 0.32846204 0.53605330 0.18333885 0.01338709 0.94052515 </span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
