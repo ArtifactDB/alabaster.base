@@ -4,6 +4,8 @@
 #include <unordered_set>
 #include <string>
 
+#include "WrappedOption.hpp"
+
 /**
  * @file data_frame.hpp
  * @brief Common data frame utilities.
@@ -11,6 +13,10 @@
 
 namespace takane {
 
+/**
+ * @namespace takane::data_frame
+ * @brief Definitions for abstract data frames.
+ */
 namespace data_frame {
 
 /**
@@ -62,23 +68,18 @@ struct ColumnDetails {
     /**
      * Format of string columns, only used if `type == ColumnType::STRING`.
      */
-    StringFormat format = StringFormat::NONE;
+    StringFormat string_format = StringFormat::NONE;
+
+    /**
+     * Whether the factor levels are ordered, only used if `type == ColumnType::FACTOR`.
+     */
+    bool factor_ordered = false;
 
     /**
      * Unique factor levels, only used if `type == ColumnType::FACTOR`.
+     * This may be ignored by specific validation functions if the factor levels are available elsewhere.
      */
-    std::unordered_set<std::string> factor_levels;
-
-    /**
-     * Add a unique level to `factor_levels`, throwing an error if it already exists.
-     * @param x Factor level to be added.
-     */
-    void add_factor_level(std::string x) {
-        if (factor_levels.find(x) != factor_levels.end()) {
-            throw std::runtime_error("factor level '" + x + "' already exists in this column");
-        }
-        factor_levels.insert(std::move(x));
-    }
+    WrappedOption<std::unordered_set<std::string> > factor_levels;
 };
 
 }

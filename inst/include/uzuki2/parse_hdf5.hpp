@@ -41,20 +41,21 @@ namespace hdf5 {
 /**
  * @cond
  */
-inline H5::DataSet get_scalar_dataset(const H5::Group& handle, const std::string& name, H5T_class_t type_class, const std::string& path) {
+inline H5::DataSet get_scalar_dataset(const H5::Group& handle, const std::string& name, H5T_class_t type_class) try {
     auto dhandle = ritsuko::hdf5::get_scalar_dataset(handle, name.c_str());
     if (dhandle.getTypeClass() != type_class) {
-        throw std::runtime_error("dataset at '" + path + "/" + name + "' has the wrong datatype class");
+        throw std::runtime_error("dataset has the wrong datatype class");
     }
     return dhandle;
+} catch (std::exception& e) {
+    throw std::runtime_error("failed to load scalar dataset at '" + ritsuko::hdf5::get_name(handle) + "/" + name + "'; " + std::string(e.what()));
 }
 
 template<class Host, class Function>
-void parse_integer_like(const H5::DataSet& handle, Host* ptr, const std::string& path, Function check, const Version& version) {
-    if (handle.getDataType().getClass() != H5T_INTEGER) {
-        throw std::runtime_error("expected an integer dataset at '" + path + "'");
+void parse_integer_like(const H5::DataSet& handle, Host* ptr, Function check, const Version& version) try {
+    if (ritsuko::hdf5::exceeds_integer_limit(handle, 32, true)) {
+        throw std::runtime_error("dataset cannot be represented by 32-bit signed integers");
     }
-    ritsuko::hdf5::forbid_large_integers(handle, 32, path.c_str());
 
     bool has_missing = false;
     int32_t missing_value = -2147483648;
@@ -64,7 +65,7 @@ void parse_integer_like(const H5::DataSet& handle, Host* ptr, const std::string&
         const char* placeholder_name = "missing-value-placeholder";
         has_missing = handle.attrExists(placeholder_name);
         if (has_missing) {
-            auto attr = ritsuko::hdf5::get_missing_placeholder_attribute(handle, placeholder_name, path.c_str(), /* type_class_only = */ version.lt(1, 2));
+            auto attr = ritsuko::hdf5::get_missing_placeholder_attribute(handle, placeholder_name, /* type_class_only = */ version.lt(1, 2));
             attr.read(H5::PredType::NATIVE_INT32, &missing_value);
         }
     }
@@ -88,21 +89,23 @@ void parse_integer_like(const H5::DataSet& handle, Host* ptr, const std::string&
             }
         }
     );
+} catch (std::exception& e) {
+    throw std::runtime_error("failed to load integer dataset at '" + ritsuko::hdf5::get_name(handle) + "'; " + std::string(e.what()));
 }
 
 template<class Host, class Function>
-void parse_string_like(const H5::DataSet& handle, Host* ptr, const std::string& path, Function check) {
+void parse_string_like(const H5::DataSet& handle, Host* ptr, Function check) try {
     auto dtype = handle.getDataType();
     if (dtype.getClass() != H5T_STRING) {
-        throw std::runtime_error("expected a string dataset at '" + path + "'");
+        throw std::runtime_error("expected a string dataset");
     }
 
     const char* placeholder_name = "missing-value-placeholder";
     bool has_missing = handle.attrExists(placeholder_name);
     std::string missing_val;
     if (has_missing) {
-        auto ahandle = ritsuko::hdf5::get_missing_placeholder_attribute(handle, placeholder_name, path.c_str(), /* type_class_only = */ true);
-        missing_val = ritsuko::hdf5::load_scalar_string_attribute(ahandle, placeholder_name, path.c_str());
+        auto ahandle = ritsuko::hdf5::get_missing_placeholder_attribute(handle, placeholder_name, /* type_class_only = */ true);
+        missing_val = ritsuko::hdf5::load_scalar_string_attribute(ahandle);
     }
 
     ritsuko::hdf5::load_1d_string_dataset(
@@ -119,17 +122,20 @@ void parse_string_like(const H5::DataSet& handle, Host* ptr, const std::string& 
             }
         }
     );
+} catch (std::exception& e) {
+    throw std::runtime_error("failed to load string dataset at '" + ritsuko::hdf5::get_name(handle) + "'; " + std::string(e.what()));
 }
 
 template<class Host, class Function>
-void parse_numbers(const H5::DataSet& handle, Host* ptr, const std::string& path, Function check, const Version& version) {
-    if (handle.getDataType().getClass() != H5T_FLOAT) {
-        throw std::runtime_error("expected a float dataset at '" + path + "'");
-    }
-
-    H5::FloatType ftype(handle);
-    if (ftype.getPrecision() > 64) {
-        throw std::runtime_error("data type is potentially out of range for a double at '" + path + "'");
+void parse_numbers(const H5::DataSet& handle, Host* ptr, Function check, const Version& version) try {
+    if (version.lt(1, 3)) {
+        if (handle.getTypeClass() != H5T_FLOAT) {
+            throw std::runtime_error("expected a floating-point dataset");
+        }
+    } else {
+        if (ritsuko::hdf5::exceeds_float_limit(handle, 64)) {
+            throw std::runtime_error("dataset cannot be represented by 64-bit floats");
+        }
     }
 
     bool has_missing = false;
@@ -142,10 +148,22 @@ void parse_numbers(const H5::DataSet& handle, Host* ptr, const std::string& path
         const char* placeholder_name = "missing-value-placeholder";
         has_missing = handle.attrExists(placeholder_name);
         if (has_missing) {
-            auto attr = ritsuko::hdf5::get_missing_placeholder_attribute(handle, placeholder_name, path.c_str(), /* type_class_only = */ version.lt(1, 2));
+            auto attr = ritsuko::hdf5::get_missing_placeholder_attribute(handle, placeholder_name, /* type_class_only = */ version.lt(1, 2));
             attr.read(H5::PredType::NATIVE_DOUBLE, &missing_value);
         }
     }
+
+    bool should_compare_nan = version.lt(1, 3);
+    bool is_placeholder_nan = std::isnan(missing_value);
+    auto is_missing_value = [&](double val) -> bool {
+        if (should_compare_nan) {
+            return ritsuko::are_floats_identical(&val, &missing_value);
+        } else if (is_placeholder_nan) {
+            return std::isnan(val);
+        } else {
+            return val == missing_value;
+        }
+    };
 
     hsize_t full_length = ptr->size();
     auto block_size = ritsuko::hdf5::pick_1d_block_size(handle.getCreatePlist(), full_length, /* buffer_size = */ 10000);
@@ -157,7 +175,7 @@ void parse_numbers(const H5::DataSet& handle, Host* ptr, const std::string& path
             handle.read(buffer.data(), H5::PredType::NATIVE_DOUBLE, mspace, dspace);
             for (hsize_t i = 0; i < limit; ++i) {
                 auto current = buffer[i];
-                if (has_missing && ritsuko::are_floats_identical(&current, &missing_value)) {
+                if (has_missing && is_missing_value(current)) {
                     ptr->set_missing(counter + i);
                 } else {
                     check(current);
@@ -166,25 +184,26 @@ void parse_numbers(const H5::DataSet& handle, Host* ptr, const std::string& path
             }
         }
     ); 
+} catch (std::exception& e) {
+    throw std::runtime_error("failed to load floating-point dataset at '" + ritsuko::hdf5::get_name(handle) + "'; " + std::string(e.what()));
 }
 
 template<class Host>
-void extract_names(const H5::Group& handle, Host* ptr, const std::string& path, const std::string& dpath) {
-    auto npath = path + "/names";
+void extract_names(const H5::Group& handle, Host* ptr) try {
     if (handle.childObjType("names") != H5O_TYPE_DATASET) {
-        throw std::runtime_error("expected a dataset at '" + npath + "'");
+        throw std::runtime_error("expected a dataset");
     }
 
     auto nhandle = handle.openDataSet("names");
     auto dtype = nhandle.getDataType();
     if (dtype.getClass() != H5T_STRING) {
-        throw std::runtime_error("expected a string dataset at '" + npath + "'");
+        throw std::runtime_error("expected a string dataset");
     }
 
-    auto len = ptr->size();
-    auto nlen = ritsuko::hdf5::get_1d_length(nhandle.getSpace(), false, npath.c_str());
+    size_t len = ptr->size();
+    size_t nlen = ritsuko::hdf5::get_1d_length(nhandle.getSpace(), false);
     if (nlen != len) {
-        throw std::runtime_error("length of '" + npath + "' should be equal to length of '" + dpath + "'");
+        throw std::runtime_error("number of names should be equal to the object length");
     }
 
     ritsuko::hdf5::load_1d_string_dataset(
@@ -195,18 +214,19 @@ void extract_names(const H5::Group& handle, Host* ptr, const std::string& path, 
             ptr->set_name(i, std::string(val, val + len));
         }
     );
+} catch (std::exception& e) {
+    throw std::runtime_error("failed to load names at '" + ritsuko::hdf5::get_name(handle) + "'; " + std::string(e.what()));
 }
 
 template<class Provisioner, class Externals>
-std::shared_ptr<Base> parse_inner(const H5::Group& handle, Externals& ext, const std::string& path, const Version& version) {
+std::shared_ptr<Base> parse_inner(const H5::Group& handle, Externals& ext, const Version& version) try {
     // Deciding what type we're dealing with.
-    auto object_type = ritsuko::hdf5::load_scalar_string_attribute(handle, "uzuki_object", path.c_str());
+    auto object_type = ritsuko::hdf5::load_scalar_string_attribute(handle, "uzuki_object");
     std::shared_ptr<Base> output;
 
     if (object_type == "list") {
-        auto dpath = path + "/data";
         if (!handle.exists("data") || handle.childObjType("data") != H5O_TYPE_GROUP) {
-            throw std::runtime_error("expected a group at '" + dpath + "'");
+            throw std::runtime_error("expected a group at 'data'");
         }
         auto dhandle = handle.openGroup("data");
         size_t len = dhandle.getNumObjs();
@@ -217,24 +237,22 @@ std::shared_ptr<Base> parse_inner(const H5::Group& handle, Externals& ext, const
 
         for (size_t i = 0; i < len; ++i) {
             auto istr = std::to_string(i);
-            auto ipath = dpath + "/" + istr;
             if (!dhandle.exists(istr) || dhandle.childObjType(istr) != H5O_TYPE_GROUP) {
-                throw std::runtime_error("expected a group at '" + ipath + "'");
+                throw std::runtime_error("expected a group at 'data/" + istr + "'");
             }
             auto lhandle = dhandle.openGroup(istr);
-            lptr->set(i, parse_inner<Provisioner>(lhandle, ext, ipath, version));
+            lptr->set(i, parse_inner<Provisioner>(lhandle, ext, version));
         }
 
         if (named) {
-            extract_names(handle, lptr, path, dpath);
+            extract_names(handle, lptr);
         }
 
     } else if (object_type == "vector") {
-        auto vector_type = ritsuko::hdf5::load_scalar_string_attribute(handle, "uzuki_type", path.c_str());
+        auto vector_type = ritsuko::hdf5::load_scalar_string_attribute(handle, "uzuki_type");
 
         auto dhandle = ritsuko::hdf5::get_dataset(handle, "data");
-        std::string dpath = path + "/data";
-        auto len = ritsuko::hdf5::get_1d_length(dhandle.getSpace(), true, dpath.c_str());
+        size_t len = ritsuko::hdf5::get_1d_length(dhandle.getSpace(), true);
         bool is_scalar = (len == 0);
         if (is_scalar) {
             len = 1;
@@ -245,31 +263,30 @@ std::shared_ptr<Base> parse_inner(const H5::Group& handle, Externals& ext, const
         if (vector_type == "integer") {
             auto iptr = Provisioner::new_Integer(len, named, is_scalar);
             output.reset(iptr);
-            parse_integer_like(dhandle, iptr, dpath, [](int32_t) -> void {}, version);
+            parse_integer_like(dhandle, iptr, [](int32_t) -> void {}, version);
 
         } else if (vector_type == "boolean") {
             auto bptr = Provisioner::new_Boolean(len, named, is_scalar);
             output.reset(bptr);
-            parse_integer_like(dhandle, bptr, dpath, [&](int32_t x) -> void { 
+            parse_integer_like(dhandle, bptr, [&](int32_t x) -> void { 
                 if (x != 0 && x != 1) {
-                     throw std::runtime_error("boolean values should be 0 or 1 in '" + dpath + "'");
+                     throw std::runtime_error("boolean values should be 0 or 1");
                 }
             }, version);
 
         } else if (vector_type == "factor" || (version.equals(1, 0) && vector_type == "ordered")) {
             auto levhandle = ritsuko::hdf5::get_dataset(handle, "levels");
             auto levtype = levhandle.getDataType();
-            std::string levpath = path + "/levels";
             if (levtype.getClass() != H5T_STRING) {
-                throw std::runtime_error("expected a string dataset at '" + levpath + "'");
+                throw std::runtime_error("expected a string dataset for the levels at 'levels'");
             }
-            int32_t levlen = ritsuko::hdf5::get_1d_length(levhandle.getSpace(), false, levpath.c_str()); // use int-32 for comparison with the integer codes.
 
+            int32_t levlen = ritsuko::hdf5::get_1d_length(levhandle.getSpace(), false);
             bool ordered = false;
             if (vector_type == "ordered") {
                 ordered = true;
             } else if (handle.exists("ordered")) {
-                auto ohandle = get_scalar_dataset(handle, "ordered", H5T_INTEGER, path);
+                auto ohandle = get_scalar_dataset(handle, "ordered", H5T_INTEGER);
                 int tmp_ordered = 0;
                 ohandle.read(&tmp_ordered, H5::PredType::NATIVE_INT);
                 ordered = tmp_ordered > 0;
@@ -277,9 +294,9 @@ std::shared_ptr<Base> parse_inner(const H5::Group& handle, Externals& ext, const
 
             auto fptr = Provisioner::new_Factor(len, named, is_scalar, levlen, ordered);
             output.reset(fptr);
-            parse_integer_like(dhandle, fptr, dpath, [&](int32_t x) -> void { 
+            parse_integer_like(dhandle, fptr, [&](int32_t x) -> void { 
                 if (x < 0 || x >= levlen) {
-                     throw std::runtime_error("factor codes should be non-negative and less than the number of levels in '" + dpath + "'");
+                     throw std::runtime_error("factor codes should be non-negative and less than the number of levels");
                 }
             }, version);
 
@@ -291,7 +308,7 @@ std::shared_ptr<Base> parse_inner(const H5::Group& handle, Externals& ext, const
                 [&](size_t i, const char* val, size_t len) -> void { 
                     std::string x(val, val + len);
                     if (present.find(x) != present.end()) {
-                        throw std::runtime_error("levels should be unique at '" + path + "/levels'");
+                        throw std::runtime_error("levels should be unique");
                     }
                     fptr->set_level(i, x); 
                     present.insert(std::move(x));
@@ -307,7 +324,7 @@ std::shared_ptr<Base> parse_inner(const H5::Group& handle, Externals& ext, const
                     format = StringVector::DATETIME;
                 }
             } else if (handle.exists("format")) {
-                auto fhandle = get_scalar_dataset(handle, "format", H5T_STRING, path);
+                auto fhandle = get_scalar_dataset(handle, "format", H5T_STRING);
                 ritsuko::hdf5::load_1d_string_dataset(
                     fhandle, 
                     1, 
@@ -319,7 +336,7 @@ std::shared_ptr<Base> parse_inner(const H5::Group& handle, Externals& ext, const
                         } else if (x == "date-time") {
                             format = StringVector::DATETIME;
                         } else {
-                            throw std::runtime_error("unsupported format '" + x + "' at '" + path + "/format'");
+                            throw std::runtime_error("unsupported format '" + x + "'");
                         }
                     }
                 );
@@ -328,19 +345,19 @@ std::shared_ptr<Base> parse_inner(const H5::Group& handle, Externals& ext, const
             auto sptr = Provisioner::new_String(len, named, is_scalar, format);
             output.reset(sptr);
             if (format == StringVector::NONE) {
-                parse_string_like(dhandle, sptr, dpath, [](const std::string&) -> void {});
+                parse_string_like(dhandle, sptr, [](const std::string&) -> void {});
 
             } else if (format == StringVector::DATE) {
-                parse_string_like(dhandle, sptr, dpath, [&](const std::string& x) -> void {
+                parse_string_like(dhandle, sptr, [&](const std::string& x) -> void {
                     if (!ritsuko::is_date(x.c_str(), x.size())) {
-                         throw std::runtime_error("dates should follow YYYY-MM-DD formatting in '" + path + ".values'");
+                         throw std::runtime_error("dates should follow YYYY-MM-DD formatting");
                     }
                 });
 
             } else if (format == StringVector::DATETIME) {
-                parse_string_like(dhandle, sptr, dpath, [&](const std::string& x) -> void {
+                parse_string_like(dhandle, sptr, [&](const std::string& x) -> void {
                     if (!ritsuko::is_rfc3339(x.c_str(), x.size())) {
-                         throw std::runtime_error("date-times should follow the Internet Date/Time format in '" + path + ".values'");
+                         throw std::runtime_error("date-times should follow the Internet Date/Time format");
                     }
                 });
             }
@@ -348,38 +365,36 @@ std::shared_ptr<Base> parse_inner(const H5::Group& handle, Externals& ext, const
         } else if (vector_type == "number") {
             auto dptr = Provisioner::new_Number(len, named, is_scalar);
             output.reset(dptr);
-            parse_numbers(dhandle, dptr, dpath, [](double) -> void {}, version);
+            parse_numbers(dhandle, dptr, [](double) -> void {}, version);
 
         } else {
-            throw std::runtime_error("unknown vector type '" + vector_type + "' for '" + path + "'");
+            throw std::runtime_error("unknown vector type '" + vector_type + "'");
         }
 
         if (named) {
             auto vptr = static_cast<Vector*>(output.get());
-            extract_names(handle, vptr, path, dpath);
+            extract_names(handle, vptr);
         }
 
     } else if (object_type == "nothing") {
         output.reset(Provisioner::new_Nothing());
 
     } else if (object_type == "external") {
-        auto ipath = path + "/index";
         auto ihandle = ritsuko::hdf5::get_dataset(handle, "index");
-        if (ihandle.getDataType().getClass() != H5T_INTEGER) {
-            throw std::runtime_error("expected integer dataset at '" + ipath + "'");
+        if (ritsuko::hdf5::exceeds_integer_limit(ihandle, 32, true)) {
+            throw std::runtime_error("external index at 'index' cannot be represented by a 32-bit signed integer");
         }
-        ritsuko::hdf5::forbid_large_integers(ihandle, 32, ipath.c_str());
 
         auto ispace = ihandle.getSpace();
         int idims = ispace.getSimpleExtentNdims();
         if (idims != 0) {
-            throw std::runtime_error("expected scalar dataset at '" + ipath + "'");
+            throw std::runtime_error("expected scalar dataset at 'index'");
         } 
 
-        int idx;
-        ihandle.read(&idx, H5::PredType::NATIVE_INT);
+        int32_t idx;
+        ihandle.read(&idx, H5::PredType::NATIVE_INT32);
         if (idx < 0 || static_cast<size_t>(idx) >= ext.size()) {
-            throw std::runtime_error("external index out of range at '" + ipath + "'");
+            throw std::runtime_error("external index out of range at 'index'");
         }
 
         output.reset(Provisioner::new_External(ext.get(idx)));
@@ -389,6 +404,8 @@ std::shared_ptr<Base> parse_inner(const H5::Group& handle, Externals& ext, const
     }
 
     return output;
+} catch (std::exception& e) {
+    throw std::runtime_error("failed to load object at '" + ritsuko::hdf5::get_name(handle) + "'; " + std::string(e.what()));
 }
 /**
  * @endcond
@@ -399,8 +416,6 @@ std::shared_ptr<Base> parse_inner(const H5::Group& handle, Externals& ext, const
  * @tparam Externals Class describing how to resolve external references for type `EXTERNAL`.
  *
  * @param handle Handle for a HDF5 group corresponding to the list.
- * @param name Name of the HDF5 group corresponding to `handle`. 
- * Only used for error messages.
  * @param ext Instance of an external reference resolver class.
  *
  * @return A `ParsedList` containing a pointer to the root `Base` object.
@@ -441,15 +456,15 @@ std::shared_ptr<Base> parse_inner(const H5::Group& handle, Externals& ext, const
  * - `size_t size()`, which returns the number of available external references.
  */
 template<class Provisioner, class Externals>
-ParsedList parse(const H5::Group& handle, const std::string& name, Externals ext) {
+ParsedList parse(const H5::Group& handle, Externals ext) {
     Version version;
     if (handle.attrExists("uzuki_version")) {
-        auto ver_str = ritsuko::hdf5::load_scalar_string_attribute(handle.openAttribute("uzuki_version"), "uzuki_version", name.c_str());
+        auto ver_str = ritsuko::hdf5::load_scalar_string_attribute(handle, "uzuki_version");
         version = parse_version_string(ver_str);
     }
 
     ExternalTracker etrack(std::move(ext));
-    auto ptr = parse_inner<Provisioner>(handle, etrack, name, version);
+    auto ptr = parse_inner<Provisioner>(handle, etrack, version);
     etrack.validate();
     return ParsedList(std::move(ptr), std::move(version));
 }
@@ -461,8 +476,6 @@ ParsedList parse(const H5::Group& handle, const std::string& name, Externals ext
  * @tparam Provisioner A class namespace defining static methods for creating new `Base` objects.
  *
  * @param handle Handle for a HDF5 group corresponding to the list.
- * @param name Name of the HDF5 group corresponding to `handle`. 
- * Only used for error messages.
  *
  * @return A `ParsedList` containing a pointer to the root `Base` object.
  * Depending on `Provisioner`, this may contain references to all nested objects. 
@@ -470,8 +483,8 @@ ParsedList parse(const H5::Group& handle, const std::string& name, Externals ext
  * Any invalid representations in `contents` will cause an error to be thrown.
  */
 template<class Provisioner>
-ParsedList parse(const H5::Group& handle, const std::string& name) {
-    return parse<Provisioner>(handle, name, uzuki2::DummyExternals(0));
+ParsedList parse(const H5::Group& handle) {
+    return parse<Provisioner>(handle, uzuki2::DummyExternals(0));
 }
 
 /**
@@ -492,7 +505,7 @@ ParsedList parse(const H5::Group& handle, const std::string& name) {
 template<class Provisioner, class Externals>
 ParsedList parse(const std::string& file, const std::string& name, Externals ext) {
     H5::H5File handle(file, H5F_ACC_RDONLY);
-    return parse<Provisioner>(handle.openGroup(name), name, std::move(ext));
+    return parse<Provisioner>(handle.openGroup(name), std::move(ext));
 }
 
 /**
@@ -512,7 +525,7 @@ ParsedList parse(const std::string& file, const std::string& name, Externals ext
 template<class Provisioner>
 ParsedList parse(const std::string& file, const std::string& name) {
     H5::H5File handle(file, H5F_ACC_RDONLY);
-    return parse<Provisioner>(handle.openGroup(name), name, uzuki2::DummyExternals(0));
+    return parse<Provisioner>(handle.openGroup(name), uzuki2::DummyExternals(0));
 }
 
 /**
@@ -524,9 +537,9 @@ ParsedList parse(const std::string& file, const std::string& name) {
  * Only used for error messages.
  * @param num_external Expected number of external references. 
  */
-inline void validate(const H5::Group& handle, const std::string& name, int num_external = 0) {
+inline void validate(const H5::Group& handle, int num_external = 0) {
     DummyExternals ext(num_external);
-    parse<DummyProvisioner>(handle, name, ext);
+    parse<DummyProvisioner>(handle, ext);
     return;
 }
 
