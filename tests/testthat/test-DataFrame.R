@@ -370,23 +370,45 @@ test_that("loaders work correctly from HDF5 with non-default placeholders", {
 })
 
 test_that("stageObject works with extra mcols", {
+    tmp <- tempfile()
+    dir.create(tmp)
+
     df <- DataFrame(A=sample(3, 100, replace=TRUE), B=sample(letters[1:3], 100, replace=TRUE))
+    out <- stageObject(df, tmp, "raw_thing")
+    expect_null(out$data_frame$column_data)
+    expect_null(out$data_frame$other_data)
+
+    # Ignores it when the mcols have no columns.
+    mcols(df) <- make_zero_col_DFrame(2)
+    out <- stageObject(df, tmp, "raw_thing2")
+    expect_null(out$data_frame$column_data)
+    expect_null(out$data_frame$other_data)
+
+    # Alright, adding some mcols.
     mcols(df)$stuff <- runif(ncol(df))
     mcols(df)$foo <- sample(LETTERS, ncol(df), replace=TRUE)
     metadata(df) <- list(WHEE="foo")
 
-    tmp <- tempfile()
-    dir.create(tmp)
     out <- stageObject(df, tmp, "thing")
     expect_false(is.null(out$data_frame$column_data))
     expect_false(is.null(out$data_frame$other_data))
 
-    # Should write without errors.
     resource <- writeMetadata(out, tmp)
     expect_true(file.exists(file.path(tmp, resource$path)))
+    df2 <- loadDataFrame(out, tmp)
+    expect_equal(df, df2)
+
+    # Eliminates redundant row names.
+    mc <- mcols(df)
+    rownames(mc) <- c("C", "D")
+    mcols(df, use.names=FALSE) <- mc
+    out <- stageObject(df, tmp, "thing2")
+    resource <- writeMetadata(out, tmp)
 
     df2 <- loadDataFrame(out, tmp)
     expect_equal(df, df2)
+    mc <- mcols(df2, use.names=FALSE)
+    expect_null(rownames(mc))
 })
 
 test_that("DF staging preserves odd colnames", {

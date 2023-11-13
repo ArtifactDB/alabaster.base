@@ -21,6 +21,9 @@
 #' @details
 #' If \code{mcols(x)} has no columns, nothing is saved by \code{.processMcols}.
 #' Similarly, if \code{metadata(x)} is an empty list, nothing is saved by \code{.processMetadata}.
+#'
+#' If \code{mcols(x)} has non-\code{NULL} row names, these are removed prior to staging.
+#' These names are redundant with the names attached to \code{x} itself.
 #' 
 #' @seealso
 #' \code{.restoreMetadata}, which does the loading.
@@ -43,14 +46,20 @@ processMetadata <- function(x, dir, path, meta.name) {
 #' @rdname processMetadata
 #' @importFrom S4Vectors mcols metadata
 processMcols <- function(x, dir, path, mcols.name) {
-    if (!is.null(mcols.name) && !is.null(mcols(x)) && ncol(mcols(x))) {
-        tryCatch({
-            meta <- altStageObject(mcols(x), dir, paste0(path, "/", mcols.name), child=TRUE)
-            list(resource=writeMetadata(meta, dir=dir))
-        }, error=function(e) stop("failed to stage 'mcols(<", class(x)[1], ">)'\n  - ", e$message))
-    } else { 
-        NULL
+    output <- NULL
+
+    if (!is.null(mcols.name)) {
+        mc <- mcols(x, use.names=FALSE)
+        if (!is.null(mc) && ncol(mc)) {
+            rownames(mc) <- NULL # stripping out unnecessary row names.
+            output <- tryCatch({
+                meta <- altStageObject(mc, dir, paste0(path, "/", mcols.name), child=TRUE)
+                list(resource=writeMetadata(meta, dir=dir))
+            }, error=function(e) stop("failed to stage 'mcols(<", class(x)[1], ">)'\n  - ", e$message))
+        }
     }
+
+    return(output)
 }
 
 # Soft-deprecated back-compatibility fixes
