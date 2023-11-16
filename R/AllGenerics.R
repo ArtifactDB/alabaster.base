@@ -8,6 +8,7 @@
 #' @param path String containing a prefix of the relative path inside \code{dir} where \code{x} is to be saved.
 #' The actual path used to save \code{x} may include additional components, see Details.
 #' @param child Logical scalar indicating whether \code{x} is a child of a larger object.
+#' @param simplified Whether to save files in the simplified format.
 #' @param ... Further arguments to pass to specific methods.
 #'
 #' @return 
@@ -89,7 +90,7 @@
 #' searchForMethods .searchForMethods
 #' @import methods
 #' @importFrom jsonlite fromJSON
-setGeneric("stageObject", function(x, dir, path, child=FALSE, ...) {
+setGeneric("stageObject", function(x, dir, path, child=FALSE, simplified=FALSE, ...) {
     if (path != "." && file.exists(full.path <- file.path(dir, path))) {
         stop("cannot stage ", class(x)[1], " at existing path '", full.path, "'")
     }
@@ -101,13 +102,21 @@ setGeneric("stageObject", function(x, dir, path, child=FALSE, ...) {
         parent <- dirname(path)
         while (parent != ".") {
             ppath <- file.path(dir, parent)
-            candidates <- list.files(ppath, pattern="\\.json$")
-            for (can in candidates) {
-                schema <- fromJSON(file.path(ppath, can), simplifyVector=FALSE)[["$schema"]]
-                if (!startsWith(schema, "redirection/")) {
+
+            if (simplified) {
+                if (file.exists(ppath, "manifest.json")) {
                     stop("cannot save a non-child object inside another object's subdirectory at '", parent, "'")
                 }
+            } else {
+                candidates <- list.files(ppath, pattern="\\.json$")
+                for (can in candidates) {
+                    schema <- fromJSON(file.path(ppath, can), simplifyVector=FALSE)[["$schema"]]
+                    if (!startsWith(schema, "redirection/")) {
+                        stop("cannot save a non-child object inside another object's subdirectory at '", parent, "'")
+                    }
+                }
             }
+
             parent <- dirname(parent)
         }
     }
@@ -123,6 +132,7 @@ setGeneric("stageObject", function(x, dir, path, child=FALSE, ...) {
 
     standardGeneric("stageObject")
 })
+
 
 #' Acquire file or metadata
 #'

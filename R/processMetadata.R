@@ -31,11 +31,15 @@
 #' @export
 #' @aliases .processMetadata .processMcols
 #' @importFrom S4Vectors mcols
-processMetadata <- function(x, dir, path, meta.name) {
+processMetadata <- function(x, dir, path, meta.name, simplified=FALSE) {
     if (!is.null(meta.name) && length(metadata(x))) {
         tryCatch({
-            meta <- altStageObject(metadata(x), dir, paste0(path, "/", meta.name), child=TRUE)
-            list(resource=writeMetadata(meta, dir=dir))
+            if (simplified) {
+                altStageObject(metadata(x), dir, paste0(path, "/", meta.name), child=TRUE, simplified=TRUE)
+            } else {
+                meta <- altStageObject(metadata(x), dir, paste0(path, "/", meta.name), child=TRUE, simplified=FALSE)
+                list(resource=writeMetadata(meta, dir=dir))
+            }
         }, error=function(e) stop("failed to stage 'metadata(<", class(x)[1], ">)'\n  - ", e$message))
     } else { 
         NULL
@@ -45,7 +49,7 @@ processMetadata <- function(x, dir, path, meta.name) {
 #' @export
 #' @rdname processMetadata
 #' @importFrom S4Vectors mcols metadata
-processMcols <- function(x, dir, path, mcols.name) {
+processMcols <- function(x, dir, path, mcols.name, simplified=FALSE) {
     output <- NULL
 
     if (!is.null(mcols.name)) {
@@ -53,8 +57,12 @@ processMcols <- function(x, dir, path, mcols.name) {
         if (!is.null(mc) && ncol(mc)) {
             rownames(mc) <- NULL # stripping out unnecessary row names.
             output <- tryCatch({
-                meta <- altStageObject(mc, dir, paste0(path, "/", mcols.name), child=TRUE)
-                list(resource=writeMetadata(meta, dir=dir))
+                if (simplified) {
+                    altStageObject(mc, dir, path, child=TRUE, simplified=TRUE)
+                } else {
+                    meta <- altStageObject(mc, dir, paste0(path, "/", mcols.name), child=TRUE, simplified=FALSE)
+                    list(resource=writeMetadata(meta, dir=dir))
+                }
             }, error=function(e) stop("failed to stage 'mcols(<", class(x)[1], ">)'\n  - ", e$message))
         }
     }

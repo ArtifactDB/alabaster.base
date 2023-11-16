@@ -42,33 +42,55 @@ setMethod("stageObject", "DataFrameFactor", function(x, dir, path, child=FALSE, 
     dir.create(file.path(dir, path))
     stuff <- levels(x)
 
-    lev.info <- tryCatch({
-        info <- altStageObject(stuff, dir, paste0(path, "/", level.name), child=TRUE)
-        writeMetadata(info, dir)
-    }, error=function(e) stop("failed to stage underlying DataFrame in a DataFrameFactor\n  - ", e$message))
+    if (simplified) {
+        ofile <- file.path(dir, path, "contents.h5")
+        h5createFile(ofile)
+        host <- "data_frame_factor"
+        h5createGroup(ofile, host)
 
-    path2 <- paste0(path, "/", index.name)
-    ofile <- file.path(dir, path2)
-    rd <- data.frame(index=as.integer(x))
-    if (!is.null(names(x))){ 
-        rd <- cbind(row_names=names(x), rd)
-    }
-    .quickWriteCsv(rd, path=ofile, compression="gzip", row.names=FALSE)
+        fhandle <- H5Fopen(ofile)
+        on.exit(H5Fclose(fhandle), add=TRUE)
+        (function (){
+            ghandle <- H5Gopen(fhandle, host)
+            on.exit(H5Gclose(ghandle), add=TRUE)
+            h5writeAttribute("1.0", ghandle, "version", asScalar=TRUE)
+        })()
 
-    element_data <- .processMcols(x, dir, path, mcols.name) 
+        .simple_save_codes(fhandle, host, x)
+        altStageObject(stuff, dir, paste0(path, "/levels"), child=TRUE, simplified=TRUE)
+        .processMcols(x, dir, path, "element_annotations", simplified=TRUE) 
+        .processMetadata(x, dir, path, "other_annotations", simplified=TRUE) 
+        write("data_frame_factor", file=file.path(dir, path, "OBJECT"))
 
-    list(
-        `$schema`="data_frame_factor/v1.json",
-        path=path2,
-        is_child=child,
-        factor=list(
-            length=length(x),
-            names=!is.null(names(x)),
-            element_data=element_data,
-            compression="gzip"
-        ),
-        data_frame_factor=list(
-            levels=list(resource=lev.info)
+    } else {
+        lev.info <- tryCatch({
+            info <- altStageObject(stuff, dir, paste0(path, "/", level.name), child=TRUE)
+            writeMetadata(info, dir)
+        }, error=function(e) stop("failed to stage underlying DataFrame in a DataFrameFactor\n  - ", e$message))
+
+        path2 <- paste0(path, "/", index.name)
+        ofile <- file.path(dir, path2)
+        rd <- data.frame(index=as.integer(x))
+        if (!is.null(names(x))){ 
+            rd <- cbind(row_names=names(x), rd)
+        }
+        .quickWriteCsv(rd, path=ofile, compression="gzip", row.names=FALSE)
+
+        element_data <- .processMcols(x, dir, path, mcols.name) 
+
+        list(
+            `$schema`="data_frame_factor/v1.json",
+            path=path2,
+            is_child=child,
+            factor=list(
+                length=length(x),
+                names=!is.null(names(x)),
+                element_data=element_data,
+                compression="gzip"
+            ),
+            data_frame_factor=list(
+                levels=list(resource=lev.info)
+            )
         )
-    )
+    }
 })

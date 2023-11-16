@@ -66,110 +66,90 @@
 #' @rdname stageDataFrame
 #' @importFrom utils write.csv
 #' @importFrom S4Vectors DataFrame
-setMethod("stageObject", "DataFrame", function(x, dir, path, child=FALSE, df.name="simple", mcols.name="mcols", meta.name="other", .version.df=2, .version.hdf5=3) {
-    dir.create(file.path(dir, path), showWarnings=FALSE)
+setMethod("stageObject", "DataFrame", function(x, dir, path, child=FALSE, simplified=TRUE, df.name="simple", mcols.name="mcols", meta.name="other", .version.df=2, .version.hdf5=2) {
+    full.path <- file.path(dir, path)
+    dir.create(full.path, showWarnings=FALSE)
 
-    true.colnames <- colnames(x)
-    if (anyDuplicated(true.colnames)) {
-        stop("detected duplicate column names in a ", class(x)[1], " object")
-    }
-    if (any(true.colnames == "")) {
-        stop("detected empty column name in a ", class(x)[1], " object")
-    }
+    if (simplified) {
+        .write_hdf5_new(x, dir, path)
+        .processMcols(x, dir, path, "column_annotations", simplified=TRUE)
+        .processMetadata(x, dir, path, "other_annotations", simplified=TRUE)
+        write("data_frame", file=file.path(full.path, "OBJECT"))
 
-    # Saving contents to file.
-    format <- .saveDataFrameFormat()
-    opath <- paste0(path, "/", df.name)
-    extra <- list(list())
-    has_row_names = !is.null(rownames(x))
+    } else {
+        true.colnames <- colnames(x)
+        if (anyDuplicated(true.colnames)) {
+            stop("detected duplicate column names in a ", class(x)[1], " object")
+        }
+        if (any(true.colnames == "")) {
+            stop("detected empty column name in a ", class(x)[1], " object")
+        }
 
-    if (!is.null(format) && format=="hdf5") {
-        opath <- paste0(opath, ".h5")
-        ofile <- file.path(dir, opath)
-        factor.levels <- rep(list(character(0)), ncol(x))
+        # Saving contents to file.
+        format <- .saveDataFrameFormat()
+        opath <- paste0(path, "/", df.name)
+        extra <- list(list())
+        has_row_names = !is.null(rownames(x))
 
-        if (.version.hdf5 < 3) {
+        if (!is.null(format) && format=="hdf5") {
+            opath <- paste0(opath, ".h5")
+            ofile <- file.path(dir, opath)
+            factor.levels <- rep(list(character(0)), ncol(x))
+
             sanitized <- .sanitize_df_columns(x, dir, path, .version.df)
             meta <- sanitized$metadata
             factor.levels <- sanitized$levels
             .dump_df_to_hdf5(sanitized$x, meta, "contents", ofile, .version.hdf5=.version.hdf5)
             extra[[1]]$version <- min(.version.hdf5, 3)
+
+            schema <- "hdf5_data_frame/v1.json"
+            extra[[1]]$group <- "contents"
+
         } else {
-            meta <- .write_hdf5_new(x, "contents", ofile, dir, path)
+            sanitized <- .sanitize_df_columns(x, dir, path, .version.df)
+            meta <- sanitized$metadata
+            X <- data.frame(sanitized$x, check.names=FALSE)
+            if (has_row_names) {
+                # Using the 'row_names' name for back-compatibility.
+                X <- cbind(row_names=rownames(sanitized$x), X)
+            }
+            
+            if (!is.null(format) && format=="csv") {
+                opath <- paste0(opath, ".csv")
+                ofile <- file.path(dir, opath)
+                .quickWriteCsv(X, ofile, row.names=FALSE, compression="none", validate=FALSE)
+                extra[[1]]$compression <- "none"
+            } else {
+                opath <- paste0(opath, ".csv.gz")
+                ofile <- file.path(dir, opath)
+                .quickWriteCsv(X, ofile, row.names=FALSE, compression="gzip", validate=FALSE)
+                extra[[1]]$compression <- "gzip"
+            }
+
+            schema <- "csv_data_frame/v1.json"
         }
 
-        schema <- "hdf5_data_frame/v1.json"
-        extra[[1]]$group <- "contents"
+        element_data <- .processMcols(x, dir, path, mcols.name)
+        other_data <- .processMetadata(x, dir, path, meta.name)
 
-        check_hdf5_df(ofile, 
-            name=extra[[1]]$group,
-            nrows=nrow(x), 
-            has_row_names=has_row_names,
-            column_names=true.colnames,
-            column_types=vapply(meta, function(x) x$type, ""),
-            string_formats=vapply(meta, function(x) if (is.null(x$format)) "" else x$format, ""),
-            factor_levels=factor.levels,
-            factor_ordered=vapply(meta, function(x) if (is.null(x$ordered)) FALSE else x$ordered, TRUE),
-            df_version=.version.df,
-            hdf5_version=.version.hdf5
+        meta <- list(
+            `$schema`=schema,
+            path=opath,
+            is_child=child,
+            data_frame=list(
+                columns=meta,
+                row_names=has_row_names,
+                column_data=element_data,
+                other_data=other_data,
+                dimensions=dim(x),
+                version=if (.version.df != 1) min(.version.df, 2) else NULL 
+            )
         )
 
-    } else {
-        sanitized <- .sanitize_df_columns(x, dir, path, .version.df)
-        meta <- sanitized$metadata
-        X <- data.frame(sanitized$x, check.names=FALSE)
-        if (has_row_names) {
-            # Using the 'row_names' name for back-compatibility.
-            X <- cbind(row_names=rownames(sanitized$x), X)
-        }
-        
-        if (!is.null(format) && format=="csv") {
-            opath <- paste0(opath, ".csv")
-            ofile <- file.path(dir, opath)
-            .quickWriteCsv(X, ofile, row.names=FALSE, compression="none", validate=FALSE)
-            extra[[1]]$compression <- "none"
-        } else {
-            opath <- paste0(opath, ".csv.gz")
-            ofile <- file.path(dir, opath)
-            .quickWriteCsv(X, ofile, row.names=FALSE, compression="gzip", validate=FALSE)
-            extra[[1]]$compression <- "gzip"
-        }
-
-        schema <- "csv_data_frame/v1.json"
-        check_csv_df(ofile, 
-            nrows=nrow(x), 
-            has_row_names=has_row_names,
-            column_names=true.colnames,
-            column_types=vapply(meta, function(x) x$type, ""),
-            string_formats=vapply(meta, function(x) if (is.null(x$format)) "" else x$format, ""),
-            factor_levels=sanitized$levels,
-            factor_ordered=vapply(meta, function(x) if (is.null(x$ordered)) FALSE else x$ordered, TRUE),
-            df_version=.version.df,
-            is_compressed=extra[[1]]$compression == "gzip",
-            parallel=TRUE
-        )
+        names(extra) <- dirname(schema) 
+        meta <- c(meta, extra)
+        meta
     }
-
-    element_data <- .processMcols(x, dir, path, mcols.name)
-    other_data <- .processMetadata(x, dir, path, meta.name)
-
-    meta <- list(
-        `$schema`=schema,
-        path=opath,
-        is_child=child,
-        data_frame=list(
-            columns=meta,
-            row_names=has_row_names,
-            column_data=element_data,
-            other_data=other_data,
-            dimensions=dim(x),
-            version=if (.version.df != 1) min(.version.df, 2) else NULL 
-        )
-    )
-
-    names(extra) <- dirname(schema) 
-    meta <- c(meta, extra)
-    meta
 })
 
 .sanitize_df_columns <- function(x, dir, path, .version.df) {
@@ -313,7 +293,11 @@ setMethod("stageObject", "DataFrame", function(x, dir, path, child=FALSE, df.nam
 }
 
 #' @importFrom rhdf5 h5write h5createGroup h5createFile H5Gopen H5Gclose H5Acreate H5Aclose H5Awrite H5Fopen H5Fclose H5Dopen H5Dclose
-.write_hdf5_new <- function(x, host, ofile, dir, path) {
+.write_hdf5_new <- function(x, dir, path) {
+    subpath <- "basic_columns.h5"
+    host <- "data_frame"
+
+    ofile <- paste0(dir, "/", subpath)
     h5createFile(ofile)
     prefix <- function(x) paste0(host, "/", x)
     h5createGroup(ofile, host)
@@ -330,11 +314,10 @@ setMethod("stageObject", "DataFrame", function(x, dir, path, child=FALSE, df.nam
         H5Awrite(ahandle, nrow(x))
     })()
 
-    meta <- vector("list", ncol(x))
+    collected <- list()
     for (z in seq_along(meta)) {
         col <- x[[z]]
         data.name <- as.character(z - 1L)
-        colmeta <- list(name=colnames(x)[z])
         is.other <- FALSE
         sanitized <- NULL
 
@@ -388,10 +371,10 @@ setMethod("stageObject", "DataFrame", function(x, dir, path, child=FALSE, df.nam
         }
 
         if (is.other) {
-            colmeta$type <- "other"
+            other.dir <- "other_columns"
+            dir.create(file.path(dir, other.dir), showWarnings=FALSE)
             tryCatch({
-                other.info <- altStageObject(x[[z]], dir, paste0(path, "/column", z), child=TRUE)
-                colmeta$resource <- writeMetadata(other.info, dir=dir)
+                altStageObject(x[[z]], dir, paste0(other.dir, "/", data.name), child=TRUE, simplified=TRUE)
             }, error = function(e) stop("failed to stage column '", colmeta$name, "'\n  - ", e$message))
 
         } else if (!is.null(sanitized)) {
@@ -422,6 +405,4 @@ setMethod("stageObject", "DataFrame", function(x, dir, path, child=FALSE, df.nam
     if (!is.null(rownames(x))) {
         h5write(rownames(x), fhandle, prefix("row_names"))
     }
-
-    meta
 }
