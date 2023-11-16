@@ -26,6 +26,10 @@
 #' In such cases, developers should call \code{\link{altSaveObject}} on each child component, rather than calling \link{saveObject} directly.
 #' This ensures that any application-level overrides of the loading functions are respected. 
 #'
+#' If a method makes use of additional arguments, it should be scoped by the name of the class for each method, e.g., \code{list.format}, \code{dataframe.include.nested}.
+#' This avoids problems with conflicts in the interpretation of identically named arguments between different methods.
+#' It is expected that arguments in \code{...} are forwarded to internal \code{\link{altSaveObject}} calls.
+#'
 #' @author Aaron Lun
 #' @examples
 #' library(S4Vectors)

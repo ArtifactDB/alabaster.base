@@ -5,7 +5,7 @@
 #'
 #' @param A list or \linkS4class{List}.
 #' @inheritParams saveObject
-#' @param format String specifying the format in which to save the list.
+#' @param list.format String specifying the format in which to save the list.
 #' @param ... Further arguments, passed to \code{\link{altSaveObject}} for complex child objects.
 #' 
 #' @return
@@ -34,24 +34,25 @@
 #' @export
 #' @rdname saveBaseList
 #' @importFrom jsonlite toJSON
-setMethod("saveObject", "list", function(x, path, format=saveBaseListFormat(), ...) {
+setMethod("saveObject", "list", function(x, path, list.format=saveBaseListFormat(), ...) {
     dir.create(path, showWarnings=FALSE)
 
     env <- new.env()
     env$collected <- list()
+    args <- list(list.format=list.format, ...)
 
-    if (!is.null(format) && format == "hdf5") {
+    if (!is.null(list.format) && list.format == "hdf5") {
         fpath <- file.path(path, "list_contents.h5")
         h5createFile(fpath)
         dname <- "hdf5_simple_list"
-        .transform_list_hdf5(x, dir=NULL, path=path, fpath=fpath, name=dname, env=env, simplified=TRUE, .version=3, ...)
+        .transform_list_hdf5(x, dir=NULL, path=path, fpath=fpath, name=dname, env=env, simplified=TRUE, .version=3, extra=args)
         .label_hdf5_group(fpath, dname, uzuki_version="1.3")
         write(dname, file=file.path(path, "OBJECT"))
 
         check_list_hdf5(fpath, dname, length(env$collected)) # Check that we did it correctly.
 
     } else {
-        formatted <- .transform_list_json(x, dir=NULL, path=path, env=env, simplified=TRUE, .version=2, ...)
+        formatted <- .transform_list_json(x, dir=NULL, path=path, env=env, simplified=TRUE, .version=2, extra=args)
         formatted$version <- "1.2"
         write("json_simple_list", file=file.path(path, "OBJECT"))
 
@@ -67,8 +68,8 @@ setMethod("saveObject", "list", function(x, path, format=saveBaseListFormat(), .
 
 #' @export
 #' @rdname saveBaseList
-setMethod("stageObject", "List", function(x, path, format=saveBaseListFormat(), ...) {
-    stageObject(as.list(x), path, format=format, ...)
+setMethod("stageObject", "List", function(x, path, list.format=saveBaseListFormat(), ...) {
+    stageObject(as.list(x), path, list.format=list.format, ...)
 })
 
 ##################################
@@ -77,7 +78,7 @@ setMethod("stageObject", "List", function(x, path, format=saveBaseListFormat(), 
 
 #' @importFrom S4Vectors DataFrame
 #' @importFrom rhdf5 h5createGroup h5write
-.transform_list_hdf5 <- function(x, dir, path, fpath, name, env, simplified, .version, ...) {
+.transform_list_hdf5 <- function(x, dir, path, fpath, name, env, simplified, .version, extra) {
     h5createGroup(fpath, name)
 
     if (is.list(x) && !is.data.frame(x) && !is(x, "POSIXlt")) {
@@ -93,7 +94,7 @@ setMethod("stageObject", "List", function(x, path, format=saveBaseListFormat(), 
         for (i in seq_along(x)) {
             newname <- paste0(name, "/data/", i - 1L)
             tryCatch({
-                .transform_list_hdf5(x[[i]], dir=dir, path=path, fpath=fpath, name=newname, env=env, simplified=simplified, .version=.version, ...)
+                .transform_list_hdf5(x[[i]], dir=dir, path=path, fpath=fpath, name=newname, env=env, simplified=simplified, .version=.version, extra=extra)
             }, error=function(e) {
                 s <- if (is.null(nn)) i else paste0("'", nn[i], "'")
                 stop("failed to stage list element ", s, "\n  - ", e$message)
@@ -206,7 +207,7 @@ setMethod("stageObject", "List", function(x, path, format=saveBaseListFormat(), 
         if (simplified) {
             other.dir <- file.path(path, "other_contents")
             dir.create(other.dir, showWarnings=FALSE)
-            altSaveObject(x, file.path(other.dir, n), ...)
+            do.call(altSaveObject, c(list(x, file.path(other.dir, n)), extra))
             env$collected[[n]] <- TRUE
         } else {
             meta <- altStageObject(x, dir, paste0(path, paste0("/child-", n)), child=TRUE)
@@ -280,7 +281,7 @@ setMethod("stageObject", "List", function(x, path, format=saveBaseListFormat(), 
     }
 }
 
-.transform_list_json <- function(x, dir, path, env, simplified, .version, ...) {
+.transform_list_json <- function(x, dir, path, env, simplified, .version, extra) {
     if (is.list(x) && !is.data.frame(x)) {
         formatted <- list(type="list")
 
@@ -293,7 +294,7 @@ setMethod("stageObject", "List", function(x, path, format=saveBaseListFormat(), 
         values <- vector("list", length(x))
         for (i in seq_along(x)) {
             values[[i]] <- tryCatch({
-                .transform_list_json(x[[i]], dir=dir, path=path, env=env, simplified=simplified, .version=.version, ...)
+                .transform_list_json(x[[i]], dir=dir, path=path, env=env, simplified=simplified, .version=.version, extra=extra)
             }, error=function(e) {
                 s <- if (is.null(nn)) i else paste0("'", nn[i], "'")
                 stop("failed to stage list element ", s, "\n  - ", e$message)
@@ -381,7 +382,7 @@ setMethod("stageObject", "List", function(x, path, format=saveBaseListFormat(), 
         if (simplified) {
             other.dir <- file.path(path, "other_contents")
             dir.create(other.dir, showWarnings=FALSE)
-            altSaveObject(x, file.path(other.dir, n), ...)
+            do.call(altSaveObject, c(list(x, file.path(other.dir, n)), extra))
             env$collected[[n]] <- TRUE
         } else {
             meta <- altStageObject(x, dir, paste0(path, paste0("/child-", n)), child=TRUE)

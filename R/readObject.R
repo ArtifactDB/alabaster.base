@@ -26,6 +26,10 @@
 #' Developers of alabaster extensions can add extra functions to this registry, usually in the \code{\link{.onLoad}} function of their packages.
 #' Alternatively, extension developers can request the addition of their packages to default registry.
 #'
+#' If a loading function makes use of additional arguments, it should be scoped by the name of the class for each method, e.g., \code{list.parallel}, \code{dataframe.include.nested}.
+#' This avoids problems with conflicts in the interpretation of identically named arguments between different functions.
+#' It is expected that arguments in \code{...} are forwarded to internal \code{\link{altReadObject}} calls.
+#'
 #' @section Comments for application developers:
 #' Application developers can override the behavior of \code{readObject} by specifying a custom function in \code{\link{altReadObject}}.
 #' This is typically used to point to a different set of application-specific schemas, 

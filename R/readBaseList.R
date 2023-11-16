@@ -3,7 +3,7 @@
 #' Read a \link{list} from its on-disk representation.
 #'
 #' @param path String containing a path to a directory, itself created with the list method for \code{\link{stageObject}}. 
-#' @param parallel Whether to perform reading and parsing in parallel for greater speed.
+#' @param list.parallel Whether to perform reading and parsing in parallel for greater speed.
 #' Only relevant for lists stored in the JSON format.
 #' @param ... Further arguments to be passed to \code{\link{altReadObject}} for complex child objects.
 #' 
@@ -24,13 +24,13 @@
 #'
 #' @export
 #' @aliases loadBaseList
-readBaseList <- function(path, parallel=TRUE, ...) {
+readBaseList <- function(path, list.parallel=TRUE, ...) {
     all.children <- list()
     child.path <- file.path(path, "other_contents")
     if (file.exists(child.path)) {
         all.children <- as.list(list.files(child.path))
         for (i in seq_along(all.children)) {
-            all.children[[i]] <- altReadObject(file.path(child.path, all.children[[i]]), parallel=parallel, ...)
+            all.children[[i]] <- altReadObject(file.path(child.path, all.children[[i]]), list.parallel=list.parallel, ...)
         }
     }
 
@@ -40,7 +40,7 @@ readBaseList <- function(path, parallel=TRUE, ...) {
         output <- load_list_hdf5(lpath, "hdf5_simple_list", all.children)
     } else {
         lpath <- file.path(path, "list_contents.json.gz")
-        output <- load_list_json(lpath, all.children, parallel)
+        output <- load_list_json(lpath, all.children, list.parallel)
     }
 
     output

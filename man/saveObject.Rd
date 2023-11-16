@@ -37,7 +37,11 @@ These are reserved for applications, e.g., to build manifests or to store additi
 
 Developers of \code{stageObject} methods may wish to save \dQuote{child} components of \code{x} with a subdirectory of \code{path}.
 In such cases, developers should call \code{\link{altSaveObject}} on each child component, rather than calling \link{saveObject} directly.
-This ensures that any application-level overrides of the loading functions are respected.
+This ensures that any application-level overrides of the loading functions are respected. 
+
+If a method makes use of additional arguments, it should be scoped by the name of the class for each method, e.g., \code{list.format}, \code{dataframe.include.nested}.
+This avoids problems with conflicts in the interpretation of identically named arguments between different methods.
+It is expected that arguments in \code{...} are forwarded to internal \code{\link{altSaveObject}} calls.
 }
 \examples{
 library(S4Vectors)

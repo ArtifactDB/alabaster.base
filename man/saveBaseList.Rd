@@ -5,7 +5,7 @@
 \alias{stageObject,List-method}
 \title{Save a base list to disk}
 \usage{
-\S4method{saveObject}{list}(x, path, format = saveBaseListFormat(), ...)
+\S4method{saveObject}{list}(x, path, list.format = saveBaseListFormat(), ...)
 
 \S4method{stageObject}{List}(x, dir, path, child = FALSE, fname = "list")
 }
@@ -14,7 +14,7 @@
 
 \item{path}{String containing the path to a directory in which to save \code{x}.}
 
-\item{format}{String specifying the format in which to save the list.}
+\item{list.format}{String specifying the format in which to save the list.}
 
 \item{...}{Further arguments, passed to \code{\link{altSaveObject}} for complex child objects.}
 
