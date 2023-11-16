@@ -90,7 +90,55 @@
 #' searchForMethods .searchForMethods
 #' @import methods
 #' @importFrom jsonlite fromJSON
-setGeneric("stageObject", function(x, dir, path, child=FALSE, simplified=FALSE, ...) {
+setGeneric("saveObject", function(x, dir, path, child=FALSE, ...) {
+    if (path != "." && file.exists(full.path <- file.path(dir, path))) {
+        stop("cannot stage ", class(x)[1], " at existing path '", full.path, "'")
+    }
+    if (grepl("\\\\", path)) {
+        stop("Windows-style path separators are not allowed")
+    }
+
+    if (!child) {
+        parent <- dirname(path)
+        while (parent != ".") {
+            ppath <- file.path(dir, parent)
+
+            if (simplified) {
+                if (file.exists(ppath, "manifest.json")) {
+                    stop("cannot save a non-child object inside another object's subdirectory at '", parent, "'")
+                }
+            } else {
+                candidates <- list.files(ppath, pattern="\\.json$")
+                for (can in candidates) {
+                    schema <- fromJSON(file.path(ppath, can), simplifyVector=FALSE)[["$schema"]]
+                    if (!startsWith(schema, "redirection/")) {
+                        stop("cannot save a non-child object inside another object's subdirectory at '", parent, "'")
+                    }
+                }
+            }
+
+            parent <- dirname(parent)
+        }
+    }
+
+    # Need to search here to pick up any subclasses that might have better
+    # stageObject methods in yet-to-be-loaded packages.
+    if (.search_methods(x)) {
+        fun <- selectMethod("saveObject", class(x)[1], optional=TRUE)
+        if (!is.null(fun)) {
+            return(fun(x, dir, path, child=child, ...))
+        }
+    }
+
+    standardGeneric("saveObject")
+})
+
+#######################################
+########### OLD STUFF HERE ############
+#######################################
+
+#' @export
+setGeneric("stageObject", function(x, dir, path, child=FALSE, ...) {
     if (path != "." && file.exists(full.path <- file.path(dir, path))) {
         stop("cannot stage ", class(x)[1], " at existing path '", full.path, "'")
     }
@@ -133,9 +181,10 @@ setGeneric("stageObject", function(x, dir, path, child=FALSE, simplified=FALSE, 
     standardGeneric("stageObject")
 })
 
-
 #' Acquire file or metadata
 #'
+#' \emph{WARNING: these functions are deprecated. 
+#' Applications are expected to handle acquisition of files before loaders are called.}
 #' Acquire a file or metadata for loading.
 #' As one might expect, these are typically used inside a \code{load*} function.
 #'

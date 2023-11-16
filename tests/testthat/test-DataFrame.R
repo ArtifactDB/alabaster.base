@@ -63,7 +63,7 @@ test_that("DFs handle their column types correctly", {
     old <- saveDataFrameFormat("hdf5")
     on.exit(saveDataFrameFormat(old))
 
-    for (version in 1:3) {
+    for (version in 1:2) {
         meta2 <- stageObject(df, tmp, path=paste0("WHEE-", version), .version.df=version, .version.hdf5=version)
         expect_match(meta2$path, ".h5$")
         expect_identical(meta2$`$schema`, "hdf5_data_frame/v1.json")
@@ -76,6 +76,13 @@ test_that("DFs handle their column types correctly", {
         round2 <- loadDataFrame(meta2, project=tmp)
         expect_identical(round2, df)
     }
+
+    # Works in the new world.
+    saveObject(df, tmp, path="FOOBAR")
+    expect_identical(readLines(file.path(tmp, "FOOBAR", "OBJECT")), "data_frame")
+    round2 <- readDataFrame(tmp, "FOOBAR")
+    expect_identical(round2, df)
+    asdasd
 })
 
 test_that("staging of weird objects within DFs works correctly", {

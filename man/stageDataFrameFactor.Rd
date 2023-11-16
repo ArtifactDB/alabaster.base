@@ -17,13 +17,6 @@
 \arguments{
 \item{x}{A \linkS4class{DataFrameFactor} object.}
 
-\item{dir}{String containing the path to the staging directory.}
-
-\item{path}{String containing a prefix of the relative path inside \code{dir} where \code{x} is to be saved.
-The actual path used to save \code{x} may include additional components, see Details.}
-
-\item{child}{Logical scalar indicating whether \code{x} is a child of a larger object.}
-
 \item{index.name}{String containing the name of the file to save the factor indices.}
 
 \item{level.name}{String containing the name of the subdirectory to save the factor levels.}

@@ -15,9 +15,6 @@ This can also be \code{NULL}, in which case no \code{mcols} are restored.}
 
 \item{meta.data}{List of metadata specifying the \code{resource} location of the \code{\link{metadata}} files.
 This can also be \code{NULL}, in which case no \code{metadata} are restored.}
-
-\item{project}{Any argument accepted by the acquisition functions, see \code{?\link{acquireFile}}.
-By default, this should be a string containing the path to a staging directory.}
 }
 \value{
 \code{x} is returned, possibly with \code{mcols} and \code{metadata} added to it.

@@ -37,8 +37,120 @@
 #' loadDataFrame(out, tmp)
 #'
 #' @export
+#' @rdname loadDataFrame
+#' @aliases loadDataFrame
 #' @importFrom S4Vectors DataFrame make_zero_col_DFrame
-#' @importFrom rhdf5 h5read h5readAttributes
+#' @importFrom rhdf5 h5read h5readAttributes h5ls
+readDataFrame <- function(dir, path, ...) {
+    fpath <- file.path(dir, path, "basic_columns.h5")
+    fhandle <- H5Fopen(fpath)
+    on.exit(H5Fclose(fhandle))
+
+    host <- "data_frame"
+    ghandle <- H5Gopen(fhandle, host)
+    on.exit(H5Gclose(ghandle), add=TRUE, after=FALSE)
+
+    nrows <- h5readAttributes(fhandle, host)[["row-count"]]
+    colnames <- as.vector(h5read(ghandle, "column_names"))
+    rownames <- NULL
+    if ("row_names" %in% h5ls(ghandle, recursive=FALSE, datasetinfo=FALSE)$name) {
+        rownames <- as.vector(h5read(ghandle, "row_names"))
+    }
+
+    dhandle<- H5Gopen(ghandle, "data")
+    on.exit(H5Gclose(dhandle), add=TRUE, after=FALSE)
+    all.children <- h5ls(dhandle, recursive=FALSE, datasetinfo=FALSE)$name
+
+    columns <- vector("list", length(colnames))
+    for (col in seq_along(colnames)) {
+        expected <- as.character(col - 1L)
+
+        if (expected %in% all.children) {
+            full.name <- paste0(host, "/data/", expected)
+            attrs <- h5readAttributes(fhandle, full.name)
+
+            if (attrs$type == "factor") {
+                code.name <- paste0(full.name, "/codes")
+                codes <- as.vector(h5read(fhandle, code.name))
+                code.attrs <- h5readAttributes(fhandle, code.name)
+                codes <- .repopulate_missing_hdf5(codes, code.attrs)
+                levels <- as.vector(h5read(fhandle, paste0(full.name, "/levels")))
+                columns[[col]] <- factor(levels[codes + 1L], levels=levels, ordered=isTRUE(attrs$ordered > 0))
+
+            } else {
+                contents <- as.vector(h5read(fhandle, full.name))
+                contents <- .repopulate_missing_hdf5(contents, attrs)
+                contents <- .cast_atomic(contents, attrs$type)
+
+                if (attrs$type == "string") {
+                    if (!is.null(attrs$format)) {
+                        if (attrs$format == "date") {
+                            contents <- as.Date(contents)
+                        } else if (attrs$format == "date-time") {
+                            contents <- .cast_datetime(contents)
+                        }
+                    }
+                }
+
+                columns[[col]] <- contents
+            }
+            
+        } else {
+            columns[[col]] <- readObject(dir, paste0(path, "/other_columns/", expected), ...)
+        }
+    }
+   
+    names(columns) <- colnames
+    if (length(columns) || !is.null(rownames)) {
+        output <- DataFrame(columns, check.names=FALSE, row.names=rownames)
+    } else {
+        output <- make_zero_col_DFrame(nrow=nrows)
+    }
+
+    if (file.exists(file.path(dir, path, "column_annotations"))) {
+        mcols(output) <- altReadObject(dir, paste0(path, "/column_annotations"), ...)
+    }
+
+    if (file.exists(file.path(dir, path, "other_annotations"))) {
+        metadata(output) <- altReadObject(dir, paste0(path, "/other_annotations"), ...)
+    }
+
+    output
+}
+
+#' @importFrom rhdf5 h5readAttributes
+.repopulate_missing_hdf5 <- function(current, attr=NULL) {
+    replace.na <- attr[["missing-value-placeholder"]]
+
+    restore_min_integer <- function(y) {
+        if (is.integer(y) && anyNA(y)) { # promote integer NAs back to the actual number.
+            y <- as.double(y)
+            y[is.na(y)] <- -2^31
+        }
+        y
+    }
+
+    if (is.null(replace.na)) {
+        current <- restore_min_integer(current)
+    } else if (is.na(replace.na)) {
+        if (!is.nan(replace.na)) {
+            # No-op as the placeholder is already R's NA of the relevant type.
+        } else { 
+            current[is.nan(current)] <- NA # avoid equality checks to an NaN.
+        }
+    } else {
+        current <- restore_min_integer(current)
+        current[which(current == replace.na)] <- NA # Using which() to avoid problems with existing NAs.
+    }
+
+    current
+}
+
+#######################################
+########### OLD STUFF HERE ############
+#######################################
+
+#' @export
 loadDataFrame <- function(info, project, include.nested=TRUE, parallel=TRUE) {
     has.rownames <- isTRUE(info$data_frame$row_names)
     col.info <- info$data_frame$columns
@@ -67,11 +179,13 @@ loadDataFrame <- function(info, project, include.nested=TRUE, parallel=TRUE) {
                     if (curinfo$type != "factor") {
                         stop("HDF5 groups as columns are only supported for factor columns")
                     }
-                    codes <- .repopulate_missing_hdf5(current$codes, path, prefix(paste0("data/", d, "/codes")))
+                    attrs <- h5readAttributes(path, prefix(paste0("data/", d, "/codes")))
+                    codes <- .repopulate_missing_hdf5(current$codes, attrs)
                     df[[i]] <- factor(current$levels[codes + 1L], current$levels, ordered=isTRUE(curinfo$ordered))
 
                 } else if (!is.null(current)) {
-                    current <- .repopulate_missing_hdf5(current, path, prefix(paste0("data/", d)))
+                    attrs <- h5readAttributes(path, prefix(paste0("data/", d)))
+                    current <- .repopulate_missing_hdf5(current, attrs)
                     df[[i]] <- as.vector(current) # remove 1d arrays.
 
                 } else {
@@ -98,35 +212,6 @@ loadDataFrame <- function(info, project, include.nested=TRUE, parallel=TRUE) {
 
     df <- .coerce_df_column_type(df, col.info, project, include.nested=include.nested)
     .restoreMetadata(df, mcol.data=info$data_frame$column_data, meta.data=info$data_frame$other_data, project=project)
-}
-
-#' @importFrom rhdf5 h5readAttributes
-.repopulate_missing_hdf5 <- function(current, path, name) {
-    attr <- h5readAttributes(path, name)
-    replace.na <- attr[["missing-value-placeholder"]]
-
-    restore_min_integer <- function(y) {
-        if (is.integer(y) && anyNA(y)) { # promote integer NAs back to the actual number.
-            y <- as.double(y)
-            y[is.na(y)] <- -2^31
-        }
-        y
-    }
-
-    if (is.null(replace.na)) {
-        current <- restore_min_integer(current)
-    } else if (is.na(replace.na)) {
-        if (!is.nan(replace.na)) {
-            # No-op as the placeholder is already R's NA of the relevant type.
-        } else { 
-            current[is.nan(current)] <- NA # avoid equality checks to an NaN.
-        }
-    } else {
-        current <- restore_min_integer(current)
-        current[which(current == replace.na)] <- NA # Using which() to avoid problems with existing NAs.
-    }
-
-    current
 }
 
 .coerce_df_column_type <- function(df, col.info, project, include.nested) {

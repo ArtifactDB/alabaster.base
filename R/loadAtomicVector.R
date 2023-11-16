@@ -19,6 +19,39 @@
 #' loadAtomicVector(meta, tmp)
 #' 
 #' @export
+#' @rdname loadAtomicVector
+#' @aliases loadAtomicVector
+readAtomicVector <- function(dir, path, ...) {
+    fpath <- file.path(dir, path, "contents.h5")
+    fhandle <- H5Fopen(fpath)
+    on.exit(H5Fclose(fhandle))
+
+    host <- "atomic_vector"
+    full.name <- paste0(host, "/values")
+    attrs <- h5readAttributes(fhandle, full.name)
+    contents <- as.vector(h5read(fhandle, full.name))
+    contents <- .repopulate_missing_hdf5(contents, attrs)
+    contents <- .cast_atomic(contents, attrs$type)
+
+    if (attrs$type == "string") {
+        if (!is.null(attrs$format)) {
+            if (attrs$format == "date") {
+                contents <- as.Date(contents)
+            } else if (attrs$format == "date-time") {
+                contents <- .cast_datetime(contents)
+            }
+        }
+    }
+
+    name.name <- paste0(host, "/names")
+    if (h5exists(fpath, name.name)) {
+        names(contents) <- as.vector(h5read(fpath, name.name))
+    }
+
+    contents
+}
+
+#' @export
 loadAtomicVector <- function(info, project, ...) {
     fpath <- acquireFile(project, info$path)
     meta <- info$atomic_vector

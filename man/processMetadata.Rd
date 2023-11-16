@@ -7,9 +7,9 @@
 \alias{processMcols}
 \title{Process R-level metadata}
 \usage{
-processMetadata(x, dir, path, meta.name)
+processMetadata(x, dir, path, meta.name, simplified = FALSE)
 
-processMcols(x, dir, path, mcols.name)
+processMcols(x, dir, path, mcols.name, simplified = FALSE)
 }
 \arguments{
 \item{x}{An \linkS4class{Vector} object for \code{.processMcols}, and a \linkS4class{Annotated} object for \code{.processMetadata}.}
@@ -36,6 +36,9 @@ This is typically used inside \code{\link{stageObject}} methods for concrete sub
 \details{
 If \code{mcols(x)} has no columns, nothing is saved by \code{.processMcols}.
 Similarly, if \code{metadata(x)} is an empty list, nothing is saved by \code{.processMetadata}.
+
+If \code{mcols(x)} has non-\code{NULL} row names, these are removed prior to staging.
+These names are redundant with the names attached to \code{x} itself.
 }
 \seealso{
 \code{.restoreMetadata}, which does the loading.

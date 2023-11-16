@@ -10,15 +10,6 @@
 \S4method{stageObject}{List}(x, dir, path, child = FALSE, fname = "list")
 }
 \arguments{
-\item{x}{A Bioconductor object of the specified class.}
-
-\item{dir}{String containing the path to the staging directory.}
-
-\item{path}{String containing a prefix of the relative path inside \code{dir} where \code{x} is to be saved.
-The actual path used to save \code{x} may include additional components, see Details.}
-
-\item{child}{Logical scalar indicating whether \code{x} is a child of a larger object.}
-
 \item{fname}{String containing the name of the file to use to save \code{x}. 
 Note that this should not have a \code{.json} suffix, so as to avoid confusion with the JSON-formatted metadata.}
 

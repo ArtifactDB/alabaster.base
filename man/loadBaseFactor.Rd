@@ -7,11 +7,6 @@
 loadBaseFactor(info, project, ...)
 }
 \arguments{
-\item{info}{Named list containing the metadata for this object.}
-
-\item{project}{Any argument accepted by the acquisition functions, see \code{?\link{acquireFile}}.
-By default, this should be a string containing the path to a staging directory.}
-
 \item{...}{Further arguments, ignored.}
 }
 \value{

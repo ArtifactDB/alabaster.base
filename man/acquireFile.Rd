@@ -28,6 +28,8 @@ but other objects can be used to control dispatch.}
 \code{acquireMetadata} methods return a named list of metadata for the requested resource.
 }
 \description{
+\emph{WARNING: these functions are deprecated. 
+Applications are expected to handle acquisition of files before loaders are called.}
 Acquire a file or metadata for loading.
 As one might expect, these are typically used inside a \code{load*} function.
 }
