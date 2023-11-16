@@ -55,7 +55,7 @@ readDataFrameFactor <- function(path, ...) {
 #######################################
 
 #' @export
-loadDataFrameFactor <- function(dir, path, ...) {
+loadDataFrameFactor <- function(info, project, ...) {
     lev.info <- acquireMetadata(project, info$data_frame_factor$levels$resource$path)
     levels <- altLoadObject(lev.info, project=project)
 

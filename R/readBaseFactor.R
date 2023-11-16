@@ -43,7 +43,7 @@ readBaseFactor <- function(path, ...) {
     code.name <- paste0(host, "/codes")
     codes <- as.vector(h5read(fhandle, code.name))
     code.attrs <- h5readAttributes(fhandle, code.name)
-    codes <- .repopulate_missing_hdf5(codes, code.attrs)
+    codes <- .h5cast(codes, code.attrs, type="integer")
     codes + 1L
 }
 

@@ -15,7 +15,7 @@ readMetadata(x, metadata.path, mcols.path, ...)
 
 \item{mcols.path}{String containing a path to a directory, itself containing an on-disk representation of a \linkS4class{DataFrame} to be used as the \code{\link{mcols}}.}
 
-\item{...}{Further arguments to be passed to \code{\link{altLoadObject}}.}
+\item{...}{Further arguments to be passed to \code{\link{altReadObject}}.}
 }
 \value{
 \code{x} is returned, possibly with \code{mcols} and \code{metadata} added to it.

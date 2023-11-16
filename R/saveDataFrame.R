@@ -95,7 +95,7 @@ setMethod("saveObject", "DataFrame", function(x, path, ...) {
                 }
             })()
 
-            .simple_save_codes(fhandle, full.data.name, x, save.names=FALSE)
+            .simple_save_codes(fhandle, full.data.name, col, save.names=FALSE)
             h5write(levels(col), fhandle, paste0(full.data.name, "/levels"));
 
         } else if (.is_datetime(col)) {

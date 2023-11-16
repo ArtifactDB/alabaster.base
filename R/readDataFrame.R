@@ -58,8 +58,7 @@ readDataFrame <- function(path, ...) {
 
             } else {
                 contents <- as.vector(h5read(fhandle, full.name))
-                contents <- .repopulate_missing_hdf5(contents, attrs)
-                contents <- .cast_atomic(contents, attrs$type)
+                contents <- .h5cast(contents, attrs)
 
                 if (attrs$type == "string") {
                     if (!is.null(attrs$format)) {
@@ -95,19 +94,24 @@ readDataFrame <- function(path, ...) {
 }
 
 #' @importFrom rhdf5 h5readAttributes
-.repopulate_missing_hdf5 <- function(current, attr=NULL) {
-    replace.na <- attr[["missing-value-placeholder"]]
+.h5cast <- function(current, attrs, type=attrs[["type"]]) {
+    replace.na <- attrs[["missing-value-placeholder"]]
 
     restore_min_integer <- function(y) {
+        z <- FALSE
         if (is.integer(y) && anyNA(y)) { # promote integer NAs back to the actual number.
             y <- as.double(y)
             y[is.na(y)] <- -2^31
+            z <- TRUE
         }
-        y
+        list(y=y, converted=z)
     }
 
+    converted <- FALSE
     if (is.null(replace.na)) {
-        current <- restore_min_integer(current)
+        out <- restore_min_integer(current)
+        current <- out$y
+        converted <- out$converted
     } else if (is.na(replace.na)) {
         if (!is.nan(replace.na)) {
             # No-op as the placeholder is already R's NA of the relevant type.
@@ -115,8 +119,14 @@ readDataFrame <- function(path, ...) {
             current[is.nan(current)] <- NA # avoid equality checks to an NaN.
         }
     } else {
-        current <- restore_min_integer(current)
+        out <- restore_min_integer(current)
+        current <- out$y
+        converted <- out$converted
         current[which(current == replace.na)] <- NA # Using which() to avoid problems with existing NAs.
+    }
+
+    if (!converted && !is.null(type)) {
+        current <- .cast_atomic(current, type)
     }
 
     current
@@ -151,17 +161,9 @@ loadDataFrame <- function(info, project, include.nested=TRUE, parallel=TRUE) {
                 d <- as.character(i - 1L) # -1 to get back to 0-based indices.
                 current <- raw[[d]]
 
-                if (is.list(current)) { # Handling factors stored as lists in the new version.
-                    if (curinfo$type != "factor") {
-                        stop("HDF5 groups as columns are only supported for factor columns")
-                    }
-                    attrs <- h5readAttributes(path, prefix(paste0("data/", d, "/codes")))
-                    codes <- .repopulate_missing_hdf5(current$codes, attrs)
-                    df[[i]] <- factor(current$levels[codes + 1L], current$levels, ordered=isTRUE(curinfo$ordered))
-
-                } else if (!is.null(current)) {
+                if (!is.null(current)) {
                     attrs <- h5readAttributes(path, prefix(paste0("data/", d)))
-                    current <- .repopulate_missing_hdf5(current, attrs)
+                    current <- .h5cast(current, attrs, type=NULL)
                     df[[i]] <- as.vector(current) # remove 1d arrays.
 
                 } else {

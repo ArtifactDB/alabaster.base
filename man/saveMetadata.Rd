@@ -19,10 +19,10 @@ If \code{NULL}, no \code{\link{metadata}} is saved.}
 \item{mcols.path}{String containing the path in which to save the \code{mcols}.
 If \code{NULL}, no \code{\link{mcols}} is saved.}
 
-\item{...}{Further arguments to be passed to \code{\link{altStageObject}}.}
+\item{...}{Further arguments to be passed to \code{\link{altSaveObject}}.}
 }
 \value{
-The metadata for \code{x} is saved to \code{path}.
+The metadata for \code{x} is saved to \code{metadata.path}, and similarly for the \code{mcols}.
 }
 \description{
 Save \code{\link{metadata}} and \code{\link{mcols}} for \linkS4class{Annotated} or \linkS4class{Vector} objects, respectively, to disk.

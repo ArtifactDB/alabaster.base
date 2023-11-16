@@ -31,8 +31,7 @@ readAtomicVector <- function(path, ...) {
     full.name <- paste0(host, "/values")
     attrs <- h5readAttributes(fhandle, full.name)
     contents <- as.vector(h5read(fhandle, full.name))
-    contents <- .repopulate_missing_hdf5(contents, attrs)
-    contents <- .cast_atomic(contents, attrs$type)
+    contents <- .h5cast(contents, attrs=attrs)
 
     if (attrs$type == "string") {
         if (!is.null(attrs$format)) {

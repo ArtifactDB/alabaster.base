@@ -8,12 +8,12 @@
 #' If \code{NULL}, no \code{\link{metadata}} is saved.
 #' @param mcols.path String containing the path in which to save the \code{mcols}.
 #' If \code{NULL}, no \code{\link{mcols}} is saved.
-#' @param ... Further arguments to be passed to \code{\link{altStageObject}}.
+#' @param ... Further arguments to be passed to \code{\link{altSaveObject}}.
 #'
 #' @author Aaron Lun
 #'
 #' @return 
-#' The metadata for \code{x} is saved to \code{path}.
+#' The metadata for \code{x} is saved to \code{metadata.path}, and similarly for the \code{mcols}.
 #'
 #' @details
 #' If \code{mcols(x)} has no columns, nothing is saved by \code{saveMcols}.
@@ -34,7 +34,7 @@ saveMetadata <- function(x, metadata.path, mcols.path, ...) {
         mm <- metadata(x)
         if (!is.null(mm) && length(mm)) {
             tryCatch({
-                altStageObject(mm, metadata.path, ...)
+                altSaveObject(mm, metadata.path, ...)
             }, error=function(e) stop("failed to stage 'metadata(<", class(x)[1], ">)'\n  - ", e$message))
         }
     }
@@ -44,7 +44,7 @@ saveMetadata <- function(x, metadata.path, mcols.path, ...) {
         if (!is.null(mc) && ncol(mc)) {
             rownames(mc) <- NULL # stripping out unnecessary row names.
             output <- tryCatch({
-                altStageObject(mc, mcols.path, ...)
+                altSaveObject(mc, mcols.path, ...)
             }, error=function(e) stop("failed to stage 'mcols(<", class(x)[1], ">)'\n  - ", e$message))
         }
     }
@@ -59,7 +59,7 @@ saveMetadata <- function(x, metadata.path, mcols.path, ...) {
 processMetadata <- function(x, dir, path, meta.name) {
     if (!is.null(meta.name) && length(metadata(x))) {
         tryCatch({
-            meta <- altStageObject(metadata(x), dir, paste0(path, "/", meta.name), child=TRUE, simplified=FALSE)
+            meta <- altStageObject(metadata(x), dir, paste0(path, "/", meta.name), child=TRUE) 
             list(resource=writeMetadata(meta, dir=dir))
         }, error=function(e) stop("failed to stage 'metadata(<", class(x)[1], ">)'\n  - ", e$message))
     } else { 
@@ -77,7 +77,7 @@ processMcols <- function(x, dir, path, mcols.name) {
         if (!is.null(mc) && ncol(mc)) {
             rownames(mc) <- NULL # stripping out unnecessary row names.
             output <- tryCatch({
-                meta <- altStageObject(mc, dir, paste0(path, "/", mcols.name), child=TRUE, simplified=FALSE)
+                meta <- altStageObject(mc, dir, paste0(path, "/", mcols.name), child=TRUE) 
                 list(resource=writeMetadata(meta, dir=dir))
             }, error=function(e) stop("failed to stage 'mcols(<", class(x)[1], ">)'\n  - ", e$message))
         }

@@ -38,6 +38,7 @@ ll <- list(A=1, B=LETTERS, C=DataFrame(X=1:5))
 saveObject(ll, file.path(tmp, "stuff"))
 
 listObjects(tmp)
+listObjects(tmp, include.children=TRUE)
 
 }
 \author{
