@@ -1,5 +1,6 @@
 #' Saving the metadata
 #'
+#' \emph{WARNING: this function is deprecated as newer versions of \pkg{alabaster} do not need to write metadata.}
 #' Helper function to write metadata from a named list to a JSON file.
 #' This is commonly used inside \code{\link{stageObject}} methods to create the metadata file for a child object.
 #'

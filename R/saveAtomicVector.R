@@ -1,31 +1,24 @@
-#' Stage atomic vectors
+#' Save atomic vectors to disk
 #'
-#' Stage vectors containing atomic elements (or values that can be cast as such, e.g., dates and times).
+#' Save vectors containing atomic elements (or values that can be cast as such, e.g., dates and times) to an on-disk representation.
 #'
 #' @param x Any of the atomic vector types, or \link{Date} objects, or time objects, e.g., \link{POSIXct}.
-#' @inheritParams stageObject
+#' @inheritParams saveObject
 #' @param ... Further arguments that are ignored.
 #' 
 #' @return
-#' A named list containing the metadata for \code{x}.
-#' \code{x} itself is written to a CSV file inside \code{path}.
-#'
-#' @details 
-#' Dates and POSIX times are cast to strings;
-#' the type itself is recorded in the metadata.
+#' \code{x} is saved inside \code{path}.
 #'
 #' @author Aaron Lun
 #' 
 #' @examples
 #' tmp <- tempfile()
 #' dir.create(tmp)
-#' stageObject(LETTERS, tmp, path="foo")
-#' stageObject(setNames(runif(26), letters), tmp, path="bar")
-#'
+#' saveObject(LETTERS, file.path(tmp, "foo"))
+#' saveObject(setNames(runif(26), letters), file.path(tmp, "bar"))
 #' list.files(tmp, recursive=TRUE)
 #' 
 #' @name saveAtomicVector
-#' @rdname stageAtomicVector
 #' @aliases
 #' stageObject,integer-method
 #' stageObject,numeric-method
@@ -36,10 +29,8 @@
 #' stageObject,Date-method
 NULL
 
-#' @importFrom S4Vectors DataFrame
-#' @importFrom rhdf5 h5createFile h5createGroup H5Fopen H5Fclose H5Gopen H5Gclose h5writeAttribute
-.save_atomic_vector <- function(x, dir, path, ...) {
-    dir.create(file.path(dir, path), showWarnings=FALSE)
+.save_atomic_vector <- function(x, path, ...) {
+    dir.create(path)
 
     if (.is_datetime(x)) {
         type <- "string"
@@ -59,7 +50,7 @@ NULL
         format <- NULL
     }
 
-    ofile <- file.path(dir, path, "contents.h5")
+    ofile <- file.path(path, "contents.h5")
     h5createFile(ofile)
     host <- "atomic_vector"
     h5createGroup(ofile, host)
@@ -96,7 +87,7 @@ NULL
     }
     full.data.name <- paste0(host, "/values")
 
-    write("atomic_vector", file=file.path(dir, path, "OBJECT"))
+    write("atomic_vector", file=file.path(path, "OBJECT"))
 }
 
 #' @export

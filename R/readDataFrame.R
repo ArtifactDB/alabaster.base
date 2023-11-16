@@ -1,26 +1,14 @@
-#' Load a DataFrame 
+#' Read a DataFrame from disk
 #'
-#' Load a \linkS4class{DataFrame} from file, possibly containing complex columns and row names.
+#' Read a \linkS4class{DataFrame} from its on-disk representation.
 #'
-#' @param info Named list containing the metadata for this object.
-#' @param project Any argument accepted by the acquisition functions, see \code{?\link{acquireFile}}.
-#' By default, this should be a string containing the path to a staging directory.
-#' @param include.nested Logical scalar indicating whether nested \linkS4class{DataFrame}s should be loaded.
-#' @param parallel Whether to perform reading and parsing in parallel for greater speed.
+#' @param path String containing a path to the directory, itself created with \code{\link{saveObject}} method for \linkS4class{DataFrame}s.
+#' @param ... Further arguments, passed to \code{\link{altLoadObject}} for complex nested columns.
 #'
-#' @details
-#' This function effectively reverses the behavior of \code{"\link{stageObject,DataFrame-method}"}, 
-#' loading the \linkS4class{DataFrame} back into memory from the CSV or HDF5 file.
-#' Atomic columns are loaded directly while complex columns (such as nested DataFrames) are loaded by calling the appropriate \code{restore} method.
-#' 
-#' One implicit interpretation of using a nested DataFrame is that the contents are not important enough to warrant top-level columns.
-#' In such cases, we can skip all columns containing a nested DataFrame by setting \code{include.nested=FALSE}.
-#' This avoids the cost of loading a (potentially large) nested DataFrame when its contents are unlikely to be relevant.
-#' 
-#' @return The DataFrame described by \code{info}.
+#' @return The \linkS4class{DataFrame} represented by \code{path}.
 #'
 #' @seealso
-#' \code{"\link{stageObject,DataFrame-method}"}, for the staging method.
+#' \code{"\link{saveObject,DataFrame-method}"}, for the staging method.
 #'
 #' @author Aaron Lun
 #'
@@ -28,21 +16,15 @@
 #' library(S4Vectors)
 #' df <- DataFrame(A=1:10, B=LETTERS[1:10])
 #'
-#' # First staging it:
 #' tmp <- tempfile()
-#' dir.create(tmp)
-#' out <- stageObject(df, tmp, path="coldata")
-#'
-#' # And now loading it:
-#' loadDataFrame(out, tmp)
+#' saveObject(df, tmp)
+#' readDataFrame(tmp)
 #'
 #' @export
-#' @rdname loadDataFrame
 #' @aliases loadDataFrame
 #' @importFrom S4Vectors DataFrame make_zero_col_DFrame
-#' @importFrom rhdf5 h5read h5readAttributes h5ls
-readDataFrame <- function(dir, path, ...) {
-    fpath <- file.path(dir, path, "basic_columns.h5")
+readDataFrame <- function(path, ...) {
+    fpath <- file.path(path, "basic_columns.h5")
     fhandle <- H5Fopen(fpath)
     on.exit(H5Fclose(fhandle))
 
@@ -70,12 +52,9 @@ readDataFrame <- function(dir, path, ...) {
             attrs <- h5readAttributes(fhandle, full.name)
 
             if (attrs$type == "factor") {
-                code.name <- paste0(full.name, "/codes")
-                codes <- as.vector(h5read(fhandle, code.name))
-                code.attrs <- h5readAttributes(fhandle, code.name)
-                codes <- .repopulate_missing_hdf5(codes, code.attrs)
+                codes <- .simple_read_codes(fhandle, full.name) 
                 levels <- as.vector(h5read(fhandle, paste0(full.name, "/levels")))
-                columns[[col]] <- factor(levels[codes + 1L], levels=levels, ordered=isTRUE(attrs$ordered > 0))
+                columns[[col]] <- factor(levels[codes], levels=levels, ordered=isTRUE(attrs$ordered > 0))
 
             } else {
                 contents <- as.vector(h5read(fhandle, full.name))
@@ -94,9 +73,9 @@ readDataFrame <- function(dir, path, ...) {
 
                 columns[[col]] <- contents
             }
-            
+
         } else {
-            columns[[col]] <- readObject(dir, paste0(path, "/other_columns/", expected), ...)
+            columns[[col]] <- altReadObject(file.path(path, "other_columns", expected), ...)
         }
     }
    
@@ -107,15 +86,12 @@ readDataFrame <- function(dir, path, ...) {
         output <- make_zero_col_DFrame(nrow=nrows)
     }
 
-    if (file.exists(file.path(dir, path, "column_annotations"))) {
-        mcols(output) <- altReadObject(dir, paste0(path, "/column_annotations"), ...)
-    }
-
-    if (file.exists(file.path(dir, path, "other_annotations"))) {
-        metadata(output) <- altReadObject(dir, paste0(path, "/other_annotations"), ...)
-    }
-
-    output
+    readMetadata(
+        output,
+        metadata.path=file.path(path, "other_annotations"),
+        mcols.path=file.path(path, "column_annotations"),
+        ...
+    )
 }
 
 #' @importFrom rhdf5 h5readAttributes

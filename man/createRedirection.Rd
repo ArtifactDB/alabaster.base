@@ -19,6 +19,8 @@ This may be any path that can also be used in \code{\link{acquireMetadata}}.}
 A list of metadata that can be processed by \code{\link{writeMetadata}}.
 }
 \description{
+\emph{WARNING: this function is deprecated. 
+Redirection is no longer supported in the latest \pkg{alabaster} framework.}
 Create a redirection to another path in the same staging directory.
 This is useful for creating short-hand aliases for resources that have inconveniently long paths.
 }

@@ -1,32 +1,33 @@
-#' Load an atomic vector
+#' Read an atomic vector from disk
 #'
-#' Load a simple vector consisting of atomic elements from file.
+#' Read a vector consisting of atomic elements from its on-disk representation.
 #'
-#' @inheritParams loadDataFrame
+#' @param path Path to a directory created with any of the vector methods for \code{\link{saveObject}}.
 #' @param ... Further arguments, ignored.
 #'
 #' @return The vector described by \code{info}, possibly with names.
 #'
 #' @seealso
-#' \code{"\link{stageObject,integer-method}"}, for one of the staging methods.
+#' \code{"\link{saveObject,integer-method}"}, for one of the staging methods.
 #'
 #' @author Aaron Lun
 #' 
 #' @examples
 #' tmp <- tempfile()
-#' dir.create(tmp)
-#' meta <- stageObject(setNames(runif(26), letters), tmp, path="bar")
-#' loadAtomicVector(meta, tmp)
+#' saveObject(setNames(runif(26), letters), tmp)
+#' readAtomicVector(tmp)
 #' 
 #' @export
-#' @rdname loadAtomicVector
 #' @aliases loadAtomicVector
-readAtomicVector <- function(dir, path, ...) {
-    fpath <- file.path(dir, path, "contents.h5")
+readAtomicVector <- function(path, ...) {
+    fpath <- file.path(path, "contents.h5")
     fhandle <- H5Fopen(fpath)
     on.exit(H5Fclose(fhandle))
 
     host <- "atomic_vector"
+    ghandle <- H5Gopen(fhandle, host)
+    on.exit(H5Gclose(ghandle))
+
     full.name <- paste0(host, "/values")
     attrs <- h5readAttributes(fhandle, full.name)
     contents <- as.vector(h5read(fhandle, full.name))
@@ -43,13 +44,16 @@ readAtomicVector <- function(dir, path, ...) {
         }
     }
 
-    name.name <- paste0(host, "/names")
-    if (h5exists(fpath, name.name)) {
-        names(contents) <- as.vector(h5read(fpath, name.name))
+    if ("names" %in% h5ls(ghandle, recursive=FALSE, datasetinfo=FALSE)$name) {
+        names(contents) <- as.vector(h5read(ghandle, "names"))
     }
 
     contents
 }
+
+#######################################
+########### OLD STUFF HERE ############
+#######################################
 
 #' @export
 loadAtomicVector <- function(info, project, ...) {

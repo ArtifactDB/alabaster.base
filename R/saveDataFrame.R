@@ -1,17 +1,9 @@
-#' Stage a DataFrame
+#' Save a DataFrame to disk
 #'
-#' Stage a DataFrame by saving it to a CSV or HDF5 file.
-#' CSV files follow the \href{https://github.com/LTLA/comservatory}{comservatory} specification,
-#' while the expected layout of a HDF5 file is described in the \code{hdf5_data_frame} schema in \pkg{alabaster.schemas}.
+#' Stage a DataFrame by saving it to a HDF5 file.
 #'
 #' @param x A \linkS4class{DataFrame}.
-#' @inheritParams stageObject
-#' @param df.name String containing the relative path inside \code{dir} to save the CSV/HDF5 file.
-#' @param mcols.name String specifying the name of the directory inside \code{path} to save \code{\link{mcols}(x)}.
-#' If \code{NULL}, per-element metadata is not saved.
-#' @param meta.name String specifying the name of the directory inside \code{path} to save \code{\link{metadata}(x)}.
-#' If \code{NULL}, object metadata is not saved.
-#' @param .version.df,.version.hdf5 Internal use only.
+#' @inheritParams saveObject
 #'
 #' @return
 #' A named list containing the metadata for \code{x}.
@@ -19,37 +11,16 @@
 #' Additional files may also be created inside \code{path} and referenced from the metadata.
 #'
 #' @details
-#' All atomic vector types are supported in the columns along with dates and (ordered) factors.
-#' Dates and factors are converted to character vectors and saved as such inside the file.
-#' Factor levels are saved in a separate data frame, which is referenced in the \code{columns} field of the returned metadata.
+#' This method creates a \code{basic_columns.h5} file that contains columns for atomic vectors, factors, dates and date-times.
+#' Dates and date-times are converted to character vectors and saved as such inside the file.
+#' Factors are saved as a HDF5 group with both the codes and the levels as separate datasets.
 #'
-#' Any non-atomic columns are saved to a separate file inside \code{path} via \code{\link{stageObject}},
-#' and referenced from the corresponding \code{columns} entry.
-#' For consistency, they will be replaced in the main file by a placeholder all-zero column.
+#' Any non-atomic columns are saved to a \code{other_columns} subdirectory inside \code{path} via \code{\link{saveObject}},
+#' named after its zero-based positional index within \code{x}.
 #'
-#' As a DataFrame is a \linkS4class{Vector} subclass, its R-level metadata can be staged by \code{\link{.processMetadata}}.
+#' If \code{\link{metadata}} or \code{\link{mcols}} are present, 
+#' they are saved to the \code{other_annotations} and \code{column_annotations} subdirectories, respectively, via \code{\link{saveObject}}.
 #'
-#' @section File formats:
-#' If \code{\link{.saveDataFrameFormat}() == "csv"}, the contents of \code{x} are saved to a uncompressed CSV file.
-#' If \code{x} has non-\code{NULL} row names, the first saved column in the CSV is named \code{row_names} and will contain the row names.
-#' This should be ignored when indexing columns and comparing them to the corresponding entry of \code{columns} in the file's JSON metadata document.
-#'
-#' If \code{\link{.saveDataFrameFormat}() == "csv.gz"}, the CSV file is compressed (the default).
-#' This reduces space and bandwidth requirements at the cost of the (de)compression overhead.
-#' It also makes it more difficult to do queries inside the file without decompression of the entire file.
-#'
-#' If \code{\link{.saveDataFrameFormat}() == "hdf5"}, \code{x} is saved into a HDF5 file instead of a CSV.
-#' Columns are saved into a \code{data} group where each column is a dataset named after its positional index.
-#' The names of the columns are saved into the \code{column_names} dataset.
-#' If row names are present, a separate \code{row_names} dataset containing the row names will be generated.
-#' This format is most useful for random access and for preserving the precision of numerical data.
-#'
-#' @seealso
-#' \url{https://github.com/LTLA/comservatory}, for the CSV file specification.
-#'
-#' The \code{csv_data_frame} and \code{hdf5_data_frame} schemas from the \pkg{alabaster.schemas} package.
-#'
-#' 
 #' @author Aaron Lun
 #'
 #' @examples
@@ -58,7 +29,7 @@
 #'
 #' tmp <- tempfile()
 #' dir.create(tmp)
-#' stageObject(df, tmp, path="coldata")
+#' saveObject(df, tmp)
 #'
 #' list.files(tmp, recursive=TRUE)
 #' 
@@ -66,21 +37,24 @@
 #' @rdname stageDataFrame
 #' @aliases stageObject,DataFrame-method
 #' @importFrom S4Vectors DataFrame
-setMethod("saveObject", "DataFrame", function(x, dir, path, child=FALSE) {
-    full.path <- file.path(dir, path)
-    dir.create(full.path, showWarnings=FALSE)
-    .write_hdf5_new(x, dir, path)
-    .processMcols(x, dir, path, "column_annotations", simplified=TRUE)
-    .processMetadata(x, dir, path, "other_annotations", simplified=TRUE)
-    write("data_frame", file=file.path(full.path, "OBJECT"))
+setMethod("saveObject", "DataFrame", function(x, path, ...) {
+    dir.create(path, showWarnings=FALSE)
+    .write_hdf5_new(x, path, ...)
+    saveMetadata(
+        x,
+        metadata.path=file.path(path, "other_annotations"),
+        mcols.path=file.path(path, "column_annotations"),
+        ...
+    )
+    write("data_frame", file=file.path(path, "OBJECT"))
 })
 
 #' @importFrom rhdf5 h5write h5createGroup h5createFile H5Gopen H5Gclose H5Acreate H5Aclose H5Awrite H5Fopen H5Fclose H5Dopen H5Dclose
-.write_hdf5_new <- function(x, dir, path) {
+.write_hdf5_new <- function(x, path, ...) {
     subpath <- "basic_columns.h5"
     host <- "data_frame"
 
-    ofile <- paste0(dir, "/", path, "/", subpath)
+    ofile <- paste0(path, "/", subpath)
     h5createFile(ofile)
     prefix <- function(x) paste0(host, "/", x)
     h5createGroup(ofile, host)
@@ -121,14 +95,7 @@ setMethod("saveObject", "DataFrame", function(x, dir, path, child=FALSE) {
                 }
             })()
 
-            code.name <- paste0(full.data.name, "/codes")
-            transformed <- as.integer(col) - 1L
-            transformed[is.na(transformed)] <- -1L
-            h5write(transformed, fhandle, code.name)
-            if (anyNA(col)) {
-                addMissingPlaceholderAttributeForHdf5(fhandle, code.name, -1L)
-            }
-
+            .simple_save_codes(fhandle, full.data.name, x, save.names=FALSE)
             h5write(levels(col), fhandle, paste0(full.data.name, "/levels"));
 
         } else if (.is_datetime(col)) {
@@ -151,10 +118,10 @@ setMethod("saveObject", "DataFrame", function(x, dir, path, child=FALSE) {
         }
 
         if (is.other) {
-            other.dir <- prefix("other_columns")
-            dir.create(file.path(dir, other.dir), showWarnings=FALSE)
+            other.dir <- file.path(path, "other_columns")
+            dir.create(other.dir, showWarnings=FALSE)
             tryCatch({
-                altStageObject(x[[z]], dir, paste0(other.dir, "/", data.name), child=TRUE, simplified=TRUE)
+                altSaveObject(x[[z]], file.path(other.dir, data.name), ...)
             }, error = function(e) stop("failed to stage column '", colnames(x)[z], "'\n  - ", e$message))
 
         } else if (!is.null(sanitized)) {

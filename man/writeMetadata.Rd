@@ -20,6 +20,7 @@ A JSON file containing the metadata is created at \code{path}.
 A list of resource metadata is returned, e.g., for inclusion as the \code{"resource"} property in parent schemas.
 }
 \description{
+\emph{WARNING: this function is deprecated as newer versions of \pkg{alabaster} do not need to write metadata.}
 Helper function to write metadata from a named list to a JSON file.
 This is commonly used inside \code{\link{stageObject}} methods to create the metadata file for a child object.
 }

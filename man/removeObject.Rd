@@ -17,6 +17,7 @@ The object represented by \code{path} is removed, along with any redirections to
 A \code{NULL} is invisibly returned.
 }
 \description{
+\emph{WARNING: this function is deprecated, as directories of non-child objects can just be deleted with regular methods (e.g., \code{\link{file.rename}}) in the latest version of \pkg{alabaster}.}
 Pretty much as it says in the title.
 This only works with non-child objects as children are referenced by their parents and cannot be safely removed in this manner.
 }

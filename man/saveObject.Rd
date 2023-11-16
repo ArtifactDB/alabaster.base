@@ -5,103 +5,48 @@
 \alias{stageObject,ANY-method}
 \alias{searchForMethods}
 \alias{.searchForMethods}
-\title{Stage assorted objects}
+\title{Save objects to disk}
 \usage{
-saveObject(x, dir, path, child = FALSE, ...)
+saveObject(x, path, ...)
 }
 \arguments{
 \item{x}{A Bioconductor object of the specified class.}
 
-\item{dir}{String containing the path to the staging directory.}
-
-\item{path}{String containing a prefix of the relative path inside \code{dir} where \code{x} is to be saved.
-The actual path used to save \code{x} may include additional components, see Details.}
-
-\item{child}{Logical scalar indicating whether \code{x} is a child of a larger object.}
+\item{path}{String containing the path to a directory in which to save \code{x}.}
 
 \item{...}{Further arguments to pass to specific methods.}
-
-\item{simplified}{Whether to save files in the simplified format.}
 }
 \value{
-\code{dir} is populated with files containing the contents of \code{x}.
-A named list containing the metadata for \code{x} is returned.
+\code{dir} is created and populated with files containing the contents of \code{x}.
 }
 \description{
-Generic to stage assorted R objects.
+Generic to stage assorted R objects into appropriate on-disk representations.
 More methods may be defined by other packages to extend the \pkg{alabaster.base} framework to new classes.
 }
 \details{
-Methods for the \code{stageObject} generic should create a subdirectory at the input \code{path} inside \code{dir}.
-All files (artifacts and metadata documents) required to represent \code{x} on disk should be created inside \code{path}.
-Upon method completion, \code{path} should contain:
+Methods for the \code{stageObject} generic should create a directory at \code{path} in which the contents of \code{x} are to be saved.
+The files may consist of any format, though language-agnostic formats like HDF5, CSV, JSON are preferred.
+For more complex objects, multiple files and subdirectories may be created within \code{path}. 
+The only strict requirements are:
 \itemize{
-\item Zero or one file containing the data inside \code{x}.
-Methods are free to choose any format and name within \code{path} except for the \code{.json} file extension, 
-which is reserved for JSON metadata documents (see below).
-The presence of such a file is optional and may be omitted for metadata-only schemas.
-\item Zero or many subdirectories containing child objects of \code{x}.
-Each child object should be saved in its own subdirectory within \code{dir}, 
-which can have any name that does not conflict with the data file (if present) and does not end with \code{.json}.
-This allows developers to decompose complex \code{x} into their components for more flexible staging/loading.
+\item There must be an \code{OBJECT} file inside \code{path}, containing a single word specifying the class of the object that was saved, e.g., \code{data_frame}, \code{summarized_experiment}.
+This will be used by loading functions to determine how to load the files into memory.
+\item The names of files and subdirectories should not start with \code{_} or \code{.}.
+These are reserved for applications, e.g., to build manifests or to store additional metadata.
 }
 
-The return value of each method should be a named list of metadata, 
-which will (eventually) be passed to \code{\link{writeMetadata}} to save a JSON metadata file inside the \code{path} subdirectory.
-This list should contain at least:
-\itemize{
-\item \code{$schema}, a string specifying the schema to use to validate the metadata for the class of \code{x}.
-This may be decorated with the \code{package} attribute to help \code{\link{writeMetadata}} find the package containing the schema.
-\item \code{path}, a string containing the relative path to the object's file representation inside \code{dir}.
-For clarity, we will denote the input \code{path} argument as PATHIN and the output \code{path} property as PATHOUT.
-These are different as PATHIN refers to the directory while PATHOUT refers to a file inside the directory.
-
-If a data file exists, PATHOUT should contain the relative path to that file from \code{dir}.
-Otherwise, for metadata-only schemas, PATHOUT should be set to a relative path of a JSON file inside the PATHIN subdirectory,
-specifying the location in which the metadata is to be saved by \code{\link{writeMetadata}}.
-\item \code{is_child}, a logical scalar equal to the input \code{child}. 
+Developers of \code{stageObject} methods may wish to save \dQuote{child} components of \code{x} with a subdirectory of \code{path}.
+In such cases, developers should call \code{\link{altSaveObject}} on each child component, rather than calling \link{saveObject} directly.
+This ensures that any application-level overrides of the loading functions are respected.
 }
-
-This list will usually contain more useful elements to describe \code{x}.
-The exact nature of those elements will depend on the specified schema for the class of \code{x}.
-
-The \code{stageObject} generic will check if PATHIN already exists inside \code{dir} before dispatching to the methods.
-If so, it will throw an error to ensure that downstream name clashes do not occur.
-The exception is if PATHIN is \code{"."}, in which case no check is performed; this is useful for eliminating subdirectories in situations where the project contains only one object.
-}
-\section{Saving child objects}{
-
-The concept of child objects allows developers to break down complex objects into its basic components for convenience.
-For example, if one \linkS4class{DataFrame} is nested within another as a separate column, the former is a child and the latter is the parent.
-A list of multiple \linkS4class{DataFrame}s will also represent each DataFrame as a child object.
-This allows developers to re-use the staging/loading code for DataFrames when reconstructing the complex parent object.
-
-If a \code{stageObject} method needs to save a child object, it should do so in a subdirectory of PATHIN (i.e., the input \code{path} argument).
-This is achieved by calling \code{\link{altStageObject}(child, dir, subpath)} where \code{child} is the child component of \code{x} and \code{subdir} is the desired subdirectory path.
-Note the period at the start of the function, which ensures that the method respects customizations from alabaster applications (see \code{\link{.altStageObject}} for details).
-We also suggest creating \code{subdir} with \code{paste0(path, "/", subname)} for a given subdirectory name, which avoids potential problems with non-\code{/} file separators.
-
-After creating the child object's subdirectory, the \code{stageObject} method should call \code{\link{writeMetadata}} on the output of \code{altStageObject} to save the child's metadata.
-This will return a list that can be inserted into the parent's metadata list for the method's return value.
-All child files created by a \code{stageObject} method should be referenced from the metadata list, 
-i.e., the child metadata's PATHOUT should be present in in the metadata list as a \code{resource} entry somewhere.
-
-Any attempt to use the \code{stageObject} generic to save another non-child object into PATHIN or its subdirectories will cause an error.
-This ensures that PATHIN contains all and only the contents of \code{x}.
-}
-
 \examples{
-tmp <- tempfile()
-dir.create(tmp)
-
 library(S4Vectors)
 X <- DataFrame(X=LETTERS, Y=sample(3, 26, replace=TRUE))
-stageObject(X, tmp, path="test1")
-list.files(file.path(tmp, "test1"))
 
-}
-\seealso{
-\code{\link{checkValidDirectory}}, for validation of the staged contents.
+tmp <- tempfile()
+saveObject(X, tmp)
+list.files(tmp, recursive=TRUE)
+
 }
 \author{
 Aaron Lun
