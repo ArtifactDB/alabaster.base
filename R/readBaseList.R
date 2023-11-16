@@ -46,6 +46,10 @@ readBaseList <- function(path, list.parallel=TRUE, ...) {
     output
 }
 
+#######################################
+########### OLD STUFF HERE ############
+#######################################
+
 #' @export
 loadBaseList <- function(info, project, parallel=TRUE) {
     children <- info$simple_list$children
