@@ -78,7 +78,7 @@ NULL
         on.exit(H5Dclose(dhandle), add=TRUE)
         h5writeAttribute(type, dhandle, "type", asScalar=TRUE)
         if (!is.null(format)) {
-            h5writeAttribute(colmeta$format, dhandle, "format", asScalar=TRUE)
+            h5writeAttribute(format, dhandle, "format", asScalar=TRUE)
         }
     })()
 
