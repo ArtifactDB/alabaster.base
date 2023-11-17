@@ -68,8 +68,8 @@ setMethod("saveObject", "list", function(x, path, list.format=saveBaseListFormat
 
 #' @export
 #' @rdname saveBaseList
-setMethod("stageObject", "List", function(x, path, list.format=saveBaseListFormat(), ...) {
-    stageObject(as.list(x), path, list.format=list.format, ...)
+setMethod("saveObject", "List", function(x, path, list.format=saveBaseListFormat(), ...) {
+    saveObject(as.list(x), path, list.format=list.format, ...)
 })
 
 ##################################
