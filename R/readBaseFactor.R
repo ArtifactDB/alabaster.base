@@ -26,7 +26,7 @@ readBaseFactor <- function(path, ...) {
 
     host <- "string_factor"
     ghandle <- H5Gopen(fhandle, host)
-    on.exit(H5Gclose(ghandle))
+    on.exit(H5Gclose(ghandle), add=TRUE, after=FALSE)
 
     attrs <- h5readAttributes(fhandle, host)
     codes <- .simple_read_codes(fhandle, host)

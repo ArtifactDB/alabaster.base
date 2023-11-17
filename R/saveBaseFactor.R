@@ -33,7 +33,7 @@ setMethod("saveObject", "factor", function(x, path, ...) {
         ghandle <- H5Gopen(fhandle, host)
         on.exit(H5Gclose(ghandle), add=TRUE)
         h5writeAttribute("1.0", ghandle, "version", asScalar=TRUE)
-        if (is.ordered(col)) {
+        if (is.ordered(x)) {
             h5writeAttribute(1L, ghandle, "ordered", asScalar=TRUE)
         }
     })()
@@ -72,51 +72,31 @@ setMethod("saveObject", "factor", function(x, path, ...) {
 setMethod("stageObject", "factor", function(x, dir, path, child = FALSE, ...) {
     dir.create(file.path(dir, path), showWarnings=FALSE)
 
-    if (simplified) {
-        ofile <- file.path(dir, path, "contents.h5")
-        h5createFile(ofile)
-        host <- "string_factor"
-        h5createGroup(ofile, host)
-
-        fhandle <- H5Fopen(ofile)
-        on.exit(H5Fclose(fhandle), add=TRUE)
-        (function (){
-            ghandle <- H5Gopen(fhandle, host)
-            on.exit(H5Gclose(ghandle), add=TRUE)
-            h5writeAttribute("1.0", ghandle, "version", asScalar=TRUE)
-        })()
-
-        .simple_save_codes(fhandle, host, x)
-        h5write(levels(x), fhandle, paste0(host, "/levels"))
-        write("string_factor", file=file.path(dir, path, "OBJECT"))
-
-    } else {
-        contents <- as.integer(x) - 1L
-        mock <- DataFrame(values=contents)
-        if (!is.null(names(x))) {
-            mock <- cbind(names=names(x), mock)
-        }
-
-        new_path <- paste0(path, "/indices.txt.gz")
-        ofile <- file.path(dir, new_path)
-        quickWriteCsv(mock, ofile, row.names=FALSE, compression="gzip", validate=FALSE)
-
-        level_meta <- stageObject(levels(x), dir, paste0(path, "/levels"), child=TRUE)
-        level_stub <- writeMetadata(level_meta, dir)
-
-        list(
-            `$schema` = "string_factor/v1.json",
-            path = new_path,
-            is_child = child,
-            factor = list(
-                length = length(x),
-                names = !is.null(names(x)),
-                compression = "gzip"
-            ),
-            string_factor = list(
-                levels = list(resource = level_stub),
-                ordered = is.ordered(x)
-            )
-        )
+    contents <- as.integer(x) - 1L
+    mock <- DataFrame(values=contents)
+    if (!is.null(names(x))) {
+        mock <- cbind(names=names(x), mock)
     }
+
+    new_path <- paste0(path, "/indices.txt.gz")
+    ofile <- file.path(dir, new_path)
+    quickWriteCsv(mock, ofile, row.names=FALSE, compression="gzip", validate=FALSE)
+
+    level_meta <- stageObject(levels(x), dir, paste0(path, "/levels"), child=TRUE)
+    level_stub <- writeMetadata(level_meta, dir)
+
+    list(
+        `$schema` = "string_factor/v1.json",
+        path = new_path,
+        is_child = child,
+        factor = list(
+            length = length(x),
+            names = !is.null(names(x)),
+            compression = "gzip"
+        ),
+        string_factor = list(
+            levels = list(resource = level_stub),
+            ordered = is.ordered(x)
+        )
+    )
 })
