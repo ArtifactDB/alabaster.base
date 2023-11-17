@@ -28,9 +28,7 @@
 #' df <- DataFrame(A=1:10, B=LETTERS[1:10])
 #'
 #' tmp <- tempfile()
-#' dir.create(tmp)
 #' saveObject(df, tmp)
-#'
 #' list.files(tmp, recursive=TRUE)
 #' 
 #' @export 

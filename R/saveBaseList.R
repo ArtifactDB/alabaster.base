@@ -3,7 +3,7 @@
 #' Save a \link{list} or \linkS4class{List} to a JSON or HDF5 file, with extra files created for any of the more complex list elements (e.g., DataFrames, arrays). 
 #' This uses the \href{https://github.com/LTLA/uzuki2}{uzuki2} specification to ensure that appropriate types are declared.
 #'
-#' @param A list or \linkS4class{List}.
+#' @param x A list or \linkS4class{List}.
 #' @inheritParams saveObject
 #' @param list.format String specifying the format in which to save the list.
 #' @param ... Further arguments, passed to \code{\link{altSaveObject}} for complex child objects.
@@ -32,7 +32,11 @@
 #' list.files(tmp, recursive=TRUE)
 #' 
 #' @export
-#' @rdname saveBaseList
+#' @name saveBaseList
+#' @aliases 
+#' saveObject,list-method
+#' stageObject,list-method
+#' stageObject,List-method
 #' @importFrom jsonlite toJSON
 setMethod("saveObject", "list", function(x, path, list.format=saveBaseListFormat(), ...) {
     dir.create(path, showWarnings=FALSE)

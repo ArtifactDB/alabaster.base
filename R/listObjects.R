@@ -3,7 +3,7 @@
 #' List all objects in a directory, along with their types.
 #' 
 #' @param dir String containing a path to a staging directory.
-#' @param ignore.children Logical scalar indicating whether to ignore child objects.
+#' @param include.children Logical scalar indicating whether to include child objects.
 #' 
 #' @return \linkS4class{DataFrame} where each row corresponds to an object and contains;
 #' \itemize{
@@ -12,7 +12,7 @@
 #' \item \code{child}, whether or not the object is a child of another object.
 #' }
 #'
-#' If \code{ignore.children=TRUE}, metadata is only returned for non-child objects. 
+#' If \code{include.children=FALSE}, metadata is only returned for non-child objects. 
 #'
 #' @author Aaron Lun
 #'

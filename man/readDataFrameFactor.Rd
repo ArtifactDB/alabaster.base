@@ -2,6 +2,7 @@
 % Please edit documentation in R/readDataFrameFactor.R
 \name{readDataFrameFactor}
 \alias{readDataFrameFactor}
+\alias{loadDataFrameFactor}
 \title{Read a DataFrame factor from disk}
 \usage{
 readDataFrameFactor(path, ...)

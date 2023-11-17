@@ -40,7 +40,8 @@
 #' list.files(tmp, recursive=TRUE)
 #'
 #' @export
-#' @aliases stageObject,ANY-method
+#' @aliases 
+#' stageObject stageObject,ANY-method
 #' searchForMethods .searchForMethods
 #' @import methods
 #' @importFrom jsonlite fromJSON

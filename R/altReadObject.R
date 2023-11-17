@@ -46,17 +46,16 @@
 #' library(S4Vectors)
 #' df <- DataFrame(A=1:10, B=LETTERS[1:10])
 #' tmp <- tempfile()
-#' dir.create(tmp)
-#' out <- stageObject(df, tmp, path="coldata")
+#' saveObject(df, tmp)
 #'
 #' # And now reading it - this should print our message.
-#' altReadObject(out, tmp)
+#' altReadObject(tmp)
 #' 
 #' # Restoring the old reader:
 #' altReadObjectFunction(old)
 #'
 #' @export
-#' @aliases .altReadObject .readObject
+#' @aliases .altLoadObject .loadObject altLoadObject altLoadObjectFunction
 altReadObject <- function(...) {
     FUN <- altReadObjectFunction()
     if (is.null(FUN)) {

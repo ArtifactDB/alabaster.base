@@ -8,6 +8,7 @@
 \alias{stageObject,character-method}
 \alias{stageObject,double-method}
 \alias{stageObject,POSIXct-method}
+\alias{stageObject,POSIXlt-method}
 \alias{stageObject,Date-method}
 \alias{saveObject,integer-method}
 \alias{saveObject,character-method}

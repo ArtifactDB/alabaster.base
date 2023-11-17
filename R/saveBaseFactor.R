@@ -18,7 +18,9 @@
 #' 
 #' @export
 #' @name saveBaseFactor
-#' @aliases stageObject,factor-method
+#' @aliases 
+#' saveObject,factor-method
+#' stageObject,factor-method
 setMethod("saveObject", "factor", function(x, path, ...) {
     dir.create(path, showWarnings=FALSE)
 

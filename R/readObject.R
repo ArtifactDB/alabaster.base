@@ -19,7 +19,7 @@
 #'
 #' @section Comments for extension developers:
 #' When writing alabaster extensions, developers may need to load child objects inside the loading functions for their classes. 
-#' In such cases, developers should use \code{\link{altRoadObject}} rather than calling \code{readObject} directly.
+#' In such cases, developers should use \code{\link{altReadObject}} rather than calling \code{readObject} directly.
 #' This ensures that any application-level overrides of the loading functions are respected. 
 #' Once in memory, the child objects can then be assembled into more complex objects by the developer's loading function.
 #'
@@ -39,16 +39,15 @@
 #'
 #' @author Aaron Lun
 #' @examples
-#' # Same example as stageObject, but reversed.
 #' library(S4Vectors)
 #' df <- DataFrame(A=1:10, B=LETTERS[1:10])
 #'
 #' tmp <- tempfile()
-
-#' readObject(out, tmp)
+#' saveObject(df, tmp)
+#' readObject(tmp)
 #' 
 #' @export
-#' @aliases loadObject schemaLocations customLoadObjectHelper .loadObjectInternal 
+#' @aliases loadObject schemaLocations customloadObjectHelper .loadObjectInternal 
 readObject <- function(path, type=NULL, ...) {
     if (is.null(type)) {
         type <- readLines(file.path(path, "OBJECT"))

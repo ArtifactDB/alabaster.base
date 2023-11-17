@@ -4,13 +4,13 @@
 \alias{readObject}
 \alias{loadObject}
 \alias{schemaLocations}
-\alias{customLoadObjectHelper}
+\alias{customloadObjectHelper}
 \alias{.loadObjectInternal}
 \alias{readObjectFunctionRegistry}
 \alias{registerReadObjectFunction}
 \title{Read an object from disk}
 \usage{
-readObject(path, ...)
+readObject(path, type = NULL, ...)
 
 readObjectFunctionRegistry()
 
@@ -19,9 +19,10 @@ registerReadObjectFunction(type, fun)
 \arguments{
 \item{path}{String containing a path to a directory, itself created with a \code{\link{saveObject}} method.}
 
-\item{...}{Further arguments to pass to individual methods.}
+\item{type}{String specifying the name of type of the object.
+If this is not supplied for \code{readObject}, it is automatically determined from the \code{OBJECT} file in \code{path}.}
 
-\item{type}{String specifying the name of type to register.}
+\item{...}{Further arguments to pass to individual methods.}
 
 \item{fun}{A loading function that accepts \code{path} and \code{...}, and returns the associated object.
 This may also be \code{NULL} to delete an existing registry.}
@@ -40,7 +41,7 @@ This is done dispatching to an appropriate loading function based on the type in
 \section{Comments for extension developers}{
 
 When writing alabaster extensions, developers may need to load child objects inside the loading functions for their classes. 
-In such cases, developers should use \code{\link{altRoadObject}} rather than calling \code{readObject} directly.
+In such cases, developers should use \code{\link{altReadObject}} rather than calling \code{readObject} directly.
 This ensures that any application-level overrides of the loading functions are respected. 
 Once in memory, the child objects can then be assembled into more complex objects by the developer's loading function.
 
@@ -56,19 +57,18 @@ It is expected that arguments in \code{...} are forwarded to internal \code{\lin
 \section{Comments for application developers}{
 
 Application developers can override the behavior of \code{readObject} by specifying a custom function in \code{\link{altReadObject}}.
-This is typically used to point to a different set of application-specific schemas, 
-which in turn point to (potentially custom) reading functions in their \code{_application.restore.R} properties.
-In most applications, the override should be defined with \code{customreadObjectHelper}, which simplifies the process of specifying a different set of schemas.
+This can be used to point to a different registry of reading functions, to perform pre- or post-reading actions, etc.
+If customization is type-specific, the custom \code{altReadObject} function can read the type from the \code{OBJECT} file to determine the most appropriate course of action;
+this type information may then be passed to the \code{type} argument of \code{readObject} to avoid a redundant read from the same file.
 }
 
 \examples{
-# Same example as stageObject, but reversed.
 library(S4Vectors)
 df <- DataFrame(A=1:10, B=LETTERS[1:10])
 
 tmp <- tempfile()
-out <- stageObject(df, tmp)
-readObject(out, tmp)
+saveObject(df, tmp)
+readObject(tmp)
 
 }
 \author{

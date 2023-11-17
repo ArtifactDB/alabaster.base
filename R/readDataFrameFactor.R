@@ -22,7 +22,7 @@
 #' readDataFrameFactor(tmp)
 #'
 #' @export
-#' @aliases readDataFrameFactor
+#' @aliases loadDataFrameFactor
 #' @importFrom S4Vectors DataFrameFactor
 readDataFrameFactor <- function(path, ...) {
     fpath <- file.path(path, "contents.h5")

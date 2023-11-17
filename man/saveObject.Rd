@@ -2,6 +2,7 @@
 % Please edit documentation in R/AllGenerics.R
 \name{saveObject}
 \alias{saveObject}
+\alias{stageObject}
 \alias{stageObject,ANY-method}
 \alias{searchForMethods}
 \alias{.searchForMethods}

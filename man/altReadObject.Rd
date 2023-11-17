@@ -2,8 +2,10 @@
 % Please edit documentation in R/altReadObject.R
 \name{altReadObject}
 \alias{altReadObject}
-\alias{.altReadObject}
-\alias{.readObject}
+\alias{.altLoadObject}
+\alias{.loadObject}
+\alias{altLoadObject}
+\alias{altLoadObjectFunction}
 \alias{altReadObjectFunction}
 \title{Alter the reading function}
 \usage{
@@ -59,11 +61,10 @@ altReadObjectFunction(function(...) {
 library(S4Vectors)
 df <- DataFrame(A=1:10, B=LETTERS[1:10])
 tmp <- tempfile()
-dir.create(tmp)
-out <- stageObject(df, tmp, path="coldata")
+saveObject(df, tmp)
 
 # And now reading it - this should print our message.
-altReadObject(out, tmp)
+altReadObject(tmp)
 
 # Restoring the old reader:
 altReadObjectFunction(old)

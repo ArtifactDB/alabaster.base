@@ -65,8 +65,7 @@ altSaveObjectFunction(superSaveObject)
 library(S4Vectors)
 df <- DataFrame(A=1:10, B=LETTERS[1:10])
 tmp <- tempfile()
-dir.create(tmp)
-out <- altSaveObject(df, tmp, path="coldata")
+altSaveObject(df, tmp)
 
 # Restoring the old loader:
 altSaveObjectFunction(old)

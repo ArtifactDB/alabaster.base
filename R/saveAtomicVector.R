@@ -26,6 +26,7 @@
 #' stageObject,character-method
 #' stageObject,double-method
 #' stageObject,POSIXct-method
+#' stageObject,POSIXlt-method
 #' stageObject,Date-method
 NULL
 

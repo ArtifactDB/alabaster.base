@@ -2,6 +2,7 @@
 % Please edit documentation in R/saveBaseFactor.R
 \name{saveBaseFactor}
 \alias{saveBaseFactor}
+\alias{saveObject,factor-method}
 \alias{stageObject,factor-method}
 \title{Save a factor to disk}
 \usage{
