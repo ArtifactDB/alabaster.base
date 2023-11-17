@@ -8,9 +8,15 @@
 #' 
 #' @return
 #' \code{x} is saved inside \code{path}.
+#' \code{NULL} is invisibly returned.
 #'
 #' @author Aaron Lun
 #' 
+#' @seealso
+#' \code{\link{readAtomicVector}}, to read the files back into the session.
+#'
+#' \code{\link{validateAtomicVector}}, to validate the file contents.
+#'
 #' @examples
 #' tmp <- tempfile()
 #' dir.create(tmp)
@@ -62,6 +68,10 @@ NULL
         ghandle <- H5Gopen(fhandle, host)
         on.exit(H5Gclose(ghandle), add=TRUE)
         h5writeAttribute("1.0", ghandle, "version", asScalar=TRUE)
+        h5writeAttribute(type, ghandle, "type", asScalar=TRUE)
+        if (!is.null(format)) {
+            h5writeAttribute(format, ghandle, "format", asScalar=TRUE)
+        }
     })()
 
     transformed <- transformVectorForHdf5(contents)
@@ -74,21 +84,13 @@ NULL
         addMissingPlaceholderAttributeForHdf5(fhandle, full.data.name, missing.placeholder)
     }
 
-    (function() {
-        dhandle <- H5Dopen(fhandle, full.data.name)
-        on.exit(H5Dclose(dhandle), add=TRUE)
-        h5writeAttribute(type, dhandle, "type", asScalar=TRUE)
-        if (!is.null(format)) {
-            h5writeAttribute(format, dhandle, "format", asScalar=TRUE)
-        }
-    })()
-
     if (!is.null(names(x))) {
         h5write(names(x), fhandle, paste0(host, "/names"))
     }
     full.data.name <- paste0(host, "/values")
 
     write("atomic_vector", file=file.path(path, "OBJECT"))
+    invisible(NULL)
 }
 
 #' @export

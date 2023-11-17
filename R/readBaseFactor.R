@@ -5,10 +5,14 @@
 #' @param path String containing a path to a directory, itself created with the \code{\link{saveObject}} method for factors.
 #' @param ... Further arguments, ignored.
 #'
-#' @return The vector described by \code{info}, possibly with names.
+#' @return 
+#' For \code{readBaseFactor}, the vector described by \code{info}. 
+#'
+#' For \code{validateBaseFactor}, an error is raised if the files are invalid.
+#' Otherwise, \code{NULL} is invisibly returned.
 #'
 #' @seealso
-#' \code{"\link{stageObject,factor-method}"}, for the staging method.
+#' \code{"\link{saveObject,factor-method}"}, for the staging method.
 #'
 #' @author Aaron Lun
 #' 
@@ -45,6 +49,12 @@ readBaseFactor <- function(path, ...) {
     code.attrs <- h5readAttributes(fhandle, code.name)
     codes <- .h5cast(codes, code.attrs, type="integer")
     codes + 1L
+}
+
+#' @export
+#' @rdname readBaseFactor
+validateBaseFactor <- function(path) {
+    invisible(validate_string_factor(path))
 }
 
 #######################################

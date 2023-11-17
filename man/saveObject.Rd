@@ -19,6 +19,7 @@ saveObject(x, path, ...)
 }
 \value{
 \code{dir} is created and populated with files containing the contents of \code{x}.
+\code{NULL} should be invisibly returned.
 }
 \description{
 Generic to stage assorted R objects into appropriate on-disk representations.

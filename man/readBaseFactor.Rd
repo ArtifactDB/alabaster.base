@@ -3,9 +3,12 @@
 \name{readBaseFactor}
 \alias{readBaseFactor}
 \alias{loadBaseFactor}
+\alias{validateBaseFactor}
 \title{Read a factor from disk}
 \usage{
 readBaseFactor(path, ...)
+
+validateBaseFactor(path)
 }
 \arguments{
 \item{path}{String containing a path to a directory, itself created with the \code{\link{saveObject}} method for factors.}
@@ -13,7 +16,10 @@ readBaseFactor(path, ...)
 \item{...}{Further arguments, ignored.}
 }
 \value{
-The vector described by \code{info}, possibly with names.
+For \code{readBaseFactor}, the vector described by \code{info}. 
+
+For \code{validateBaseFactor}, an error is raised if the files are invalid.
+Otherwise, \code{NULL} is invisibly returned.
 }
 \description{
 Read a base R \link{factor} from its on-disk representation.
@@ -25,7 +31,7 @@ readBaseFactor(tmp)
 
 }
 \seealso{
-\code{"\link{stageObject,factor-method}"}, for the staging method.
+\code{"\link{saveObject,factor-method}"}, for the staging method.
 }
 \author{
 Aaron Lun

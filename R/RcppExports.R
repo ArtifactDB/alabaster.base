@@ -49,6 +49,14 @@ load_list_json <- function(file, obj, parallel) {
     .Call(`_alabaster_base_load_list_json`, file, obj, parallel)
 }
 
+validate_atomic_vector <- function(path) {
+    .Call(`_alabaster_base_validate_atomic_vector`, path)
+}
+
+validate_string_factor <- function(path) {
+    .Call(`_alabaster_base_validate_string_factor`, path)
+}
+
 write_integer_scalar <- function(path, host, name, val) {
     .Call(`_alabaster_base_write_integer_scalar`, path, host, name, val)
 }

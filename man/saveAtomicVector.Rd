@@ -45,6 +45,7 @@
 }
 \value{
 \code{x} is saved inside \code{path}.
+\code{NULL} is invisibly returned.
 }
 \description{
 Save vectors containing atomic elements (or values that can be cast as such, e.g., dates and times) to an on-disk representation.
@@ -56,6 +57,11 @@ saveObject(LETTERS, file.path(tmp, "foo"))
 saveObject(setNames(runif(26), letters), file.path(tmp, "bar"))
 list.files(tmp, recursive=TRUE)
 
+}
+\seealso{
+\code{\link{readAtomicVector}}, to read the files back into the session.
+
+\code{\link{validateAtomicVector}}, to validate the file contents.
 }
 \author{
 Aaron Lun

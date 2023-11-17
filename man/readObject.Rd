@@ -25,7 +25,7 @@ If this is not supplied for \code{readObject}, it is automatically determined fr
 \item{...}{Further arguments to pass to individual methods.}
 
 \item{fun}{A loading function that accepts \code{path} and \code{...}, and returns the associated object.
-This may also be \code{NULL} to delete an existing registry.}
+This may also be \code{NULL} to delete an existing entry in the registry.}
 }
 \value{
 For \code{readObject}, an object created from the on-disk representation in \code{path}.
@@ -36,7 +36,7 @@ For \code{registerReadObjectFunction}, the function is added to the registry.
 }
 \description{
 Read an object from its on-disk representation.
-This is done dispatching to an appropriate loading function based on the type in the \code{OBJECT} file.
+This is done by dispatching to an appropriate loading function based on the type in the \code{OBJECT} file.
 }
 \section{Comments for extension developers}{
 

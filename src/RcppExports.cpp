@@ -168,6 +168,26 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// validate_atomic_vector
+Rcpp::RObject validate_atomic_vector(std::string path);
+RcppExport SEXP _alabaster_base_validate_atomic_vector(SEXP pathSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::traits::input_parameter< std::string >::type path(pathSEXP);
+    rcpp_result_gen = Rcpp::wrap(validate_atomic_vector(path));
+    return rcpp_result_gen;
+END_RCPP
+}
+// validate_string_factor
+Rcpp::RObject validate_string_factor(std::string path);
+RcppExport SEXP _alabaster_base_validate_string_factor(SEXP pathSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::traits::input_parameter< std::string >::type path(pathSEXP);
+    rcpp_result_gen = Rcpp::wrap(validate_string_factor(path));
+    return rcpp_result_gen;
+END_RCPP
+}
 // write_integer_scalar
 SEXP write_integer_scalar(std::string path, std::string host, std::string name, int val);
 RcppExport SEXP _alabaster_base_write_integer_scalar(SEXP pathSEXP, SEXP hostSEXP, SEXP nameSEXP, SEXP valSEXP) {
@@ -208,6 +228,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_alabaster_base_load_csv", (DL_FUNC) &_alabaster_base_load_csv, 4},
     {"_alabaster_base_load_list_hdf5", (DL_FUNC) &_alabaster_base_load_list_hdf5, 3},
     {"_alabaster_base_load_list_json", (DL_FUNC) &_alabaster_base_load_list_json, 3},
+    {"_alabaster_base_validate_atomic_vector", (DL_FUNC) &_alabaster_base_validate_atomic_vector, 1},
+    {"_alabaster_base_validate_string_factor", (DL_FUNC) &_alabaster_base_validate_string_factor, 1},
     {"_alabaster_base_write_integer_scalar", (DL_FUNC) &_alabaster_base_write_integer_scalar, 4},
     {"_alabaster_base_write_string_scalar", (DL_FUNC) &_alabaster_base_write_string_scalar, 4},
     {NULL, NULL, 0}
