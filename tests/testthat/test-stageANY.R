@@ -35,6 +35,9 @@ test_that("stageObject fails for unknown classes", {
     tmp <- tempfile()
     dir.create(tmp) 
     expect_error(stageObject(a, tmp, "foo"), "MyClass")
+
+    tmp <- tempfile()
+    expect_error(saveObject(a, tmp), "MyClass")
 })
 
 test_that("stageObject fails for existing paths", {
@@ -49,6 +52,11 @@ test_that("stageObject fails for existing paths", {
     dir.create(tmp) 
     expect_error(info <- stageObject(a, tmp, "."), NA)
     expect_identical(info$path, "./simple.csv.gz")
+
+    # Fails with the new world.
+    tmp <- tempfile()
+    dir.create(tmp) 
+    expect_error(saveObject(a, tmp), "existing path")
 })
 
 test_that("stageObject fails for saving non-child objects in other object's subdirectories", {

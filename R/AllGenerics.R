@@ -45,11 +45,8 @@
 #' @import methods
 #' @importFrom jsonlite fromJSON
 setGeneric("saveObject", function(x, path, ...) {
-    if (path != "." && file.exists(path)) {
+    if (file.exists(path)) {
         stop("cannot stage ", class(x)[1], " at existing path '", path, "'")
-    }
-    if (grepl("\\\\", path)) {
-        stop("Windows-style path separators are not allowed")
     }
 
     # Need to search here to pick up any subclasses that might have better
@@ -81,21 +78,13 @@ setGeneric("stageObject", function(x, dir, path, child=FALSE, ...) {
         parent <- dirname(path)
         while (parent != ".") {
             ppath <- file.path(dir, parent)
-
-            if (simplified) {
-                if (file.exists(ppath, "manifest.json")) {
+            candidates <- list.files(ppath, pattern="\\.json$")
+            for (can in candidates) {
+                schema <- fromJSON(file.path(ppath, can), simplifyVector=FALSE)[["$schema"]]
+                if (!startsWith(schema, "redirection/")) {
                     stop("cannot save a non-child object inside another object's subdirectory at '", parent, "'")
                 }
-            } else {
-                candidates <- list.files(ppath, pattern="\\.json$")
-                for (can in candidates) {
-                    schema <- fromJSON(file.path(ppath, can), simplifyVector=FALSE)[["$schema"]]
-                    if (!startsWith(schema, "redirection/")) {
-                        stop("cannot save a non-child object inside another object's subdirectory at '", parent, "'")
-                    }
-                }
             }
-
             parent <- dirname(parent)
         }
     }
