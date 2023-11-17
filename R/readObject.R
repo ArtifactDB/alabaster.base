@@ -5,7 +5,8 @@
 #'
 #' @param path String containing a path to a directory, itself created with a \code{\link{saveObject}} method.
 #' @param ... Further arguments to pass to individual methods.
-#' @param type String specifying the name of type to register.
+#' @param type String specifying the name of type of the object.
+#' If this is not supplied for \code{readObject}, it is automatically determined from the \code{OBJECT} file in \code{path}.
 #' @param fun A loading function that accepts \code{path} and \code{...}, and returns the associated object.
 #' This may also be \code{NULL} to delete an existing registry.
 #' 
@@ -32,9 +33,9 @@
 #'
 #' @section Comments for application developers:
 #' Application developers can override the behavior of \code{readObject} by specifying a custom function in \code{\link{altReadObject}}.
-#' This is typically used to point to a different set of application-specific schemas, 
-#' which in turn point to (potentially custom) reading functions in their \code{_application.restore.R} properties.
-#' In most applications, the override should be defined with \code{customreadObjectHelper}, which simplifies the process of specifying a different set of schemas.
+#' This can be used to point to a different registry of reading functions, to perform pre- or post-reading actions, etc.
+#' If customization is type-specific, the custom \code{altReadObject} function can read the type from the \code{OBJECT} file to determine the most appropriate course of action;
+#' this type information may then be passed to the \code{type} argument of \code{readObject} to avoid a redundant read from the same file.
 #'
 #' @author Aaron Lun
 #' @examples
@@ -43,13 +44,16 @@
 #' df <- DataFrame(A=1:10, B=LETTERS[1:10])
 #'
 #' tmp <- tempfile()
-#' out <- stageObject(df, tmp)
+
 #' readObject(out, tmp)
 #' 
 #' @export
 #' @aliases loadObject schemaLocations customLoadObjectHelper .loadObjectInternal 
-readObject <- function(path, ...) {
-    type <- readLines(file.path(path, "OBJECT"))
+readObject <- function(path, type=NULL, ...) {
+    if (is.null(type)) {
+        type <- readLines(file.path(path, "OBJECT"))
+    }
+
     meth <- registry$registry[[type]]
     if (is.null(meth)) {
         stop("cannot read unknown object type '", type, "'")
