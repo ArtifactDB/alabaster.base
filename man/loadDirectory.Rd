@@ -20,6 +20,7 @@ loadDirectory(dir, redirect.action = c("from", "to", "both"))
 A named list is returned containing all (non-child) R objects in \code{dir}.
 }
 \description{
+\emph{WARNING: this function is deprecated, use \code{\link{listObjects}} and loop over entries with \code{\link{readObject}} instead.}
 As the title suggests, this function loads all non-child objects in a staging directory.
 All loading is performed using \code{\link{altLoadObject}} to respect any application-specific overrides.
 Children are used to assemble their parent objects and are not reported here.

@@ -4,7 +4,7 @@ author:
 - name: Aaron Lun
   email: infinite.monkeys.with.keyboards@gmail.com
 package: alabaster.base
-date: "Revised: September 29, 2022"
+date: "Revised: November 16, 2023"
 output:
   BiocStyle::html_document
 vignette: >
@@ -42,116 +42,217 @@ df <- DataFrame(X=1:10, Y=letters[1:10])
 df
 ```
 
-We'll save this `DataFrame` to file inside a "staging directory":
+We'll save this `DataFrame` to a directory:
 
 ```{r}
-staging <- tempfile()
-
+tmp <- tempfile()
 library(alabaster.base)
-quickStageObject(df, staging, "my_favorite_df")
+saveObject(df, tmp)
 ```
 
-And reading it back in:
+And read it back in:
 
 ```{r}
-quickLoadObject(staging, "my_favorite_df")
+readObject(tmp)
 ```
 
 # Class-specific methods
 
-Each class implements a staging and loading method for use inside the _alabaster_ framework.
-The staging method (for the `stageObject()` generic) will save the object to one or more files, given a staging directory and a path inside it:
+Each class implements a saving and reading method for use by the _alabaster_ framework.
+The saving method (for the `saveObject()` generic) will save the object to one or more files, given a path to a directory:
 
 ```{r}
 tmp <- tempfile()
-dir.create(tmp)
-
-# DataFrame method already defined for the stageObject generic:
-meta <- stageObject(df, tmp, path="my_df")
-str(meta)
-
-# Writing the metadata to file.
-invisible(writeMetadata(meta, tmp))
-
+saveObject(df, tmp)
 list.files(tmp, recursive=TRUE)
 ```
 
-Conversely, the loading function will - as the name suggests - load the object back into memory, given the staging directory and the file's metadata.
-The correct loading function for each class is automatically called by the `loadObject()` function:
+Conversely, the reading function will - as the name suggests - load the object back into memory, given the path to its directory. 
+The correct loading function for each class is automatically called by the `readObject()` function:
 
 ```{r}
-remeta <- acquireMetadata(tmp, "my_df/simple.csv.gz")
-loadObject(remeta, tmp)
+readObject(tmp)
 ```
 
 `r self` itself supports a small set of classes from the `r Biocpkg("S4Vectors")` packages;
 support for additional classes can be found in other packages like `r Biocpkg("alabaster.ranges")` and `r Biocpkg("alabaster.se")`.
 Third-party developers can also add support for their own classes by defining new methods, see the [_Extensions_](extensions.html) vignette for details.
 
-Incidentally, `readLocalObject()` and `saveLocalObject()` are just convenience wrappers acround `stageObject()` and `loadObject()`, respectively.
+# Operating on directories
 
-# What's a staging directory?
-
-For some concept of a "project", the staging directory contains all of the artifacts generated for that project.
-Multiple objects can be saved into a single staging directory, usually in separate subdirectories to avoid conflicts.
-For example:
-
-```{r}
-# Creating a nested DF to be a little spicy:
-df2 <- DataFrame(Z=factor(1:5), AA=I(DataFrame(B=runif(5), C=rnorm(5))))
-
-meta2 <- stageObject(df2, tmp, path="my_df2")
-list.files(tmp, recursive=TRUE)
-```
-
-We use the staging directory as a root for the hard-coded paths in the metadata returned by `stageObject()` (i.e., `meta` and `meta2`).
-Thus, we can easily copy the entire directory to a new file system and everything will still be correctly referenced.
-
-```{r}
-meta2$path
-new.dir <- tempfile()
-dir.create(new.dir)
-invisible(file.copy(tmp, new.dir, recursive=TRUE))
-loadObject(meta2, file.path(new.dir, basename(tmp)))
-```
-
+Users can move freely rename or relocate directories and `readObject()` function will still work.
+For example, we can easily copy the entire directory to a new file system and everything will still be correctly referenced.
 The simplest way to share objects is to just `zip` or `tar` the staging directory for _ad hoc_ distribution.
 For more serious applications, `r self` can be used in conjunction with centralized file storage systems - 
 see the [_Applications_](applications.html) vignette for more details.
 
-# Saving and validating metadata
-
-Each file artifact is associated with JSON-formatted metadata, denoted by a file with an additional `.json` suffix. 
-This defines the interpretation of the contents of the file as well as pointing to other files that are required to represent the corresponding object in an R session.
-Users can use the `.writeMetadata()` utility to quickly write the metadata to an appropriate location inside the staging directory.
-
 ```{r}
-# Writing the metadata to file.
-invisible(writeMetadata(meta, dir=tmp))
-invisible(writeMetadata(meta2, dir=tmp))
+tmp <- tempfile()
+saveObject(df, tmp)
 
-# Reading a snippet.
-meta.path <- file.path(tmp, paste0(meta$path, ".json"))
-cat(head(readLines(meta.path), 20), sep="\n")
+tmp2 <- tempfile()
+file.rename(tmp, tmp2)
+readObject(tmp2)
 ```
 
-The JSON metadata for each artifact follows the constraints of the schema specified in the `$schema` property.
-This schema determines what fields can be stored and which are mandatory; the loading method uses such fields to reliably restore the object into memory.
-`.writeMetadata()` will automatically validate the metadata against the schema to ensure that the contents are appropriate.
+That said, it is unwise to manipulate the files inside the directory created by `saveObject()`.
+Reading functions will usually depend on specific file names or subdirectory structures within the directory, and fiddling with them may cause unexpected results.
 
 ```{r}
-meta.fail <- meta
-meta.fail[["data_frame"]][["columns"]] <- NULL
-try(writeMetadata(meta.fail, dir=tmp))
+# Creating a nested DF to be a little spicy:
+df2 <- DataFrame(Z=factor(1:5), AA=I(DataFrame(B=runif(5), C=rnorm(5))))
+tmp <- tempfile()
+meta2 <- saveObject(df2, tmp)
+
+list.files(tmp, recursive=TRUE)
+readObject(file.path(tmp, "other_columns/1"))
 ```
 
-The schema will also list the exact R function that is required to load an object into memory.
-This means that developers can create third-party extensions for new data structures by defining new schemas, without requiring changes to `r self`'s code.
-Indeed, `loadObject()` automatically uses the schema to determine how it should load the files back into memory:
+# Extending to new classes
+
+The _alabaster_ framework is easily extended to new classes by:
+
+1. Writing a method for `saveObject()`.
+   This should accept an instance of the object and a path to a directory, and save the contents of the object inside the directory.
+   It should also produce an `OBJECT` file that specifies the type of the object, e.g., `data_frame`, `hdf5_sparse_matrix`.
+2. Writing a function for `readObject()` and registering it with `registerReadObjectFunction()` (or, for core Bioconductor classes, by requesting a change to the default registry in `r self`).
+   This should accept a path to a directory and read its contents to reconstruct the object.
+   The registered type should be the same as that used in the `OBJECT` file.
+3. (optional) Formalize the on-disk representation by adding a specification to the [**takane**](https://github.com/ArtifactDB/takane) repository.
+   This aims to provide C++-based validators for each representation, allowing us to enforce consistency across multiple languages (e.g., Python).
+
+To illustrate, let's extend _alabaster_ to the `dgTMatrix` from the `r CRANpkg("Matrix")` package.
+First, the saving method:
 
 ```{r}
-re.read <- acquireMetadata(tmp, "my_df2/simple.csv.gz")
-loadObject(re.read, tmp)
+library(Matrix)
+setMethod("saveObject", "dgTMatrix", function(x, path, ...) {
+    # Create a directory to stash our contents.
+    dir.create(path)
+
+    # Saving a DataFrame with the triplet data.
+    df <- DataFrame(i = x@i, j = x@j, x = x@x)
+    write.csv(df, file.path(path, "matrix.csv"), row.names=FALSE)
+
+    # Adding some more information.
+    write(dim(x), file=file.path(path, "dimensions.txt"), ncol=1)
+
+    # Creating an object file.
+    write("triplet_sparse_matrix", file=file.path(path, "OBJECT"))
+})
+```
+
+And now the reading method:
+
+```{r}
+readSparseTripletMatrix <- function(path) {
+    df <- read.table(file.path(path, "matrix.csv"), header=TRUE, sep=",")
+    dims <- readLines(file.path(path, "dimensions.txt"))
+    sparseMatrix(
+         i=df$i + 1L, 
+         j=df$j + 1L, 
+         x=df$x, 
+         dims=as.integer(dims),
+         repr="T"
+    )
+}
+
+registerReadObjectFunction("triplet_sparse_matrix", readSparseTripletMatrix)
+```
+
+And running them:
+
+```{r}
+x <- sparseMatrix(
+    i=c(1,2,3,5,6), 
+    j=c(3,6,1,3,8), 
+    x=runif(5), 
+    dims=c(10, 10), 
+    repr="T"
+)
+x
+
+tmp <- tempfile()
+saveObject(x, tmp, "test")
+list.files(tmp, recursive=TRUE)
+readObject(tmp)
+```
+
+For more complex objects that are composed of multiple smaller "child" objects, developers should consider saving each of their children in subdirectories of `path`.
+This can be achieved by calling `altSaveObject()` and `altReadObject()` in the saving and loading functions, respectively.
+
+# Creating applications
+
+Developers can also create applications that customize the machinery of the _alabaster_ framework for specific needs.
+For example, we might want to deposit some metadata for each saved object - say, the authoring user.
+This is achieved by creating an application-specific saving generic:
+
+```{r}
+setGeneric("appSaveObject", function(x, path, ...) {
+    ans <- standardGeneric("appSaveObject")
+
+    # File names with leading underscores are reserved for application-specific
+    # use, so they won't clash with anything produced by stageObject. 
+    metapath <- file.path(path, "_metadata.json")
+    write(jsonlite::toJSON(ans, auto_unbox=TRUE), file=metapath)
+})
+
+setMethod("appSaveObject", "ANY", function(x, path, ...) {
+    saveObject(x, path, ...) # does the real work
+    list(authors=I(Sys.info()[["user"]])) # adds the desired metadata
+})
+```
+
+We can specialize the behavior for specific classes like `DataFrame`s:
+
+```{r}
+setMethod("appSaveObject", "DFrame", function(x, path, child=FALSE, ...) {
+    ans <- callNextMethod()
+    ans$columns <- I(colnames(x))
+    ans
+})
+```
+
+Applications can then override any `altSaveObject()` calls with their generic.
+This ensures that the customizations are applied to all child objects, such as the nested `DataFrame` below.
+
+```{r}
+df2 <- DataFrame(Z=factor(1:5), AA=I(DataFrame(B=runif(5), C=rnorm(5))))
+
+old <- altSaveObjectFunction(appSaveObject)
+tmp <- tempfile()
+altSaveObject(df2, tmp)
+
+# Both the parent and child DataFrames have metadata.
+cat(readLines(file.path(tmp, "_metadata.json")), sep="\n")
+cat(readLines(file.path(tmp, "other_columns/1/_metadata.json")), sep="\n")
+
+# Unsetting the override for other applications.
+altSaveObjectFunction(old) 
+```
+
+The reading function can be similarly overridden, e.g., to do something with the metadata that we just added.
+
+```{r}
+appReadObject <- function(path, ...) {
+    type <- readLines(file.path(path, "OBJECT"))
+
+    # Adding a custom message based on the type and its metadata.
+    meta <- jsonlite::fromJSON(file.path(path, "_metadata.json"))
+    cat("I am a ", type, " created by ", meta$authors[1], ".\n", sep="")
+    if (type == "data_frame") {
+        all.cols <- paste(meta$columns, collapse=", ")
+        cat("I have the following columns: ", all.cols, ".\n", sep="")
+    }
+
+    readObject(path, type=type, ...)
+}
+
+old <- altReadObjectFunction(appReadObject)
+altReadObject(tmp)
+
+# Unsetting the override for other applications.
+altReadObjectFunction(old) 
 ```
 
 # Session information {-}

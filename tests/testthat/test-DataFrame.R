@@ -63,7 +63,7 @@ test_that("DFs handle their column types correctly", {
     old <- saveDataFrameFormat("hdf5")
     on.exit(saveDataFrameFormat(old))
 
-    for (version in 1:3) {
+    for (version in 1:2) {
         meta2 <- stageObject(df, tmp, path=paste0("WHEE-", version), .version.df=version, .version.hdf5=version)
         expect_match(meta2$path, ".h5$")
         expect_identical(meta2$`$schema`, "hdf5_data_frame/v1.json")
@@ -76,6 +76,13 @@ test_that("DFs handle their column types correctly", {
         round2 <- loadDataFrame(meta2, project=tmp)
         expect_identical(round2, df)
     }
+
+    # Works in the new world.
+    tmp2 <- tempfile()
+    saveObject(df, tmp2)
+    expect_identical(readLines(file.path(tmp2, "OBJECT")), "data_frame")
+    round2 <- readDataFrame(tmp2)
+    expect_identical(round2, df)
 })
 
 test_that("staging of weird objects within DFs works correctly", {
@@ -106,7 +113,7 @@ test_that("staging of weird objects within DFs works correctly", {
     old <- saveDataFrameFormat("hdf5")
     on.exit(saveDataFrameFormat(old))
 
-    for (version in 1:3) {
+    for (version in 1:2) {
         meta <- stageObject(input, tmp, path=paste0("WHEE-", version), .version.df=version, .version.hdf5=version)
 
         expect_match(meta$path, ".h5$")
@@ -120,6 +127,13 @@ test_that("staging of weird objects within DFs works correctly", {
         round <- loadDataFrame(meta, project=tmp)
         expect_identical(round, input)
     }
+
+    # Works in the new world.
+    tmp2 <- tempfile()
+    saveObject(df, tmp2)
+    expect_identical(readLines(file.path(tmp2, "OBJECT")), "data_frame")
+    round2 <- readDataFrame(tmp2)
+    expect_identical(round2, df)
 })
 
 test_that("staging of uncompressed Gzip works correctly", {
@@ -157,11 +171,18 @@ test_that("staging with row names works correctly", {
     old <- saveDataFrameFormat("hdf5")
     on.exit(saveDataFrameFormat(old))
 
-    for (version in 1:3) {
+    for (version in 1:2) {
         meta2 <- stageObject(df, tmp, path=paste0("FOO-", version), .version.df=version, .version.hdf5=version)
         round2 <- loadDataFrame(meta2, project=tmp)
         expect_identical(round2, df)
     }
+
+    # Works in the new world.
+    tmp2 <- tempfile()
+    saveObject(df, tmp2)
+    expect_identical(readLines(file.path(tmp2, "OBJECT")), "data_frame")
+    round2 <- readDataFrame(tmp2)
+    expect_identical(df, round2)
 })
 
 test_that("staging of empty objects works correctly", {
@@ -185,7 +206,7 @@ test_that("staging of empty objects works correctly", {
     old <- saveDataFrameFormat("hdf5")
     on.exit(saveDataFrameFormat(old))
 
-    for (version in 1:3) {
+    for (version in 1:2) {
         meta <- stageObject(df, tmp, path=paste0("WHEE_h5", version), .version.df=version, .version.hdf5=version)
         round <- loadDataFrame(meta, project=tmp)
         expect_identical(round, df)
@@ -194,6 +215,17 @@ test_that("staging of empty objects works correctly", {
         round <- loadDataFrame(meta, project=tmp)
         expect_identical(round, df2)
     }
+
+    # Works in the new world.
+    tmp2a <- tempfile()
+    saveObject(df, tmp2a)
+    round2 <- readDataFrame(tmp2a)
+    expect_identical(df, round2)
+
+    tmp2b <- tempfile()
+    saveObject(df2, tmp2b)
+    round2 <- readDataFrame(tmp2b)
+    expect_identical(df2, round2)
 })
 
 test_that("handling of NAs works correctly", {
@@ -225,46 +257,50 @@ test_that("handling of NAs works correctly", {
     old <- saveDataFrameFormat("hdf5")
     on.exit(saveDataFrameFormat(old))
 
-    for (version in 2:3) {
-        meta2 <- stageObject(df, tmp, path=paste0("WHEE-", version), .version.df=version, .version.hdf5=version)
-        expect_match(meta2[["$schema"]], "hdf5_data_frame")
+    meta2 <- stageObject(df, tmp, path="WHEE2", .version.df=2, .version.hdf5=2)
+    expect_match(meta2[["$schema"]], "hdf5_data_frame")
 
-        fpath <- file.path(tmp, meta2$path)
-        attrs <- rhdf5::h5readAttributes(fpath, "contents/data/0")
-        expect_identical(attrs[["missing-value-placeholder"]], "NA")
-        attrs <- rhdf5::h5readAttributes(fpath, "contents/data/1")
-        expect_identical(attrs[["missing-value-placeholder"]], "_NA")
+    fpath <- file.path(tmp, meta2$path)
+    attrs <- rhdf5::h5readAttributes(fpath, "contents/data/0")
+    expect_identical(attrs[["missing-value-placeholder"]], "NA")
+    attrs <- rhdf5::h5readAttributes(fpath, "contents/data/1")
+    expect_identical(attrs[["missing-value-placeholder"]], "_NA")
 
-        if (version >= 3) {
-            attrs <- rhdf5::h5readAttributes(fpath, "contents/data/2/codes")
-            expect_identical(attrs[["missing-value-placeholder"]], -1L)
-            attrs <- rhdf5::h5readAttributes(fpath, "contents/data/3/codes")
-            expect_null(attrs[["missing-value-placeholder"]])
-        } else {
-            attrs <- rhdf5::h5readAttributes(fpath, "contents/data/2")
-            expect_identical(attrs[["missing-value-placeholder"]], NA_integer_)
-            attrs <- rhdf5::h5readAttributes(fpath, "contents/data/3")
-            expect_null(attrs[["missing-value-placeholder"]])
-        }
+    attrs <- rhdf5::h5readAttributes(fpath, "contents/data/2")
+    expect_identical(attrs[["missing-value-placeholder"]], NA_integer_)
+    attrs <- rhdf5::h5readAttributes(fpath, "contents/data/3")
+    expect_null(attrs[["missing-value-placeholder"]])
 
-        attrs <- rhdf5::h5readAttributes(fpath, "contents/data/4")
-        expect_true(is.na(attrs[["missing-value-placeholder"]]))
-        attrs <- rhdf5::h5readAttributes(fpath, "contents/data/5")
-        place <- attrs[["missing-value-placeholder"]]
-        expect_true(is.na(place) && !is.nan(place))
-        attrs <- rhdf5::h5readAttributes(fpath, "contents/data/6")
-        expect_equal(attrs[["missing-value-placeholder"]], -1L)
+    attrs <- rhdf5::h5readAttributes(fpath, "contents/data/4")
+    expect_true(is.na(attrs[["missing-value-placeholder"]]))
+    attrs <- rhdf5::h5readAttributes(fpath, "contents/data/5")
+    place <- attrs[["missing-value-placeholder"]]
+    expect_true(is.na(place) && !is.nan(place))
+    attrs <- rhdf5::h5readAttributes(fpath, "contents/data/6")
+    expect_equal(attrs[["missing-value-placeholder"]], -1L)
 
-        attrs <- rhdf5::h5readAttributes(fpath, "contents/data/7")
-        expect_null(attrs[["missing-value-placeholder"]])
-        attrs <- rhdf5::h5readAttributes(fpath, "contents/data/8")
-        expect_null(attrs[["missing-value-placeholder"]])
-        attrs <- rhdf5::h5readAttributes(fpath, "contents/data/9")
-        expect_null(attrs[["missing-value-placeholder"]])
+    attrs <- rhdf5::h5readAttributes(fpath, "contents/data/7")
+    expect_null(attrs[["missing-value-placeholder"]])
+    attrs <- rhdf5::h5readAttributes(fpath, "contents/data/8")
+    expect_null(attrs[["missing-value-placeholder"]])
+    attrs <- rhdf5::h5readAttributes(fpath, "contents/data/9")
+    expect_null(attrs[["missing-value-placeholder"]])
 
-        round2 <- loadDataFrame(meta2, project=tmp)
-        expect_identical(df, round2)
-    }
+    round2 <- loadDataFrame(meta2, project=tmp)
+    expect_identical(df, round2)
+
+    # Works in the new world.
+    tmp2 <- tempfile()
+    saveObject(df, tmp2)
+
+    fpath <- file.path(tmp2, "basic_columns.h5")
+    attrs <- rhdf5::h5readAttributes(fpath, "data_frame/data/2/codes")
+    expect_identical(attrs[["missing-value-placeholder"]], -1L)
+    attrs <- rhdf5::h5readAttributes(fpath, "data_frame/data/3/codes")
+    expect_null(attrs[["missing-value-placeholder"]])
+
+    round2 <- readDataFrame(tmp2)
+    expect_identical(df, round2)
 })
 
 test_that("handling of the integer minimum limit works correctly", {
@@ -287,7 +323,7 @@ test_that("handling of the integer minimum limit works correctly", {
     old <- saveDataFrameFormat("hdf5")
     on.exit(saveDataFrameFormat(old))
 
-    for (version in 1:3) { 
+    for (version in 1:2) { 
         meta <- stageObject(df, tmp, path=paste0("hdf5-", version), .version.df=version, .version.hdf5=version)
         fpath <- file.path(tmp, meta$path)
         rhdf5::h5deleteAttribute(fpath, "contents/data/0", "missing-value-placeholder")
@@ -305,6 +341,24 @@ test_that("handling of the integer minimum limit works correctly", {
         round <- loadDataFrame(meta, project=tmp)
         expect_identical(round$foobar, c(NA, 2, -2^31))
     }
+
+    # Works in the new world.
+    tmp2 <- tempfile()
+    saveObject(df, tmp2)
+
+    fpath <- file.path(tmp2, "basic_columns.h5")
+    rhdf5::h5deleteAttribute(fpath, "data_frame/data/0", "missing-value-placeholder")
+    round2 <- readDataFrame(tmp2)
+    expect_identical(round2$foobar, actual)
+
+    fhandle <- rhdf5::H5Fopen(fpath)
+    dhandle <- rhdf5::H5Dopen(fhandle, "data_frame/data/0")
+    rhdf5::h5writeAttribute(1, dhandle, "missing-value-placeholder", asScalar=TRUE)
+    rhdf5::H5Dclose(dhandle)
+    rhdf5::H5Fclose(fhandle)
+
+    round <- readDataFrame(tmp2)
+    expect_identical(round$foobar, c(NA, 2, -2^31))
 })
 
 test_that("handling of IEEE special values work correctly", {
@@ -330,7 +384,7 @@ test_that("handling of IEEE special values work correctly", {
     old <- saveDataFrameFormat("hdf5")
     on.exit(saveDataFrameFormat(old))
 
-    for (version in 1:3) { 
+    for (version in 1:2) { 
         meta <- stageObject(df, tmp, path=paste0("hFOO1-", version), .version.df=version, .version.hdf5=version)
         round <- loadDataFrame(meta, project=tmp)
         expect_identical(round, df)
@@ -339,6 +393,19 @@ test_that("handling of IEEE special values work correctly", {
         round <- loadDataFrame(meta, project=tmp)
         expect_identical(round, df2)
     }
+
+    # Works in the new world.
+    tmp2a <- tempfile()
+    saveObject(df, tmp2a)
+    expect_identical(readLines(file.path(tmp2a, "OBJECT")), "data_frame")
+    round2 <- readDataFrame(tmp2a)
+    expect_identical(round2, df)
+
+    tmp2b <- tempfile()
+    saveObject(df2, tmp2b)
+    expect_identical(readLines(file.path(tmp2b, "OBJECT")), "data_frame")
+    round2 <- readDataFrame(tmp2b)
+    expect_identical(round2, df2)
 })
 
 test_that("loaders work correctly from HDF5 with non-default placeholders", {
@@ -354,19 +421,32 @@ test_that("loaders work correctly from HDF5 with non-default placeholders", {
     old <- saveDataFrameFormat("hdf5")
     on.exit(saveDataFrameFormat(old))
 
-    for (version in 2:3) {
-        meta2 <- stageObject(df, tmp, path=paste0("WHEE-", version), .version.df=version, .version.hdf5=version)
+    # In the old world.
+    meta2 <- stageObject(df, tmp, path="WHEE2", .version.df=2, .version.hdf5=2)
 
-        fpath <- file.path(tmp, meta2$path)
-        addMissingPlaceholderAttributeForHdf5(fpath, "contents/data/0", 1L)
-        addMissingPlaceholderAttributeForHdf5(fpath, "contents/data/1", 2.5)
-        addMissingPlaceholderAttributeForHdf5(fpath, "contents/data/2", NaN)
+    fpath <- file.path(tmp, meta2$path)
+    addMissingPlaceholderAttributeForHdf5(fpath, "contents/data/0", 1L)
+    addMissingPlaceholderAttributeForHdf5(fpath, "contents/data/1", 2.5)
+    addMissingPlaceholderAttributeForHdf5(fpath, "contents/data/2", NaN)
 
-        round <- loadDataFrame(meta2, project=tmp)
-        expect_identical(round$a, c(NA, 2L, 3L))
-        expect_identical(round$b, c(1.5, NA, 3.5))
-        expect_identical(round$c, c(1.5, 2.5, NA))
-    }
+    round <- loadDataFrame(meta2, project=tmp)
+    expect_identical(round$a, c(NA, 2L, 3L))
+    expect_identical(round$b, c(1.5, NA, 3.5))
+    expect_identical(round$c, c(1.5, 2.5, NA))
+
+    # Works in the new world.
+    tmp2 <- tempfile()
+    saveObject(df, tmp2)
+
+    fpath <- file.path(tmp2, "basic_columns.h5")
+    addMissingPlaceholderAttributeForHdf5(fpath, "data_frame/data/0", 1L)
+    addMissingPlaceholderAttributeForHdf5(fpath, "data_frame/data/1", 2.5)
+    addMissingPlaceholderAttributeForHdf5(fpath, "data_frame/data/2", NaN)
+
+    round2 <- readDataFrame(tmp2)
+    expect_identical(round2$a, c(NA, 2L, 3L))
+    expect_identical(round2$b, c(1.5, NA, 3.5))
+    expect_identical(round2$c, c(1.5, 2.5, NA))
 })
 
 test_that("stageObject works with extra mcols", {
@@ -384,6 +464,13 @@ test_that("stageObject works with extra mcols", {
     expect_null(out$data_frame$column_data)
     expect_null(out$data_frame$other_data)
 
+    tmp2 <- tempfile()
+    saveObject(df, tmp2)
+    round2 <- readDataFrame(tmp2)
+    expect_null(mcols(round2))
+    mcols(round2) <- mcols(df)
+    expect_identical(df, round2)
+
     # Alright, adding some mcols.
     mcols(df)$stuff <- runif(ncol(df))
     mcols(df)$foo <- sample(LETTERS, ncol(df), replace=TRUE)
@@ -398,6 +485,11 @@ test_that("stageObject works with extra mcols", {
     df2 <- loadDataFrame(out, tmp)
     expect_equal(df, df2)
 
+    tmp2 <- tempfile()
+    saveObject(df, tmp2)
+    round2 <- readDataFrame(tmp2)
+    expect_identical(df, round2)
+
     # Eliminates redundant row names.
     mc <- mcols(df)
     rownames(mc) <- c("C", "D")
@@ -409,6 +501,11 @@ test_that("stageObject works with extra mcols", {
     expect_equal(df, df2)
     mc <- mcols(df2, use.names=FALSE)
     expect_null(rownames(mc))
+
+    tmp2 <- tempfile()
+    saveObject(df, tmp2)
+    round2 <- readDataFrame(tmp2)
+    expect_identical(df, round2)
 })
 
 test_that("DF staging preserves odd colnames", {
@@ -435,14 +532,18 @@ test_that("DF staging preserves odd colnames", {
     old <- saveDataFrameFormat("hdf5")
     on.exit(saveDataFrameFormat(old))
 
-    for (version in 2:3) {
-        meta <- stageObject(df, tmp, path=paste0("WHEE2-", version), .version.df=version, .version.hdf5=version)
-        resource <- writeMetadata(meta, tmp)
-        expect_identical(loadDataFrame(meta, tmp), df)
+    meta <- stageObject(df, tmp, path="WHEE2", .version.df=2, .version.hdf5=2)
+    resource <- writeMetadata(meta, tmp)
+    expect_identical(loadDataFrame(meta, tmp), df)
 
-        fpath <- file.path(tmp, meta$path)
-        expect_identical(as.vector(rhdf5::h5read(fpath, "contents/column_names")), colnames(df))
-    }
+    fpath <- file.path(tmp, meta$path)
+    expect_identical(as.vector(rhdf5::h5read(fpath, "contents/column_names")), colnames(df))
+
+    # Works in the new world.
+    tmp2 <- tempfile()
+    saveObject(df, tmp2)
+    round2 <- readDataFrame(tmp2)
+    expect_identical(df, round2)
 })
 
 test_that("DFs fails with duplicate or empty colnames", {
@@ -463,6 +564,12 @@ test_that("DFs fails with duplicate or empty colnames", {
     df2 <- df
     colnames(df2)[2] <- ""
     expect_error(info <- stageObject(df2, tmp, "rnaseq"), "empty")
+
+    # Fails in the new world.
+#    tmp2 <- tempfile()
+#    expect_error(saveObject(df, tmp2), "duplicate")
+#    tmp2 <- tempfile()
+#    expect_error(saveObject(df2, tmp2), "empty")
 })
 
 test_that("DFs handle POSIX times correctly", {
@@ -481,8 +588,13 @@ test_that("DFs handle POSIX times correctly", {
     expect_identical(meta$columns[[2]]$type, "string")
     expect_identical(meta$columns[[2]]$format, "date-time")
 
-    # Round-tripping to make sure it's okay.
+    # Round-tripping to make sure it's okay. Note that this requires some care
+    # because on some machines, R doesn't set the timezone properly if you call
+    # as.POSIXct with format=.  Dunno why, but it goes away if we just call
+    # as.POSIXct again, so we'll just stop fighting and do that.
     out <- loadDataFrame(info, tmp)
+    expect_s3_class(out$foo, "POSIXct")
+    expect_s3_class(out$bar, "POSIXct")
     expect_identical(df$foo, as.POSIXct(out$foo))
     expect_identical(df$bar, as.POSIXct(out$bar))
 
@@ -490,10 +602,21 @@ test_that("DFs handle POSIX times correctly", {
     old <- saveDataFrameFormat("hdf5")
     on.exit(saveDataFrameFormat(old))
 
-    for (version in 1:3) {
+    for (version in 1:2) {
         info <- stageObject(df, tmp, paste0("bar-", version), .version.df=version, .version.hdf5=version)
         out <- loadDataFrame(info, tmp)
+        expect_s3_class(out$foo, "POSIXct")
+        expect_s3_class(out$bar, "POSIXct")
         expect_identical(df$foo, as.POSIXct(out$foo))
         expect_identical(df$bar, as.POSIXct(out$bar))
     }
+
+    # Works in the new world.
+    tmp2 <- tempfile()
+    saveObject(df, tmp2)
+    round2 <- readDataFrame(tmp2)
+    expect_s3_class(out$foo, "POSIXct")
+    expect_s3_class(out$bar, "POSIXct")
+    expect_identical(df$foo, as.POSIXct(out$foo))
+    expect_identical(df$bar, as.POSIXct(out$bar))
 })

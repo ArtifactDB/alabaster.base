@@ -1,5 +1,6 @@
 #' Convenience helpers for handling local directories
 #'
+#' \emph{WARNING: these functions are deprecated as the saving/reading functions are already simple enough in the newer versions of the \pkg{alabaster} framework.}
 #' Read and write objects from a local staging directory.
 #' These are just convenience wrappers around functions like \code{\link{loadObject}}, \code{\link{stageObject}} and \code{\link{writeMetadata}}.
 #'

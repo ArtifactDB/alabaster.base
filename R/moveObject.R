@@ -1,5 +1,6 @@
 #' Move a non-child object in the staging directory
 #'
+#' \emph{WARNING: this function is deprecated, as directories of non-child objects can just be moved with regular methods (e.g., \code{\link{file.rename}}) in the latest version of \pkg{alabaster}.}
 #' Pretty much as it says in the title.
 #' This only works with non-child objects as children are referenced by their parents and cannot be safely moved in this manner.
 #'

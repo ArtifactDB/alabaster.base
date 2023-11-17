@@ -31,6 +31,15 @@ test_that("lists handle complex types correctly", {
     info <- stageObject(rvals, tmp, path="stuff2")
     roundtrip <- loadBaseList(info, tmp)
     expect_identical(roundtrip, rvals)
+
+    # Works in the new world.
+    tmp2 <- tempfile()
+    saveObject(vals, tmp2)
+    expect_identical(readBaseList(tmp2), vals)
+
+    tmp2 <- tempfile()
+    saveObject(rvals, tmp2)
+    expect_identical(readBaseList(tmp2), rvals)
 })
 
 test_that("lists work in HDF5 mode", {
@@ -60,6 +69,15 @@ test_that("lists work in HDF5 mode", {
     info <- stageObject(rvals, tmp, path="stuff2")
     roundtrip <- loadBaseList(info, tmp)
     expect_identical(roundtrip, rvals)
+
+    # Works in the new world.
+    tmp2 <- tempfile()
+    saveObject(vals, tmp2)
+    expect_identical(readBaseList(tmp2), vals)
+
+    tmp2 <- tempfile()
+    saveObject(rvals, tmp2)
+    expect_identical(readBaseList(tmp2), rvals)
 })
 
 test_that("S4 Lists can also be staged", {
@@ -76,6 +94,11 @@ test_that("S4 Lists can also be staged", {
     info <- stageObject(vals, tmp, path="stuff")
     roundtrip <- loadBaseList(info, tmp)
     expect_identical(roundtrip, as.list(vals))
+
+    # Works in the new world.
+    tmp2 <- tempfile()
+    saveObject(vals, tmp2)
+    expect_identical(readBaseList(tmp2), as.list(vals))
 })
 
 test_that("names are properly supported", {
@@ -95,6 +118,10 @@ test_that("names are properly supported", {
     roundtrip <- loadBaseList(info, tmp)
     expect_identical(roundtrip, vals)
 
+    tmp2 <- tempfile()
+    saveObject(vals, tmp2)
+    expect_identical(readBaseList(tmp2), vals)
+
     # Works in HDF5 mode.
     old <- saveBaseListFormat("hdf5")
     on.exit(saveBaseListFormat(old))
@@ -105,6 +132,10 @@ test_that("names are properly supported", {
 
     roundtrip <- loadBaseList(info, tmp)
     expect_identical(roundtrip, vals)
+
+    tmp2 <- tempfile()
+    saveObject(vals, tmp2)
+    expect_identical(readBaseList(tmp2), vals)
 })
 
 test_that("data.frames cause dispatch to external objects", {
@@ -129,6 +160,14 @@ test_that("data.frames cause dispatch to external objects", {
 
     expect_equal(roundtrip, vals)
 
+    tmp2 <- tempfile()
+    saveObject(vals, tmp2)
+    roundtrip <- readBaseList(tmp2)
+    roundtrip$X <- as.data.frame(roundtrip$X)
+    roundtrip$Y[[1]] <- as.data.frame(roundtrip$Y[[1]])
+    roundtrip$Z <- as.data.frame(roundtrip$Z)
+    expect_identical(roundtrip, vals)
+
     # Works in HDF5 mode.
     old <- saveBaseListFormat("hdf5")
     on.exit(saveBaseListFormat(old))
@@ -143,6 +182,14 @@ test_that("data.frames cause dispatch to external objects", {
     roundtrip$Z <- as.data.frame(roundtrip$Z)
 
     expect_equal(roundtrip, vals) # still equality, not identity, because DF's are saved as CSVs right now.
+
+    tmp2 <- tempfile()
+    saveObject(vals, tmp2)
+    roundtrip <- readBaseList(tmp2)
+    roundtrip$X <- as.data.frame(roundtrip$X)
+    roundtrip$Y[[1]] <- as.data.frame(roundtrip$Y[[1]])
+    roundtrip$Z <- as.data.frame(roundtrip$Z)
+    expect_identical(roundtrip, vals)
 })
 
 test_that("unnamed lists are properly supported", {
@@ -161,6 +208,10 @@ test_that("unnamed lists are properly supported", {
     roundtrip <- loadBaseList(info, tmp)
     expect_identical(roundtrip, vals)
 
+    tmp2 <- tempfile()
+    saveObject(vals, tmp2)
+    expect_identical(readBaseList(tmp2), vals)
+
     # Works in HDF5 mode.
     old <- saveBaseListFormat("hdf5")
     on.exit(saveBaseListFormat(old))
@@ -171,6 +222,10 @@ test_that("unnamed lists are properly supported", {
 
     roundtrip <- loadBaseList(info, tmp)
     expect_identical(roundtrip, vals)
+
+    tmp2 <- tempfile()
+    saveObject(vals, tmp2)
+    expect_identical(readBaseList(tmp2), vals)
 })
 
 test_that("partially named or duplicate named lists fail", {
@@ -201,6 +256,10 @@ test_that("external references work correctly", {
     roundtrip <- loadBaseList(info, tmp)
     expect_equal(roundtrip, vals)
 
+    tmp2 <- tempfile()
+    saveObject(vals, tmp2)
+    expect_identical(readBaseList(tmp2), vals)
+
     # Works in HDF5 mode.
     old <- saveBaseListFormat("hdf5")
     on.exit(saveBaseListFormat(old))
@@ -211,6 +270,10 @@ test_that("external references work correctly", {
 
     roundtrip <- loadBaseList(info, tmp)
     expect_equal(roundtrip, vals) # still equality, not identity, because DF's are saved as CSVs right now.
+
+    tmp2 <- tempfile()
+    saveObject(vals, tmp2)
+    expect_identical(readBaseList(tmp2), vals)
 })
 
 test_that("we handle lists with NAs", {
@@ -227,6 +290,10 @@ test_that("we handle lists with NAs", {
     roundtrip <- loadBaseList(info, tmp)
     expect_equal(roundtrip, vals)
 
+    tmp2 <- tempfile()
+    saveObject(vals, tmp2)
+    expect_identical(readBaseList(tmp2), vals)
+
     # More difficult NAs.
     vals$C <- c(vals$C, "NA")
 
@@ -239,6 +306,10 @@ test_that("we handle lists with NAs", {
 
     roundtrip <- loadBaseList(info, tmp)
     expect_equal(roundtrip, vals)
+
+    tmp2 <- tempfile()
+    saveObject(vals, tmp2)
+    expect_identical(readBaseList(tmp2), vals)
 
     # Works in HDF5 mode.
     old <- saveBaseListFormat("hdf5")
@@ -259,6 +330,10 @@ test_that("we handle lists with NAs", {
     roundtrip <- loadBaseList(info, tmp)
     expect_identical(roundtrip, vals)
 
+    tmp2 <- tempfile()
+    saveObject(vals, tmp2)
+    expect_identical(readBaseList(tmp2), vals)
+
     # Avoid unnecessary NA attributes for NaNs, unless they're mixed in with NAs.
     revals <- list(A=c(NaN, 1.0, 3, NaN), B=c(NaN, 1.0, NA, NaN))
 
@@ -276,6 +351,10 @@ test_that("we handle lists with NAs", {
 
     roundtrip <- loadBaseList(info, tmp)
     expect_identical(roundtrip, revals)
+
+    tmp2 <- tempfile()
+    saveObject(vals, tmp2)
+    expect_identical(readBaseList(tmp2), vals)
 })
 
 test_that("we handle lists with minimum integers", {
@@ -295,6 +374,10 @@ test_that("we handle lists with minimum integers", {
     roundtrip <- loadBaseList(info, tmp)
     expect_equal(roundtrip$A, c(1,2,3,-2^31))
 
+    tmp2 <- tempfile()
+    saveObject(vals, tmp2)
+    expect_identical(readBaseList(tmp2), vals)
+
     # Works for HDF5.
     old <- saveBaseListFormat("hdf5")
     on.exit(saveBaseListFormat(old))
@@ -305,6 +388,10 @@ test_that("we handle lists with minimum integers", {
 
     roundtrip <- loadBaseList(info, tmp)
     expect_equal(roundtrip$A, c(1,2,3,-2^31))
+
+    tmp2 <- tempfile()
+    saveObject(vals, tmp2)
+    expect_identical(readBaseList(tmp2), vals)
 })
 
 test_that("loaders work correctly from HDF5 with non-default placeholders", {
@@ -327,6 +414,10 @@ test_that("loaders work correctly from HDF5 with non-default placeholders", {
     expect_identical(roundtrip$a, c(NA, 2, 3))
     expect_identical(roundtrip$b, c(4L, NA, 6L))
     expect_identical(roundtrip$c, c(7, 8, NA))
+
+    tmp2 <- tempfile()
+    saveObject(vals, tmp2)
+    expect_identical(readBaseList(tmp2), vals)
 })
 
 test_that("we handle the various float specials", {
@@ -343,6 +434,10 @@ test_that("we handle the various float specials", {
     roundtrip <- loadBaseList(info, tmp)
     expect_equal(roundtrip, vals)
 
+    tmp2 <- tempfile()
+    saveObject(vals, tmp2)
+    expect_identical(readBaseList(tmp2), vals)
+
     # Same for HDF5.
     old <- saveBaseListFormat("hdf5")
     on.exit(saveBaseListFormat(old))
@@ -353,6 +448,10 @@ test_that("we handle the various float specials", {
 
     roundtrip <- loadBaseList(info, tmp)
     expect_identical(roundtrip, vals)
+
+    tmp2 <- tempfile()
+    saveObject(vals, tmp2)
+    expect_identical(readBaseList(tmp2), vals)
 })
 
 test_that("we handle lists with NULLs", {
@@ -369,6 +468,10 @@ test_that("we handle lists with NULLs", {
     roundtrip <- loadBaseList(info, tmp)
     expect_identical(roundtrip, vals)
 
+    tmp2 <- tempfile()
+    saveObject(vals, tmp2)
+    expect_identical(readBaseList(tmp2), vals)
+
     # Works in HDF5 mode.
     old <- saveBaseListFormat("hdf5")
     on.exit(saveBaseListFormat(old))
@@ -379,6 +482,10 @@ test_that("we handle lists with NULLs", {
 
     roundtrip <- loadBaseList(info, tmp)
     expect_identical(roundtrip, vals)
+
+    tmp2 <- tempfile()
+    saveObject(vals, tmp2)
+    expect_identical(readBaseList(tmp2), vals)
 })
 
 test_that("we handle lists with times", {
@@ -393,6 +500,10 @@ test_that("we handle lists with times", {
     roundtrip <- loadBaseList(info, tmp)
     expect_equal(roundtrip, vals)
 
+    tmp2 <- tempfile()
+    saveObject(vals, tmp2)
+    expect_equal(readBaseList(tmp2), vals)
+
     # Works in HDF5 mode.
     old <- saveBaseListFormat("hdf5")
     on.exit(saveBaseListFormat(old))
@@ -404,6 +515,10 @@ test_that("we handle lists with times", {
     roundtrip <- loadBaseList(info, tmp)
     expect_equal(roundtrip, vals)
 
+    tmp2 <- tempfile()
+    saveObject(vals, tmp2)
+    expect_equal(readBaseList(tmp2), vals)
+
     # Works with POSIXlt objects, though these lose some precision when they go to POSIXct on back-conversion.
     now2 <- as.POSIXlt(now)
     vals2 <- list(now, list(list(now + 10000), c(X=now + 400000, Y=now + 1000000)))
@@ -411,6 +526,10 @@ test_that("we handle lists with times", {
     info2 <- stageObject(vals, tmp, path="whee2")
     roundtrip2 <- loadBaseList(info2, tmp)
     expect_equal(roundtrip2, vals)
+
+    tmp2 <- tempfile()
+    saveObject(vals, tmp2)
+    expect_equal(readBaseList(tmp2), vals)
 })
 
 test_that("lists work correctly in legacy mode (JSON)", {

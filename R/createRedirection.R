@@ -1,5 +1,7 @@
 #' Create a redirection file
 #'
+#' \emph{WARNING: this function is deprecated. 
+#' Redirection is no longer supported in the latest \pkg{alabaster} framework.}
 #' Create a redirection to another path in the same staging directory.
 #' This is useful for creating short-hand aliases for resources that have inconveniently long paths.
 #'
