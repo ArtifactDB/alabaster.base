@@ -1,5 +1,5 @@
-#ifndef TAKANE_UTILS_HPP
-#define TAKANE_UTILS_HPP
+#ifndef TAKANE_UTILS_HDF5_HPP
+#define TAKANE_UTILS_HDF5_HPP
 
 #include <unordered_set>
 #include <string>
@@ -9,7 +9,9 @@
 
 namespace takane {
 
-inline void validate_hdf5_string_format(const H5::DataSet& handle, hsize_t len, const std::string& format, bool has_missing, const std::string& missing_value, hsize_t buffer_size) {
+namespace internal_hdf5 {
+
+inline void validate_string_format(const H5::DataSet& handle, hsize_t len, const std::string& format, bool has_missing, const std::string& missing_value, hsize_t buffer_size) {
     if (format == "date") {
         ritsuko::hdf5::load_1d_string_dataset(
             handle, 
@@ -47,7 +49,7 @@ inline void validate_hdf5_string_format(const H5::DataSet& handle, hsize_t len, 
     }
 }
 
-inline hsize_t validate_hdf5_factor_levels(const H5::Group& handle, const std::string& name, hsize_t buffer_size) {
+inline hsize_t validate_factor_levels(const H5::Group& handle, const std::string& name, hsize_t buffer_size) {
     auto lhandle = ritsuko::hdf5::get_dataset(handle, name.c_str());
     if (lhandle.getTypeClass() != H5T_STRING) {
         throw std::runtime_error("expected a string datatype for '" + name + "'");
@@ -72,7 +74,7 @@ inline hsize_t validate_hdf5_factor_levels(const H5::Group& handle, const std::s
     return len;
 }
 
-inline hsize_t validate_hdf5_factor_codes(const H5::Group& handle, const std::string& name, hsize_t num_levels, hsize_t buffer_size) {
+inline hsize_t validate_factor_codes(const H5::Group& handle, const std::string& name, hsize_t num_levels, hsize_t buffer_size) {
     auto chandle = ritsuko::hdf5::get_dataset(handle, name.c_str());
     if (ritsuko::hdf5::exceeds_integer_limit(chandle, 32, true)) {
         throw std::runtime_error("expected a datatype for '" + name + "' that fits in a 32-bit signed integer");
@@ -110,6 +112,8 @@ inline hsize_t validate_hdf5_factor_codes(const H5::Group& handle, const std::st
     );
 
     return len;
+}
+
 }
 
 }

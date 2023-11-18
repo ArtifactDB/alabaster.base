@@ -10,6 +10,7 @@
 #' 
 #' @return
 #' \code{x} is saved inside \code{dir}.
+#' \code{NULL} is invisibly returned.
 #'
 #' @section File formats:
 #' If \code{format="json.gz"}, the list is saved to a Gzip-compressed JSON file (the default).
@@ -48,26 +49,24 @@ setMethod("saveObject", "list", function(x, path, list.format=saveBaseListFormat
     if (!is.null(list.format) && list.format == "hdf5") {
         fpath <- file.path(path, "list_contents.h5")
         h5createFile(fpath)
-        dname <- "hdf5_simple_list"
+        dname <- "simple_list"
         .transform_list_hdf5(x, dir=NULL, path=path, fpath=fpath, name=dname, env=env, simplified=TRUE, .version=3, extra=args)
         .label_hdf5_group(fpath, dname, uzuki_version="1.3")
         write(dname, file=file.path(path, "OBJECT"))
 
-        check_list_hdf5(fpath, dname, length(env$collected)) # Check that we did it correctly.
-
     } else {
         formatted <- .transform_list_json(x, dir=NULL, path=path, env=env, simplified=TRUE, .version=2, extra=args)
         formatted$version <- "1.2"
-        write("json_simple_list", file=file.path(path, "OBJECT"))
+        write("simple_list", file=file.path(path, "OBJECT"))
 
         str <- toJSON(formatted, auto_unbox=TRUE, ident=4, null="null", na="null")
-        fpath <- paste0(path, "/list_contents.json.gz")
+        fpath <- file.path(path, "list_contents.json.gz")
         con <- gzfile(fpath, open="wb")
         write(file=con, str)
         close(con)
-
-        check_list_json(fpath, length(env$collected), parallel=TRUE) # Check that we did it correctly.
     }
+
+    invisible(NULL)
 })
 
 #' @export

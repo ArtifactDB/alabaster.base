@@ -66,9 +66,8 @@ readObject <- function(path, type=NULL, ...) {
 read.registry <- new.env()
 read.registry$registry <- list(
     atomic_vector="alabaster.base::readAtomicVector",
-    hdf5_simple_list="alabaster.base::readBaseList",
-    json_simple_list="alabaster.base::readBaseList",
     string_factor="alabaster.base::readBaseFactor",
+    simple_list="alabaster.base::readBaseList",
     data_frame="alabaster.base::readDataFrame",
     data_frame_factor="alabaster.base::readDataFrameFactor"
 )

@@ -7,7 +7,11 @@
 #' Only relevant for lists stored in the JSON format.
 #' @param ... Further arguments to be passed to \code{\link{altReadObject}} for complex child objects.
 #' 
-#' @return The list represented by \code{path}.
+#' @return 
+#' For \code{readBaseList}, the list represented by \code{path}.
+#'
+#' For \code{validateBaseList}, an error is raised if the on-disk representation is invalid.
+#' Otherwise, \code{NULL} is silently returned.
 #'
 #' @author Aaron Lun
 #'
@@ -34,16 +38,21 @@ readBaseList <- function(path, list.parallel=TRUE, ...) {
         }
     }
 
-    type <- readLines(file.path(path, "OBJECT"))
-    if (type == "hdf5_simple_list") {
-        lpath <- file.path(path, "list_contents.h5")
-        output <- load_list_hdf5(lpath, "hdf5_simple_list", all.children)
+    lpath <- file.path(path, "list_contents.h5")
+    if (file.exists(lpath)) {
+        output <- load_list_hdf5(lpath, "simple_list", all.children)
     } else {
         lpath <- file.path(path, "list_contents.json.gz")
         output <- load_list_json(lpath, all.children, list.parallel)
     }
 
     output
+}
+
+#' @export
+#' @rdname readBaseList
+validateBaseList <- function(path) {
+    invisible(validate_simple_list(path))
 }
 
 #######################################

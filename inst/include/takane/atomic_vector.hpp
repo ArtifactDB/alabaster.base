@@ -1,11 +1,14 @@
 #ifndef TAKANE_ATOMIC_VECTOR_HPP
 #define TAKANE_ATOMIC_VECTOR_HPP
 
+#include <string>
+#include <stdexcept>
+#include <filesystem>
+
 #include "ritsuko/hdf5/hdf5.hpp"
 
+#include "utils_public.hpp"
 #include "utils_hdf5.hpp"
-
-#include <stdexcept>
 
 /**
  * @file atomic_vector.hpp
@@ -21,21 +24,11 @@ namespace takane {
 namespace atomic_vector {
 
 /**
- * @brief Parameters for validating the atomic vector file.
- */
-struct Parameters {
-    /**
-     * Buffer size to use when reading values from the HDF5 file.
-     */
-    hsize_t buffer_size = 10000;
-};
-
-/**
  * @param path Path to the directory containing the atomic vector.
- * @param params Validation parameters.
+ * @param options Validation options, typically for reading performance.
  */
-inline void validate(const std::string& path, Parameters params = Parameters()) try {
-    H5::H5File handle(path + "/contents.h5", H5F_ACC_RDONLY);
+inline void validate(const std::filesystem::path& path, const Options& options) try {
+    H5::H5File handle((path / "contents.h5").string(), H5F_ACC_RDONLY);
 
     const char* parent = "atomic_vector";
     if (!handle.exists(parent) || handle.childObjType(parent) != H5O_TYPE_GROUP) {
@@ -84,7 +77,7 @@ inline void validate(const std::string& path, Parameters params = Parameters()) 
 
         if (ghandle.attrExists("format")) {
             auto format = ritsuko::hdf5::load_scalar_string_attribute(ghandle, "format");
-            validate_hdf5_string_format(dhandle, vlen, format, has_missing, missing_value, params.buffer_size);
+            internal_hdf5::validate_string_format(dhandle, vlen, format, has_missing, missing_value, options.hdf5_buffer_size);
         }
     } else {
         throw std::runtime_error("unsupported type '" + type + "'");
@@ -103,7 +96,15 @@ inline void validate(const std::string& path, Parameters params = Parameters()) 
     }
 
 } catch (std::exception& e) {
-    throw std::runtime_error("failed to validate an 'atomic_vector' at '" + path + "'; " + std::string(e.what()));
+    throw std::runtime_error("failed to validate an 'atomic_vector' at '" + path.string() + "'; " + std::string(e.what()));
+}
+
+/**
+ * Overload of `atomic_vector::validate()` with default options.
+ * @param path Path to the directory containing the atomic vector.
+ */
+inline void validate(const std::filesystem::path& path) {
+    atomic_vector::validate(path, Options());
 }
 
 }

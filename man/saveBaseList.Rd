@@ -23,6 +23,7 @@
 }
 \value{
 \code{x} is saved inside \code{dir}.
+\code{NULL} is invisibly returned.
 }
 \description{
 Save a \link{list} or \linkS4class{List} to a JSON or HDF5 file, with extra files created for any of the more complex list elements (e.g., DataFrames, arrays). 

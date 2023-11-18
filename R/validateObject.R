@@ -44,9 +44,8 @@ validateObject <- function(path, type=NULL, ...) {
 validate.registry <- new.env()
 validate.registry$registry <- list(
     atomic_vector="alabaster.base::validateAtomicVector",
-    hdf5_simple_list="alabaster.base::validateBaseList",
-    json_simple_list="alabaster.base::validateBaseList",
     string_factor="alabaster.base::validateBaseFactor",
+    simple_list="alabaster.base::validateBaseList",
     data_frame="alabaster.base::validateDataFrame",
     data_frame_factor="alabaster.base::validateDataFrameFactor"
 )

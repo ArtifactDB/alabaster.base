@@ -1,11 +1,14 @@
 #ifndef TAKANE_STRING_FACTOR_HPP
 #define TAKANE_STRING_FACTOR_HPP
 
+#include <string>
+#include <stdexcept>
+#include <filesystem>
+
 #include "ritsuko/hdf5/hdf5.hpp"
 
+#include "utils_public.hpp"
 #include "utils_hdf5.hpp"
-
-#include <stdexcept>
 
 /**
  * @file string_factor.hpp
@@ -21,21 +24,11 @@ namespace takane {
 namespace string_factor {
 
 /**
- * @brief Parameters for validating the string factor file.
- */
-struct Parameters {
-    /**
-     * Buffer size to use when reading values from the HDF5 file.
-     */
-    hsize_t buffer_size = 10000;
-};
-
-/**
  * @param path Path to the directory containing the string factor.
- * @param params Validation parameters.
+ * @param options Validation options, typically for reading performance.
  */
-inline void validate(const std::string& path, Parameters params = Parameters()) try {
-    H5::H5File handle(path + "/contents.h5", H5F_ACC_RDONLY);
+inline void validate(const std::filesystem::path& path, const Options& options) try {
+    H5::H5File handle((path / "contents.h5").string(), H5F_ACC_RDONLY);
 
     const char* parent = "string_factor";
     if (!handle.exists(parent) || handle.childObjType(parent) != H5O_TYPE_GROUP) {
@@ -57,8 +50,8 @@ inline void validate(const std::string& path, Parameters params = Parameters()) 
     }
 
     // Number of levels.
-    size_t num_levels = validate_hdf5_factor_levels(ghandle, "levels", params.buffer_size);
-    size_t num_codes = validate_hdf5_factor_codes(ghandle, "codes", num_levels, params.buffer_size);
+    size_t num_levels = internal_hdf5::validate_factor_levels(ghandle, "levels", options.hdf5_buffer_size);
+    size_t num_codes = internal_hdf5::validate_factor_codes(ghandle, "codes", num_levels, options.hdf5_buffer_size);
 
     if (ghandle.exists("names")) {
         auto nhandle = ritsuko::hdf5::get_dataset(ghandle, "names");
@@ -72,7 +65,15 @@ inline void validate(const std::string& path, Parameters params = Parameters()) 
     }
 
 } catch (std::exception& e) {
-    throw std::runtime_error("failed to validate a 'string_factor' at '" + path + "'; " + std::string(e.what()));
+    throw std::runtime_error("failed to validate a 'string_factor' at '" + path.string() + "'; " + std::string(e.what()));
+}
+
+/**
+ * Overload of `string_factor::validate()` with default options.
+ * @param path Path to the directory containing the string factor.
+ */
+inline void validate(const std::filesystem::path& path) {
+    string_factor::validate(path, Options());
 }
 
 }
