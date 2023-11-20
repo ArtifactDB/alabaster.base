@@ -82,11 +82,10 @@ readObjectFunctionRegistry <- function() {
 #' @rdname readObject
 registerReadObjectFunction <- function(type, fun) {
     if (!is.null(fun) && !is.null(read.registry$registry[[type]])) {
-        warning("readObject function has already been registered for object type '", type, "'")
+        stop("readObject function has already been registered for object type '", type, "'")
     }
     read.registry$registry[[type]] <- fun
 }
-
 
 #######################################
 ########### OLD STUFF HERE ############
