@@ -8,10 +8,7 @@
 #' @param ... Further arguments to be passed to \code{\link{altReadObject}} for complex child objects.
 #' 
 #' @return 
-#' For \code{readBaseList}, the list represented by \code{path}.
-#'
-#' For \code{validateBaseList}, an error is raised if the on-disk representation is invalid.
-#' Otherwise, \code{NULL} is silently returned.
+#' The list represented by \code{path}.
 #'
 #' @author Aaron Lun
 #'
@@ -47,12 +44,6 @@ readBaseList <- function(path, list.parallel=TRUE, ...) {
     }
 
     output
-}
-
-#' @export
-#' @rdname readBaseList
-validateBaseList <- function(path) {
-    invisible(validate_simple_list(path))
 }
 
 #######################################

@@ -69,11 +69,15 @@ inline void validate(const std::filesystem::path& path, const Options& options) 
 }
 
 /**
- * Overload of `string_factor::validate()` with default options.
  * @param path Path to the directory containing the string factor.
+ * @param options Validation options, typically for reading performance.
+ * @return Length of the factor.
  */
-inline void validate(const std::filesystem::path& path) {
-    string_factor::validate(path, Options());
+inline size_t height(const std::filesystem::path& path, const Options&) {
+    H5::H5File handle((path / "contents.h5").string(), H5F_ACC_RDONLY);
+    auto ghandle = handle.openGroup("string_factor");
+    auto dhandle = ghandle.openDataSet("codes");
+    return ritsuko::hdf5::get_1d_length(dhandle.getSpace(), false);
 }
 
 }

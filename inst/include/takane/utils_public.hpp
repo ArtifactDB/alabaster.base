@@ -30,6 +30,11 @@ inline std::string read_object_type(const std::filesystem::path& path) {
         size_t available = reader.available();
         output.insert(output.end(), buffer, buffer + available);
     }
+
+    // Removing trailing newline.
+    if (output.size() && output.back() == '\n') {
+        output.pop_back();
+    }
     return output;
 }
 

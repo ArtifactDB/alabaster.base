@@ -6,10 +6,7 @@
 #' @param ... Further arguments, ignored.
 #'
 #' @return 
-#' For \code{readAtomicVector}, the vector described by \code{info}.
-#'
-#' For \code{validateAtomicVector}, an error is raised if the files are invalid.
-#' Otherwise, \code{NULL} is invisibly returned.
+#' The vector described by \code{info}.
 #'
 #' @seealso
 #' \code{"\link{saveObject,integer-method}"}, for one of the staging methods.
@@ -53,12 +50,6 @@ readAtomicVector <- function(path, ...) {
     }
 
     contents
-}
-
-#' @export
-#' @rdname loadAtomicVector 
-validateAtomicVector <- function(path) {
-    invisible(validate_atomic_vector(path))
 }
 
 #######################################

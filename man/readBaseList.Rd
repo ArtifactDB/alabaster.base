@@ -3,12 +3,9 @@
 \name{readBaseList}
 \alias{readBaseList}
 \alias{loadBaseList}
-\alias{validateBaseList}
 \title{Read a base list from disk}
 \usage{
 readBaseList(path, list.parallel = TRUE, ...)
-
-validateBaseList(path)
 }
 \arguments{
 \item{path}{String containing a path to a directory, itself created with the list method for \code{\link{stageObject}}.}
@@ -19,10 +16,7 @@ Only relevant for lists stored in the JSON format.}
 \item{...}{Further arguments to be passed to \code{\link{altReadObject}} for complex child objects.}
 }
 \value{
-For \code{readBaseList}, the list represented by \code{path}.
-
-For \code{validateBaseList}, an error is raised if the on-disk representation is invalid.
-Otherwise, \code{NULL} is silently returned.
+The list represented by \code{path}.
 }
 \description{
 Read a \link{list} from its on-disk representation.

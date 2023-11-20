@@ -51,6 +51,10 @@ setMethod("saveObject", "DataFrameFactor", function(x, path, ...) {
     write("data_frame_factor", file=file.path(path, "OBJECT"))
 })
 
+.anyDuplicated_fallback <- function(path, ...) {
+    anyDuplicated(readObject(path, ...))
+}
+
 #######################################
 ########### OLD STUFF HERE ############
 #######################################

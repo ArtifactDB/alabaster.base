@@ -2,31 +2,37 @@
 % Please edit documentation in R/validateObject.R
 \name{validateObject}
 \alias{validateObject}
-\alias{validateObjectFunctionRegistry}
 \alias{registerValidateObjectFunction}
+\alias{registerValidateObjectHeightFunction}
 \title{Validate an object's on-disk representation}
 \usage{
-validateObject(path, type = NULL, ...)
-
-validateObjectFunctionRegistry()
+validateObject(path, type = NULL)
 
 registerValidateObjectFunction(type, fun)
+
+registerValidateObjectHeightFunction(type, fun)
 }
 \arguments{
 \item{path}{String containing a path to a directory, itself created with a \code{\link{saveObject}} method.}
 
 \item{type}{String specifying the name of type of the object.
-If this is not supplied for \code{readObject}, it is automatically determined from the \code{OBJECT} file in \code{path}.}
+If this is not supplied for \code{validateObject}, it is automatically determined from the \code{OBJECT} file in \code{path}.}
 
-\item{fun}{A validation function that accepts \code{path} and \code{...}, and returns the associated object.
+\item{fun}{For \code{registerValidateObjectFunction}, a function that accepts \code{path} and raises an error if the object at \code{path} is invalid.
+
+For \code{registerValidateObjectHeightFunction}, a function that accepts \code{path} and returns an integer specifying the \dQuote{height} of the object.
+This is usually the length for vector-like or 1-dimensional objects, and the extent of the first dimension for higher-dimensional objects.
+
 This may also be \code{NULL} to delete an existing registry.}
 }
 \value{
 For \code{validateObject}, \code{NULL} is returned invisibly upon success, otherwise an error is raised.
 
-For \code{validateObjectFunctionRegistry}, a named list of functions used to load each object type.
+For \code{registerValidateObjectFunction}, the function is added to the registry for \code{type}.
+If \code{fun = NULL}, any existing entry for \code{type} is removed.
 
-For \code{registerValidateObjectFunction}, the function is added to the registry.
+For \code{registerValidateObjectHeightFunction}, the function is added to the registry for \code{type}.
+If \code{fun = NULL}, any existing entry for \code{type} is removed.
 }
 \description{
 Validate an object's on-disk representation.

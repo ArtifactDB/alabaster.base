@@ -3,12 +3,9 @@
 \name{readBaseFactor}
 \alias{readBaseFactor}
 \alias{loadBaseFactor}
-\alias{validateBaseFactor}
 \title{Read a factor from disk}
 \usage{
 readBaseFactor(path, ...)
-
-validateBaseFactor(path)
 }
 \arguments{
 \item{path}{String containing a path to a directory, itself created with the \code{\link{saveObject}} method for factors.}
@@ -16,10 +13,7 @@ validateBaseFactor(path)
 \item{...}{Further arguments, ignored.}
 }
 \value{
-For \code{readBaseFactor}, the vector described by \code{info}. 
-
-For \code{validateBaseFactor}, an error is raised if the files are invalid.
-Otherwise, \code{NULL} is invisibly returned.
+The vector described by \code{info}.
 }
 \description{
 Read a base R \link{factor} from its on-disk representation.

@@ -5,18 +5,6 @@ check_csv <- function(path, is_compressed, parallel) {
     .Call(`_alabaster_base_check_csv`, path, is_compressed, parallel)
 }
 
-check_csv_df <- function(path, nrows, has_row_names, column_names, column_types, string_formats, factor_ordered, factor_levels, df_version, is_compressed, parallel) {
-    .Call(`_alabaster_base_check_csv_df`, path, nrows, has_row_names, column_names, column_types, string_formats, factor_ordered, factor_levels, df_version, is_compressed, parallel)
-}
-
-check_hdf5_df <- function(path, name, nrows, has_row_names, column_names, column_types, string_formats, factor_ordered, factor_levels, df_version, hdf5_version) {
-    .Call(`_alabaster_base_check_hdf5_df`, path, name, nrows, has_row_names, column_names, column_types, string_formats, factor_ordered, factor_levels, df_version, hdf5_version)
-}
-
-check_factor <- function(path, length, num_levels, has_names, is_compressed, parallel) {
-    .Call(`_alabaster_base_check_factor`, path, length, num_levels, has_names, is_compressed, parallel)
-}
-
 check_list_hdf5 <- function(file, name, num_external) {
     .Call(`_alabaster_base_check_list_hdf5`, file, name, num_external)
 }
@@ -49,16 +37,28 @@ load_list_json <- function(file, obj, parallel) {
     .Call(`_alabaster_base_load_list_json`, file, obj, parallel)
 }
 
-validate_string_factor <- function(path) {
-    .Call(`_alabaster_base_validate_string_factor`, path)
+validate <- function(path, type) {
+    .Call(`_alabaster_base_validate`, path, type)
 }
 
-validate_atomic_vector <- function(path) {
-    .Call(`_alabaster_base_validate_atomic_vector`, path)
+register_validate_function <- function(type, fun) {
+    .Call(`_alabaster_base_register_validate_function`, type, fun)
 }
 
-validate_simple_list <- function(path) {
-    .Call(`_alabaster_base_validate_simple_list`, path)
+deregister_validate_function <- function(type) {
+    .Call(`_alabaster_base_deregister_validate_function`, type)
+}
+
+register_height_function <- function(type, fun) {
+    .Call(`_alabaster_base_register_height_function`, type, fun)
+}
+
+deregister_height_function <- function(type) {
+    .Call(`_alabaster_base_deregister_height_function`, type)
+}
+
+register_any_duplicated <- function(set) {
+    .Call(`_alabaster_base_register_any_duplicated`, set)
 }
 
 write_integer_scalar <- function(path, host, name, val) {

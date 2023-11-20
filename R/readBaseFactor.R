@@ -6,10 +6,7 @@
 #' @param ... Further arguments, ignored.
 #'
 #' @return 
-#' For \code{readBaseFactor}, the vector described by \code{info}. 
-#'
-#' For \code{validateBaseFactor}, an error is raised if the files are invalid.
-#' Otherwise, \code{NULL} is invisibly returned.
+#' The vector described by \code{info}. 
 #'
 #' @seealso
 #' \code{"\link{saveObject,factor-method}"}, for the staging method.
@@ -49,12 +46,6 @@ readBaseFactor <- function(path, ...) {
     code.attrs <- h5readAttributes(fhandle, code.name)
     codes <- .h5cast(codes, code.attrs, type="integer")
     codes + 1L
-}
-
-#' @export
-#' @rdname readBaseFactor
-validateBaseFactor <- function(path) {
-    invisible(validate_string_factor(path))
 }
 
 #######################################

@@ -5,16 +5,23 @@
 #'
 #' @param path String containing a path to a directory, itself created with a \code{\link{saveObject}} method.
 #' @param type String specifying the name of type of the object.
-#' If this is not supplied for \code{readObject}, it is automatically determined from the \code{OBJECT} file in \code{path}.
-#' @param fun A validation function that accepts \code{path} and \code{...}, and returns the associated object.
+#' If this is not supplied for \code{validateObject}, it is automatically determined from the \code{OBJECT} file in \code{path}.
+#' @param fun 
+#' For \code{registerValidateObjectFunction}, a function that accepts \code{path} and raises an error if the object at \code{path} is invalid.
+#'
+#' For \code{registerValidateObjectHeightFunction}, a function that accepts \code{path} and returns an integer specifying the \dQuote{height} of the object.
+#' This is usually the length for vector-like or 1-dimensional objects, and the extent of the first dimension for higher-dimensional objects.
+#' 
 #' This may also be \code{NULL} to delete an existing registry.
 #' 
 #' @return 
 #' For \code{validateObject}, \code{NULL} is returned invisibly upon success, otherwise an error is raised.
 #'
-#' For \code{validateObjectFunctionRegistry}, a named list of functions used to load each object type.
+#' For \code{registerValidateObjectFunction}, the function is added to the registry for \code{type}.
+#' If \code{fun = NULL}, any existing entry for \code{type} is removed.
 #'
-#' For \code{registerValidateObjectFunction}, the function is added to the registry.
+#' For \code{registerValidateObjectHeightFunction}, the function is added to the registry for \code{type}.
+#' If \code{fun = NULL}, any existing entry for \code{type} is removed.
 #'
 #' @author Aaron Lun
 #' @examples
@@ -26,41 +33,30 @@
 #' validateObject(tmp)
 #' 
 #' @export
-validateObject <- function(path, type=NULL, ...) {
+validateObject <- function(path, type=NULL) {
     if (is.null(type)) {
         type <- readLines(file.path(path, "OBJECT"))
     }
-
-    meth <- validate.registry$registry[[type]]
-    if (is.null(meth)) {
-        stop("cannot validate unknown object type '", type, "'")
-    } else if (is.character(meth)) {
-        meth <- eval(parse(text=meth))
-        validate.registry$registry[[type]] <- meth
-    }
-    meth(path, ...)
-}
-
-validate.registry <- new.env()
-validate.registry$registry <- list(
-    atomic_vector="alabaster.base::validateAtomicVector",
-    string_factor="alabaster.base::validateBaseFactor",
-    simple_list="alabaster.base::validateBaseList",
-    data_frame="alabaster.base::validateDataFrame",
-    data_frame_factor="alabaster.base::validateDataFrameFactor"
-)
-
-#' @export
-#' @rdname validateObject
-validateObjectFunctionRegistry <- function() {
-    validate.registry$registry
+    validate(path, type)
+    invisible(NULL)
 }
 
 #' @export
 #' @rdname validateObject
 registerValidateObjectFunction <- function(type, fun) {
-    if (!is.null(fun) && !is.null(validate.registry$registry[[type]])) {
-        warning("validateObject function has alvalidatey been registered for object type '", type, "'")
+    if (!is.null(fun)) {
+        register_validate_function(type, fun)
+    } else {
+        deregister_validate_function(type);
     }
-    validate.registry$registry[[type]] <- fun
+}
+
+#' @export
+#' @rdname validateObject
+registerValidateObjectHeightFunction <- function(type, fun) {
+    if (!is.null(fun)) {
+        register_height_function(type, fun)
+    } else {
+        deregister_height_function(type);
+    }
 }

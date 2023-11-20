@@ -15,8 +15,6 @@
 #' @seealso
 #' \code{\link{readAtomicVector}}, to read the files back into the session.
 #'
-#' \code{\link{validateAtomicVector}}, to validate the file contents.
-#'
 #' @examples
 #' tmp <- tempfile()
 #' dir.create(tmp)

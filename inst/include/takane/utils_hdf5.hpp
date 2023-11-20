@@ -3,6 +3,9 @@
 
 #include <unordered_set>
 #include <string>
+#include <cstdint>
+#include <vector>
+#include <stdexcept>
 
 #include "ritsuko/ritsuko.hpp"
 #include "ritsuko/hdf5/hdf5.hpp"
@@ -74,7 +77,7 @@ inline hsize_t validate_factor_levels(const H5::Group& handle, const std::string
     return len;
 }
 
-inline hsize_t validate_factor_codes(const H5::Group& handle, const std::string& name, hsize_t num_levels, hsize_t buffer_size) {
+inline hsize_t validate_factor_codes(const H5::Group& handle, const std::string& name, hsize_t num_levels, hsize_t buffer_size, bool allow_missing = true) {
     auto chandle = ritsuko::hdf5::get_dataset(handle, name.c_str());
     if (ritsuko::hdf5::exceeds_integer_limit(chandle, 32, true)) {
         throw std::runtime_error("expected a datatype for '" + name + "' that fits in a 32-bit signed integer");
@@ -84,12 +87,15 @@ inline hsize_t validate_factor_codes(const H5::Group& handle, const std::string&
     auto block_size = ritsuko::hdf5::pick_1d_block_size(chandle.getCreatePlist(), len, buffer_size);
     std::vector<int32_t> buffer(block_size);
 
-    const char* missing_attr_name = "missing-value-placeholder";
-    bool has_missing = chandle.attrExists(missing_attr_name);
+    bool has_missing = false;
     int32_t missing_placeholder = 0;
-    if (has_missing) {
-        auto missing_attr = ritsuko::hdf5::get_missing_placeholder_attribute(chandle, missing_attr_name);
-        missing_attr.read(H5::PredType::NATIVE_INT32, &missing_placeholder);
+    if (allow_missing) {
+        const char* missing_attr_name = "missing-value-placeholder";
+        has_missing = chandle.attrExists(missing_attr_name);
+        if (has_missing) {
+            auto missing_attr = ritsuko::hdf5::get_missing_placeholder_attribute(chandle, missing_attr_name);
+            missing_attr.read(H5::PredType::NATIVE_INT32, &missing_placeholder);
+        }
     }
 
     ritsuko::hdf5::iterate_1d_blocks(

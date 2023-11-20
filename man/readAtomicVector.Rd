@@ -13,10 +13,7 @@ readAtomicVector(path, ...)
 \item{...}{Further arguments, ignored.}
 }
 \value{
-For \code{readAtomicVector}, the vector described by \code{info}.
-
-For \code{validateAtomicVector}, an error is raised if the files are invalid.
-Otherwise, \code{NULL} is invisibly returned.
+The vector described by \code{info}.
 }
 \description{
 Read a vector consisting of atomic elements from its on-disk representation.

@@ -48,30 +48,15 @@ inline void validate(const std::filesystem::path& path, const Options& options) 
 
     const char* missing_attr_name = "missing-value-placeholder";
     bool has_missing = dhandle.attrExists(missing_attr_name);
-    H5::Attribute missing_attr; 
-    if (has_missing) {
-        missing_attr = ritsuko::hdf5::get_missing_placeholder_attribute(dhandle, missing_attr_name);
-    }
 
-    if (type == "integer") {
-        if (ritsuko::hdf5::exceeds_integer_limit(dhandle, 32, true)) {
-            throw std::runtime_error("expected a datatype for 'values' that fits in a 32-bit signed integer");
-        }
-    } else if (type == "boolean") {
-        if (ritsuko::hdf5::exceeds_integer_limit(dhandle, 32, true)) {
-            throw std::runtime_error("expected a datatype for 'values' that fits in a 32-bit signed integer");
-        }
-    } else if (type == "number") {
-        if (ritsuko::hdf5::exceeds_float_limit(dhandle, 64)) {
-            throw std::runtime_error("expected a datatype for 'values' that fits in a 64-bit float");
-        }
-    } else if (type == "string") {
+    if (type == "string") {
         if (dhandle.getTypeClass() != H5T_STRING) {
             throw std::runtime_error("expected a string datatype for 'values'");
         }
 
         std::string missing_value;
         if (has_missing) {
+            auto missing_attr = ritsuko::hdf5::get_missing_placeholder_attribute(dhandle, missing_attr_name, /* type_class_only = */ true);
             missing_value = ritsuko::hdf5::load_scalar_string_attribute(missing_attr);
         }
 
@@ -79,10 +64,28 @@ inline void validate(const std::filesystem::path& path, const Options& options) 
             auto format = ritsuko::hdf5::load_scalar_string_attribute(ghandle, "format");
             internal_hdf5::validate_string_format(dhandle, vlen, format, has_missing, missing_value, options.hdf5_buffer_size);
         }
-    } else {
-        throw std::runtime_error("unsupported type '" + type + "'");
-    }
 
+    } else {
+        if (type == "integer") {
+            if (ritsuko::hdf5::exceeds_integer_limit(dhandle, 32, true)) {
+                throw std::runtime_error("expected a datatype for 'values' that fits in a 32-bit signed integer");
+            }
+        } else if (type == "boolean") {
+            if (ritsuko::hdf5::exceeds_integer_limit(dhandle, 32, true)) {
+                throw std::runtime_error("expected a datatype for 'values' that fits in a 32-bit signed integer");
+            }
+        } else if (type == "number") {
+            if (ritsuko::hdf5::exceeds_float_limit(dhandle, 64)) {
+                throw std::runtime_error("expected a datatype for 'values' that fits in a 64-bit float");
+            }
+        } else {
+            throw std::runtime_error("unsupported type '" + type + "'");
+        }
+
+        if (has_missing) {
+            ritsuko::hdf5::get_missing_placeholder_attribute(dhandle, missing_attr_name);
+        }
+    }
 
     if (ghandle.exists("names")) {
         auto nhandle = ritsuko::hdf5::get_dataset(ghandle, "names");
@@ -100,11 +103,15 @@ inline void validate(const std::filesystem::path& path, const Options& options) 
 }
 
 /**
- * Overload of `atomic_vector::validate()` with default options.
  * @param path Path to the directory containing the atomic vector.
+ * @param options Validation options, typically for reading performance.
+ * @return Length of the vector.
  */
-inline void validate(const std::filesystem::path& path) {
-    atomic_vector::validate(path, Options());
+inline size_t height(const std::filesystem::path& path, const Options&) {
+    H5::H5File handle((path / "contents.h5").string(), H5F_ACC_RDONLY);
+    auto ghandle = handle.openGroup("atomic_vector");
+    auto dhandle = ghandle.openDataSet("values");
+    return ritsuko::hdf5::get_1d_length(dhandle.getSpace(), false);
 }
 
 }

@@ -60,8 +60,6 @@ list.files(tmp, recursive=TRUE)
 }
 \seealso{
 \code{\link{readAtomicVector}}, to read the files back into the session.
-
-\code{\link{validateAtomicVector}}, to validate the file contents.
 }
 \author{
 Aaron Lun

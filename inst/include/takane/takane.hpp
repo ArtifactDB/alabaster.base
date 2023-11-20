@@ -1,7 +1,8 @@
 #ifndef TAKANE_TAKANE_HPP
 #define TAKANE_TAKANE_HPP
 
-#include "atomic_vector.hpp"
+#include "_validate.hpp"
+#include "_height.hpp"
 
 /**
  * @namespace takane

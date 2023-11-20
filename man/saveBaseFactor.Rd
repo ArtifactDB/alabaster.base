@@ -30,8 +30,6 @@ list.files(tmp, recursive=TRUE)
 }
 \seealso{
 \code{\link{readBaseFactor}}, to read the files back into the session.
-
-\code{\link{validateBaseFactor}}, to validate the file contents.
 }
 \author{
 Aaron Lun
