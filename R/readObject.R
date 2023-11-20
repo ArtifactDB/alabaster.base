@@ -1,14 +1,14 @@
 #' Read an object from disk
 #'
 #' Read an object from its on-disk representation.
-#' This is done dispatching to an appropriate loading function based on the type in the \code{OBJECT} file.
+#' This is done by dispatching to an appropriate loading function based on the type in the \code{OBJECT} file.
 #'
 #' @param path String containing a path to a directory, itself created with a \code{\link{saveObject}} method.
 #' @param ... Further arguments to pass to individual methods.
 #' @param type String specifying the name of type of the object.
 #' If this is not supplied for \code{readObject}, it is automatically determined from the \code{OBJECT} file in \code{path}.
 #' @param fun A loading function that accepts \code{path} and \code{...}, and returns the associated object.
-#' This may also be \code{NULL} to delete an existing registry.
+#' This may also be \code{NULL} to delete an existing entry in the registry.
 #' 
 #' @return 
 #' For \code{readObject}, an object created from the on-disk representation in \code{path}.
@@ -53,22 +53,21 @@ readObject <- function(path, type=NULL, ...) {
         type <- readLines(file.path(path, "OBJECT"))
     }
 
-    meth <- registry$registry[[type]]
+    meth <- read.registry$registry[[type]]
     if (is.null(meth)) {
         stop("cannot read unknown object type '", type, "'")
     } else if (is.character(meth)) {
         meth <- eval(parse(text=meth))
-        registry$registry[[type]] <- meth
+        read.registry$registry[[type]] <- meth
     }
     meth(path, ...)
 }
 
-registry <- new.env()
-registry$registry <- list(
+read.registry <- new.env()
+read.registry$registry <- list(
     atomic_vector="alabaster.base::readAtomicVector",
-    hdf5_simple_list="alabaster.base::readBaseList",
-    json_simple_list="alabaster.base::readBaseList",
     string_factor="alabaster.base::readBaseFactor",
+    simple_list="alabaster.base::readBaseList",
     data_frame="alabaster.base::readDataFrame",
     data_frame_factor="alabaster.base::readDataFrameFactor"
 )
@@ -76,16 +75,16 @@ registry$registry <- list(
 #' @export
 #' @rdname readObject
 readObjectFunctionRegistry <- function() {
-    registry$registry
+    read.registry$registry
 }
 
 #' @export
 #' @rdname readObject
 registerReadObjectFunction <- function(type, fun) {
-    if (!is.null(fun) && !is.null(registry$registry[[type]])) {
+    if (!is.null(fun) && !is.null(read.registry$registry[[type]])) {
         warning("readObject function has already been registered for object type '", type, "'")
     }
-    registry$registry[[type]] <- fun
+    read.registry$registry[[type]] <- fun
 }
 
 

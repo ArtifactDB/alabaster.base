@@ -22,61 +22,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// check_csv_df
-Rcpp::RObject check_csv_df(std::string path, int nrows, bool has_row_names, Rcpp::CharacterVector column_names, Rcpp::CharacterVector column_types, Rcpp::CharacterVector string_formats, Rcpp::LogicalVector factor_ordered, Rcpp::List factor_levels, int df_version, bool is_compressed, bool parallel);
-RcppExport SEXP _alabaster_base_check_csv_df(SEXP pathSEXP, SEXP nrowsSEXP, SEXP has_row_namesSEXP, SEXP column_namesSEXP, SEXP column_typesSEXP, SEXP string_formatsSEXP, SEXP factor_orderedSEXP, SEXP factor_levelsSEXP, SEXP df_versionSEXP, SEXP is_compressedSEXP, SEXP parallelSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::traits::input_parameter< std::string >::type path(pathSEXP);
-    Rcpp::traits::input_parameter< int >::type nrows(nrowsSEXP);
-    Rcpp::traits::input_parameter< bool >::type has_row_names(has_row_namesSEXP);
-    Rcpp::traits::input_parameter< Rcpp::CharacterVector >::type column_names(column_namesSEXP);
-    Rcpp::traits::input_parameter< Rcpp::CharacterVector >::type column_types(column_typesSEXP);
-    Rcpp::traits::input_parameter< Rcpp::CharacterVector >::type string_formats(string_formatsSEXP);
-    Rcpp::traits::input_parameter< Rcpp::LogicalVector >::type factor_ordered(factor_orderedSEXP);
-    Rcpp::traits::input_parameter< Rcpp::List >::type factor_levels(factor_levelsSEXP);
-    Rcpp::traits::input_parameter< int >::type df_version(df_versionSEXP);
-    Rcpp::traits::input_parameter< bool >::type is_compressed(is_compressedSEXP);
-    Rcpp::traits::input_parameter< bool >::type parallel(parallelSEXP);
-    rcpp_result_gen = Rcpp::wrap(check_csv_df(path, nrows, has_row_names, column_names, column_types, string_formats, factor_ordered, factor_levels, df_version, is_compressed, parallel));
-    return rcpp_result_gen;
-END_RCPP
-}
-// check_hdf5_df
-Rcpp::RObject check_hdf5_df(std::string path, std::string name, int nrows, bool has_row_names, Rcpp::CharacterVector column_names, Rcpp::CharacterVector column_types, Rcpp::CharacterVector string_formats, Rcpp::LogicalVector factor_ordered, Rcpp::List factor_levels, int df_version, int hdf5_version);
-RcppExport SEXP _alabaster_base_check_hdf5_df(SEXP pathSEXP, SEXP nameSEXP, SEXP nrowsSEXP, SEXP has_row_namesSEXP, SEXP column_namesSEXP, SEXP column_typesSEXP, SEXP string_formatsSEXP, SEXP factor_orderedSEXP, SEXP factor_levelsSEXP, SEXP df_versionSEXP, SEXP hdf5_versionSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::traits::input_parameter< std::string >::type path(pathSEXP);
-    Rcpp::traits::input_parameter< std::string >::type name(nameSEXP);
-    Rcpp::traits::input_parameter< int >::type nrows(nrowsSEXP);
-    Rcpp::traits::input_parameter< bool >::type has_row_names(has_row_namesSEXP);
-    Rcpp::traits::input_parameter< Rcpp::CharacterVector >::type column_names(column_namesSEXP);
-    Rcpp::traits::input_parameter< Rcpp::CharacterVector >::type column_types(column_typesSEXP);
-    Rcpp::traits::input_parameter< Rcpp::CharacterVector >::type string_formats(string_formatsSEXP);
-    Rcpp::traits::input_parameter< Rcpp::LogicalVector >::type factor_ordered(factor_orderedSEXP);
-    Rcpp::traits::input_parameter< Rcpp::List >::type factor_levels(factor_levelsSEXP);
-    Rcpp::traits::input_parameter< int >::type df_version(df_versionSEXP);
-    Rcpp::traits::input_parameter< int >::type hdf5_version(hdf5_versionSEXP);
-    rcpp_result_gen = Rcpp::wrap(check_hdf5_df(path, name, nrows, has_row_names, column_names, column_types, string_formats, factor_ordered, factor_levels, df_version, hdf5_version));
-    return rcpp_result_gen;
-END_RCPP
-}
-// check_factor
-Rcpp::RObject check_factor(std::string path, int length, int num_levels, bool has_names, bool is_compressed, bool parallel);
-RcppExport SEXP _alabaster_base_check_factor(SEXP pathSEXP, SEXP lengthSEXP, SEXP num_levelsSEXP, SEXP has_namesSEXP, SEXP is_compressedSEXP, SEXP parallelSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::traits::input_parameter< std::string >::type path(pathSEXP);
-    Rcpp::traits::input_parameter< int >::type length(lengthSEXP);
-    Rcpp::traits::input_parameter< int >::type num_levels(num_levelsSEXP);
-    Rcpp::traits::input_parameter< bool >::type has_names(has_namesSEXP);
-    Rcpp::traits::input_parameter< bool >::type is_compressed(is_compressedSEXP);
-    Rcpp::traits::input_parameter< bool >::type parallel(parallelSEXP);
-    rcpp_result_gen = Rcpp::wrap(check_factor(path, length, num_levels, has_names, is_compressed, parallel));
-    return rcpp_result_gen;
-END_RCPP
-}
 // check_list_hdf5
 SEXP check_list_hdf5(std::string file, std::string name, int num_external);
 RcppExport SEXP _alabaster_base_check_list_hdf5(SEXP fileSEXP, SEXP nameSEXP, SEXP num_externalSEXP) {
@@ -168,6 +113,69 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// validate
+Rcpp::RObject validate(std::string path, std::string type);
+RcppExport SEXP _alabaster_base_validate(SEXP pathSEXP, SEXP typeSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::traits::input_parameter< std::string >::type path(pathSEXP);
+    Rcpp::traits::input_parameter< std::string >::type type(typeSEXP);
+    rcpp_result_gen = Rcpp::wrap(validate(path, type));
+    return rcpp_result_gen;
+END_RCPP
+}
+// register_validate_function
+Rcpp::RObject register_validate_function(std::string type, Rcpp::Function fun);
+RcppExport SEXP _alabaster_base_register_validate_function(SEXP typeSEXP, SEXP funSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::traits::input_parameter< std::string >::type type(typeSEXP);
+    Rcpp::traits::input_parameter< Rcpp::Function >::type fun(funSEXP);
+    rcpp_result_gen = Rcpp::wrap(register_validate_function(type, fun));
+    return rcpp_result_gen;
+END_RCPP
+}
+// deregister_validate_function
+Rcpp::RObject deregister_validate_function(std::string type);
+RcppExport SEXP _alabaster_base_deregister_validate_function(SEXP typeSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::traits::input_parameter< std::string >::type type(typeSEXP);
+    rcpp_result_gen = Rcpp::wrap(deregister_validate_function(type));
+    return rcpp_result_gen;
+END_RCPP
+}
+// register_height_function
+Rcpp::RObject register_height_function(std::string type, Rcpp::Function fun);
+RcppExport SEXP _alabaster_base_register_height_function(SEXP typeSEXP, SEXP funSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::traits::input_parameter< std::string >::type type(typeSEXP);
+    Rcpp::traits::input_parameter< Rcpp::Function >::type fun(funSEXP);
+    rcpp_result_gen = Rcpp::wrap(register_height_function(type, fun));
+    return rcpp_result_gen;
+END_RCPP
+}
+// deregister_height_function
+Rcpp::RObject deregister_height_function(std::string type);
+RcppExport SEXP _alabaster_base_deregister_height_function(SEXP typeSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::traits::input_parameter< std::string >::type type(typeSEXP);
+    rcpp_result_gen = Rcpp::wrap(deregister_height_function(type));
+    return rcpp_result_gen;
+END_RCPP
+}
+// register_any_duplicated
+Rcpp::RObject register_any_duplicated(bool set);
+RcppExport SEXP _alabaster_base_register_any_duplicated(SEXP setSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::traits::input_parameter< bool >::type set(setSEXP);
+    rcpp_result_gen = Rcpp::wrap(register_any_duplicated(set));
+    return rcpp_result_gen;
+END_RCPP
+}
 // write_integer_scalar
 SEXP write_integer_scalar(std::string path, std::string host, std::string name, int val);
 RcppExport SEXP _alabaster_base_write_integer_scalar(SEXP pathSEXP, SEXP hostSEXP, SEXP nameSEXP, SEXP valSEXP) {
@@ -197,9 +205,6 @@ END_RCPP
 
 static const R_CallMethodDef CallEntries[] = {
     {"_alabaster_base_check_csv", (DL_FUNC) &_alabaster_base_check_csv, 3},
-    {"_alabaster_base_check_csv_df", (DL_FUNC) &_alabaster_base_check_csv_df, 11},
-    {"_alabaster_base_check_hdf5_df", (DL_FUNC) &_alabaster_base_check_hdf5_df, 11},
-    {"_alabaster_base_check_factor", (DL_FUNC) &_alabaster_base_check_factor, 6},
     {"_alabaster_base_check_list_hdf5", (DL_FUNC) &_alabaster_base_check_list_hdf5, 3},
     {"_alabaster_base_check_list_json", (DL_FUNC) &_alabaster_base_check_list_json, 3},
     {"_alabaster_base_any_actually_numeric_na", (DL_FUNC) &_alabaster_base_any_actually_numeric_na, 1},
@@ -208,6 +213,12 @@ static const R_CallMethodDef CallEntries[] = {
     {"_alabaster_base_load_csv", (DL_FUNC) &_alabaster_base_load_csv, 4},
     {"_alabaster_base_load_list_hdf5", (DL_FUNC) &_alabaster_base_load_list_hdf5, 3},
     {"_alabaster_base_load_list_json", (DL_FUNC) &_alabaster_base_load_list_json, 3},
+    {"_alabaster_base_validate", (DL_FUNC) &_alabaster_base_validate, 2},
+    {"_alabaster_base_register_validate_function", (DL_FUNC) &_alabaster_base_register_validate_function, 2},
+    {"_alabaster_base_deregister_validate_function", (DL_FUNC) &_alabaster_base_deregister_validate_function, 1},
+    {"_alabaster_base_register_height_function", (DL_FUNC) &_alabaster_base_register_height_function, 2},
+    {"_alabaster_base_deregister_height_function", (DL_FUNC) &_alabaster_base_deregister_height_function, 1},
+    {"_alabaster_base_register_any_duplicated", (DL_FUNC) &_alabaster_base_register_any_duplicated, 1},
     {"_alabaster_base_write_integer_scalar", (DL_FUNC) &_alabaster_base_write_integer_scalar, 4},
     {"_alabaster_base_write_string_scalar", (DL_FUNC) &_alabaster_base_write_string_scalar, 4},
     {NULL, NULL, 0}

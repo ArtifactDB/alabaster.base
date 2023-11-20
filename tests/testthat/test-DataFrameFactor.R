@@ -63,3 +63,16 @@ test_that("staging and loading of data frame factors work in the new world", {
     Y <- readDataFrameFactor(file.path(tmp, "test3"))
     expect_identical(X, Y)
 })
+
+test_that("validation of data frame factors catches non-unique levels", {
+    tmp <- tempfile()
+
+    df <- DataFrame(A=sample(3, 100, replace=TRUE), B=sample(letters[1:3], 100, replace=TRUE))
+    X <- DataFrameFactor(x=df)
+    saveObject(X, tmp)
+
+    leveldir <- file.path(tmp, "levels")
+    unlink(leveldir, recursive=TRUE)
+    saveObject(rbind(levels(X), levels(X)), leveldir)
+    expect_error(validateObject(tmp), "duplicated rows")
+})

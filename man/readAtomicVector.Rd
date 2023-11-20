@@ -13,7 +13,7 @@ readAtomicVector(path, ...)
 \item{...}{Further arguments, ignored.}
 }
 \value{
-The vector described by \code{info}, possibly with names.
+The vector described by \code{info}.
 }
 \description{
 Read a vector consisting of atomic elements from its on-disk representation.

@@ -13,7 +13,7 @@ readBaseFactor(path, ...)
 \item{...}{Further arguments, ignored.}
 }
 \value{
-The vector described by \code{info}, possibly with names.
+The vector described by \code{info}.
 }
 \description{
 Read a base R \link{factor} from its on-disk representation.
@@ -25,7 +25,7 @@ readBaseFactor(tmp)
 
 }
 \seealso{
-\code{"\link{stageObject,factor-method}"}, for the staging method.
+\code{"\link{saveObject,factor-method}"}, for the staging method.
 }
 \author{
 Aaron Lun

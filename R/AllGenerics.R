@@ -9,6 +9,7 @@
 #'
 #' @return 
 #' \code{dir} is created and populated with files containing the contents of \code{x}.
+#' \code{NULL} should be invisibly returned.
 #'
 #' @details
 #' Methods for the \code{stageObject} generic should create a directory at \code{path} in which the contents of \code{x} are to be saved.
@@ -60,6 +61,7 @@ setGeneric("saveObject", function(x, path, ...) {
     }
 
     standardGeneric("saveObject")
+    validateObject(path)
 })
 
 #######################################

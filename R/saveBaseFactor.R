@@ -8,6 +8,10 @@
 #'
 #' @return
 #' \code{x} is saved inside \code{path}.
+#' \code{NULL} is invisibly returned.
+#'
+#' @seealso
+#' \code{\link{readBaseFactor}}, to read the files back into the session.
 #'
 #' @author Aaron Lun
 #' 
@@ -42,7 +46,9 @@ setMethod("saveObject", "factor", function(x, path, ...) {
 
     .simple_save_codes(fhandle, host, x)
     h5write(levels(x), fhandle, paste0(host, "/levels"))
+
     write("string_factor", file=file.path(path, "OBJECT"))
+    invisible(NULL)
 })
 
 .simple_save_codes <- function(fhandle, host, x, save.names=TRUE) {

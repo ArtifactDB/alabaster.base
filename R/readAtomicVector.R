@@ -5,7 +5,8 @@
 #' @param path Path to a directory created with any of the vector methods for \code{\link{saveObject}}.
 #' @param ... Further arguments, ignored.
 #'
-#' @return The vector described by \code{info}, possibly with names.
+#' @return 
+#' The vector described by \code{info}.
 #'
 #' @seealso
 #' \code{"\link{saveObject,integer-method}"}, for one of the staging methods.
@@ -27,11 +28,12 @@ readAtomicVector <- function(path, ...) {
     host <- "atomic_vector"
     ghandle <- H5Gopen(fhandle, host)
     on.exit(H5Gclose(ghandle))
+    attrs <- h5readAttributes(fhandle, host)
 
     full.name <- paste0(host, "/values")
-    attrs <- h5readAttributes(fhandle, full.name)
+    vattrs <- h5readAttributes(fhandle, full.name)
     contents <- as.vector(h5read(fhandle, full.name))
-    contents <- .h5cast(contents, attrs=attrs)
+    contents <- .h5cast(contents, attrs=vattrs, type=attrs$type)
 
     if (attrs$type == "string") {
         if (!is.null(attrs$format)) {

@@ -5,10 +5,11 @@
 #' @param path String containing a path to a directory, itself created with the \code{\link{saveObject}} method for factors.
 #' @param ... Further arguments, ignored.
 #'
-#' @return The vector described by \code{info}, possibly with names.
+#' @return 
+#' The vector described by \code{info}. 
 #'
 #' @seealso
-#' \code{"\link{stageObject,factor-method}"}, for the staging method.
+#' \code{"\link{saveObject,factor-method}"}, for the staging method.
 #'
 #' @author Aaron Lun
 #' 
