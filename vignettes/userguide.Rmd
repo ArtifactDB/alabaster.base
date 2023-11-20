@@ -118,8 +118,12 @@ The _alabaster_ framework is easily extended to new classes by:
 2. Writing a function for `readObject()` and registering it with `registerReadObjectFunction()` (or, for core Bioconductor classes, by requesting a change to the default registry in `r self`).
    This should accept a path to a directory and read its contents to reconstruct the object.
    The registered type should be the same as that used in the `OBJECT` file.
-3. (optional) Formalize the on-disk representation by adding a specification to the [**takane**](https://github.com/ArtifactDB/takane) repository.
+3. Writing a function for `validateObject()` and registering it with `registervalidateObjectFunction()`.
+   This should accept a path to a directory and read its contents to determine if it is a valid on-disk representation.
+   The registered type should be the same as that used in the `OBJECT` file.
+   - (optional) Devleopers can alternatively formalize the on-disk representation by adding a specification to the [**takane**](https://github.com/ArtifactDB/takane) repository.
    This aims to provide C++-based validators for each representation, allowing us to enforce consistency across multiple languages (e.g., Python).
+   Any **takane** validator is automatically used by `validateObject()` so no registration is required.
 
 To illustrate, let's extend _alabaster_ to the `dgTMatrix` from the `r CRANpkg("Matrix")` package.
 First, the saving method:
