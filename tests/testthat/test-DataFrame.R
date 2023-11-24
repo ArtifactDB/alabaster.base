@@ -295,7 +295,7 @@ test_that("handling of NAs works correctly", {
 
     fpath <- file.path(tmp2, "basic_columns.h5")
     attrs <- rhdf5::h5readAttributes(fpath, "data_frame/data/2/codes")
-    expect_identical(attrs[["missing-value-placeholder"]], -1L)
+    expect_identical(attrs[["missing-value-placeholder"]], 2L)
     attrs <- rhdf5::h5readAttributes(fpath, "data_frame/data/3/codes")
     expect_null(attrs[["missing-value-placeholder"]])
 

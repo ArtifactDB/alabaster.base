@@ -3,6 +3,7 @@
 
 #include "_validate.hpp"
 #include "_height.hpp"
+#include "_satisfies_interface.hpp"
 
 /**
  * @namespace takane

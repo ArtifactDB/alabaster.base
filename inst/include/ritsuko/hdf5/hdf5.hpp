@@ -1,15 +1,19 @@
 #ifndef RITSUKO_HDF5_HPP
 #define RITSUKO_HDF5_HPP
 
+#include "Stream1dNumericDataset.hpp"
+#include "Stream1dStringDataset.hpp"
+#include "as_numeric_datatype.hpp"
 #include "exceeds_limit.hpp"
 #include "get_1d_length.hpp"
-#include "iterate_1d_blocks.hpp"
-#include "load_1d_string_dataset.hpp"
-#include "load_scalar_string_attribute.hpp"
-#include "get_missing_placeholder_attribute.hpp"
-#include "get_dataset.hpp"
-#include "get_scalar_attribute.hpp"
 #include "get_name.hpp"
+#include "load_attribute.hpp"
+#include "load_dataset.hpp"
+#include "missing_placeholder.hpp"
+#include "miscellaneous.hpp"
+#include "open.hpp"
+#include "pick_1d_block_size.hpp"
+#include "validate_string.hpp"
 
 /**
  * @file hdf5.hpp
