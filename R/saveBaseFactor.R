@@ -35,39 +35,47 @@ setMethod("saveObject", "factor", function(x, path, ...) {
 
     fhandle <- H5Fopen(ofile)
     on.exit(H5Fclose(fhandle), add=TRUE)
+    ghandle <- H5Gopen(fhandle, host)
+    on.exit(H5Gclose(ghandle), add=TRUE, after=FALSE)
     (function (){
-        ghandle <- H5Gopen(fhandle, host)
-        on.exit(H5Gclose(ghandle), add=TRUE)
         h5writeAttribute("1.0", ghandle, "version", asScalar=TRUE)
         if (is.ordered(x)) {
             h5writeAttribute(1L, ghandle, "ordered", asScalar=TRUE)
         }
     })()
 
-    .simple_save_codes(fhandle, host, x)
-    h5write(levels(x), fhandle, paste0(host, "/levels"))
+    .simple_save_codes(ghandle, x)
+    h5write(levels(x), ghandle, "levels")
 
     write("string_factor", file=file.path(path, "OBJECT"))
     invisible(NULL)
 })
 
-.simple_save_codes <- function(fhandle, host, x, save.names=TRUE) {
+.simple_save_codes <- function(ghandle, x, save.names=TRUE) {
     codes <- as.integer(x) - 1L
 
     missing.placeholder <- NULL
     if (anyNA(codes)) {
-        missing.placeholder <- -1L
+        missing.placeholder <- nlevels(x)
         codes[is.na(codes)] <- missing.placeholder
     }
 
-    full.data.name <- paste0(host, "/codes")
-    h5write(codes, fhandle, full.data.name)
+    shandle <- H5Screate_simple(length(x))
+    on.exit(H5Sclose(shandle), add=TRUE)
+    dhandle <- H5Dcreate(ghandle, "codes", dtype_id="H5T_NATIVE_UINT32", h5space=shandle)
+    on.exit(H5Dclose(dhandle), add=TRUE, after=FALSE)
+    H5Dwrite(dhandle, codes)
+
     if (!is.null(missing.placeholder)) {
-        addMissingPlaceholderAttributeForHdf5(fhandle, full.data.name, missing.placeholder)
+        ashandle <- H5Screate("H5S_SCALAR")
+        on.exit(H5Sclose(ashandle), add=TRUE, after=FALSE)
+        ahandle <- H5Acreate(dhandle, "missing-value-placeholder", dtype_id="H5T_NATIVE_UINT32", h5space=ashandle)
+        on.exit(H5Aclose(ahandle), add=TRUE, after=FALSE)
+        H5Awrite(ahandle, missing.placeholder)
     }
 
     if (save.names && !is.null(names(x))) {
-        h5write(names(x), fhandle, paste0(host, "/names"))
+        h5write(names(x), ghandle, "names")
     }
 }
 

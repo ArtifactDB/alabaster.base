@@ -91,10 +91,9 @@ setMethod("saveObject", "DataFrame", function(x, path, ...) {
                 if (is.ordered(col)) {
                     h5writeAttribute(1L, ghandle, "ordered", asScalar=TRUE)
                 }
+                .simple_save_codes(ghandle, col, save.names=FALSE)
+                h5write(levels(col), ghandle, "levels");
             })()
-
-            .simple_save_codes(fhandle, full.data.name, col, save.names=FALSE)
-            h5write(levels(col), fhandle, paste0(full.data.name, "/levels"));
 
         } else if (.is_datetime(col)) {
             coltype <- "string"

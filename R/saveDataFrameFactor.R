@@ -32,13 +32,11 @@ setMethod("saveObject", "DataFrameFactor", function(x, path, ...) {
 
     fhandle <- H5Fopen(ofile)
     on.exit(H5Fclose(fhandle), add=TRUE)
-    (function (){
-        ghandle <- H5Gopen(fhandle, host)
-        on.exit(H5Gclose(ghandle), add=TRUE)
-        h5writeAttribute("1.0", ghandle, "version", asScalar=TRUE)
-    })()
+    ghandle <- H5Gopen(fhandle, host)
+    on.exit(H5Gclose(ghandle), add=TRUE, after=FALSE)
+    h5writeAttribute("1.0", ghandle, "version", asScalar=TRUE)
 
-    .simple_save_codes(fhandle, host, x)
+    .simple_save_codes(ghandle, x)
     stuff <- levels(x)
     altSaveObject(stuff, paste0(path, "/levels"), ...)
 
