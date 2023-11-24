@@ -24,21 +24,17 @@
 #' @aliases stageObject,DataFrameFactor-method
 setMethod("saveObject", "DataFrameFactor", function(x, path, ...) {
     dir.create(path)
-
     ofile <- file.path(path, "contents.h5")
-    h5createFile(ofile)
-    host <- "data_frame_factor"
-    h5createGroup(ofile, host)
 
-    fhandle <- H5Fopen(ofile)
-    on.exit(H5Fclose(fhandle), add=TRUE)
-    ghandle <- H5Gopen(fhandle, host)
+    fhandle <- H5Fcreate(ofile, "H5F_ACC_TRUNC")
+    on.exit(H5Fclose(fhandle), add=TRUE, after=FALSE)
+    ghandle <- H5Gcreate(fhandle, "data_frame_factor")
     on.exit(H5Gclose(ghandle), add=TRUE, after=FALSE)
-    h5writeAttribute("1.0", ghandle, "version", asScalar=TRUE)
+    h5_write_attribute(ghandle, "version", "1.0", scalar=TRUE)
 
     .simple_save_codes(ghandle, x)
     stuff <- levels(x)
-    altSaveObject(stuff, paste0(path, "/levels"), ...)
+    altSaveObject(stuff, file.path(path, "levels"), ...)
 
     saveMetadata(x, 
         mcols.path=file.path(path, "element_annotations"),

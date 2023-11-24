@@ -27,25 +27,20 @@
 #' stageObject,factor-method
 setMethod("saveObject", "factor", function(x, path, ...) {
     dir.create(path, showWarnings=FALSE)
-
     ofile <- file.path(path, "contents.h5")
-    h5createFile(ofile)
-    host <- "string_factor"
-    h5createGroup(ofile, host)
 
-    fhandle <- H5Fopen(ofile)
-    on.exit(H5Fclose(fhandle), add=TRUE)
-    ghandle <- H5Gopen(fhandle, host)
+    fhandle <- H5Fcreate(ofile, "H5F_ACC_TRUNC")
+    on.exit(H5Fclose(fhandle), add=TRUE, after=FALSE)
+    ghandle <- H5Gcreate(fhandle, "string_factor")
     on.exit(H5Gclose(ghandle), add=TRUE, after=FALSE)
-    (function (){
-        h5writeAttribute("1.0", ghandle, "version", asScalar=TRUE)
-        if (is.ordered(x)) {
-            h5writeAttribute(1L, ghandle, "ordered", asScalar=TRUE)
-        }
-    })()
+
+    h5_write_attribute(ghandle, "version", "1.0", scalar=TRUE)
+    if (is.ordered(x)) {
+        h5_write_attribute(ghandle, "ordered", 1L, scalar=TRUE)
+    }
 
     .simple_save_codes(ghandle, x)
-    h5write(levels(x), ghandle, "levels")
+    h5_write_vector(ghandle, "levels", levels(x))
 
     write("string_factor", file=file.path(path, "OBJECT"))
     invisible(NULL)
@@ -60,22 +55,15 @@ setMethod("saveObject", "factor", function(x, path, ...) {
         codes[is.na(codes)] <- missing.placeholder
     }
 
-    shandle <- H5Screate_simple(length(x))
-    on.exit(H5Sclose(shandle), add=TRUE)
-    dhandle <- H5Dcreate(ghandle, "codes", dtype_id="H5T_NATIVE_UINT32", h5space=shandle)
+    dhandle <- h5_write_vector(ghandle, "codes", codes, type="H5T_NATIVE_UINT32", emit=TRUE)
     on.exit(H5Dclose(dhandle), add=TRUE, after=FALSE)
-    H5Dwrite(dhandle, codes)
 
     if (!is.null(missing.placeholder)) {
-        ashandle <- H5Screate("H5S_SCALAR")
-        on.exit(H5Sclose(ashandle), add=TRUE, after=FALSE)
-        ahandle <- H5Acreate(dhandle, "missing-value-placeholder", dtype_id="H5T_NATIVE_UINT32", h5space=ashandle)
-        on.exit(H5Aclose(ahandle), add=TRUE, after=FALSE)
-        H5Awrite(ahandle, missing.placeholder)
+        h5_write_attribute(dhandle, "missing-value-placeholder", missing.placeholder, type="H5T_NATIVE_UINT32", scalar=TRUE)
     }
 
     if (save.names && !is.null(names(x))) {
-        h5write(names(x), ghandle, "names")
+        h5_write_vector(ghandle, "names", names(x))
     }
 }
 

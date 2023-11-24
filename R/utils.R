@@ -40,7 +40,3 @@
 .cast_atomic <- function(x, type) {
     as(x, as.character(.atomics[type]))
 }
-
-h5exists <- function(handle, name) {
-    name %in% h5ls(handle, datasetinfo=FALSE, recursive=FALSE)$name
-}

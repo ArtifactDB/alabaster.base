@@ -41,6 +41,8 @@
 #' @importFrom jsonlite toJSON
 setMethod("saveObject", "list", function(x, path, list.format=saveBaseListFormat(), ...) {
     dir.create(path, showWarnings=FALSE)
+    dname <- "simple_list"
+    write(dname, file=file.path(path, "OBJECT"))
 
     env <- new.env()
     env$collected <- list()
@@ -48,16 +50,18 @@ setMethod("saveObject", "list", function(x, path, list.format=saveBaseListFormat
 
     if (!is.null(list.format) && list.format == "hdf5") {
         fpath <- file.path(path, "list_contents.h5")
-        h5createFile(fpath)
-        dname <- "simple_list"
-        .transform_list_hdf5(x, dir=NULL, path=path, fpath=fpath, name=dname, env=env, simplified=TRUE, .version=3, extra=args)
-        .label_hdf5_group(fpath, dname, uzuki_version="1.3")
-        write(dname, file=file.path(path, "OBJECT"))
+        handle <- H5Fcreate(fpath, "H5F_ACC_TRUNC")
+        on.exit(H5Fclose(handle), add=FALSE, after=TRUE)
+
+        .transform_list_hdf5(x, dir=NULL, path=path, handle=handle, name=dname, env=env, simplified=TRUE, .version=3, extra=args)
+
+        ghandle <- H5Gopen(handle, dname)
+        on.exit(H5Gclose(ghandle), add=FALSE, after=TRUE)
+        .label_hdf5_group(ghandle, uzuki_version="1.3")
 
     } else {
         formatted <- .transform_list_json(x, dir=NULL, path=path, env=env, simplified=TRUE, .version=2, extra=args)
         formatted$version <- "1.2"
-        write("simple_list", file=file.path(path, "OBJECT"))
 
         str <- toJSON(formatted, auto_unbox=TRUE, ident=4, null="null", na="null")
         fpath <- file.path(path, "list_contents.json.gz")
@@ -80,24 +84,25 @@ setMethod("saveObject", "List", function(x, path, list.format=saveBaseListFormat
 ##################################
 
 #' @importFrom S4Vectors DataFrame
-#' @importFrom rhdf5 h5createGroup h5write
-.transform_list_hdf5 <- function(x, dir, path, fpath, name, env, simplified, .version, extra) {
-    h5createGroup(fpath, name)
+.transform_list_hdf5 <- function(x, dir, path, handle, name, env, simplified, .version, extra) {
+    ghandle <- H5Gcreate(handle, name)
+    on.exit(H5Gclose(ghandle), add=TRUE, after=FALSE)
 
     if (is.list(x) && !is.data.frame(x) && !is(x, "POSIXlt")) {
-        .label_hdf5_group(fpath, name, uzuki_object="list")
-        h5createGroup(fpath, paste0(name, "/data"))
+        .label_hdf5_group(ghandle, uzuki_object="list")
+        gdhandle <- H5Gcreate(ghandle, "data")
+        on.exit(H5Gclose(gdhandle), add=TRUE, after=FALSE)
 
         nn <- names(x)
         if (!is.null(nn)) {
             .check_ok_list_names(nn)
-            h5write(nn, fpath, paste0(name, "/names"))
+            h5_write_vector(ghandle, "names", nn)
         }
 
         for (i in seq_along(x)) {
-            newname <- paste0(name, "/data/", i - 1L)
+            newname <- as.character(i - 1L)
             tryCatch({
-                .transform_list_hdf5(x[[i]], dir=dir, path=path, fpath=fpath, name=newname, env=env, simplified=simplified, .version=.version, extra=extra)
+                .transform_list_hdf5(x[[i]], dir=dir, path=path, handle=gdhandle, name=newname, env=env, simplified=simplified, .version=.version, extra=extra)
             }, error=function(e) {
                 s <- if (is.null(nn)) i else paste0("'", nn[i], "'")
                 stop("failed to stage list element ", s, "\n  - ", e$message)
@@ -108,39 +113,42 @@ setMethod("saveObject", "List", function(x, path, list.format=saveBaseListFormat
     }
 
     if (is.null(x)) {
-        .label_hdf5_group(fpath, name, uzuki_object="nothing")
+        .label_hdf5_group(ghandle, uzuki_object="nothing")
         return(NULL)
     }
 
     if (is.null(dim(x))) {
         if (is.factor(x)) {
-            .label_hdf5_group(fpath, name, 
+            .label_hdf5_group(
+                ghandle,
                 uzuki_object="vector",
                 uzuki_type=if (.version == 1 && is.ordered(x)) "ordered" else "factor"
             )
 
-            dataname <- paste0(name, "/data")
-            h5write(as.integer(x) - 1L, fpath, dataname)
-            if (.version > 1 && anyNA(x)) {
-                addMissingPlaceholderAttributeForHdf5(fpath, dataname, -1L)
+            codes <- as.integer(x) - 1L
+            missing.placeholder <- NULL
+            if (.version > 1 && anyNA(codes)) {
+                missing.placeholder <- -1L
+                codes[is.na(codes)] <- missing.placeholder
             }
 
-            h5write(levels(x), fpath, paste0(name, "/levels"))
+            .write_hdf5_vector(ghandle, "data", codes, missing.placeholder)
+            h5_write_vector(ghandle, "levels", levels(x))
             if (.version > 1 && is.ordered(x)) {
-                write_integer_scalar(fpath, name, "ordered", 1)
+                h5_write_attribute(ghandle, "ordered", 1L, scalar=TRUE)
             }
-
-            .add_hdf5_names(x, fpath, name)
+            .add_hdf5_names(ghandle, x)
             return(NULL)
 
         } else if (!is.null(sltype <- .is_stringlike(x))) {
-            .label_hdf5_group(fpath, name, 
+            .label_hdf5_group(
+                ghandle,
                 uzuki_object="vector",
                 uzuki_type=if (.version == 1) sltype else "string"
             )
 
             if (.version > 1 && sltype != "string") {
-                write_string_scalar(fpath, name, "format", sltype)
+                h5_write_vector(ghandle, "format", sltype, scalar=TRUE)
             }
 
             y <- .sanitize_stringlike(x, sltype)
@@ -157,18 +165,15 @@ setMethod("saveObject", "List", function(x, path, list.format=saveBaseListFormat
                 }
             }
 
-            dname <- paste0(name, "/data")
-            h5write(y, fpath, dname)
-            if (!is.null(missing.placeholder)) {
-                addMissingPlaceholderAttributeForHdf5(fpath, dname, missing.placeholder)
-            }
-            .add_hdf5_names(x, fpath, name)
+            .write_hdf5_vector(ghandle, "data", y, missing.placeholder)
+            .add_hdf5_names(ghandle, x)
             return(NULL)
 
         } else if (is.atomic(x)) {
             coerced <- .remap_atomic_type(x)
 
-            .label_hdf5_group(fpath, name, 
+            .label_hdf5_group(
+                ghandle,
                 uzuki_object="vector",
                 uzuki_type=coerced$type
             )
@@ -186,21 +191,16 @@ setMethod("saveObject", "List", function(x, path, list.format=saveBaseListFormat
                 }
             }
 
-            dataname <- paste0(name, "/data")
-            h5write(y, fpath, dataname)
-            .add_hdf5_names(x, fpath, name)
-            if (.version > 1 && !is.null(missing.placeholder)) {
-                addMissingPlaceholderAttributeForHdf5(fpath, dataname, missing.placeholder)
-            }
-
+            .write_hdf5_vector(ghandle, "data", y, missing.placeholder)
+            .add_hdf5_names(ghandle, x)
             return(NULL)
        }
     }
 
     # External object fallback.
-    .label_hdf5_group(fpath, name, uzuki_object="external")
+    .label_hdf5_group(ghandle, uzuki_object="external")
     n <- length(env$collected)
-    write_integer_scalar(fpath, name, "index", n)
+    h5_write_vector(ghandle, "index", n, scalar=TRUE)
 
     n <- n + 1L
     if (is.data.frame(x)) {
@@ -240,38 +240,25 @@ setMethod("saveObject", "List", function(x, path, list.format=saveBaseListFormat
     }
 }
 
-#' @importFrom rhdf5 H5Fopen H5Fclose H5Gopen H5Gclose h5writeAttribute 
-.label_hdf5_group <- function(file, name, ...) {
-    fhandle <- H5Fopen(file)
-    on.exit(H5Fclose(fhandle), add=TRUE)
-    ghandle <- H5Gopen(fhandle, name)
-    on.exit(H5Gclose(ghandle), add=TRUE)
-
+.label_hdf5_group <- function(ghandle, ...) {
     attrs <- list(...)
     for (a in names(attrs)) {
-        h5writeAttribute(attrs[[a]], h5obj=ghandle, name=a, asScalar=TRUE)
+        h5_write_attribute(ghandle, a, attrs[[a]], scalar=TRUE)
     }
 }
 
-#' @importFrom rhdf5 H5Fopen H5Fclose H5Gopen H5Gclose h5writeAttribute H5Dcreate H5Dclose H5Dwrite H5Screate H5Sclose
-.write_scalar_dataset <- function(file, parent, name, value, datatype) {
-    fhandle <- H5Fopen(file)
-    on.exit(H5Fclose(fhandle), add=TRUE)
-    ghandle <- H5Gopen(fhandle, parent)
-    on.exit(H5Gclose(ghandle), add=TRUE)
-
-    shandle <- H5Screate("H5S_SCALAR")
-    on.exit(H5Sclose(shandle), add=TRUE)
-    dhandle <- H5Dcreate(ghandle, name, dtype_id=datatype, h5space=shandle)
-    on.exit(H5Dclose(dhandle), add=TRUE)
-
-    H5Dwrite(dhandle, value) 
+.write_hdf5_vector <- function(handle, name, data, placeholder, type=NULL) {
+    dhandle <- h5_write_vector(ghandle, "data", data, type=type, emit=TRUE)
+    on.exit(H5Dclose(dhandle), add=TRUE, after=FALSE)
+    if (!is.null(placeholder)) {
+        h5_write_attribute(dhandle, "missing-value-placeholder", placeholder, type=type, scalar=TRUE)
+    }
 }
 
 #' @importFrom rhdf5 h5write
-.add_hdf5_names <- function(x, fpath, name) {
+.add_hdf5_names <- function(handle, x) {
     if (!is.null(names(x))) {
-        h5write(names(x), fpath, paste0(name, "/names"))
+        h5_write_vector(handle, "names", names(x))
     }
 }
 
@@ -421,7 +408,8 @@ setMethod("stageObject", "list", function(x, dir, path, child=FALSE, fname="list
     if (!is.null(format) && format == "hdf5") {
         target <- paste0(path, "/", fname, ".h5")
         fpath <- file.path(dir, target)
-        h5createFile(fpath)
+        handle <- H5Fcreate(fpath, "H5F_ACC_TRUNC")
+        on.exit(H5Fclose(handle), add=FALSE, after=TRUE)
 
         dname <- "contents"
         meta[["$schema"]] <- "hdf5_simple_list/v1.json"
@@ -431,8 +419,11 @@ setMethod("stageObject", "list", function(x, dir, path, child=FALSE, fname="list
             .version <- 3
         }
         .transform_list_hdf5(x, dir=dir, path=path, fpath=fpath, name=dname, env=env, simplified=FALSE, .version=.version)
+
         if (.version > 1) {
-            .label_hdf5_group(fpath, dname, uzuki_version=paste0("1.", .version))
+            ghandle <- H5Gopen(handle, dname)
+            on.exit(H5Gclose(ghandle), add=FALSE, after=TRUE)
+            .label_hdf5_group(ghandle, uzuki_version=paste0("1.", .version))
         }
 
         check_list_hdf5(fpath, dname, length(env$collected)) # Check that we did it correctly.
