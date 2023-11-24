@@ -27,19 +27,18 @@
 readDataFrameFactor <- function(path, ...) {
     fpath <- file.path(path, "contents.h5")
     fhandle <- H5Fopen(fpath)
-    on.exit(H5Fclose(fhandle))
+    on.exit(H5Fclose(fhandle), add=TRUE, after=FALSE)
 
     host <- "data_frame_factor"
     ghandle <- H5Gopen(fhandle, host)
-    on.exit(H5Gclose(ghandle))
+    on.exit(H5Gclose(ghandle), add=TRUE, after=FALSE)
 
-    attrs <- h5readAttributes(fhandle, host)
-    codes <- .simple_read_codes(fhandle, host)
+    codes <- .simple_read_codes(ghandle)
     levels <- altReadObject(file.path(path, "levels"), ...)
     output <- DataFrameFactor(index=codes, levels=levels)
 
-    if (h5exists(ghandle, "names")) {
-        names(output) <- as.vector(h5read(ghandle, "names"))
+    if (h5_object_exists(ghandle, "names")) {
+        names(output) <- h5_read_vector(ghandle, "names")
     }
 
     readMetadata(

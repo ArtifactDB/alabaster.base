@@ -6,15 +6,13 @@
 #' @name hdf5
 #' @import rhdf5
 #' @aliases 
-#' h5_exists
 #' h5_write_vector
 #' h5_write_attribute
+#' h5_read_vector
+#' h5_read_attribute
+#' h5_object_exists
+#' h5_cast
 NULL
-
-#' @export
-h5_exists <- function(handle, name) {
-    name %in% h5ls(handle, datasetinfo=FALSE, recursive=FALSE)$name
-}
 
 .choose_type <- function(x, plus.one=FALSE) {
     if (is.integer(x)) {
@@ -55,7 +53,7 @@ h5_write_vector <- function(handle, name, x, type=NULL, compress=6, chunks=NULL,
     phandle <- H5Pcreate("H5P_DATASET_CREATE")
     on.exit(H5Pclose(phandle), add=TRUE, after=FALSE)
     H5Pset_fill_time(phandle, "H5D_FILL_TIME_ALLOC")
-    if (compress > 0) {
+    if (compress > 0 && length(x)) {
         H5Pset_deflate(phandle, level=compress)
         if (is.null(chunks)) { # Some reasonable number between 10000 and 100000, depending on the size. 
             chunks <- sqrt(length(x))
@@ -99,4 +97,70 @@ h5_write_attribute <- function(handle, name, x, type=NULL, scalar=FALSE) {
     H5Awrite(ahandle, x)
 
     invisible(NULL)
+}
+
+#' @export
+h5_object_exists <- function(handle, name) {
+    name %in% h5ls(handle, datasetinfo=FALSE, recursive=FALSE)$name
+}
+
+#' @export
+h5_read_vector <- function(handle, name, check=FALSE, default=NULL, bit64conversion) {
+    if (check) {
+        if (!h5_object_exists(handle, name)) {
+            return(default)
+        }
+    }
+    dhandle <- H5Dopen(handle, name)
+    on.exit(H5Dclose(dhandle), add=TRUE, after=FALSE)
+    H5Dread(dhandle, bit64conversion=bit64conversion, drop=TRUE)
+}
+
+#' @export
+h5_read_attribute <- function(handle, name, check=FALSE, default=NULL, bit64conversion) {
+    if (check) {
+        if (!H5Aexists(handle, name)) {
+            return(default)
+        }
+    }
+    ahandle <- H5Aopen_by_name(handle, name=name)
+    on.exit(H5Aclose(ahandle), add=TRUE, after=FALSE)
+    H5Aread(ahandle, bit64conversion=bit64conversion)
+}
+
+#' @export
+h5_cast <- function(current, expected.type, missing.placeholder) {
+    restore_min_integer <- function(y) {
+        z <- FALSE
+        if (is.integer(y) && anyNA(y)) { # promote integer NAs back to the actual number.
+            y <- as.double(y)
+            y[is.na(y)] <- -2^31
+            z <- TRUE
+        }
+        list(y=y, converted=z)
+    }
+
+    converted <- FALSE
+    if (is.null(missing.placeholder)) {
+        out <- restore_min_integer(current)
+        current <- out$y
+        converted <- out$converted
+    } else if (is.na(missing.placeholder)) {
+        if (!is.nan(missing.placeholder)) {
+            # No-op as the placeholder is already R's NA of the relevant type.
+        } else { 
+            current[is.nan(current)] <- NA # avoid equality checks to an NaN.
+        }
+    } else {
+        out <- restore_min_integer(current)
+        current <- out$y
+        converted <- out$converted
+        current[which(current == missing.placeholder)] <- NA # Using which() to avoid problems with existing NAs.
+    }
+
+    if (!converted && !is.null(expected.type)) {
+        current <- .cast_atomic(current, expected.type)
+    }
+
+    current
 }

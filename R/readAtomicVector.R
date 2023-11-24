@@ -23,30 +23,32 @@
 readAtomicVector <- function(path, ...) {
     fpath <- file.path(path, "contents.h5")
     fhandle <- H5Fopen(fpath)
-    on.exit(H5Fclose(fhandle))
+    on.exit(H5Fclose(fhandle), add=TRUE, after=FALSE)
 
     host <- "atomic_vector"
     ghandle <- H5Gopen(fhandle, host)
-    on.exit(H5Gclose(ghandle))
-    attrs <- h5readAttributes(fhandle, host)
+    on.exit(H5Gclose(ghandle), add=TRUE, after=FALSE)
+    expected.type <- h5_read_attribute(ghandle, "type")
 
-    full.name <- paste0(host, "/values")
-    vattrs <- h5readAttributes(fhandle, full.name)
-    contents <- as.vector(h5read(fhandle, full.name))
-    contents <- .h5cast(contents, attrs=vattrs, type=attrs$type)
+    vhandle <- H5Dopen(ghandle, "values")
+    on.exit(H5Dclose(vhandle), add=TRUE, after=FALSE)
+    contents <- H5Dread(vhandle, drop=FALSE)
+    missing.placeholder <- h5_read_attribute(vhandle, missing_placeholder_name, check=TRUE, default=NULL)
 
-    if (attrs$type == "string") {
-        if (!is.null(attrs$format)) {
-            if (attrs$format == "date") {
+    contents <- h5_cast(contents, expected.type=expected.type, missing.placeholder=missing.placeholder)
+    if (expected.type == "string") {
+        if (H5Aexists(ghandle, "format")) {
+            format <- h5_read_attribute(ghandle, "format")
+            if (format == "date") {
                 contents <- as.Date(contents)
-            } else if (attrs$format == "date-time") {
+            } else if (format == "date-time") {
                 contents <- .cast_datetime(contents)
             }
         }
     }
 
-    if ("names" %in% h5ls(ghandle, recursive=FALSE, datasetinfo=FALSE)$name) {
-        names(contents) <- as.vector(h5read(ghandle, "names"))
+    if (h5_object_exists(ghandle, "names")) {
+        names(contents) <- h5_read_vector(ghandle, "names")
     }
 
     contents

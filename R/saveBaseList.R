@@ -51,12 +51,12 @@ setMethod("saveObject", "list", function(x, path, list.format=saveBaseListFormat
     if (!is.null(list.format) && list.format == "hdf5") {
         fpath <- file.path(path, "list_contents.h5")
         handle <- H5Fcreate(fpath, "H5F_ACC_TRUNC")
-        on.exit(H5Fclose(handle), add=FALSE, after=TRUE)
+        on.exit(H5Fclose(handle), add=TRUE, after=FALSE)
 
         .transform_list_hdf5(x, dir=NULL, path=path, handle=handle, name=dname, env=env, simplified=TRUE, .version=3, extra=args)
 
         ghandle <- H5Gopen(handle, dname)
-        on.exit(H5Gclose(ghandle), add=FALSE, after=TRUE)
+        on.exit(H5Gclose(ghandle), add=TRUE, after=FALSE)
         .label_hdf5_group(ghandle, uzuki_version="1.3")
 
     } else {
@@ -135,7 +135,7 @@ setMethod("saveObject", "List", function(x, path, list.format=saveBaseListFormat
             .write_hdf5_vector(ghandle, "data", codes, missing.placeholder)
             h5_write_vector(ghandle, "levels", levels(x))
             if (.version > 1 && is.ordered(x)) {
-                h5_write_attribute(ghandle, "ordered", 1L, scalar=TRUE)
+                h5_write_vector(ghandle, "ordered", 1L, compress=0, scalar=TRUE)
             }
             .add_hdf5_names(ghandle, x)
             return(NULL)
@@ -148,7 +148,7 @@ setMethod("saveObject", "List", function(x, path, list.format=saveBaseListFormat
             )
 
             if (.version > 1 && sltype != "string") {
-                h5_write_vector(ghandle, "format", sltype, scalar=TRUE)
+                h5_write_vector(ghandle, "format", sltype, compress=0, scalar=TRUE)
             }
 
             y <- .sanitize_stringlike(x, sltype)
@@ -200,7 +200,7 @@ setMethod("saveObject", "List", function(x, path, list.format=saveBaseListFormat
     # External object fallback.
     .label_hdf5_group(ghandle, uzuki_object="external")
     n <- length(env$collected)
-    h5_write_vector(ghandle, "index", n, scalar=TRUE)
+    h5_write_vector(ghandle, "index", n, compress=0, scalar=TRUE)
 
     n <- n + 1L
     if (is.data.frame(x)) {
@@ -248,10 +248,10 @@ setMethod("saveObject", "List", function(x, path, list.format=saveBaseListFormat
 }
 
 .write_hdf5_vector <- function(handle, name, data, placeholder, type=NULL) {
-    dhandle <- h5_write_vector(ghandle, "data", data, type=type, emit=TRUE)
+    dhandle <- h5_write_vector(handle, "data", data, type=type, emit=TRUE)
     on.exit(H5Dclose(dhandle), add=TRUE, after=FALSE)
     if (!is.null(placeholder)) {
-        h5_write_attribute(dhandle, "missing-value-placeholder", placeholder, type=type, scalar=TRUE)
+        h5_write_attribute(dhandle, missing_placeholder_name, placeholder, type=type, scalar=TRUE)
     }
 }
 
@@ -408,8 +408,6 @@ setMethod("stageObject", "list", function(x, dir, path, child=FALSE, fname="list
     if (!is.null(format) && format == "hdf5") {
         target <- paste0(path, "/", fname, ".h5")
         fpath <- file.path(dir, target)
-        handle <- H5Fcreate(fpath, "H5F_ACC_TRUNC")
-        on.exit(H5Fclose(handle), add=FALSE, after=TRUE)
 
         dname <- "contents"
         meta[["$schema"]] <- "hdf5_simple_list/v1.json"
@@ -418,13 +416,18 @@ setMethod("stageObject", "list", function(x, dir, path, child=FALSE, fname="list
         if (is.null(.version)) {
             .version <- 3
         }
-        .transform_list_hdf5(x, dir=dir, path=path, fpath=fpath, name=dname, env=env, simplified=FALSE, .version=.version)
 
-        if (.version > 1) {
-            ghandle <- H5Gopen(handle, dname)
-            on.exit(H5Gclose(ghandle), add=FALSE, after=TRUE)
-            .label_hdf5_group(ghandle, uzuki_version=paste0("1.", .version))
-        }
+        local({
+            handle <- H5Fcreate(fpath, "H5F_ACC_TRUNC")
+            on.exit(H5Fclose(handle), add=TRUE, after=FALSE)
+            .transform_list_hdf5(x, dir=dir, path=path, handle=handle, name=dname, env=env, simplified=FALSE, .version=.version)
+
+            if (.version > 1) {
+                ghandle <- H5Gopen(handle, dname)
+                on.exit(H5Gclose(ghandle), add=TRUE, after=FALSE)
+                .label_hdf5_group(ghandle, uzuki_version=paste0("1.", .version))
+            }
+        })
 
         check_list_hdf5(fpath, dname, length(env$collected)) # Check that we did it correctly.
 

@@ -23,28 +23,29 @@
 readBaseFactor <- function(path, ...) {
     fpath <- file.path(path, "contents.h5")
     fhandle <- H5Fopen(fpath)
-    on.exit(H5Fclose(fhandle))
+    on.exit(H5Fclose(fhandle), add=TRUE, after=FALSE)
 
     host <- "string_factor"
     ghandle <- H5Gopen(fhandle, host)
     on.exit(H5Gclose(ghandle), add=TRUE, after=FALSE)
 
-    attrs <- h5readAttributes(fhandle, host)
-    codes <- .simple_read_codes(fhandle, host)
-    levels <- as.vector(h5read(fhandle, paste0(host, "/levels")))
-    output <- factor(levels[codes], levels=levels, ordered=isTRUE(attrs$ordered > 0))
+    codes <- .simple_read_codes(ghandle)
+    levels <- h5_read_vector(ghandle, "levels")
+    ordered <- h5_read_attribute(ghandle, "ordered", check=TRUE, default=NULL)
+    output <- factor(levels[codes], levels=levels, ordered=isTRUE(ordered > 0L))
 
-    if (h5exists(ghandle, "names")) {
-        names(output) <- as.vector(h5read(ghandle, "names"))
+    if (h5_object_exists(ghandle, "names")) {
+        names(output) <- h5_read_vector(ghandle, "names")
     }
     output 
 }
 
-.simple_read_codes <- function(fhandle, host) {
-    code.name <- paste0(host, "/codes")
-    codes <- as.vector(h5read(fhandle, code.name))
-    code.attrs <- h5readAttributes(fhandle, code.name)
-    codes <- .h5cast(codes, code.attrs, type="integer")
+.simple_read_codes <- function(handle, name="codes") {
+    chandle <- H5Dopen(handle, name)
+    on.exit(H5Dclose(chandle), add=TRUE, after=FALSE)
+    codes <- H5Dread(chandle, drop=TRUE)
+    missing.placeholder <- h5_read_attribute(chandle, missing_placeholder_name, check=TRUE, default=NULL)
+    codes <- h5_cast(codes, expected.type="integer", missing.placeholder=missing.placeholder)
     codes + 1L
 }
 
