@@ -24,7 +24,7 @@ h5_exists <- function(handle, name) {
     } else if (is.character(x)) {
         tid <- H5Tcopy("H5T_C_S1")
         H5Tset_strpad(tid, strpad = "NULLPAD")
-        H5Tset_size(tid, max(nchar(x, type="bytes") + plus.one, 1L))
+        H5Tset_size(tid, max(nchar(x, type="bytes") + plus.one, 1L, na.rm=TRUE))
 
         enc <- unique(Encoding(x))
         if ("UTF-8" %in% enc) {
