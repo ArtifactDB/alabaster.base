@@ -102,6 +102,8 @@ chooseMissingPlaceholderForHdf5 <- function(x, .version=3) {
     missing.placeholder
 }
 
+missing_placeholder_name <- "missing-value-placeholder"
+
 #' @export
 #' @rdname transformVectorForHdf5
 #' @importFrom rhdf5 H5Fopen H5Fclose H5Dopen H5Dclose h5writeAttribute
@@ -112,7 +114,7 @@ addMissingPlaceholderAttributeForHdf5 <- function(file, name, placeholder) {
     }
     dhandle <- H5Dopen(file, name)
     on.exit(H5Dclose(dhandle), add=TRUE)
-    h5writeAttribute(placeholder, h5obj=dhandle, name="missing-value-placeholder", asScalar=TRUE)
+    h5writeAttribute(placeholder, h5obj=dhandle, name=missing_placeholder_name, asScalar=TRUE)
 }
 
 # Soft-deprecated back-compatibility fixes.

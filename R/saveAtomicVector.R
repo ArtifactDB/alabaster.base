@@ -36,6 +36,7 @@ NULL
 
 .save_atomic_vector <- function(x, path, ...) {
     dir.create(path)
+    ofile <- file.path(path, "contents.h5")
 
     if (.is_datetime(x)) {
         type <- "string"
@@ -55,37 +56,30 @@ NULL
         format <- NULL
     }
 
-    ofile <- file.path(path, "contents.h5")
-    h5createFile(ofile)
-    host <- "atomic_vector"
-    h5createGroup(ofile, host)
+    fhandle <- H5Fcreate(ofile, "H5F_ACC_TRUNC")
+    on.exit(H5Fclose(fhandle), add=TRUE, after=FALSE)
+    ghandle <- H5Gcreate(fhandle, "atomic_vector")
+    on.exit(H5Gclose(ghandle), add=TRUE, after=FALSE)
 
-    fhandle <- H5Fopen(ofile)
-    on.exit(H5Fclose(fhandle), add=TRUE)
-    (function (){
-        ghandle <- H5Gopen(fhandle, host)
-        on.exit(H5Gclose(ghandle), add=TRUE)
-        h5writeAttribute("1.0", ghandle, "version", asScalar=TRUE)
-        h5writeAttribute(type, ghandle, "type", asScalar=TRUE)
-        if (!is.null(format)) {
-            h5writeAttribute(format, ghandle, "format", asScalar=TRUE)
-        }
-    })()
+    h5_write_attribute(ghandle, "version", "1.0", scalar=TRUE)
+    h5_write_attribute(ghandle, "type", type, scalar=TRUE)
+    if (!is.null(format)) {
+        h5_write_attribute(ghandle, "format", format, scalar=TRUE)
+    }
 
     transformed <- transformVectorForHdf5(contents)
     current <- transformed$transformed
     missing.placeholder <- transformed$placeholder
 
-    full.data.name <- paste0(host, "/values")
-    h5write(current, fhandle, full.data.name)
+    dhandle <- h5_write_vector(ghandle, "values", current, emit=TRUE)
+    on.exit(H5Dclose(dhandle), add=TRUE, after=FALSE)
     if (!is.null(missing.placeholder)) {
-        addMissingPlaceholderAttributeForHdf5(fhandle, full.data.name, missing.placeholder)
+        h5_write_attribute(dhandle, "missing-value-placeholder", missing.placeholder, scalar=TRUE)
     }
 
     if (!is.null(names(x))) {
-        h5write(names(x), fhandle, paste0(host, "/names"))
+        h5_write_vector(ghandle, "names", names(x))
     }
-    full.data.name <- paste0(host, "/values")
 
     write("atomic_vector", file=file.path(path, "OBJECT"))
     invisible(NULL)

@@ -50,24 +50,17 @@ setMethod("saveObject", "DataFrame", function(x, path, ...) {
 #' @importFrom rhdf5 h5write h5createGroup h5createFile H5Gopen H5Gclose H5Acreate H5Aclose H5Awrite H5Fopen H5Fclose H5Dopen H5Dclose
 .write_hdf5_new <- function(x, path, ...) {
     subpath <- "basic_columns.h5"
-    host <- "data_frame"
-
     ofile <- paste0(path, "/", subpath)
-    h5createFile(ofile)
-    prefix <- function(x) paste0(host, "/", x)
-    h5createGroup(ofile, host)
-    h5createGroup(ofile, paste0(host, "/data"))
 
-    fhandle <- H5Fopen(ofile)
-    on.exit(H5Fclose(fhandle), add=TRUE)
-    (function (){
-        ghandle <- H5Gopen(fhandle, host)
-        on.exit(H5Gclose(ghandle), add=TRUE)
-        h5writeAttribute("1.0", ghandle, "version", asScalar=TRUE)
-        ahandle <- H5Acreate(ghandle, "row-count", "H5T_NATIVE_UINT32", H5Screate("H5S_SCALAR"))
-        on.exit(H5Aclose(ahandle), add=TRUE, after=FALSE)
-        H5Awrite(ahandle, nrow(x))
-    })()
+    fhandle <- H5Fcreate(ofile, "H5F_ACC_TRUNC")
+    on.exit(H5Fclose(fhandle), add=TRUE, after=FALSE)
+    ghandle <- H5Gcreate(fhandle, "data_frame")
+    on.exit(H5Gclose(ghandle), add=TRUE, after=FALSE)
+    h5_write_attribute(ghandle, "version", "1.0", scalar=TRUE)
+    h5_write_attribute(ghandle, "row-count", nrow(x), scalar=TRUE, type="H5T_NATIVE_UINT32")
+
+    gdhandle <- H5Gcreate(ghandle, "data")
+    on.exit(H5Gclose(gdhandle), add=TRUE, after=FALSE)
 
     collected <- list()
     for (z in seq_len(ncol(x))) {
@@ -82,18 +75,16 @@ setMethod("saveObject", "DataFrame", function(x, path, ...) {
             is.other <- TRUE
 
         } else if (is.factor(col)) {
-            full.data.name <- prefix(paste0("data/", data.name))
-            h5createGroup(fhandle, full.data.name)
-            (function() {
-                ghandle <- H5Gopen(fhandle, full.data.name)
-                on.exit(H5Gclose(ghandle), add=TRUE)
-                h5writeAttribute("factor", ghandle, "type", asScalar=TRUE)
+            local({
+                colhandle <- H5Gcreate(gdhandle, data.name)
+                on.exit(H5Gclose(colhandle), add=TRUE, after=FALSE)
+                h5_write_attribute(colhandle, "type", "factor", scalar=TRUE)
                 if (is.ordered(col)) {
-                    h5writeAttribute(1L, ghandle, "ordered", asScalar=TRUE)
+                    h5_write_attribute(colhandle, "ordered", 1L, scalar=TRUE)
                 }
-                .simple_save_codes(ghandle, col, save.names=FALSE)
-                h5write(levels(col), ghandle, "levels");
-            })()
+                .simple_save_codes(colhandle, col, save.names=FALSE)
+                h5_write_vector(colhandle, "levels", levels(col))
+            })
 
         } else if (.is_datetime(col)) {
             coltype <- "string"
@@ -126,26 +117,24 @@ setMethod("saveObject", "DataFrame", function(x, path, ...) {
             current <- transformed$transformed
             missing.placeholder <- transformed$placeholder
 
-            full.data.name <- prefix(paste0("data/", data.name))
-            h5write(current, fhandle, full.data.name)
-            if (!is.null(missing.placeholder)) {
-                addMissingPlaceholderAttributeForHdf5(fhandle, full.data.name, missing.placeholder)
-            }
-
-            (function() {
-                dhandle <- H5Dopen(fhandle, full.data.name)
-                on.exit(H5Dclose(dhandle), add=TRUE)
-                h5writeAttribute(coltype, dhandle, "type", asScalar=TRUE)
-                if (!is.null(colformat)) {
-                    h5writeAttribute(colformat, dhandle, "format", asScalar=TRUE)
+            local({
+                dhandle <- h5_write_vector(gdhandle, data.name, current, emit=TRUE)
+                on.exit(H5Dclose(dhandle), add=TRUE, after=FALSE)
+                if (!is.null(missing.placeholder)) {
+                    h5_write_attribute(dhandle, "missing-value-placeholder", missing.placeholder, scalar=TRUE)
                 }
-            })()
+
+                h5_write_attribute(dhandle, "type", coltype, scalar=TRUE)
+                if (!is.null(colformat)) {
+                    h5_write_attribute(dhandle, "format", colformat, scalar=TRUE)
+                }
+            })
         }
     }
 
-    h5write(colnames(x), fhandle, prefix("column_names"))
+    h5_write_vector(ghandle, "column_names", colnames(x))
     if (!is.null(rownames(x))) {
-        h5write(rownames(x), fhandle, prefix("row_names"))
+        h5_write_vector(ghandle, "row_names", rownames(x))
     }
 }
 

@@ -26,51 +26,66 @@
 readDataFrame <- function(path, ...) {
     fpath <- file.path(path, "basic_columns.h5")
     fhandle <- H5Fopen(fpath)
-    on.exit(H5Fclose(fhandle))
+    on.exit(H5Fclose(fhandle), add=TRUE, after=FALSE)
 
     host <- "data_frame"
     ghandle <- H5Gopen(fhandle, host)
     on.exit(H5Gclose(ghandle), add=TRUE, after=FALSE)
 
-    nrows <- h5readAttributes(fhandle, host)[["row-count"]]
-    colnames <- as.vector(h5read(ghandle, "column_names"))
+    nrows <- h5_read_attribute(ghandle, "row-count")
+    colnames <- h5_read_vector(ghandle, "column_names")
     rownames <- NULL
-    if ("row_names" %in% h5ls(ghandle, recursive=FALSE, datasetinfo=FALSE)$name) {
-        rownames <- as.vector(h5read(ghandle, "row_names"))
+    if (h5_object_exists(ghandle, "row_names")) {
+        rownames <- h5_read_vector(ghandle, "row_names")
     }
 
-    dhandle<- H5Gopen(ghandle, "data")
-    on.exit(H5Gclose(dhandle), add=TRUE, after=FALSE)
-    all.children <- h5ls(dhandle, recursive=FALSE, datasetinfo=FALSE)$name
+    gdhandle <- H5Gopen(ghandle, "data")
+    on.exit(H5Gclose(gdhandle), add=TRUE, after=FALSE)
+    all.children <- h5ls(gdhandle, recursive=FALSE, datasetinfo=FALSE)$name
 
     columns <- vector("list", length(colnames))
     for (col in seq_along(colnames)) {
         expected <- as.character(col - 1L)
 
         if (expected %in% all.children) {
-            full.name <- paste0(host, "/data/", expected)
-            attrs <- h5readAttributes(fhandle, full.name)
+            type <- local({
+                precolhandle <- H5Oopen(gdhandle, expected)
+                on.exit(H5Oclose(precolhandle), add=TRUE, after=FALSE)
+                h5_read_attribute(precolhandle, "type")
+            })
 
-            if (attrs$type == "factor") {
-                codes <- .simple_read_codes(fhandle, full.name) 
-                levels <- as.vector(h5read(fhandle, paste0(full.name, "/levels")))
-                columns[[col]] <- factor(levels[codes], levels=levels, ordered=isTRUE(attrs$ordered > 0))
+            if (type == "factor") {
+                columns[[col]] <- local({
+                    colhandle <- H5Gopen(gdhandle, expected)
+                    on.exit(H5Gclose(colhandle), add=TRUE, after=FALSE)
+                    codes <- .simple_read_codes(colhandle)
+                    levels <- h5_read_vector(colhandle, "levels")
+                    ordered <- h5_read_attribute(colhandle, "ordered", check=TRUE, default=NULL)
+                    factor(levels[codes], levels=levels, ordered=isTRUE(ordered > 0L))
+                })
 
             } else {
-                contents <- as.vector(h5read(fhandle, full.name))
-                contents <- .h5cast(contents, attrs)
+                columns[[col]] <- local({
+                    colhandle <- H5Dopen(gdhandle, expected)
+                    on.exit(H5Dclose(colhandle), add=TRUE, after=FALSE)
+                    contents <- H5Dread(colhandle)
 
-                if (attrs$type == "string") {
-                    if (!is.null(attrs$format)) {
-                        if (attrs$format == "date") {
-                            contents <- as.Date(contents)
-                        } else if (attrs$format == "date-time") {
-                            contents <- .cast_datetime(contents)
+                    missing.placeholder <- h5_read_attribute(colhandle, missing_placeholder_name, check=TRUE, default=NULL)
+                    contents <- h5_cast(contents, expected.type=type, missing.placeholder=missing.placeholder)
+
+                    if (type == "string") {
+                        if (H5Aexists(colhandle, "format")) {
+                            format <- h5_read_attribute(colhandle, "format")
+                            if (format == "date") {
+                                contents <- as.Date(contents)
+                            } else if (format == "date-time") {
+                                contents <- .cast_datetime(contents)
+                            }
                         }
                     }
-                }
 
-                columns[[col]] <- contents
+                    contents
+                })
             }
 
         } else {
@@ -91,45 +106,6 @@ readDataFrame <- function(path, ...) {
         mcols.path=file.path(path, "column_annotations"),
         ...
     )
-}
-
-#' @importFrom rhdf5 h5readAttributes
-.h5cast <- function(current, attrs, type=attrs[["type"]]) {
-    replace.na <- attrs[["missing-value-placeholder"]]
-
-    restore_min_integer <- function(y) {
-        z <- FALSE
-        if (is.integer(y) && anyNA(y)) { # promote integer NAs back to the actual number.
-            y <- as.double(y)
-            y[is.na(y)] <- -2^31
-            z <- TRUE
-        }
-        list(y=y, converted=z)
-    }
-
-    converted <- FALSE
-    if (is.null(replace.na)) {
-        out <- restore_min_integer(current)
-        current <- out$y
-        converted <- out$converted
-    } else if (is.na(replace.na)) {
-        if (!is.nan(replace.na)) {
-            # No-op as the placeholder is already R's NA of the relevant type.
-        } else { 
-            current[is.nan(current)] <- NA # avoid equality checks to an NaN.
-        }
-    } else {
-        out <- restore_min_integer(current)
-        current <- out$y
-        converted <- out$converted
-        current[which(current == replace.na)] <- NA # Using which() to avoid problems with existing NAs.
-    }
-
-    if (!converted && !is.null(type)) {
-        current <- .cast_atomic(current, type)
-    }
-
-    current
 }
 
 #######################################
@@ -163,7 +139,7 @@ loadDataFrame <- function(info, project, include.nested=TRUE, parallel=TRUE) {
 
                 if (!is.null(current)) {
                     attrs <- h5readAttributes(path, prefix(paste0("data/", d)))
-                    current <- .h5cast(current, attrs, type=NULL)
+                    current <- h5_cast(current, expected.type=NULL, missing.placeholder=attrs[[missing_placeholder_name]])
                     df[[i]] <- as.vector(current) # remove 1d arrays.
 
                 } else {

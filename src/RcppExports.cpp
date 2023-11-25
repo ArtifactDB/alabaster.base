@@ -176,32 +176,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// write_integer_scalar
-SEXP write_integer_scalar(std::string path, std::string host, std::string name, int val);
-RcppExport SEXP _alabaster_base_write_integer_scalar(SEXP pathSEXP, SEXP hostSEXP, SEXP nameSEXP, SEXP valSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::traits::input_parameter< std::string >::type path(pathSEXP);
-    Rcpp::traits::input_parameter< std::string >::type host(hostSEXP);
-    Rcpp::traits::input_parameter< std::string >::type name(nameSEXP);
-    Rcpp::traits::input_parameter< int >::type val(valSEXP);
-    rcpp_result_gen = Rcpp::wrap(write_integer_scalar(path, host, name, val));
-    return rcpp_result_gen;
-END_RCPP
-}
-// write_string_scalar
-SEXP write_string_scalar(std::string path, std::string host, std::string name, std::string val);
-RcppExport SEXP _alabaster_base_write_string_scalar(SEXP pathSEXP, SEXP hostSEXP, SEXP nameSEXP, SEXP valSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::traits::input_parameter< std::string >::type path(pathSEXP);
-    Rcpp::traits::input_parameter< std::string >::type host(hostSEXP);
-    Rcpp::traits::input_parameter< std::string >::type name(nameSEXP);
-    Rcpp::traits::input_parameter< std::string >::type val(valSEXP);
-    rcpp_result_gen = Rcpp::wrap(write_string_scalar(path, host, name, val));
-    return rcpp_result_gen;
-END_RCPP
-}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_alabaster_base_check_csv", (DL_FUNC) &_alabaster_base_check_csv, 3},
@@ -219,8 +193,6 @@ static const R_CallMethodDef CallEntries[] = {
     {"_alabaster_base_register_height_function", (DL_FUNC) &_alabaster_base_register_height_function, 2},
     {"_alabaster_base_deregister_height_function", (DL_FUNC) &_alabaster_base_deregister_height_function, 1},
     {"_alabaster_base_register_any_duplicated", (DL_FUNC) &_alabaster_base_register_any_duplicated, 1},
-    {"_alabaster_base_write_integer_scalar", (DL_FUNC) &_alabaster_base_write_integer_scalar, 4},
-    {"_alabaster_base_write_string_scalar", (DL_FUNC) &_alabaster_base_write_string_scalar, 4},
     {NULL, NULL, 0}
 };
 
