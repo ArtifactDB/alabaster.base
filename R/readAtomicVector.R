@@ -32,7 +32,7 @@ readAtomicVector <- function(path, ...) {
 
     vhandle <- H5Dopen(ghandle, "values")
     on.exit(H5Dclose(vhandle), add=TRUE, after=FALSE)
-    contents <- H5Dread(vhandle, drop=FALSE)
+    contents <- H5Dread(vhandle, drop=TRUE)
     missing.placeholder <- h5_read_attribute(vhandle, missingPlaceholderName, check=TRUE, default=NULL)
 
     contents <- h5_cast(contents, expected.type=expected.type, missing.placeholder=missing.placeholder)
