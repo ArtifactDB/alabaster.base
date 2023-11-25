@@ -277,7 +277,13 @@ test_that("external references work correctly", {
 })
 
 test_that("we handle lists with NAs", {
-    vals <- list(A=NA, B1=c(1,2,3,NA), B2=c(4L, 5L, NA), C=c("A", "B", NA))
+    vals <- list(
+        A=NA, 
+        B1=c(1,2,3,NA), 
+        B2=c(4L, 5L, NA), 
+        C=c("A", "B", NA), 
+        D=factor(c("A", NA, "C"), c("a", "A", "b", "B", "c", "C"))
+    )
 
     tmp <- tempfile()
     dir.create(tmp)
@@ -326,6 +332,9 @@ test_that("we handle lists with NAs", {
     expect_true(is.na(place) && !is.nan(place))
     attrs <- rhdf5::h5readAttributes(file.path(tmp, "hstuff/list.h5"), "contents/data/3/data")
     expect_identical(attrs[["missing-value-placeholder"]], "_NA")
+    attrs <- rhdf5::h5readAttributes(file.path(tmp, "hstuff/list.h5"), "contents/data/4/data")
+    place <- attrs[["missing-value-placeholder"]]
+    expect_identical(place, -1L)
 
     roundtrip <- loadBaseList(info, tmp)
     expect_identical(roundtrip, vals)

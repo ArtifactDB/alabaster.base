@@ -246,7 +246,9 @@ struct RFactor : public uzuki2::Factor, public RBase {
 
     Rcpp::RObject extract_object() {
         for (auto& i : vec) {
-            ++i;
+            if (i != NA_INTEGER) {
+                ++i;
+            }
         }
 
         if (ordered) {
