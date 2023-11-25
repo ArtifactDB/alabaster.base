@@ -57,7 +57,7 @@ setMethod("saveObject", "list", function(x, path, list.format=saveBaseListFormat
 
         ghandle <- H5Gopen(handle, dname)
         on.exit(H5Gclose(ghandle), add=TRUE, after=FALSE)
-        .label_hdf5_group(ghandle, uzuki_version="1.3")
+        h5_write_attribute(ghandle, "uzuki_version", "1.3", scalar=TRUE)
 
     } else {
         formatted <- .transform_list_json(x, dir=NULL, path=path, env=env, simplified=TRUE, .version=2, extra=args)
@@ -89,7 +89,7 @@ setMethod("saveObject", "List", function(x, path, list.format=saveBaseListFormat
     on.exit(H5Gclose(ghandle), add=TRUE, after=FALSE)
 
     if (is.list(x) && !is.data.frame(x) && !is(x, "POSIXlt")) {
-        .label_hdf5_group(ghandle, uzuki_object="list")
+        h5_write_attribute(ghandle, "uzuki_object", "list", scalar=TRUE)
         gdhandle <- H5Gcreate(ghandle, "data")
         on.exit(H5Gclose(gdhandle), add=TRUE, after=FALSE)
 
@@ -113,17 +113,14 @@ setMethod("saveObject", "List", function(x, path, list.format=saveBaseListFormat
     }
 
     if (is.null(x)) {
-        .label_hdf5_group(ghandle, uzuki_object="nothing")
+        h5_write_attribute(ghandle, "uzuki_object", "nothing", scalar=TRUE)
         return(NULL)
     }
 
     if (is.null(dim(x))) {
         if (is.factor(x)) {
-            .label_hdf5_group(
-                ghandle,
-                uzuki_object="vector",
-                uzuki_type=if (.version == 1 && is.ordered(x)) "ordered" else "factor"
-            )
+            h5_write_attribute(ghandle, "uzuki_object", "vector", scalar=TRUE)
+            h5_write_attribute(ghandle, "uzuki_type", if (.version == 1 && is.ordered(x)) "ordered" else "factor", scalar=TRUE)
 
             codes <- as.integer(x) - 1L
             missing.placeholder <- NULL
@@ -132,20 +129,26 @@ setMethod("saveObject", "List", function(x, path, list.format=saveBaseListFormat
                 codes[is.na(codes)] <- missing.placeholder
             }
 
-            .write_hdf5_vector(ghandle, "data", codes, missing.placeholder)
+            local({
+                dhandle <- h5_write_vector(ghandle, "data", codes, emit=TRUE)
+                on.exit(H5Dclose(dhandle), add=TRUE, after=FALSE)
+                if (!is.null(missing.placeholder)) {
+                    h5_write_attribute(dhandle, missing_placeholder_name, missing.placeholder, scalar=TRUE)
+                }
+            })
+
             h5_write_vector(ghandle, "levels", levels(x))
             if (.version > 1 && is.ordered(x)) {
                 h5_write_vector(ghandle, "ordered", 1L, compress=0, scalar=TRUE)
             }
-            .add_hdf5_names(ghandle, x)
+            if (!is.null(names(x))) {
+                h5_write_vector(ghandle, "names", names(x))
+            }
             return(NULL)
 
         } else if (!is.null(sltype <- .is_stringlike(x))) {
-            .label_hdf5_group(
-                ghandle,
-                uzuki_object="vector",
-                uzuki_type=if (.version == 1) sltype else "string"
-            )
+            h5_write_attribute(ghandle, "uzuki_object", "vector", scalar=TRUE)
+            h5_write_attribute(ghandle, "uzuki_type", if (.version == 1) sltype else "string", scalar=TRUE)
 
             if (.version > 1 && sltype != "string") {
                 h5_write_vector(ghandle, "format", sltype, compress=0, scalar=TRUE)
@@ -165,20 +168,24 @@ setMethod("saveObject", "List", function(x, path, list.format=saveBaseListFormat
                 }
             }
 
-            .write_hdf5_vector(ghandle, "data", y, missing.placeholder)
-            .add_hdf5_names(ghandle, x)
+            local({
+                dhandle <- h5_write_vector(ghandle, "data", y, emit=TRUE)
+                on.exit(H5Dclose(dhandle), add=TRUE, after=FALSE)
+                if (!is.null(missing.placeholder)) {
+                    h5_write_attribute(dhandle, missing_placeholder_name, missing.placeholder, scalar=TRUE)
+                }
+            })
+            if (!is.null(names(x))) {
+                h5_write_vector(ghandle, "names", names(x))
+            }
             return(NULL)
 
         } else if (is.atomic(x)) {
             coerced <- .remap_atomic_type(x)
-
-            .label_hdf5_group(
-                ghandle,
-                uzuki_object="vector",
-                uzuki_type=coerced$type
-            )
-
             y <- coerced$values
+
+            h5_write_attribute(ghandle, "uzuki_object", "vector", scalar=TRUE)
+            h5_write_attribute(ghandle, "uzuki_type", coerced$type, scalar=TRUE)
 
             missing.placeholder <- NULL
             if (.version > 1) {
@@ -191,14 +198,22 @@ setMethod("saveObject", "List", function(x, path, list.format=saveBaseListFormat
                 }
             }
 
-            .write_hdf5_vector(ghandle, "data", y, missing.placeholder)
-            .add_hdf5_names(ghandle, x)
+            local({
+                dhandle <- h5_write_vector(ghandle, "data", y, emit=TRUE)
+                on.exit(H5Dclose(dhandle), add=TRUE, after=FALSE)
+                if (!is.null(missing.placeholder)) {
+                    h5_write_attribute(dhandle, missing_placeholder_name, missing.placeholder, scalar=TRUE)
+                }
+            })
+            if (!is.null(names(x))) {
+                h5_write_vector(ghandle, "names", names(x))
+            }
             return(NULL)
        }
     }
 
     # External object fallback.
-    .label_hdf5_group(ghandle, uzuki_object="external")
+    h5_write_attribute(ghandle, "uzuki_object", "external", scalar=TRUE)
     n <- length(env$collected)
     h5_write_vector(ghandle, "index", n, compress=0, scalar=TRUE)
 
@@ -237,28 +252,6 @@ setMethod("saveObject", "List", function(x, path, list.format=saveBaseListFormat
         .sanitize_datetime(x)
     } else {
         as.character(x)
-    }
-}
-
-.label_hdf5_group <- function(ghandle, ...) {
-    attrs <- list(...)
-    for (a in names(attrs)) {
-        h5_write_attribute(ghandle, a, attrs[[a]], scalar=TRUE)
-    }
-}
-
-.write_hdf5_vector <- function(handle, name, data, placeholder, type=NULL) {
-    dhandle <- h5_write_vector(handle, "data", data, type=type, emit=TRUE)
-    on.exit(H5Dclose(dhandle), add=TRUE, after=FALSE)
-    if (!is.null(placeholder)) {
-        h5_write_attribute(dhandle, missing_placeholder_name, placeholder, type=type, scalar=TRUE)
-    }
-}
-
-#' @importFrom rhdf5 h5write
-.add_hdf5_names <- function(handle, x) {
-    if (!is.null(names(x))) {
-        h5_write_vector(handle, "names", names(x))
     }
 }
 
@@ -425,7 +418,7 @@ setMethod("stageObject", "list", function(x, dir, path, child=FALSE, fname="list
             if (.version > 1) {
                 ghandle <- H5Gopen(handle, dname)
                 on.exit(H5Gclose(ghandle), add=TRUE, after=FALSE)
-                .label_hdf5_group(ghandle, uzuki_version=paste0("1.", .version))
+                h5_write_attribute(ghandle, "uzuki_version", paste0("1.", .version), scalar=TRUE)
             }
         })
 
