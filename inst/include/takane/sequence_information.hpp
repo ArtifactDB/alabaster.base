@@ -1,6 +1,7 @@
 #ifndef TAKANE_SEQUENCE_INFORMATION_HPP
 #define TAKANE_SEQUENCE_INFORMATION_HPP
 
+#include "ritsuko/ritsuko.hpp"
 #include "ritsuko/hdf5/hdf5.hpp"
 
 #include <filesystem>
@@ -30,6 +31,12 @@ namespace sequence_information {
 inline void validate(const std::filesystem::path& path, const Options& options) try {
     auto handle = ritsuko::hdf5::open_file(path / "info.h5");
     auto ghandle = ritsuko::hdf5::open_group(handle, "sequence_information");
+
+    auto vstring = ritsuko::hdf5::open_and_load_scalar_string_attribute(ghandle, "version");
+    auto version = ritsuko::parse_version_string(vstring.c_str(), vstring.size(), /* skip_patch = */ true);
+    if (version.major != 1) {
+        throw std::runtime_error("unsupported version string '" + vstring + "'");
+    }
 
     size_t nseq = 0;
     {

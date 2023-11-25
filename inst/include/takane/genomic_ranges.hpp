@@ -106,10 +106,17 @@ inline void validate(const std::filesystem::path& path, const Options& options) 
     const auto& seqlen = limits.seqlen;
     size_t num_sequences = restricted.size();
 
-    // Now loading all three components.
+    // Handling the preamble.
     auto handle = ritsuko::hdf5::open_file(path / "ranges.h5");
     auto ghandle = ritsuko::hdf5::open_group(handle, "genomic_ranges");
 
+    auto vstring = ritsuko::hdf5::open_and_load_scalar_string_attribute(ghandle, "version");
+    auto version = ritsuko::parse_version_string(vstring.c_str(), vstring.size(), /* skip_patch = */ true);
+    if (version.major != 1) {
+        throw std::runtime_error("unsupported version string '" + vstring + "'");
+    }
+
+    // Now loading all three components.
     auto id_handle = ritsuko::hdf5::open_dataset(ghandle, "sequence");
     auto num_ranges = ritsuko::hdf5::get_1d_length(id_handle, false);
     if (ritsuko::hdf5::exceeds_integer_limit(id_handle, 64, false)) {
