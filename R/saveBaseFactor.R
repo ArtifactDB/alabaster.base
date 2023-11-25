@@ -59,7 +59,7 @@ setMethod("saveObject", "factor", function(x, path, ...) {
     on.exit(H5Dclose(dhandle), add=TRUE, after=FALSE)
 
     if (!is.null(missing.placeholder)) {
-        h5_write_attribute(dhandle, "missing-value-placeholder", missing.placeholder, type="H5T_NATIVE_UINT32", scalar=TRUE)
+        h5_write_attribute(dhandle, missingPlaceholderName, missing.placeholder, type="H5T_NATIVE_UINT32", scalar=TRUE)
     }
 
     if (save.names && !is.null(names(x))) {

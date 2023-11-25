@@ -121,7 +121,7 @@ setMethod("saveObject", "DataFrame", function(x, path, ...) {
                 dhandle <- h5_write_vector(gdhandle, data.name, current, emit=TRUE)
                 on.exit(H5Dclose(dhandle), add=TRUE, after=FALSE)
                 if (!is.null(missing.placeholder)) {
-                    h5_write_attribute(dhandle, "missing-value-placeholder", missing.placeholder, scalar=TRUE)
+                    h5_write_attribute(dhandle, missingPlaceholderName, missing.placeholder, scalar=TRUE)
                 }
 
                 h5_write_attribute(dhandle, "type", coltype, scalar=TRUE)

@@ -2,51 +2,29 @@
 % Please edit documentation in R/transformVectorForHdf5.R
 \name{transformVectorForHdf5}
 \alias{transformVectorForHdf5}
-\alias{.addMissingStringPlaceholderAttribute}
-\alias{.chooseMissingStringPlaceholder}
-\alias{chooseMissingPlaceholderForHdf5}
-\alias{addMissingPlaceholderAttributeForHdf5}
-\title{Utilities for saving vectors to HDF5}
+\title{Transform a vector to save in a HDF5 file}
 \usage{
 transformVectorForHdf5(x, .version = 3)
-
-chooseMissingPlaceholderForHdf5(x, .version = 3)
-
-addMissingPlaceholderAttributeForHdf5(file, name, placeholder)
 }
 \arguments{
 \item{x}{An atomic vector to be saved to HDF5.}
 
 \item{.version}{Internal use only.}
-
-\item{file}{String containing the path to a HDF5 file.
-This may also be an existing HDF5 file handle created with, e.g., \code{\link{H5Fopen}}.}
-
-\item{name}{String containing the name of a HDF5 dataset.}
-
-\item{placeholder}{Scalar value representing a placeholder for missing values.}
 }
 \value{
-\code{chooseMissingPlaceholderForHdf5} returns a placeholder value for missing values in \code{x},
-For strings, this is gauranteed to be an actual string that does not equal any existing entry.
-For logicals, this is set to -1.
-
-\code{transformVectorForHdf5} will transform an atomic vector in preparation for saving to HDF5, returning a list containing:
+A list containing:
 \itemize{
 \item \code{transformed}, the transformed vector.
 This may be the same as \code{x} if no \code{NA} values were detected.
 Note that logical vectors are cast to integers.
 \item \code{placeholder}, the placeholder value used to represent \code{NA} values.
 This is \code{NULL} if no \code{NA} values were detected in \code{x},
-otherwise it is the same as the output of \code{chooseMissingPlaceholderForHdf5}.
+otherwise it is the same as the output of \code{\link{chooseMissingPlaceholderForHdf5}}.
 }
-
-\code{addMissingPlaceholderAttributeForHdf5} will add a \code{"missing-value-placeholder"} attribute to the HDF5 dataset,
-containing the placeholder scalar used to represent missing values.
 }
 \description{
-Exported for re-use in anything that saves possibly-missing values to HDF5.
-\pkg{alabaster.matrix} is probably the main beneficiary here.
+This handles type casting and missing placeholder value selection/substitution.
+It is primarily intended for developers of \pkg{alabaster.*} extensions.
 }
 \examples{
 transformVectorForHdf5(c(TRUE, NA, FALSE))

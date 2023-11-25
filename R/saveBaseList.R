@@ -133,7 +133,7 @@ setMethod("saveObject", "List", function(x, path, list.format=saveBaseListFormat
                 dhandle <- h5_write_vector(ghandle, "data", codes, emit=TRUE)
                 on.exit(H5Dclose(dhandle), add=TRUE, after=FALSE)
                 if (!is.null(missing.placeholder)) {
-                    h5_write_attribute(dhandle, missing_placeholder_name, missing.placeholder, scalar=TRUE)
+                    h5_write_attribute(dhandle, missingPlaceholderName, missing.placeholder, scalar=TRUE)
                 }
             })
 
@@ -172,7 +172,7 @@ setMethod("saveObject", "List", function(x, path, list.format=saveBaseListFormat
                 dhandle <- h5_write_vector(ghandle, "data", y, emit=TRUE)
                 on.exit(H5Dclose(dhandle), add=TRUE, after=FALSE)
                 if (!is.null(missing.placeholder)) {
-                    h5_write_attribute(dhandle, missing_placeholder_name, missing.placeholder, scalar=TRUE)
+                    h5_write_attribute(dhandle, missingPlaceholderName, missing.placeholder, scalar=TRUE)
                 }
             })
             if (!is.null(names(x))) {
@@ -202,7 +202,7 @@ setMethod("saveObject", "List", function(x, path, list.format=saveBaseListFormat
                 dhandle <- h5_write_vector(ghandle, "data", y, emit=TRUE)
                 on.exit(H5Dclose(dhandle), add=TRUE, after=FALSE)
                 if (!is.null(missing.placeholder)) {
-                    h5_write_attribute(dhandle, missing_placeholder_name, missing.placeholder, scalar=TRUE)
+                    h5_write_attribute(dhandle, missingPlaceholderName, missing.placeholder, scalar=TRUE)
                 }
             })
             if (!is.null(names(x))) {

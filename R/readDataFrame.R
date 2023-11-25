@@ -70,7 +70,7 @@ readDataFrame <- function(path, ...) {
                     on.exit(H5Dclose(colhandle), add=TRUE, after=FALSE)
                     contents <- H5Dread(colhandle)
 
-                    missing.placeholder <- h5_read_attribute(colhandle, missing_placeholder_name, check=TRUE, default=NULL)
+                    missing.placeholder <- h5_read_attribute(colhandle, missingPlaceholderName, check=TRUE, default=NULL)
                     contents <- h5_cast(contents, expected.type=type, missing.placeholder=missing.placeholder)
 
                     if (type == "string") {
@@ -139,7 +139,7 @@ loadDataFrame <- function(info, project, include.nested=TRUE, parallel=TRUE) {
 
                 if (!is.null(current)) {
                     attrs <- h5readAttributes(path, prefix(paste0("data/", d)))
-                    current <- h5_cast(current, expected.type=NULL, missing.placeholder=attrs[[missing_placeholder_name]])
+                    current <- h5_cast(current, expected.type=NULL, missing.placeholder=attrs[[missingPlaceholderName]])
                     df[[i]] <- as.vector(current) # remove 1d arrays.
 
                 } else {
