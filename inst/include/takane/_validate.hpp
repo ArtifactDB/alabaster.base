@@ -17,6 +17,8 @@
 #include "atomic_vector_list.hpp"
 #include "data_frame_list.hpp"
 #include "genomic_ranges_list.hpp"
+#include "dense_array.hpp"
+#include "compressed_sparse_matrix.hpp"
 
 /**
  * @file _validate.hpp
@@ -42,6 +44,8 @@ inline auto default_registry() {
     registry["atomic_vector_list"] = [](const std::filesystem::path& p, const Options& o) { atomic_vector_list::validate(p, o); };
     registry["data_frame_list"] = [](const std::filesystem::path& p, const Options& o) { data_frame_list::validate(p, o); };
     registry["genomic_ranges_list"] = [](const std::filesystem::path& p, const Options& o) { genomic_ranges_list::validate(p, o); };
+    registry["dense_array"] = [](const std::filesystem::path& p, const Options& o) { dense_array::validate(p, o); };
+    registry["compressed_sparse_matrix"] = [](const std::filesystem::path& p, const Options& o) { compressed_sparse_matrix::validate(p, o); };
     return registry;
 } 
 

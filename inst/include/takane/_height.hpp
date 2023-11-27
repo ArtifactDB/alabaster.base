@@ -16,6 +16,8 @@
 #include "atomic_vector_list.hpp"
 #include "data_frame_list.hpp"
 #include "genomic_ranges_list.hpp"
+#include "dense_array.hpp"
+#include "compressed_sparse_matrix.hpp"
 
 /**
  * @file _height.hpp
@@ -40,6 +42,8 @@ inline auto default_registry() {
     registry["atomic_vector_list"] = [](const std::filesystem::path& p, const Options& o) -> size_t { return atomic_vector_list::height(p, o); };
     registry["data_frame_list"] = [](const std::filesystem::path& p, const Options& o) -> size_t { return data_frame_list::height(p, o); };
     registry["genomic_ranges_list"] = [](const std::filesystem::path& p, const Options& o) -> size_t { return genomic_ranges_list::height(p, o); };
+    registry["dense_array"] = [](const std::filesystem::path& p, const Options& o) -> size_t { return dense_array::height(p, o); };
+    registry["compressed_sparse_matrix"] = [](const std::filesystem::path& p, const Options& o) -> size_t { return compressed_sparse_matrix::height(p, o); };
     return registry;
 } 
 
