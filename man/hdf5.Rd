@@ -2,6 +2,8 @@
 % Please edit documentation in R/hdf5.R
 \name{hdf5}
 \alias{hdf5}
+\alias{h5_guess_vector_chunks}
+\alias{h5_create_vector}
 \alias{h5_write_vector}
 \alias{h5_write_attribute}
 \alias{h5_read_vector}

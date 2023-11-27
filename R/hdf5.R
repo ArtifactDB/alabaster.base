@@ -6,6 +6,8 @@
 #' @name hdf5
 #' @import rhdf5
 #' @aliases 
+#' h5_guess_vector_chunks 
+#' h5_create_vector
 #' h5_write_vector
 #' h5_write_attribute
 #' h5_read_vector
@@ -38,38 +40,52 @@ NULL
 }
 
 #' @export
-h5_write_vector <- function(handle, name, x, type=NULL, compress=6, chunks=NULL, scalar=FALSE, emit=FALSE) {
-    if (is.null(type)) {
-        type <- .choose_type(x)
+h5_guess_vector_chunks <- function(len) {
+    # Some reasonable number between 10000 and 100000, depending on the size. 
+    chunks <- sqrt(len)
+    if (chunks < 10000) {
+        chunks <- min(len, 10000)
+    } else if (chunks > 100000) {
+        chunks <- 100000
     }
+    return(chunks)
+}
 
-    if (length(x) == 1 && scalar) {
+#' @export
+h5_create_vector <- function(handle, name, len, type, compress=6, chunks=NULL, scalar=FALSE, emit=FALSE) {
+    if (len == 1 && scalar) {
         shandle <- H5Screate("H5S_SCALAR")
     } else {
-        shandle <- H5Screate_simple(length(x))
+        shandle <- H5Screate_simple(len)
     }
     on.exit(H5Sclose(shandle), add=TRUE, after=FALSE)
 
     phandle <- H5Pcreate("H5P_DATASET_CREATE")
     on.exit(H5Pclose(phandle), add=TRUE, after=FALSE)
     H5Pset_fill_time(phandle, "H5D_FILL_TIME_ALLOC")
-    if (compress > 0 && length(x)) {
+
+    if (compress > 0 && len) {
         H5Pset_deflate(phandle, level=compress)
-        if (is.null(chunks)) { # Some reasonable number between 10000 and 100000, depending on the size. 
-            chunks <- sqrt(length(x))
-            if (chunks < 10000) {
-                chunks <- min(length(x), 10000)
-            } else if (chunks > 100000) {
-                chunks <- 100000
-            }
+        if (is.null(chunks)) {
+            chunks <- h5_guess_vector_chunks(len)
         }
         H5Pset_chunk(phandle, chunks)
     }
 
-    dhandle <- H5Dcreate(handle, name, dtype_id=type, h5space=shandle, dcpl=phandle)
+    H5Dcreate(handle, name, dtype_id=type, h5space=shandle, dcpl=phandle)
+}
+
+#' @export
+h5_write_vector <- function(handle, name, x, type=NULL, compress=6, chunks=NULL, scalar=FALSE, emit=FALSE) {
+    if (is.null(type)) {
+        type <- .choose_type(x)
+    }
+
+    dhandle <- h5_create_vector(handle, name, length(x), type=type, compress=compress, chunks=chunks, scalar=scalar, emit=emit)
     if (!emit) {
         on.exit(H5Dclose(dhandle), add=TRUE, after=FALSE)
     }
+
     H5Dwrite(dhandle, x)
 
     if (emit) {
