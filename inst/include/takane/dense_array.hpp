@@ -219,6 +219,28 @@ inline size_t height(const std::filesystem::path& path, [[maybe_unused]] const O
     }
 }
 
+/**
+ * @param path Path to the directory containing a dense array.
+ * @param options Validation options, mostly related to reading performance.
+ * @return Dimensions of the array.
+ */
+inline std::vector<size_t> dimensions(const std::filesystem::path& path, [[maybe_unused]] const Options& options) {
+    auto handle = ritsuko::hdf5::open_file(path / "array.h5");
+    auto ghandle = ritsuko::hdf5::open_group(handle, "dense_array");
+
+    auto dhandle = ritsuko::hdf5::open_dataset(ghandle, "data");
+    auto dspace = dhandle.getSpace();
+    size_t ndims = dspace.getSimpleExtentNdims();
+    std::vector<hsize_t> extents(ndims);
+    dspace.getSimpleExtentDims(extents.data());
+
+    if (internal::is_transposed(ghandle)) {
+        return std::vector<size_t>(extents.rbegin(), extents.rend());
+    } else {
+        return std::vector<size_t>(extents.begin(), extents.end());
+    }
+}
+
 }
 
 }
