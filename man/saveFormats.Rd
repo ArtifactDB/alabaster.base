@@ -3,21 +3,14 @@
 \name{saveFormats}
 \alias{saveFormats}
 \alias{.saveDataFrameFormat}
-\alias{.saveBaseListFormat}
 \alias{saveDataFrameFormat}
-\alias{saveBaseListFormat}
 \title{Choose the format for certain objects}
 \usage{
 saveDataFrameFormat(format)
-
-saveBaseListFormat(format)
 }
 \arguments{
 \item{format}{String containing the format to use.
-\itemize{
-\item For \code{saveDataFrameFormat}, this may be \code{"csv"}, \code{"csv.gz"} (default) or \code{"hdf5"}.
-\item For \code{saveBaseListFormat}, this may be \code{"json.gz"} (default) or \code{"hdf5"}.
-}
+Tbe \code{"csv"}, \code{"csv.gz"} (default) or \code{"hdf5"}.
 Alternatively \code{NULL}, to use the default format.}
 }
 \value{
@@ -26,7 +19,7 @@ If \code{format} is missing, a string containing the current format is returned,
 If \code{format} is supplied, it is used to define the current format, and the \emph{previous} format is returned.
 }
 \description{
-Alter the format used to save DataFrames or base lists in their respective \code{\link{stageObject}} methods.
+Alter the format used to save DataFrames in its \code{\link{stageObject}} methods.
 }
 \details{
 \code{\link{stageObject}} methods will treat a \code{format=NULL} in the same manner as the default format.

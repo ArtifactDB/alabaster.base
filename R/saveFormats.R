@@ -3,13 +3,10 @@ format.env$DataFrame <- NULL
 
 #' Choose the format for certain objects
 #'
-#' Alter the format used to save DataFrames or base lists in their respective \code{\link{stageObject}} methods.
+#' Alter the format used to save DataFrames in its \code{\link{stageObject}} methods.
 #'
 #' @param format String containing the format to use.
-#' \itemize{
-#' \item For \code{saveDataFrameFormat}, this may be \code{"csv"}, \code{"csv.gz"} (default) or \code{"hdf5"}.
-#' \item For \code{saveBaseListFormat}, this may be \code{"json.gz"} (default) or \code{"hdf5"}.
-#' }
+#' Tbe \code{"csv"}, \code{"csv.gz"} (default) or \code{"hdf5"}.
 #' Alternatively \code{NULL}, to use the default format.
 #' 
 #' @return 
@@ -35,19 +32,13 @@ format.env$DataFrame <- NULL
 #' .saveDataFrameFormat(old)
 #'
 #' @name saveFormats
-#' @aliases .saveDataFrameFormat .saveBaseListFormat
+#' @aliases .saveDataFrameFormat 
 NULL
 
 #' @export
 #' @rdname saveFormats
 saveDataFrameFormat <- function(format) {
     .save_format(format, "DataFrame", c("csv", "csv.gz", "hdf5"))
-}
-
-#' @export
-#' @rdname saveFormats
-saveBaseListFormat <- function(format) {
-    .save_format(format, "BaseList", c("json.gz", "hdf5"))
 }
 
 .save_format <- function(format, mode, choices) {
@@ -67,6 +58,3 @@ saveBaseListFormat <- function(format) {
 
 #' @export
 .saveDataFrameFormat <- function(...) saveDataFrameFormat(...)
-
-#' @export
-.saveBaseListFormat <- function(...) saveBaseListFormat(...)

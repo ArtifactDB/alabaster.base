@@ -5,15 +5,20 @@
 \alias{saveObject,list-method}
 \alias{stageObject,list-method}
 \alias{stageObject,List-method}
+\alias{.saveBaseListFormat}
 \alias{saveObject,List-method}
+\alias{saveBaseListFormat}
 \title{Save a base list to disk}
 \usage{
 \S4method{saveObject}{list}(x, path, list.format = saveBaseListFormat(), ...)
 
 \S4method{saveObject}{List}(x, path, list.format = saveBaseListFormat(), ...)
+
+saveBaseListFormat(list.format)
 }
 \arguments{
-\item{x}{A list or \linkS4class{List}.}
+\item{x}{An ordinary R list, named or unnamed.
+Alternatively, a \linkS4class{List} to be coerced into a list..}
 
 \item{path}{String containing the path to a directory in which to save \code{x}.}
 
@@ -22,8 +27,11 @@
 \item{...}{Further arguments, passed to \code{\link{altSaveObject}} for complex child objects.}
 }
 \value{
-\code{x} is saved inside \code{dir}.
+For the \code{saveObject} method, \code{x} is saved inside \code{dir}.
 \code{NULL} is invisibly returned.
+
+For \code{saveBaseListFormat}; if \code{list.format} is missing, a string containing the current format is returned.
+If \code{list.format} is supplied, it is used to define the current format, and the \emph{previous} format is returned.
 }
 \description{
 Save a \link{list} or \linkS4class{List} to a JSON or HDF5 file, with extra files created for any of the more complex list elements (e.g., DataFrames, arrays). 
@@ -31,10 +39,10 @@ This uses the \href{https://github.com/LTLA/uzuki2}{uzuki2} specification to ens
 }
 \section{File formats}{
 
-If \code{format="json.gz"}, the list is saved to a Gzip-compressed JSON file (the default).
+If \code{list.format="json.gz"} (default), the list is saved to a Gzip-compressed JSON file (the default).
 This is an easily parsed format with low storage overhead.
 
-If \code{format="hdf5"}, \code{x} is saved into a HDF5 file instead.
+If \code{list.format="hdf5"}, \code{x} is saved into a HDF5 file instead.
 This format is most useful for random access and for preserving the precision of numerical data.
 }
 
@@ -49,6 +57,8 @@ list.files(tmp, recursive=TRUE)
 }
 \seealso{
 \url{https://github.com/LTLA/uzuki2} for the specification.
+
+\code{\link{readBaseList}}, to read the list back into the R session.
 }
 \author{
 Aaron Lun

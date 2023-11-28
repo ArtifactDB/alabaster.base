@@ -3,26 +3,32 @@
 #' Save a \link{list} or \linkS4class{List} to a JSON or HDF5 file, with extra files created for any of the more complex list elements (e.g., DataFrames, arrays). 
 #' This uses the \href{https://github.com/LTLA/uzuki2}{uzuki2} specification to ensure that appropriate types are declared.
 #'
-#' @param x A list or \linkS4class{List}.
+#' @param x An ordinary R list, named or unnamed.
+#' Alternatively, a \linkS4class{List} to be coerced into a list..
 #' @inheritParams saveObject
 #' @param list.format String specifying the format in which to save the list.
 #' @param ... Further arguments, passed to \code{\link{altSaveObject}} for complex child objects.
 #' 
 #' @return
-#' \code{x} is saved inside \code{dir}.
+#' For the \code{saveObject} method, \code{x} is saved inside \code{dir}.
 #' \code{NULL} is invisibly returned.
 #'
+#' For \code{saveBaseListFormat}; if \code{list.format} is missing, a string containing the current format is returned.
+#' If \code{list.format} is supplied, it is used to define the current format, and the \emph{previous} format is returned.
+#'
 #' @section File formats:
-#' If \code{format="json.gz"}, the list is saved to a Gzip-compressed JSON file (the default).
+#' If \code{list.format="json.gz"} (default), the list is saved to a Gzip-compressed JSON file (the default).
 #' This is an easily parsed format with low storage overhead.
 #'
-#' If \code{format="hdf5"}, \code{x} is saved into a HDF5 file instead.
+#' If \code{list.format="hdf5"}, \code{x} is saved into a HDF5 file instead.
 #' This format is most useful for random access and for preserving the precision of numerical data.
 #'
 #' @author Aaron Lun
 #'
 #' @seealso
 #' \url{https://github.com/LTLA/uzuki2} for the specification.
+#'
+#' \code{\link{readBaseList}}, to read the list back into the R session.
 #'
 #' @examples
 #' library(S4Vectors)
@@ -38,6 +44,7 @@
 #' saveObject,list-method
 #' stageObject,list-method
 #' stageObject,List-method
+#' .saveBaseListFormat
 #' @importFrom jsonlite toJSON
 setMethod("saveObject", "list", function(x, path, list.format=saveBaseListFormat(), ...) {
     dir.create(path, showWarnings=FALSE)
@@ -48,7 +55,7 @@ setMethod("saveObject", "list", function(x, path, list.format=saveBaseListFormat
     env$collected <- list()
     args <- list(list.format=list.format, ...)
 
-    if (!is.null(list.format) && list.format == "hdf5") {
+    if (list.format == "hdf5") {
         fpath <- file.path(path, "list_contents.h5")
         handle <- H5Fcreate(fpath, "H5F_ACC_TRUNC")
         on.exit(H5Fclose(handle), add=TRUE, after=FALSE)
@@ -78,6 +85,24 @@ setMethod("saveObject", "list", function(x, path, list.format=saveBaseListFormat
 setMethod("saveObject", "List", function(x, path, list.format=saveBaseListFormat(), ...) {
     saveObject(as.list(x), path, list.format=list.format, ...)
 })
+
+#' @export
+#' @rdname saveBaseList
+saveBaseListFormat <- (function() {
+   mode <- "json.gz"    
+   function(list.format) {
+       previous <- mode 
+       if (missing(list.format)) {
+           previous
+       } else {
+           if (is.null(list.format)) {
+               list.format <- "json.gz"
+           }
+           assign("mode", match.arg(list.format, c("json.gz", "hdf5")), envir=parent.env(environment()))
+           invisible(previous)
+       }
+   }
+})()
 
 ##################################
 ########### INTERNALS ############
@@ -464,3 +489,6 @@ setMethod("stageObject", "list", function(x, dir, path, child=FALSE, fname="list
 setMethod("stageObject", "List", function(x, dir, path, child=FALSE, fname="list") {
     stageObject(as.list(x), dir, path, child=child, fname=fname)
 })
+
+#' @export
+.saveBaseListFormat <- function(...) saveBaseListFormat(...)

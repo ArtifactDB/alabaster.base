@@ -42,6 +42,14 @@ test_that("lists handle complex types correctly", {
     expect_identical(readBaseList(tmp2), rvals)
 })
 
+test_that("list format switch works as expected", {
+    expect_identical(saveBaseListFormat(), "json.gz")
+    expect_identical(saveBaseListFormat("hdf5"), "json.gz")
+    expect_identical(saveBaseListFormat(), "hdf5")
+    expect_identical(saveBaseListFormat(NULL), "hdf5")
+    expect_identical(saveBaseListFormat(), "json.gz")
+})
+
 test_that("lists work in HDF5 mode", {
     old <- saveBaseListFormat("hdf5")
     on.exit(saveBaseListFormat(old))
