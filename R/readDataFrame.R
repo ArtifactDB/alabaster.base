@@ -89,7 +89,7 @@ readDataFrame <- function(path, ...) {
             }
 
         } else {
-            columns[[col]] <- altReadObject(file.path(path, "other_columns", expected), ...)
+            columns[[col]] <- S4Vectors::I(altReadObject(file.path(path, "other_columns", expected), ...))
         }
     }
    
