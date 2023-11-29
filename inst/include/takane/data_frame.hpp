@@ -180,12 +180,14 @@ inline void validate(const std::filesystem::path& path, const Options& options) 
     // Finally iterating through the columns.
     auto dhandle = ritsuko::hdf5::open_group(ghandle, "data");
 
-    hsize_t found = 0;
+    hsize_t num_basic = 0;
+    auto other_dir = path / "other_columns";
+
     for (size_t c = 0; c < NC; ++c) {
         std::string dset_name = std::to_string(c);
 
         if (!dhandle.exists(dset_name)) {
-            auto opath = path / "other_columns" / dset_name;
+            auto opath = other_dir / dset_name;
             try {
                 ::takane::validate(opath, options);
             } catch (std::exception& e) {
@@ -197,11 +199,17 @@ inline void validate(const std::filesystem::path& path, const Options& options) 
 
         } else {
             validate_column(dhandle, dset_name, num_rows, options);
-            ++found;
+            ++num_basic;
         }
     }
 
-    if (found != dhandle.getNumObjs()) {
+    if (std::filesystem::exists(other_dir)) {
+        if (internal_other::count_directory_entries(other_dir) != NC - num_basic) {
+            throw std::runtime_error("more objects than expected inside the 'other_columns' directory");
+        }
+    }
+
+    if (num_basic != dhandle.getNumObjs()) {
         throw std::runtime_error("more objects present in the 'data_frame/data' group than expected");
     }
 

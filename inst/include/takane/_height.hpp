@@ -45,8 +45,11 @@ inline auto default_registry() {
     registry["genomic_ranges_list"] = [](const std::filesystem::path& p, const Options& o) -> size_t { return genomic_ranges_list::height(p, o); };
     registry["dense_array"] = [](const std::filesystem::path& p, const Options& o) -> size_t { return dense_array::height(p, o); };
     registry["compressed_sparse_matrix"] = [](const std::filesystem::path& p, const Options& o) -> size_t { return compressed_sparse_matrix::height(p, o); };
+
+    // Subclasses of the SE, so we just re-use its methods here.
     registry["summarized_experiment"] = [](const std::filesystem::path& p, const Options& o) -> size_t { return summarized_experiment::height(p, o); };
-    registry["ranged_summarized_experiment"] = [](const std::filesystem::path& p, const Options& o) -> size_t { return summarized_experiment::height(p, o); }; // yes, we're deliberately re-using the SE method here.
+    registry["ranged_summarized_experiment"] = [](const std::filesystem::path& p, const Options& o) -> size_t { return summarized_experiment::height(p, o); };
+    registry["single_cell_experiment"] = [](const std::filesystem::path& p, const Options& o) -> size_t { return summarized_experiment::height(p, o); };
     return registry;
 } 
 

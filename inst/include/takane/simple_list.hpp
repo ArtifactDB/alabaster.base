@@ -9,6 +9,7 @@
 #include "byteme/byteme.hpp"
 
 #include "utils_public.hpp"
+#include "utils_other.hpp"
 
 /**
  * @file simple_list.hpp
@@ -99,10 +100,7 @@ inline size_t height(const std::filesystem::path& path, const Options& options) 
     auto other_dir = path / "other_contents";
     int num_external = 0;
     if (std::filesystem::exists(other_dir)) {
-        for (const auto& entry : std::filesystem::directory_iterator(other_dir)) {
-            (void)entry; // silence compiler warnings about unused variables.
-            ++num_external;
-        }
+        num_external = internal_other::count_directory_entries(other_dir);
     }
 
     uzuki2::json::Options opt;

@@ -16,6 +16,7 @@ inline auto default_registry() {
     std::unordered_map<std::string, std::unordered_set<std::string> > registry;
     registry["SIMPLE_LIST"] = { "simple_list" };
     registry["DATA_FRAME"] = { "data_frame" };
+    registry["SUMMARIZED_EXPERIMENT"] = { "summarized_experiment", "ranged_summarized_experiment", "single_cell_experiment" };
     return registry;
 }
 

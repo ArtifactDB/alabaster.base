@@ -6,6 +6,7 @@
 
 #include "utils_public.hpp"
 #include "utils_other.hpp"
+#include "utils_summarized_experiment.hpp"
 
 #include <filesystem>
 #include <stdexcept>
@@ -46,22 +47,10 @@ inline void validate(const std::filesystem::path& path, const std::string& objna
         }
         auto optr = reinterpret_cast<const millijson::Object*>(parsed.get());
 
-        // Validating the version.
-        {
-            auto vIt = optr->values.find("version");
-            if (vIt == optr->values.end()) {
-                throw std::runtime_error("expected a 'version' property");
-            }
-            const auto& ver = vIt->second;
-            if (ver->type() != millijson::STRING) {
-                throw std::runtime_error("expected 'version' to be a string");
-            }
-
-            const auto& vstring = reinterpret_cast<const millijson::String*>(ver.get())->value;
-            auto version = ritsuko::parse_version_string(vstring.c_str(), vstring.size(), /* skip_patch = */ true);
-            if (version.major != 1) {
-                throw std::runtime_error("unsupported version string '" + vstring + "'");
-            }
+        const auto& vstring = internal_summarized_experiment::validate_version_json(optr);
+        auto version = ritsuko::parse_version_string(vstring.c_str(), vstring.size(), /* skip_patch = */ true);
+        if (version.major != 1) {
+            throw std::runtime_error("unsupported version string '" + vstring + "'");
         }
 
         // Validating the dimensions.
@@ -102,43 +91,14 @@ inline void validate(const std::filesystem::path& path, const std::string& objna
         throw std::runtime_error("invalid 'summarized_experiment.json' file; " + std::string(e.what()));
     }
 
-    // Checking the assays.
-    {
-        size_t num_assays = 0;
-        auto mpath = path / "assays" / "names.json";
-        auto parsed = millijson::parse_file(mpath.c_str());
-
-        try {
-            if (parsed->type() != millijson::ARRAY) {
-                throw std::runtime_error("expected an array");
-            }
-
-            auto aptr = reinterpret_cast<const millijson::Array*>(parsed.get());
-            num_assays = aptr->values.size();
-            std::unordered_set<std::string> present;
-            present.reserve(num_assays);
-
-            for (size_t i = 0; i < num_assays; ++i) {
-                auto eptr = aptr->values[i];
-                if (eptr->type() != millijson::STRING) {
-                    throw std::runtime_error("expected an array of strings");
-                }
-
-                auto nptr = reinterpret_cast<const millijson::String*>(eptr.get());
-                auto name = nptr->value;
-                if (present.find(name) != present.end()) {
-                    throw std::runtime_error("detected duplicated assay name '" + name + "'");
-                }
-                present.insert(std::move(name));
-            }
-
-        } catch (std::exception& e) {
-            throw std::runtime_error("invalid 'assays/names.json' file; " + std::string(e.what()));
-        }
-
+    // Checking the assays. The directory is also allowed to not exist, 
+    // in which case we have no assays.
+    auto adir = path / "assays";
+    if (std::filesystem::exists(adir)) {
+        size_t num_assays = internal_summarized_experiment::check_names_json(adir);
         for (size_t i = 0; i < num_assays; ++i) {
             auto aname = std::to_string(i);
-            auto apath = path / "assays" / aname;
+            auto apath = adir / aname;
             auto atype = read_object_type(apath);
             ::takane::validate(apath, atype, options);
 
@@ -154,10 +114,7 @@ inline void validate(const std::filesystem::path& path, const std::string& objna
             }
         }
 
-        size_t num_dir_obj = 0;
-        for ([[maybe_unused]] const auto& entry : std::filesystem::directory_iterator(path / "assays")) {
-            ++num_dir_obj;
-        }
+        size_t num_dir_obj = internal_other::count_directory_entries(adir);
         if (num_dir_obj - 1 != num_assays) { // -1 to account for the names.json file itself.
             throw std::runtime_error("more objects than expected inside the 'assays' subdirectory");
         }

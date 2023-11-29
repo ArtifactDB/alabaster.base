@@ -54,6 +54,18 @@ inline void validate_metadata(const std::filesystem::path& parent, const std::st
     throw std::runtime_error("failed to validate '" + name + "'; " + std::string(e.what()));
 }
 
+inline size_t count_directory_entries(const std::filesystem::path& path) {
+    size_t num_dir_obj = 0;
+    for (const auto& entry : std::filesystem::directory_iterator(path)) {
+        const auto& p = entry.path().filename().string();
+        if (p.size() && (p[0] == '.' || p[0] == '_')) {
+            continue;
+        }
+        ++num_dir_obj;
+    }
+    return num_dir_obj;
+}
+
 }
 
 }

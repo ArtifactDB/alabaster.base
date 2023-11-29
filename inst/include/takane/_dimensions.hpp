@@ -28,8 +28,12 @@ inline auto default_registry() {
     registry["data_frame"] = [](const std::filesystem::path& p, const Options& o) -> std::vector<size_t> { return data_frame::dimensions(p, o); };
     registry["dense_array"] = [](const std::filesystem::path& p, const Options& o) -> std::vector<size_t> { return dense_array::dimensions(p, o); };
     registry["compressed_sparse_matrix"] = [](const std::filesystem::path& p, const Options& o) -> std::vector<size_t> { return compressed_sparse_matrix::dimensions(p, o); };
+
+    // Subclasses of SE, so we just re-use the SE methods here.
     registry["summarized_experiment"] = [](const std::filesystem::path& p, const Options& o) -> std::vector<size_t> { return summarized_experiment::dimensions(p, o); };
-    registry["ranged_summarized_experiment"] = [](const std::filesystem::path& p, const Options& o) -> std::vector<size_t> { return summarized_experiment::dimensions(p, o); }; // yes, we're deliberately re-using the SE method here.
+    registry["ranged_summarized_experiment"] = [](const std::filesystem::path& p, const Options& o) -> std::vector<size_t> { return summarized_experiment::dimensions(p, o); };
+    registry["single_cell_experiment"] = [](const std::filesystem::path& p, const Options& o) -> std::vector<size_t> { return summarized_experiment::dimensions(p, o); };
+
     return registry;
 } 
 
