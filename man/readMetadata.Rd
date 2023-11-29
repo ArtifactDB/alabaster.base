@@ -11,9 +11,11 @@ readMetadata(x, metadata.path, mcols.path, ...)
 \arguments{
 \item{x}{An \linkS4class{Vector} or \linkS4class{Annotated} object.}
 
-\item{metadata.path}{String containing a path to a directory, itself containing an on-disk representation of a base R list to be used as the \code{\link{metadata}}.}
+\item{metadata.path}{String containing a path to a directory, itself containing an on-disk representation of a base R list to be used as the \code{\link{metadata}}.
+Alternatively \code{NULL} to skip loading.}
 
-\item{mcols.path}{String containing a path to a directory, itself containing an on-disk representation of a \linkS4class{DataFrame} to be used as the \code{\link{mcols}}.}
+\item{mcols.path}{String containing a path to a directory, itself containing an on-disk representation of a \linkS4class{DataFrame} to be used as the \code{\link{mcols}}.
+Alternatively \code{NULL} to skip loading.}
 
 \item{...}{Further arguments to be passed to \code{\link{altReadObject}}.}
 }
