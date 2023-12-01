@@ -16,7 +16,7 @@
 #' h5_cast
 NULL
 
-.choose_type <- function(x, plus.one=FALSE) {
+.choose_type <- function(x) {
     if (is.integer(x)) {
         type <- "H5T_NATIVE_INT32"
     } else if (is.double(x)) {
@@ -24,7 +24,7 @@ NULL
     } else if (is.character(x)) {
         tid <- H5Tcopy("H5T_C_S1")
         H5Tset_strpad(tid, strpad = "NULLPAD")
-        H5Tset_size(tid, max(nchar(x, type="bytes") + plus.one, 1L, na.rm=TRUE))
+        H5Tset_size(tid, max(nchar(x, type="bytes"), 1L, na.rm=TRUE))
 
         enc <- unique(Encoding(x))
         if ("UTF-8" %in% enc) {
@@ -98,7 +98,7 @@ h5_write_vector <- function(handle, name, x, type=NULL, compress=6, chunks=NULL,
 #' @export
 h5_write_attribute <- function(handle, name, x, type=NULL, scalar=FALSE) {
     if (is.null(type)) {
-        type <- .choose_type(x, plus.one=TRUE) # who knows why H5Awrite forces zero-termination?
+        type <- .choose_type(x)
     }
 
     if (length(x) == 1 && scalar) {
