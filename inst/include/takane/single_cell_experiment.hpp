@@ -5,6 +5,7 @@
 #include "byteme/byteme.hpp"
 
 #include "summarized_experiment.hpp"
+#include "ranged_summarized_experiment.hpp"
 
 #include <filesystem>
 #include <stdexcept>

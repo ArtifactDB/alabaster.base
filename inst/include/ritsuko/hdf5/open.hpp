@@ -25,7 +25,7 @@ inline H5::H5File open_file(const std::filesystem::path& path) try {
     if (!std::filesystem::exists(path)) {
         throw std::runtime_error("no file is present at '" + path.string() + "'");
     }
-    return H5::H5File(path, H5F_ACC_RDONLY);
+    return H5::H5File(path.c_str(), H5F_ACC_RDONLY);
 } catch (H5::Exception& e) {
     throw std::runtime_error("failed to open the HDF5 file at '" + path.string() + "'; " + e.getDetailMsg());
 }
