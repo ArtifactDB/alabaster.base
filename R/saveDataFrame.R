@@ -89,7 +89,7 @@ setMethod("saveObject", "DataFrame", function(x, path, ...) {
         } else if (.is_datetime(col)) {
             coltype <- "string"
             colformat <- "date-time"
-            sanitized <- .sanitize_datetime(col)
+            sanitized <- as.character(as.Rfc3339(col))
 
         } else if (is(col, "Date")) {
             coltype <- "string"
@@ -275,7 +275,7 @@ setMethod("stageObject", "DataFrame", function(x, dir, path, child=FALSE, df.nam
                 out$type <- "string"
                 out$format <- "date-time"
             }
-            x[[z]] <- .sanitize_datetime(col)
+            x[[z]] <- as.character(as.Rfc3339(col))
 
         } else if (is(col, "Date")) {
             if (.version.df == 1) {

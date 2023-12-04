@@ -25,6 +25,10 @@ choose_numeric_missing_placeholder <- function(x) {
     .Call(`_alabaster_base_choose_numeric_missing_placeholder`, x)
 }
 
+not_rfc3339 <- function(x) {
+    .Call(`_alabaster_base_not_rfc3339`, x)
+}
+
 load_csv <- function(path, is_compressed, nrecords, parallel) {
     .Call(`_alabaster_base_load_csv`, path, is_compressed, nrecords, parallel)
 }

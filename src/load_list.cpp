@@ -192,9 +192,6 @@ struct RDateTimeVector : public uzuki2::StringVector, public RBase {
     }
 
     void set(size_t i, std::string val) {
-        if (val.size() >= 3 && val[val.size() - 3] == ':') { // Need to erase the colon, as this confuses as.POSIXct.
-            val.erase(val.size() - 3, 1);
-        }
         vec[i] = val;
         return;
     }
@@ -212,8 +209,9 @@ struct RDateTimeVector : public uzuki2::StringVector, public RBase {
         if (named) {
             vec.names() = names;
         }
-        Rcpp::Function f("as.POSIXct");
-        return f(vec, Rcpp::Named("format", "%Y-%m-%dT%H:%M:%S%z"));
+        Rcpp::Environment ns = Rcpp::Environment::namespace_env("alabaster.base");
+        Rcpp::Function f = ns["as.Rfc3339"];
+        return f(vec);
     }
 
     Rcpp::StringVector vec;

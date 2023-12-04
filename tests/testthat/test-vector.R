@@ -67,10 +67,6 @@ test_that("vectors work correctly without names in the new world", {
     vals <- c(Sys.Date(), Sys.Date() + 100, Sys.Date() - 100)
     saveObject(vals, file.path(tmp, "blah"))
     expect_identical(readAtomicVector(file.path(tmp, "blah")), vals)
-
-    vals <- c(Sys.time(), Sys.time() + 100, Sys.time() - 100)
-    saveObject(vals, file.path(tmp, "gunk"))
-    expect_true(all(abs(readAtomicVector(file.path(tmp, "gunk")) - vals) < 1)) # sub-second resolution on the strings.
 })
 
 test_that("vectors work correctly with names", {
@@ -85,4 +81,19 @@ test_that("vectors work correctly with names", {
 
     saveObject(vals, file.path(tmp, "foo"))
     expect_equal(readAtomicVector(file.path(tmp, "foo")), vals)
+})
+
+test_that("vectors preserve date-times as strings", {
+    vals <- c(Sys.time(), Sys.time() + 100, Sys.time() - 100)
+
+    tmp <- tempfile()
+    dir.create(tmp)
+
+    saveObject(vals, file.path(tmp, "gunk"))
+    reloaded <- readAtomicVector(file.path(tmp, "gunk"))
+    expect_s3_class(reloaded, "Rfc3339")
+    expect_true(all(abs(as.POSIXct(reloaded) - vals) < 1)) # sub-second resolution on the strings.
+
+    saveObject(reloaded, file.path(tmp, "foo"))
+    expect_identical(readAtomicVector(file.path(tmp, "foo")), reloaded)
 })

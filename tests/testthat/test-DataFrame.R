@@ -615,8 +615,13 @@ test_that("DFs handle POSIX times correctly", {
     tmp2 <- tempfile()
     saveObject(df, tmp2)
     round2 <- readDataFrame(tmp2)
-    expect_s3_class(out$foo, "POSIXct")
-    expect_s3_class(out$bar, "POSIXct")
-    expect_identical(df$foo, as.POSIXct(out$foo))
-    expect_identical(df$bar, as.POSIXct(out$bar))
+    expect_s3_class(round2$foo, "Rfc3339")
+    expect_s3_class(round2$bar, "Rfc3339")
+    expect_identical(df$foo, as.POSIXct(round2$foo))
+    expect_identical(df$bar, as.POSIXct(round2$bar))
+
+    # Rfc3339 objects are also correctly saved.
+    tmp3 <- tempfile()
+    saveObject(round2, tmp3)
+    expect_identical(readDataFrame(tmp3), round2)
 })

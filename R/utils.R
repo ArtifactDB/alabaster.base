@@ -2,12 +2,12 @@
     format(x, "%Y-%m-%d")
 }
 
-.sanitize_datetime <- function(x) {
-    sub("([0-9]{2})$", ":\\1", strftime(x, "%Y-%m-%dT%H:%M:%S%z"))
+.is_datetime <- function(x) {
+    is(x, "POSIXct") || is(x, "POSIXlt") || is.Rfc3339(x)
 }
 
-.is_datetime <- function(x) {
-    is(x, "POSIXct") || is(x, "POSIXlt")
+.sanitize_datetime <- function(x) {
+    sub("([0-9]{2})$", ":\\1", strftime(x, "%Y-%m-%dT%H:%M:%S%z"))
 }
 
 .remap_atomic_type <- function(x) {
@@ -20,15 +20,10 @@
         integer=list(type="integer", values=as.integer(x)),
         double=list(type="number", values=as.double(x)),
         numeric=list(type="number", values=as.double(x)),
-        logical=list(type="boolean", values=as.logical(x)),
         character=list(type="string", values=as.character(x)),
+        logical=list(type="boolean", values=as.logical(x)),
         stop("type '", y, "' is not supported")
     )
-}
-
-.cast_datetime <- function(x) {
-    # Remove colon in the timezone, which confuses as.POSIXct().
-    as.POSIXct(sub(":([0-9]{2})$", "\\1", x), format="%Y-%m-%dT%H:%M:%S%z")
 }
 
 .atomics <- c(integer="integer", number="double", string="character", boolean="logical")

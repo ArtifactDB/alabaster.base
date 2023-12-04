@@ -76,6 +76,16 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// not_rfc3339
+Rcpp::LogicalVector not_rfc3339(Rcpp::CharacterVector x);
+RcppExport SEXP _alabaster_base_not_rfc3339(SEXP xSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::traits::input_parameter< Rcpp::CharacterVector >::type x(xSEXP);
+    rcpp_result_gen = Rcpp::wrap(not_rfc3339(x));
+    return rcpp_result_gen;
+END_RCPP
+}
 // load_csv
 Rcpp::List load_csv(std::string path, bool is_compressed, int nrecords, bool parallel);
 RcppExport SEXP _alabaster_base_load_csv(SEXP pathSEXP, SEXP is_compressedSEXP, SEXP nrecordsSEXP, SEXP parallelSEXP) {
@@ -184,6 +194,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_alabaster_base_any_actually_numeric_na", (DL_FUNC) &_alabaster_base_any_actually_numeric_na, 1},
     {"_alabaster_base_is_actually_numeric_na", (DL_FUNC) &_alabaster_base_is_actually_numeric_na, 1},
     {"_alabaster_base_choose_numeric_missing_placeholder", (DL_FUNC) &_alabaster_base_choose_numeric_missing_placeholder, 1},
+    {"_alabaster_base_not_rfc3339", (DL_FUNC) &_alabaster_base_not_rfc3339, 1},
     {"_alabaster_base_load_csv", (DL_FUNC) &_alabaster_base_load_csv, 4},
     {"_alabaster_base_load_list_hdf5", (DL_FUNC) &_alabaster_base_load_list_hdf5, 3},
     {"_alabaster_base_load_list_json", (DL_FUNC) &_alabaster_base_load_list_json, 3},

@@ -79,7 +79,7 @@ readDataFrame <- function(path, ...) {
                             if (format == "date") {
                                 contents <- as.Date(contents)
                             } else if (format == "date-time") {
-                                contents <- .cast_datetime(contents)
+                                contents <- as.Rfc3339(contents)
                             }
                         }
                     }

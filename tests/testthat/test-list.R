@@ -508,6 +508,13 @@ test_that("we handle lists with NULLs", {
 test_that("we handle lists with times", {
     now <- as.POSIXct(round(Sys.time()), tz="")
     vals <- list(now, list(list(now + 10000), c(X=now + 400000, Y=now + 1000000)))
+    to_posix <- function(x, fun) {
+        if (is.list(x)) {
+            lapply(x, to_posix, fun=fun)
+        } else {
+            fun(x)
+        }
+    }
 
     tmp <- tempfile()
     dir.create(tmp)
@@ -519,7 +526,9 @@ test_that("we handle lists with times", {
 
     tmp2 <- tempfile()
     saveObject(vals, tmp2)
-    expect_equal(readBaseList(tmp2), vals)
+    reloaded <- readBaseList(tmp2)
+    expect_s3_class(reloaded[[1]], "Rfc3339")
+    expect_equal(to_posix(reloaded, as.POSIXct), vals)
 
     # Works in HDF5 mode.
     old <- saveBaseListFormat("hdf5")
@@ -534,19 +543,21 @@ test_that("we handle lists with times", {
 
     tmp2 <- tempfile()
     saveObject(vals, tmp2)
-    expect_equal(readBaseList(tmp2), vals)
+    reloaded <- readBaseList(tmp2)
+    expect_equal(to_posix(reloaded, as.POSIXct), vals)
 
     # Works with POSIXlt objects, though these lose some precision when they go to POSIXct on back-conversion.
     now2 <- as.POSIXlt(now)
-    vals2 <- list(now, list(list(now + 10000), c(X=now + 400000, Y=now + 1000000)))
+    vals2 <- list(now2, list(list(now2 + 10000), c(X=now2 + 400000, Y=now2 + 1000000)))
 
     info2 <- stageObject(vals, tmp, path="whee2")
     roundtrip2 <- loadBaseList(info2, tmp)
-    expect_equal(roundtrip2, vals)
+    expect_equal(to_posix(roundtrip2, as.POSIXlt), vals)
 
     tmp2 <- tempfile()
     saveObject(vals, tmp2)
-    expect_equal(readBaseList(tmp2), vals)
+    reloaded <- readBaseList(tmp2)
+    expect_equal(to_posix(reloaded, as.POSIXlt), vals)
 })
 
 test_that("lists work correctly in legacy mode (JSON)", {
