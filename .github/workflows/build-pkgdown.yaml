@@ -36,7 +36,7 @@ jobs:
         run: |
           stuff <- read.dcf("DESCRIPTION")
           stuff <- stuff[,intersect(colnames(stuff), c("Imports", "LinkingTo", "Suggests", "Depends"))]
-          deps <- unlist(strsplit(stuff, ",\\s*"), use.names=FALSE)
+          deps <- sub(" .*", "", unlist(strsplit(stuff, ",\\s*"), use.names=FALSE))
           BiocManager::install(c("pkgdown", deps))
 
       - name: Install self
