@@ -65,12 +65,29 @@ For the other \code{as.*} methods, an instance of the corresponding type generat
 }
 \description{
 The Rfc3339 class is a character vector that stores Internet Date/time timestamps, formatted as described in RFC3339.
-It is intended as a mechanism for faithfully representing any RFC3339-compliant string in an R session;
-this unfortunately cannot be done by the standard \link{POSIXct} and \link{POSIXlt} classes due to loss of the time offset and fractional seconds.
+It provides a faithful representation of any RFC3339-compliant string in an R session.
 }
 \details{
-Users should not expect too much from this class.
-It is only used to provide a faithful representation of RFC3339 strings, and does not support any time-related operations.
+This class is motivated by the difficulty in using the various \link{POSIXt} classes to faithfully represent any RFC3339-compliant string.
+In particular:
+\itemize{
+\item The POSIXt classes do not automatically capture the string's timezone offset, instead converting all times to the local timezone.
+This is problematic as it discards information about the original timezone.
+Technically, the \link{POSIXlt} class is capable of holding this information in the \code{gmtoff} field but it is not clear how to set this.
+\item There is no way to distinguish between the timezones \code{Z} and \code{+00:00}.
+These are functionally the same but will introduce differences in the checksums of saved files
+and thus interfere with deduplication mechanisms in storage backends.
+\item Coercion of POSIXt classes to strings may print more or fewer digits in the fractional seconds than what was present in the original string.
+Functionally, this is probably unimportant but will still introduce differences in the checksums.
+}
+
+By comparison, the Rfc3339 class preserves all information in the original string,
+avoiding unexpected modifications from a roundtrip through \code{\link{readObject}} and \code{\link{saveObject}}.
+This is especially relevant for strings that were created from other languages, 
+e.g., Node.js Date's ISO string conversion uses \code{Z} by default.
+
+That said, users should not expect too much from this class.
+It is only used to provide a faithful representation of RFC3339 strings, and does not support any time-related arithmetic.
 Users are advised to convert to \link{POSIXct} or similar if such operations are required.
 }
 \examples{
