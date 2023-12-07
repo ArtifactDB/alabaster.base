@@ -118,7 +118,7 @@ The _alabaster_ framework is easily extended to new classes by:
 2. Writing a function for `readObject()` and registering it with `registerReadObjectFunction()` (or, for core Bioconductor classes, by requesting a change to the default registry in `r self`).
    This should accept a path to a directory and read its contents to reconstruct the object.
    The registered type should be the same as that used in the `OBJECT` file.
-3. Writing a function for `validateObject()` and registering it with `registervalidateObjectFunction()`.
+3. Writing a function for `validateObject()` and registering it with `registerValidateObjectFunction()`.
    This should accept a path to a directory and read its contents to determine if it is a valid on-disk representation.
    The registered type should be the same as that used in the `OBJECT` file.
    - (optional) Devleopers can alternatively formalize the on-disk representation by adding a specification to the [**takane**](https://github.com/ArtifactDB/takane) repository.
@@ -146,7 +146,8 @@ setMethod("saveObject", "dgTMatrix", function(x, path, ...) {
 })
 ```
 
-And now the reading method:
+And now the reading and validation methods.
+The registration is usually done in the extension package's `onLoad()` function.
 
 ```{r}
 readSparseTripletMatrix <- function(path) {
@@ -160,11 +161,19 @@ readSparseTripletMatrix <- function(path) {
          repr="T"
     )
 }
-
 registerReadObjectFunction("triplet_sparse_matrix", readSparseTripletMatrix)
+
+validateSparseTripletMatrix <- function(path) {
+    df <- read.table(file.path(path, "matrix.csv"), header=TRUE, sep=",")
+    dims <- as.integer(readLines(file.path(path, "dimensions.txt")))
+    stopifnot(is.integer(df$i), all(df$i >= 0 & df$i < dims[1]))
+    stopifnot(is.integer(df$j), all(df$j >= 0 & df$j < dims[2]))
+    stopifnot(is.numeric(df$x))
+}
+registerValidateObjectFunction("triplet_sparse_matrix", validateSparseTripletMatrix)
 ```
 
-And running them:
+Let's run them and see how it works:
 
 ```{r}
 x <- sparseMatrix(
