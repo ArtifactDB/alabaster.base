@@ -7,12 +7,6 @@
     <loc>/LICENSE-text.html</loc>
   </url>
   <url>
-    <loc>/articles/applications.html</loc>
-  </url>
-  <url>
-    <loc>/articles/extensions.html</loc>
-  </url>
-  <url>
     <loc>/articles/index.html</loc>
   </url>
   <url>
@@ -25,49 +19,40 @@
     <loc>/index.html</loc>
   </url>
   <url>
+    <loc>/reference/Rfc3339.html</loc>
+  </url>
+  <url>
     <loc>/reference/acquireFile.html</loc>
   </url>
   <url>
-    <loc>/reference/altLoadObject.html</loc>
+    <loc>/reference/altReadObject.html</loc>
   </url>
   <url>
-    <loc>/reference/altStageObject.html</loc>
+    <loc>/reference/altSaveObject.html</loc>
+  </url>
+  <url>
+    <loc>/reference/anyMissing.html</loc>
+  </url>
+  <url>
+    <loc>/reference/chooseMissingPlaceholderForHdf5.html</loc>
   </url>
   <url>
     <loc>/reference/createRedirection.html</loc>
   </url>
   <url>
+    <loc>/reference/hdf5.html</loc>
+  </url>
+  <url>
     <loc>/reference/index.html</loc>
   </url>
   <url>
-    <loc>/reference/listDirectory.html</loc>
-  </url>
-  <url>
-    <loc>/reference/loadAtomicVector.html</loc>
-  </url>
-  <url>
-    <loc>/reference/loadBaseFactor.html</loc>
-  </url>
-  <url>
-    <loc>/reference/loadBaseList.html</loc>
-  </url>
-  <url>
-    <loc>/reference/loadDataFrame.html</loc>
-  </url>
-  <url>
-    <loc>/reference/loadDataFrameFactor.html</loc>
+    <loc>/reference/listObjects.html</loc>
   </url>
   <url>
     <loc>/reference/loadDirectory.html</loc>
   </url>
   <url>
-    <loc>/reference/loadObject.html</loc>
-  </url>
-  <url>
     <loc>/reference/moveObject.html</loc>
-  </url>
-  <url>
-    <loc>/reference/processMetadata.html</loc>
   </url>
   <url>
     <loc>/reference/quickLoadObject.html</loc>
@@ -76,37 +61,61 @@
     <loc>/reference/quickReadCsv.html</loc>
   </url>
   <url>
+    <loc>/reference/readAtomicVector.html</loc>
+  </url>
+  <url>
+    <loc>/reference/readBaseFactor.html</loc>
+  </url>
+  <url>
+    <loc>/reference/readBaseList.html</loc>
+  </url>
+  <url>
+    <loc>/reference/readDataFrame.html</loc>
+  </url>
+  <url>
+    <loc>/reference/readDataFrameFactor.html</loc>
+  </url>
+  <url>
+    <loc>/reference/readMetadata.html</loc>
+  </url>
+  <url>
+    <loc>/reference/readObject.html</loc>
+  </url>
+  <url>
     <loc>/reference/removeObject.html</loc>
   </url>
   <url>
-    <loc>/reference/restoreMetadata.html</loc>
+    <loc>/reference/saveAtomicVector.html</loc>
+  </url>
+  <url>
+    <loc>/reference/saveBaseFactor.html</loc>
+  </url>
+  <url>
+    <loc>/reference/saveBaseList.html</loc>
+  </url>
+  <url>
+    <loc>/reference/saveDataFrameFactor.html</loc>
   </url>
   <url>
     <loc>/reference/saveFormats.html</loc>
   </url>
   <url>
-    <loc>/reference/stageAtomicVector.html</loc>
+    <loc>/reference/saveMetadata.html</loc>
   </url>
   <url>
-    <loc>/reference/stageBaseFactor.html</loc>
-  </url>
-  <url>
-    <loc>/reference/stageBaseList.html</loc>
+    <loc>/reference/saveObject.html</loc>
   </url>
   <url>
     <loc>/reference/stageDataFrame.html</loc>
-  </url>
-  <url>
-    <loc>/reference/stageDataFrameFactor.html</loc>
-  </url>
-  <url>
-    <loc>/reference/stageObject.html</loc>
   </url>
   <url>
     <loc>/reference/transformVectorForHdf5.html</loc>
   </url>
   <url>
     <loc>/reference/validateDirectory.html</loc>
+  </url>
+  <url>
+    <loc>/reference/validateObject.html</loc>
   </url>
   <url>
     <loc>/reference/writeMetadata.html</loc>
