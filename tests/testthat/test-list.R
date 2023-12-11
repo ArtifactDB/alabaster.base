@@ -547,17 +547,17 @@ test_that("we handle lists with times", {
     expect_equal(to_posix(reloaded, as.POSIXct), vals)
 
     # Works with POSIXlt objects, though these lose some precision when they go to POSIXct on back-conversion.
-    now2 <- as.POSIXlt(now)
+    now2 <- as.POSIXlt(now, tz="")
     vals2 <- list(now2, list(list(now2 + 10000), c(X=now2 + 400000, Y=now2 + 1000000)))
 
     info2 <- stageObject(vals, tmp, path="whee2")
     roundtrip2 <- loadBaseList(info2, tmp)
-    expect_equal(to_posix(roundtrip2, as.POSIXlt), vals)
+    expect_equal(to_posix(roundtrip2, as.POSIXlt), vals2)
 
     tmp2 <- tempfile()
     saveObject(vals, tmp2)
     reloaded <- readBaseList(tmp2)
-    expect_equal(to_posix(reloaded, as.POSIXlt), vals)
+    expect_equal(to_posix(reloaded, as.POSIXlt), vals2)
 })
 
 test_that("lists work correctly in legacy mode (JSON)", {
