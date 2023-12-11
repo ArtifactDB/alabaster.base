@@ -237,13 +237,13 @@ directory, and fiddling with them may cause unexpected results.</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/readObject.html">readObject</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">tmp</span>, <span class="st">"other_columns/1"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## DataFrame with 5 rows and 2 columns</span></span>
-<span><span class="co">##           B          C</span></span>
-<span><span class="co">##   &lt;numeric&gt;  &lt;numeric&gt;</span></span>
-<span><span class="co">## 1  0.359978 -0.7558244</span></span>
-<span><span class="co">## 2  0.696907  0.0856027</span></span>
-<span><span class="co">## 3  0.382935  0.1873415</span></span>
-<span><span class="co">## 4  0.168850  2.4322565</span></span>
-<span><span class="co">## 5  0.586456  0.0488064</span></span></code></pre>
+<span><span class="co">##           B         C</span></span>
+<span><span class="co">##   &lt;numeric&gt; &lt;numeric&gt;</span></span>
+<span><span class="co">## 1  0.801496 -0.202330</span></span>
+<span><span class="co">## 2  0.985761 -0.711939</span></span>
+<span><span class="co">## 3  0.593509 -0.458334</span></span>
+<span><span class="co">## 4  0.409567 -0.544364</span></span>
+<span><span class="co">## 5  0.280083  1.285949</span></span></code></pre>
 </div>
 <div class="section level2">
 <h2 id="extending-to-new-classes">Extending to new classes<a class="anchor" aria-label="anchor" href="#extending-to-new-classes"></a>
@@ -335,17 +335,17 @@ function.</p>
 <span><span class="op">)</span></span>
 <span><span class="va">x</span></span></code></pre></div>
 <pre><code><span><span class="co">## 10 x 10 sparse Matrix of class "dgTMatrix"</span></span>
-<span><span class="co">##                                                         </span></span>
-<span><span class="co">##  [1,] .         . 0.8102437 . . .         . .        . .</span></span>
-<span><span class="co">##  [2,] .         . .         . . 0.6117204 . .        . .</span></span>
-<span><span class="co">##  [3,] 0.2828526 . .         . . .         . .        . .</span></span>
-<span><span class="co">##  [4,] .         . .         . . .         . .        . .</span></span>
-<span><span class="co">##  [5,] .         . 0.3114561 . . .         . .        . .</span></span>
-<span><span class="co">##  [6,] .         . .         . . .         . 0.720824 . .</span></span>
-<span><span class="co">##  [7,] .         . .         . . .         . .        . .</span></span>
-<span><span class="co">##  [8,] .         . .         . . .         . .        . .</span></span>
-<span><span class="co">##  [9,] .         . .         . . .         . .        . .</span></span>
-<span><span class="co">## [10,] .         . .         . . .         . .        . .</span></span></code></pre>
+<span><span class="co">##                                                          </span></span>
+<span><span class="co">##  [1,] .         . 0.1140246 . . .         . .         . .</span></span>
+<span><span class="co">##  [2,] .         . .         . . 0.8788943 . .         . .</span></span>
+<span><span class="co">##  [3,] 0.3152925 . .         . . .         . .         . .</span></span>
+<span><span class="co">##  [4,] .         . .         . . .         . .         . .</span></span>
+<span><span class="co">##  [5,] .         . 0.2362250 . . .         . .         . .</span></span>
+<span><span class="co">##  [6,] .         . .         . . .         . 0.5364003 . .</span></span>
+<span><span class="co">##  [7,] .         . .         . . .         . .         . .</span></span>
+<span><span class="co">##  [8,] .         . .         . . .         . .         . .</span></span>
+<span><span class="co">##  [9,] .         . .         . . .         . .         . .</span></span>
+<span><span class="co">## [10,] .         . .         . . .         . .         . .</span></span></code></pre>
 <div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">tmp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/saveObject.html">saveObject</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">tmp</span>, <span class="st">"test"</span><span class="op">)</span></span>
@@ -354,17 +354,17 @@ function.</p>
 <div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/readObject.html">readObject</a></span><span class="op">(</span><span class="va">tmp</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## 10 x 10 sparse Matrix of class "dgTMatrix"</span></span>
-<span><span class="co">##                                                         </span></span>
-<span><span class="co">##  [1,] .         . 0.8102437 . . .         . .        . .</span></span>
-<span><span class="co">##  [2,] .         . .         . . 0.6117204 . .        . .</span></span>
-<span><span class="co">##  [3,] 0.2828526 . .         . . .         . .        . .</span></span>
-<span><span class="co">##  [4,] .         . .         . . .         . .        . .</span></span>
-<span><span class="co">##  [5,] .         . 0.3114561 . . .         . .        . .</span></span>
-<span><span class="co">##  [6,] .         . .         . . .         . 0.720824 . .</span></span>
-<span><span class="co">##  [7,] .         . .         . . .         . .        . .</span></span>
-<span><span class="co">##  [8,] .         . .         . . .         . .        . .</span></span>
-<span><span class="co">##  [9,] .         . .         . . .         . .        . .</span></span>
-<span><span class="co">## [10,] .         . .         . . .         . .        . .</span></span></code></pre>
+<span><span class="co">##                                                          </span></span>
+<span><span class="co">##  [1,] .         . 0.1140246 . . .         . .         . .</span></span>
+<span><span class="co">##  [2,] .         . .         . . 0.8788943 . .         . .</span></span>
+<span><span class="co">##  [3,] 0.3152925 . .         . . .         . .         . .</span></span>
+<span><span class="co">##  [4,] .         . .         . . .         . .         . .</span></span>
+<span><span class="co">##  [5,] .         . 0.2362250 . . .         . .         . .</span></span>
+<span><span class="co">##  [6,] .         . .         . . .         . 0.5364003 . .</span></span>
+<span><span class="co">##  [7,] .         . .         . . .         . .         . .</span></span>
+<span><span class="co">##  [8,] .         . .         . . .         . .         . .</span></span>
+<span><span class="co">##  [9,] .         . .         . . .         . .         . .</span></span>
+<span><span class="co">## [10,] .         . .         . . .         . .         . .</span></span></code></pre>
 <p>For more complex objects that are composed of multiple smaller
 “child” objects, developers should consider saving each of their
 children in subdirectories of <code>path</code>. This can be achieved by
@@ -447,11 +447,11 @@ something with the metadata that we just added.</p>
 <pre><code><span><span class="co">## DataFrame with 5 rows and 2 columns</span></span>
 <span><span class="co">##          Z                 AA</span></span>
 <span><span class="co">##   &lt;factor&gt;        &lt;DataFrame&gt;</span></span>
-<span><span class="co">## 1        1 0.336192:-0.344190</span></span>
-<span><span class="co">## 2        2 0.638541: 1.720382</span></span>
-<span><span class="co">## 3        3 0.568119:-0.327970</span></span>
-<span><span class="co">## 4        4 0.914258:-0.136570</span></span>
-<span><span class="co">## 5        5 0.490442:-0.679748</span></span></code></pre>
+<span><span class="co">## 1        1 0.795259:-0.413769</span></span>
+<span><span class="co">## 2        2 0.772280: 0.635484</span></span>
+<span><span class="co">## 3        3 0.109410: 1.042715</span></span>
+<span><span class="co">## 4        4 0.529391:-0.962147</span></span>
+<span><span class="co">## 5        5 0.148964:-0.801818</span></span></code></pre>
 <div class="sourceCode" id="cb39"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Unsetting the override for other applications.</span></span>
 <span><span class="fu"><a href="../reference/altReadObject.html">altReadObjectFunction</a></span><span class="op">(</span><span class="va">old</span><span class="op">)</span> </span></code></pre></div>
