@@ -25,7 +25,14 @@ inline H5::H5File open_file(const std::filesystem::path& path) try {
     if (!std::filesystem::exists(path)) {
         throw std::runtime_error("no file is present at '" + path.string() + "'");
     }
-    return H5::H5File(path.c_str(), H5F_ACC_RDONLY);
+
+    if constexpr(std::is_same<std::filesystem::path::value_type, char>::value) {
+        // Avoid copy on POSIX...
+        return H5::H5File(path.c_str(), H5F_ACC_RDONLY);
+    } else {
+        // But still get it to work on Windows...
+        return H5::H5File(path.string(), H5F_ACC_RDONLY);
+    }
 } catch (H5::Exception& e) {
     throw std::runtime_error("failed to open the HDF5 file at '" + path.string() + "'; " + e.getDetailMsg());
 }
