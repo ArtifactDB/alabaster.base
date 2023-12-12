@@ -56,7 +56,7 @@ This is done by dispatching to an appropriate loading function based on the type
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">readObject</span><span class="op">(</span><span class="va">path</span>, type <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">...</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">readObject</span><span class="op">(</span><span class="va">path</span>, metadata <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">...</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">readObjectFunctionRegistry</span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
@@ -69,17 +69,21 @@ This is done by dispatching to an appropriate loading function based on the type
 <dd><p>String containing a path to a directory, itself created with a <code><a href="saveObject.html">saveObject</a></code> method.</p></dd>
 
 
-<dt>type</dt>
-<dd><p>String specifying the name of type of the object.
-If this is not supplied for <code>readObject</code>, it is automatically determined from the <code>OBJECT</code> file in <code>path</code>.</p></dd>
+<dt>metadata</dt>
+<dd><p>Named list containing metadata for the object.
+If <code>NULL</code>, this is automatically read by <code><a href="readObjectFile.html">readObjectFile</a>(path)</code>.</p></dd>
 
 
 <dt>...</dt>
 <dd><p>Further arguments to pass to individual methods.</p></dd>
 
 
+<dt>type</dt>
+<dd><p>String specifying the name of type of the object.</p></dd>
+
+
 <dt>fun</dt>
-<dd><p>A loading function that accepts <code>path</code> and <code>...</code>, and returns the associated object.
+<dd><p>A loading function that accepts <code>path</code>, <code>metadata</code> and <code>...</code> (in that order), and returns the associated object.
 This may also be <code>NULL</code> to delete an existing entry in the registry.</p></dd>
 
 </dl></div>

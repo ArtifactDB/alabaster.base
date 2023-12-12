@@ -54,13 +54,17 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">readAtomicVector</span><span class="op">(</span><span class="va">path</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">readAtomicVector</span><span class="op">(</span><span class="va">path</span>, <span class="va">metadata</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>path</dt>
 <dd><p>Path to a directory created with any of the vector methods for <code><a href="saveObject.html">saveObject</a></code>.</p></dd>
+
+
+<dt>metadata</dt>
+<dd><p>Named list containing metadata for the object, see <code><a href="readObjectFile.html">readObjectFile</a></code> for details.</p></dd>
 
 
 <dt>...</dt>
@@ -88,13 +92,13 @@
 <span class="r-in"><span><span class="fu"><a href="saveObject.html">saveObject</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/setNames.html" class="external-link">setNames</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html" class="external-link">runif</a></span><span class="op">(</span><span class="fl">26</span><span class="op">)</span>, <span class="va">letters</span><span class="op">)</span>, <span class="va">tmp</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">readAtomicVector</span><span class="op">(</span><span class="va">tmp</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>          a          b          c          d          e          f          g </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 0.96795329 0.38427611 0.16962409 0.21275891 0.51381955 0.51308323 0.78736191 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 0.10505917 0.26759438 0.00649745 0.29395229 0.61729847 0.88277415 0.96144142 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>          h          i          j          k          l          m          n </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 0.31215977 0.72439107 0.98356479 0.91184993 0.86522176 0.08066341 0.56427403 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 0.78493664 0.61559544 0.97323696 0.27171829 0.95672349 0.25807627 0.66541884 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>          o          p          q          r          s          t          u </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 0.89433724 0.92293611 0.43978030 0.40037106 0.58594859 0.92814632 0.23918655 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 0.50051972 0.94800500 0.92137500 0.91267127 0.70269400 0.02175440 0.98019865 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>          v          w          x          y          z </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 0.36424041 0.65106816 0.19391814 0.17065242 0.95909481 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 0.46734377 0.98043363 0.27174433 0.03918217 0.94081707 </span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

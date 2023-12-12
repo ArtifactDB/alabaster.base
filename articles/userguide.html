@@ -237,13 +237,13 @@ directory, and fiddling with them may cause unexpected results.</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/readObject.html">readObject</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">tmp</span>, <span class="st">"other_columns/1"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## DataFrame with 5 rows and 2 columns</span></span>
-<span><span class="co">##           B          C</span></span>
-<span><span class="co">##   &lt;numeric&gt;  &lt;numeric&gt;</span></span>
-<span><span class="co">## 1  0.171782 -0.6477552</span></span>
-<span><span class="co">## 2  0.192055 -0.9602322</span></span>
-<span><span class="co">## 3  0.937939  0.0486247</span></span>
-<span><span class="co">## 4  0.967570  0.2111821</span></span>
-<span><span class="co">## 5  0.645395 -0.1474146</span></span></code></pre>
+<span><span class="co">##           B         C</span></span>
+<span><span class="co">##   &lt;numeric&gt; &lt;numeric&gt;</span></span>
+<span><span class="co">## 1  0.509547 -0.740906</span></span>
+<span><span class="co">## 2  0.289493 -1.348786</span></span>
+<span><span class="co">## 3  0.249933  0.232475</span></span>
+<span><span class="co">## 4  0.342086 -0.552990</span></span>
+<span><span class="co">## 5  0.812794  1.301509</span></span></code></pre>
 </div>
 <div class="section level2">
 <h2 id="extending-to-new-classes">Extending to new classes<a class="anchor" aria-label="anchor" href="#extending-to-new-classes"></a>
@@ -296,13 +296,13 @@ package. First, the saving method:</p>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/write.html" class="external-link">write</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span>, file<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">path</span>, <span class="st">"dimensions.txt"</span><span class="op">)</span>, ncol<span class="op">=</span><span class="fl">1</span><span class="op">)</span></span>
 <span></span>
 <span>    <span class="co"># Creating an object file.</span></span>
-<span>    <span class="fu"><a href="https://rdrr.io/r/base/write.html" class="external-link">write</a></span><span class="op">(</span><span class="st">"triplet_sparse_matrix"</span>, file<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">path</span>, <span class="st">"OBJECT"</span><span class="op">)</span><span class="op">)</span></span>
+<span>    <span class="fu"><a href="../reference/readObjectFile.html">saveObjectFile</a></span><span class="op">(</span><span class="va">path</span>, <span class="st">"triplet_sparse_matrix"</span><span class="op">)</span></span>
 <span><span class="op">}</span><span class="op">)</span></span></code></pre></div>
 <p>And now the reading and validation methods. The registration is
 usually done in the extension package’s <code>onLoad()</code>
 function.</p>
 <div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">readSparseTripletMatrix</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">path</span><span class="op">)</span> <span class="op">{</span></span>
+<code class="sourceCode R"><span><span class="va">readSparseTripletMatrix</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">path</span>, <span class="va">metadata</span>, <span class="va">...</span><span class="op">)</span> <span class="op">{</span></span>
 <span>    <span class="va">df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.table</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">path</span>, <span class="st">"matrix.csv"</span><span class="op">)</span>, header<span class="op">=</span><span class="cn">TRUE</span>, sep<span class="op">=</span><span class="st">","</span><span class="op">)</span></span>
 <span>    <span class="va">dims</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readLines.html" class="external-link">readLines</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">path</span>, <span class="st">"dimensions.txt"</span><span class="op">)</span><span class="op">)</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/pkg/Matrix/man/sparseMatrix.html" class="external-link">sparseMatrix</a></span><span class="op">(</span></span>
@@ -315,7 +315,7 @@ function.</p>
 <span><span class="op">}</span></span>
 <span><span class="fu"><a href="../reference/readObject.html">registerReadObjectFunction</a></span><span class="op">(</span><span class="st">"triplet_sparse_matrix"</span>, <span class="va">readSparseTripletMatrix</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">validateSparseTripletMatrix</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">path</span><span class="op">)</span> <span class="op">{</span></span>
+<span><span class="va">validateSparseTripletMatrix</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">path</span>, <span class="va">metadata</span><span class="op">)</span> <span class="op">{</span></span>
 <span>    <span class="va">df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.table</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">path</span>, <span class="st">"matrix.csv"</span><span class="op">)</span>, header<span class="op">=</span><span class="cn">TRUE</span>, sep<span class="op">=</span><span class="st">","</span><span class="op">)</span></span>
 <span>    <span class="va">dims</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/readLines.html" class="external-link">readLines</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">path</span>, <span class="st">"dimensions.txt"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/stopifnot.html" class="external-link">stopifnot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">is.integer</a></span><span class="op">(</span><span class="va">df</span><span class="op">$</span><span class="va">i</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/all.html" class="external-link">all</a></span><span class="op">(</span><span class="va">df</span><span class="op">$</span><span class="va">i</span> <span class="op">&gt;=</span> <span class="fl">0</span> <span class="op">&amp;</span> <span class="va">df</span><span class="op">$</span><span class="va">i</span> <span class="op">&lt;</span> <span class="va">dims</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span>
@@ -336,31 +336,31 @@ function.</p>
 <span><span class="va">x</span></span></code></pre></div>
 <pre><code><span><span class="co">## 10 x 10 sparse Matrix of class "dgTMatrix"</span></span>
 <span><span class="co">##                                                          </span></span>
-<span><span class="co">##  [1,] .         . 0.9201016 . . .         . .         . .</span></span>
-<span><span class="co">##  [2,] .         . .         . . 0.6877067 . .         . .</span></span>
-<span><span class="co">##  [3,] 0.9300496 . .         . . .         . .         . .</span></span>
+<span><span class="co">##  [1,] .         . 0.7260010 . . .         . .         . .</span></span>
+<span><span class="co">##  [2,] .         . .         . . 0.9773616 . .         . .</span></span>
+<span><span class="co">##  [3,] 0.5688844 . .         . . .         . .         . .</span></span>
 <span><span class="co">##  [4,] .         . .         . . .         . .         . .</span></span>
-<span><span class="co">##  [5,] .         . 0.4529047 . . .         . .         . .</span></span>
-<span><span class="co">##  [6,] .         . .         . . .         . 0.5247296 . .</span></span>
+<span><span class="co">##  [5,] .         . 0.4922007 . . .         . .         . .</span></span>
+<span><span class="co">##  [6,] .         . .         . . .         . 0.5910078 . .</span></span>
 <span><span class="co">##  [7,] .         . .         . . .         . .         . .</span></span>
 <span><span class="co">##  [8,] .         . .         . . .         . .         . .</span></span>
 <span><span class="co">##  [9,] .         . .         . . .         . .         . .</span></span>
 <span><span class="co">## [10,] .         . .         . . .         . .         . .</span></span></code></pre>
 <div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">tmp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="fu"><a href="../reference/saveObject.html">saveObject</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">tmp</span>, <span class="st">"test"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/saveObject.html">saveObject</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">tmp</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/list.files.html" class="external-link">list.files</a></span><span class="op">(</span><span class="va">tmp</span>, recursive<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## [1] "dimensions.txt" "matrix.csv"     "OBJECT"</span></span></code></pre>
 <div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/readObject.html">readObject</a></span><span class="op">(</span><span class="va">tmp</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## 10 x 10 sparse Matrix of class "dgTMatrix"</span></span>
 <span><span class="co">##                                                          </span></span>
-<span><span class="co">##  [1,] .         . 0.9201016 . . .         . .         . .</span></span>
-<span><span class="co">##  [2,] .         . .         . . 0.6877067 . .         . .</span></span>
-<span><span class="co">##  [3,] 0.9300496 . .         . . .         . .         . .</span></span>
+<span><span class="co">##  [1,] .         . 0.7260010 . . .         . .         . .</span></span>
+<span><span class="co">##  [2,] .         . .         . . 0.9773616 . .         . .</span></span>
+<span><span class="co">##  [3,] 0.5688844 . .         . . .         . .         . .</span></span>
 <span><span class="co">##  [4,] .         . .         . . .         . .         . .</span></span>
-<span><span class="co">##  [5,] .         . 0.4529047 . . .         . .         . .</span></span>
-<span><span class="co">##  [6,] .         . .         . . .         . 0.5247296 . .</span></span>
+<span><span class="co">##  [5,] .         . 0.4922007 . . .         . .         . .</span></span>
+<span><span class="co">##  [6,] .         . .         . . .         . 0.5910078 . .</span></span>
 <span><span class="co">##  [7,] .         . .         . . .         . .         . .</span></span>
 <span><span class="co">##  [8,] .         . .         . . .         . .         . .</span></span>
 <span><span class="co">##  [9,] .         . .         . . .         . .         . .</span></span>
@@ -424,18 +424,20 @@ all child objects, such as the nested <code>DataFrame</code> below.</p>
 <p>The reading function can be similarly overridden, e.g., to do
 something with the metadata that we just added.</p>
 <div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">appReadObject</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">path</span>, <span class="va">...</span><span class="op">)</span> <span class="op">{</span></span>
-<span>    <span class="va">type</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readLines.html" class="external-link">readLines</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">path</span>, <span class="st">"OBJECT"</span><span class="op">)</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">appReadObject</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">path</span>, <span class="va">metadata</span><span class="op">=</span><span class="cn">NULL</span>, <span class="va">...</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NULL.html" class="external-link">is.null</a></span><span class="op">(</span><span class="va">metadata</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span>        <span class="va">metadata</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/readObjectFile.html">readObjectFile</a></span><span class="op">(</span><span class="va">path</span><span class="op">)</span></span>
+<span>    <span class="op">}</span></span>
 <span></span>
-<span>    <span class="co"># Adding a custom message based on the type and its metadata.</span></span>
-<span>    <span class="va">meta</span> <span class="op">&lt;-</span> <span class="fu">jsonlite</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/jsonlite/man/fromJSON.html" class="external-link">fromJSON</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">path</span>, <span class="st">"_metadata.json"</span><span class="op">)</span><span class="op">)</span></span>
-<span>    <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"I am a "</span>, <span class="va">type</span>, <span class="st">" created by "</span>, <span class="va">meta</span><span class="op">$</span><span class="va">authors</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>, <span class="st">".\n"</span>, sep<span class="op">=</span><span class="st">""</span><span class="op">)</span></span>
-<span>    <span class="kw">if</span> <span class="op">(</span><span class="va">type</span> <span class="op">==</span> <span class="st">"data_frame"</span><span class="op">)</span> <span class="op">{</span></span>
-<span>        <span class="va">all.cols</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="va">meta</span><span class="op">$</span><span class="va">columns</span>, collapse<span class="op">=</span><span class="st">", "</span><span class="op">)</span></span>
+<span>    <span class="co"># Print custom message based on the type and application-specific metadata.</span></span>
+<span>    <span class="va">appmeta</span> <span class="op">&lt;-</span> <span class="fu">jsonlite</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/jsonlite/man/fromJSON.html" class="external-link">fromJSON</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">path</span>, <span class="st">"_metadata.json"</span><span class="op">)</span><span class="op">)</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"I am a "</span>, <span class="va">metadata</span><span class="op">$</span><span class="va">type</span>, <span class="st">" created by "</span>, <span class="va">appmeta</span><span class="op">$</span><span class="va">authors</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>, <span class="st">".\n"</span>, sep<span class="op">=</span><span class="st">""</span><span class="op">)</span></span>
+<span>    <span class="kw">if</span> <span class="op">(</span><span class="va">metadata</span><span class="op">$</span><span class="va">type</span> <span class="op">==</span> <span class="st">"data_frame"</span><span class="op">)</span> <span class="op">{</span></span>
+<span>        <span class="va">all.cols</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="va">appmeta</span><span class="op">$</span><span class="va">columns</span>, collapse<span class="op">=</span><span class="st">", "</span><span class="op">)</span></span>
 <span>        <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"I have the following columns: "</span>, <span class="va">all.cols</span>, <span class="st">".\n"</span>, sep<span class="op">=</span><span class="st">""</span><span class="op">)</span></span>
 <span>    <span class="op">}</span></span>
 <span></span>
-<span>    <span class="fu"><a href="../reference/readObject.html">readObject</a></span><span class="op">(</span><span class="va">path</span>, type<span class="op">=</span><span class="va">type</span>, <span class="va">...</span><span class="op">)</span></span>
+<span>    <span class="fu"><a href="../reference/readObject.html">readObject</a></span><span class="op">(</span><span class="va">path</span>, metadata<span class="op">=</span><span class="va">metadata</span>, <span class="va">...</span><span class="op">)</span></span>
 <span><span class="op">}</span></span>
 <span></span>
 <span><span class="va">old</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/altReadObject.html">altReadObjectFunction</a></span><span class="op">(</span><span class="va">appReadObject</span><span class="op">)</span></span>
@@ -447,11 +449,11 @@ something with the metadata that we just added.</p>
 <pre><code><span><span class="co">## DataFrame with 5 rows and 2 columns</span></span>
 <span><span class="co">##          Z                  AA</span></span>
 <span><span class="co">##   &lt;factor&gt;         &lt;DataFrame&gt;</span></span>
-<span><span class="co">## 1        1 0.636325:-0.1166160</span></span>
-<span><span class="co">## 2        2 0.920544:-0.2005961</span></span>
-<span><span class="co">## 3        3 0.315876: 0.0553239</span></span>
-<span><span class="co">## 4        4 0.295618: 0.8069367</span></span>
-<span><span class="co">## 5        5 0.368673: 0.3272337</span></span></code></pre>
+<span><span class="co">## 1        1 0.2571900:-2.198226</span></span>
+<span><span class="co">## 2        2 0.0640056:-1.190920</span></span>
+<span><span class="co">## 3        3 0.6010907:-0.327301</span></span>
+<span><span class="co">## 4        4 0.2178994: 1.604809</span></span>
+<span><span class="co">## 5        5 0.4892926: 0.825088</span></span></code></pre>
 <div class="sourceCode" id="cb39"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Unsetting the override for other applications.</span></span>
 <span><span class="fu"><a href="../reference/altReadObject.html">altReadObjectFunction</a></span><span class="op">(</span><span class="va">old</span><span class="op">)</span> </span></code></pre></div>
@@ -498,7 +500,7 @@ something with the metadata that we just added.</p>
 <span><span class="co">## [19] rlang_1.1.2             cachem_1.0.8            stringi_1.8.2          </span></span>
 <span><span class="co">## [22] xfun_0.41               fs_1.6.3                sass_0.4.7             </span></span>
 <span><span class="co">## [25] memoise_2.0.1           cli_3.6.1               pkgdown_2.0.7          </span></span>
-<span><span class="co">## [28] magrittr_2.0.3          Rhdf5lib_1.25.0         grid_4.4.0             </span></span>
+<span><span class="co">## [28] magrittr_2.0.3          Rhdf5lib_1.25.1         grid_4.4.0             </span></span>
 <span><span class="co">## [31] digest_0.6.33           alabaster.schemas_1.3.1 rhdf5_2.47.1           </span></span>
 <span><span class="co">## [34] lifecycle_1.0.4         vctrs_0.6.4             evaluate_0.23          </span></span>
 <span><span class="co">## [37] glue_1.6.2              ragg_1.2.6              rmarkdown_2.25         </span></span>

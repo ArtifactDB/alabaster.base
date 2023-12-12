@@ -56,7 +56,7 @@ This is done by dispatching to an appropriate validation function based on the t
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">validateObject</span><span class="op">(</span><span class="va">path</span>, type <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">validateObject</span><span class="op">(</span><span class="va">path</span>, metadata <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">registerValidateObjectFunction</span><span class="op">(</span><span class="va">type</span>, <span class="va">fun</span><span class="op">)</span></span>
 <span></span>
@@ -69,14 +69,19 @@ This is done by dispatching to an appropriate validation function based on the t
 <dd><p>String containing a path to a directory, itself created with a <code><a href="saveObject.html">saveObject</a></code> method.</p></dd>
 
 
+<dt>metadata</dt>
+<dd><p>List containing metadata for the object.
+If this is not supplied, it is automatically read from the <code>OBJECT</code> file inside <code>path</code>.</p></dd>
+
+
 <dt>type</dt>
-<dd><p>String specifying the name of type of the object.
-If this is not supplied for <code>validateObject</code>, it is automatically determined from the <code>OBJECT</code> file in <code>path</code>.</p></dd>
+<dd><p>String specifying the name of type of the object.</p></dd>
 
 
 <dt>fun</dt>
-<dd><p>For <code>registerValidateObjectFunction</code>, a function that accepts <code>path</code> and raises an error if the object at <code>path</code> is invalid.</p>
-<p>For <code>registerValidateObjectHeightFunction</code>, a function that accepts <code>path</code> and returns an integer specifying the “height” of the object.
+<dd><p>For <code>registerValidateObjectFunction</code>, a function that accepts <code>path</code> and <code>metadata</code>, and raises an error if the object at <code>path</code> is invalid.
+It can be assumed that <code>metadata</code> is a list created by reading <code>OBJECT</code>.</p>
+<p>For <code>registerValidateObjectHeightFunction</code>, a function that accepts <code>path</code> and <code>metadata</code>, and returns an integer specifying the “height” of the object.
 This is usually the length for vector-like or 1-dimensional objects, and the extent of the first dimension for higher-dimensional objects.</p>
 <p>This may also be <code>NULL</code> to delete an existing registry.</p></dd>
 

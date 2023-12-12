@@ -85,7 +85,8 @@ More methods may be defined by other packages to extend the <span class="pkg">al
     <p>Methods for the <code>stageObject</code> generic should create a directory at <code>path</code> in which the contents of <code>x</code> are to be saved.
 The files may consist of any format, though language-agnostic formats like HDF5, CSV, JSON are preferred.
 For more complex objects, multiple files and subdirectories may be created within <code>path</code>. 
-The only strict requirements are:</p><ul><li><p>There must be an <code>OBJECT</code> file inside <code>path</code>, containing a single word specifying the class of the object that was saved, e.g., <code>data_frame</code>, <code>summarized_experiment</code>.
+The only strict requirements are:</p><ul><li><p>There must be an <code>OBJECT</code> file inside <code>path</code>, 
+containing a JSON object with a <code>"type"</code> string property that specifies the class of the object, e.g., <code>"data_frame"</code>, <code>"summarized_experiment"</code>.
 This will be used by loading functions to determine how to load the files into memory.</p></li>
 <li><p>The names of files and subdirectories should not start with <code>_</code> or <code>.</code>.
 These are reserved for applications, e.g., to build manifests or to store additional metadata.</p></li>

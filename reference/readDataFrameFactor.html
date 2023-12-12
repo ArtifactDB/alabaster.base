@@ -54,13 +54,17 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">readDataFrameFactor</span><span class="op">(</span><span class="va">path</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">readDataFrameFactor</span><span class="op">(</span><span class="va">path</span>, <span class="va">metadata</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>path</dt>
 <dd><p>String containing a path to a directory, itself created with the <code><a href="saveObject.html">saveObject</a></code> method for <a href="https://rdrr.io/pkg/S4Vectors/man/DataFrameFactor-class.html" class="external-link">DataFrameFactor</a>s.</p></dd>
+
+
+<dt>metadata</dt>
+<dd><p>Named list containing metadata for the object, see <code><a href="readObjectFile.html">readObjectFile</a></code> for details.</p></dd>
 
 
 <dt>...</dt>
@@ -90,7 +94,7 @@
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">tmp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="saveObject.html">saveObject</a></span><span class="op">(</span><span class="va">out</span>, <span class="va">tmp</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu">readDataFrameFactor</span><span class="op">(</span><span class="va">tmp</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="readObject.html">readObject</a></span><span class="op">(</span><span class="va">tmp</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> DataFrameFactor object of length 100 with 0 metadata columns</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Levels: DFrame object with 5 rows</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> colnames(2): X Y</span>
