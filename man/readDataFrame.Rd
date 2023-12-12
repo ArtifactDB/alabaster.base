@@ -5,10 +5,12 @@
 \alias{loadDataFrame}
 \title{Read a DataFrame from disk}
 \usage{
-readDataFrame(path, ...)
+readDataFrame(path, metadata, ...)
 }
 \arguments{
 \item{path}{String containing a path to the directory, itself created with \code{\link{saveObject}} method for \linkS4class{DataFrame}s.}
+
+\item{metadata}{Named list containing metadata for the object, see \code{\link{readObjectFile}} for details.}
 
 \item{...}{Further arguments, passed to \code{\link{altLoadObject}} for complex nested columns.}
 }
@@ -17,6 +19,7 @@ The \linkS4class{DataFrame} represented by \code{path}.
 }
 \description{
 Read a \linkS4class{DataFrame} from its on-disk representation.
+This is usually not directly called by users, but is instead called by dispatch in \code{\link{readObject}}
 }
 \examples{
 library(S4Vectors)
@@ -24,7 +27,7 @@ df <- DataFrame(A=1:10, B=LETTERS[1:10])
 
 tmp <- tempfile()
 saveObject(df, tmp)
-readDataFrame(tmp)
+readObject(tmp)
 
 }
 \seealso{

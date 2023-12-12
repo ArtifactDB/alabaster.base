@@ -142,7 +142,7 @@ setMethod("saveObject", "dgTMatrix", function(x, path, ...) {
     write(dim(x), file=file.path(path, "dimensions.txt"), ncol=1)
 
     # Creating an object file.
-    write("triplet_sparse_matrix", file=file.path(path, "OBJECT"))
+    saveObjectFile(path, "triplet_sparse_matrix")
 })
 ```
 
@@ -150,7 +150,7 @@ And now the reading and validation methods.
 The registration is usually done in the extension package's `onLoad()` function.
 
 ```{r}
-readSparseTripletMatrix <- function(path) {
+readSparseTripletMatrix <- function(path, metadata, ...) {
     df <- read.table(file.path(path, "matrix.csv"), header=TRUE, sep=",")
     dims <- readLines(file.path(path, "dimensions.txt"))
     sparseMatrix(
@@ -163,7 +163,7 @@ readSparseTripletMatrix <- function(path) {
 }
 registerReadObjectFunction("triplet_sparse_matrix", readSparseTripletMatrix)
 
-validateSparseTripletMatrix <- function(path) {
+validateSparseTripletMatrix <- function(path, metadata) {
     df <- read.table(file.path(path, "matrix.csv"), header=TRUE, sep=",")
     dims <- as.integer(readLines(file.path(path, "dimensions.txt")))
     stopifnot(is.integer(df$i), all(df$i >= 0 & df$i < dims[1]))
@@ -186,7 +186,7 @@ x <- sparseMatrix(
 x
 
 tmp <- tempfile()
-saveObject(x, tmp, "test")
+saveObject(x, tmp)
 list.files(tmp, recursive=TRUE)
 readObject(tmp)
 ```
@@ -247,18 +247,20 @@ altSaveObjectFunction(old)
 The reading function can be similarly overridden, e.g., to do something with the metadata that we just added.
 
 ```{r}
-appReadObject <- function(path, ...) {
-    type <- readLines(file.path(path, "OBJECT"))
+appReadObject <- function(path, metadata=NULL, ...) {
+    if (is.null(metadata)) {
+        metadata <- readObjectFile(path)
+    }
 
-    # Adding a custom message based on the type and its metadata.
-    meta <- jsonlite::fromJSON(file.path(path, "_metadata.json"))
-    cat("I am a ", type, " created by ", meta$authors[1], ".\n", sep="")
-    if (type == "data_frame") {
-        all.cols <- paste(meta$columns, collapse=", ")
+    # Print custom message based on the type and application-specific metadata.
+    appmeta <- jsonlite::fromJSON(file.path(path, "_metadata.json"))
+    cat("I am a ", metadata$type, " created by ", appmeta$authors[1], ".\n", sep="")
+    if (metadata$type == "data_frame") {
+        all.cols <- paste(appmeta$columns, collapse=", ")
         cat("I have the following columns: ", all.cols, ".\n", sep="")
     }
 
-    readObject(path, type=type, ...)
+    readObject(path, metadata=metadata, ...)
 }
 
 old <- altReadObjectFunction(appReadObject)

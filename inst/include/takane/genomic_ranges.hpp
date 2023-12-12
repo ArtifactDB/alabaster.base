@@ -14,6 +14,7 @@
 #include "utils_string.hpp"
 #include "utils_public.hpp"
 #include "utils_other.hpp"
+#include "utils_json.hpp"
 
 /**
  * @file genomic_ranges.hpp
@@ -25,7 +26,7 @@ namespace takane {
 /**
  * @cond
  */
-void validate(const std::filesystem::path&, const std::string&, const Options& options);
+void validate(const std::filesystem::path&, const ObjectMetadata&, const Options& options);
 /**
  * @endcond
  */
@@ -48,11 +49,11 @@ struct SequenceLimits {
 };
 
 inline SequenceLimits find_sequence_limits(const std::filesystem::path& path, const Options& options) {
-    auto xtype = read_object_type(path);
-    if (xtype != "sequence_information") {
+    auto smeta = read_object_metadata(path);
+    if (smeta.type != "sequence_information") {
         throw std::runtime_error("'sequence_information' directory should contain a 'sequence_information' object");
     }
-    ::takane::validate(path, xtype, options);
+    ::takane::validate(path, smeta, options);
 
     auto fpath = path / "info.h5";
     H5::H5File handle(fpath, H5F_ACC_RDONLY);
@@ -97,26 +98,25 @@ inline SequenceLimits find_sequence_limits(const std::filesystem::path& path, co
 
 /**
  * @param path Path to the directory containing the genomic ranges.
+ * @param metadata Metadata for the object, typically read from its `OBJECT` file.
  * @param options Validation options, typically for reading performance.
  */
-inline void validate(const std::filesystem::path& path, const Options& options) try {
+inline void validate(const std::filesystem::path& path, const ObjectMetadata& metadata, const Options& options) {
+    const auto& vstring = internal_json::extract_version_for_type(metadata.other, "genomic_ranges");
+    auto version = ritsuko::parse_version_string(vstring.c_str(), vstring.size(), /* skip_patch = */ true);
+    if (version.major != 1) {
+        throw std::runtime_error("unsupported version string '" + vstring + "'");
+    }
+
     // Figuring out the sequence length constraints.
     auto limits = internal::find_sequence_limits(path / "sequence_information", options);
     const auto& restricted = limits.restricted;
     const auto& seqlen = limits.seqlen;
     size_t num_sequences = restricted.size();
 
-    // Handling the preamble.
+    // Now loading all three components.
     auto handle = ritsuko::hdf5::open_file(path / "ranges.h5");
     auto ghandle = ritsuko::hdf5::open_group(handle, "genomic_ranges");
-
-    auto vstring = ritsuko::hdf5::open_and_load_scalar_string_attribute(ghandle, "version");
-    auto version = ritsuko::parse_version_string(vstring.c_str(), vstring.size(), /* skip_patch = */ true);
-    if (version.major != 1) {
-        throw std::runtime_error("unsupported version string '" + vstring + "'");
-    }
-
-    // Now loading all three components.
     auto id_handle = ritsuko::hdf5::open_dataset(ghandle, "sequence");
     auto num_ranges = ritsuko::hdf5::get_1d_length(id_handle, false);
     if (ritsuko::hdf5::exceeds_integer_limit(id_handle, 64, false)) {
@@ -206,17 +206,15 @@ inline void validate(const std::filesystem::path& path, const Options& options) 
     internal_other::validate_metadata(path, "other_annotations", options);
 
     internal_string::validate_names(ghandle, "name", num_ranges, options.hdf5_buffer_size);
-
-} catch (std::exception& e) {
-    throw std::runtime_error("failed to validate 'genomic_ranges' object at '" + path.string() + "'; " + std::string(e.what()));
 }
 
 /**
  * @param path Path to a directory containing genomic ranges.
+ * @param metadata Metadata for the object, typically read from its `OBJECT` file.
  * @param options Validation options, mostly for input performance.
  * @return The number of ranges.
  */
-inline size_t height(const std::filesystem::path& path, const Options&) {
+inline size_t height(const std::filesystem::path& path, [[maybe_unused]] const ObjectMetadata& metadata, [[maybe_unused]] const Options& options) {
     auto h5path = path / "ranges.h5";
 
     // Assume it's all valid already.

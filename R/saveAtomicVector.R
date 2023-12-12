@@ -61,7 +61,6 @@ NULL
     ghandle <- H5Gcreate(fhandle, "atomic_vector")
     on.exit(H5Gclose(ghandle), add=TRUE, after=FALSE)
 
-    h5_write_attribute(ghandle, "version", "1.0", scalar=TRUE)
     h5_write_attribute(ghandle, "type", type, scalar=TRUE)
     if (!is.null(format)) {
         h5_write_attribute(ghandle, "format", format, scalar=TRUE)
@@ -81,7 +80,7 @@ NULL
         h5_write_vector(ghandle, "names", names(x))
     }
 
-    write("atomic_vector", file=file.path(path, "OBJECT"))
+    saveObjectFile(path, "atomic_vector", list(atomic_vector=list(version="1.0")))
     invisible(NULL)
 }
 

@@ -49,7 +49,6 @@
 setMethod("saveObject", "list", function(x, path, list.format=saveBaseListFormat(), ...) {
     dir.create(path, showWarnings=FALSE)
     dname <- "simple_list"
-    write(dname, file=file.path(path, "OBJECT"))
 
     env <- new.env()
     env$collected <- list()
@@ -77,6 +76,7 @@ setMethod("saveObject", "list", function(x, path, list.format=saveBaseListFormat
         close(con)
     }
 
+    saveObjectFile(path, dname, list(simple_list=list(version="1.0", format=list.format)))
     invisible(NULL)
 })
 

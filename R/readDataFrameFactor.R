@@ -1,8 +1,10 @@
 #' Read a DataFrame factor from disk
 #'
 #' Read a \linkS4class{DataFrameFactor} from its on-disk representation.
+#' This is usually not directly called by users, but is instead called by dispatch in \code{\link{readObject}}
 #'
 #' @param path String containing a path to a directory, itself created with the \code{\link{saveObject}} method for \linkS4class{DataFrameFactor}s.
+#' @param metadata Named list containing metadata for the object, see \code{\link{readObjectFile}} for details.
 #' @param ... Further arguments to pass to internal \code{\link{altSaveObject}} calls.
 #'
 #' @return A \linkS4class{DataFrameFactor} represented by \code{path}.
@@ -19,12 +21,12 @@
 #' 
 #' tmp <- tempfile()
 #' saveObject(out, tmp)
-#' readDataFrameFactor(tmp)
+#' readObject(tmp)
 #'
 #' @export
 #' @aliases loadDataFrameFactor
 #' @importFrom S4Vectors DataFrameFactor
-readDataFrameFactor <- function(path, ...) {
+readDataFrameFactor <- function(path, metadata, ...) {
     fpath <- file.path(path, "contents.h5")
     fhandle <- H5Fopen(fpath)
     on.exit(H5Fclose(fhandle), add=TRUE, after=FALSE)

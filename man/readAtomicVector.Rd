@@ -5,10 +5,12 @@
 \alias{loadAtomicVector}
 \title{Read an atomic vector from disk}
 \usage{
-readAtomicVector(path, ...)
+readAtomicVector(path, metadata, ...)
 }
 \arguments{
 \item{path}{Path to a directory created with any of the vector methods for \code{\link{saveObject}}.}
+
+\item{metadata}{Named list containing metadata for the object, see \code{\link{readObjectFile}} for details.}
 
 \item{...}{Further arguments, ignored.}
 }

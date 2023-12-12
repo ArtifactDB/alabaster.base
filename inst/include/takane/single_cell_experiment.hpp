@@ -17,8 +17,8 @@ namespace takane {
 /**
  * @cond
  */
-void validate(const std::filesystem::path&, const std::string&, const Options& options);
-std::vector<size_t> dimensions(const std::filesystem::path&, const std::string&, const Options& options);
+void validate(const std::filesystem::path&, const ObjectMetadata&, const Options& options);
+std::vector<size_t> dimensions(const std::filesystem::path&, const ObjectMetadata&, const Options& options);
 /**
  * @endcond
  */
@@ -29,30 +29,22 @@ std::vector<size_t> dimensions(const std::filesystem::path&, const std::string&,
  */
 namespace single_cell_experiment {
 
-namespace internal {
+/**
+ * @param path Path to the directory containing the single cell experiment.
+ * @param options Validation options, typically for reading performance.
+ */
+inline void validate(const std::filesystem::path& path, const ObjectMetadata& metadata, const Options& options) {
+    ::takane::ranged_summarized_experiment::validate(path, metadata, options);
 
-inline void validate(const std::filesystem::path& path, const std::string& objname, const Options& options) {
-    ::takane::ranged_summarized_experiment::internal::validate(path, "single_cell_experiment", options);
-    auto dims = ::takane::summarized_experiment::dimensions(path, options);
-    size_t num_cols = dims[1];
+    auto sedims = ::takane::summarized_experiment::dimensions(path, metadata, options);
+    size_t num_cols = sedims[1];
 
-    // Check whether we have a valid 'single_cell_experiment.json'.
-    auto mpath = path / "single_cell_experiment.json";
-    auto parsed = millijson::parse_file(mpath.c_str());
-    const millijson::Object* optr;
-    try {
-        if (parsed->type() != millijson::OBJECT) {
-            throw std::runtime_error("expected a top-level object");
-        }
-        optr = reinterpret_cast<const millijson::Object*>(parsed.get());
+    const auto& scemap = internal_json::extract_typed_object_from_metadata(metadata.other, "single_cell_experiment");
 
-        const auto& vstring = internal_summarized_experiment::validate_version_json(optr);
-        auto version = ritsuko::parse_version_string(vstring.c_str(), vstring.size(), /* skip_patch = */ true);
-        if (version.major != 1) {
-            throw std::runtime_error("unsupported version string '" + vstring + "'");
-        }
-    } catch (std::exception& e) {
-        throw std::runtime_error("invalid 'single_cell_experiment.json' file; " + std::string(e.what()));
+    const std::string& vstring = internal_json::extract_string_from_typed_object(scemap, "version", "single_cell_experiment");
+    auto version = ritsuko::parse_version_string(vstring.c_str(), vstring.size(), /* skip_patch = */ true);
+    if (version.major != 1) {
+        throw std::runtime_error("unsupported version string '" + vstring + "'");
     }
 
     // Check the reduced dimensions.
@@ -63,15 +55,15 @@ inline void validate(const std::filesystem::path& path, const std::string& objna
         for (size_t i = 0; i < num_rd; ++i) {
             auto rdname = std::to_string(i);
             auto rdpath = rddir / rdname;
-            auto rdtype = read_object_type(rdpath);
-            ::takane::validate(rdpath, rdtype, options);
+            auto rdmeta = read_object_metadata(rdpath);
+            ::takane::validate(rdpath, rdmeta, options);
 
-            auto dims = ::takane::dimensions(rdpath, rdtype, options);
+            auto dims = ::takane::dimensions(rdpath, rdmeta, options);
             if (dims.size() < 1) {
                 throw std::runtime_error("object in 'reduced_dimensions/" + rdname + "' should have at least one dimension");
             }
             if (dims[0] != num_cols) {
-                throw std::runtime_error("object in 'reduced_dimensions/" + rdname + "' should have the same number of rows as the columns of its parent '" + objname + "'");
+                throw std::runtime_error("object in 'reduced_dimensions/" + rdname + "' should have the same number of rows as the columns of its parent '" + metadata.type + "'");
             }
         }
 
@@ -91,15 +83,15 @@ inline void validate(const std::filesystem::path& path, const std::string& objna
         for (size_t i = 0; i < num_ae; ++i) {
             auto aename = std::to_string(i);
             auto aepath = aedir / aename;
-            auto aetype = read_object_type(aepath);
-            if (!satisfies_interface(aetype, "SUMMARIZED_EXPERIMENT")) {
+            auto aemeta = read_object_metadata(aepath);
+            if (!satisfies_interface(aemeta.type, "SUMMARIZED_EXPERIMENT")) {
                 throw std::runtime_error("object in 'alternative_experiments/" + aename + "' should satisfy the 'SUMMARIZED_EXPERIMENT' interface");
             }
 
-            ::takane::validate(aepath, aetype, options);
-            auto dims = ::takane::dimensions(aepath, aetype, options);
+            ::takane::validate(aepath, aemeta, options);
+            auto dims = ::takane::dimensions(aepath, aemeta, options);
             if (dims[1] != num_cols) {
-                throw std::runtime_error("object in 'alternative_experiments/" + aename + "' should have the same number of columns as its parent '" + objname + "'");
+                throw std::runtime_error("object in 'alternative_experiments/" + aename + "' should have the same number of columns as its parent '" + metadata.type + "'");
             }
         }
 
@@ -110,8 +102,8 @@ inline void validate(const std::filesystem::path& path, const std::string& objna
     }
 
     // Validating the main experiment name.
-    auto mIt = optr->values.find("main_experiment_name");
-    if (mIt != optr->values.end()) {
+    auto mIt = scemap.find("main_experiment_name");
+    if (mIt != scemap.end()) {
         const auto& ver = mIt->second;
         if (ver->type() != millijson::STRING) {
             throw std::runtime_error("expected 'main_experiment_name' to be a string");
@@ -124,18 +116,6 @@ inline void validate(const std::filesystem::path& path, const std::string& objna
             throw std::runtime_error("expected 'main_experiment_name' to not overlap with 'alternative_experiment' names (found '" + mname + "')");
         }
     }
-}
-
-}
-
-/**
- * @param path Path to the directory containing the single cell experiment.
- * @param options Validation options, typically for reading performance.
- */
-inline void validate(const std::filesystem::path& path, const Options& options) try {
-    internal::validate(path, "single_cell_experiment", options);
-} catch (std::exception& e) {
-    throw std::runtime_error("failed to validate 'single_cell_experiment' object at '" + path.string() + "'; " + std::string(e.what()));
 }
 
 }

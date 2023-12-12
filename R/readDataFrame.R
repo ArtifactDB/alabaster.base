@@ -1,8 +1,10 @@
 #' Read a DataFrame from disk
 #'
 #' Read a \linkS4class{DataFrame} from its on-disk representation.
+#' This is usually not directly called by users, but is instead called by dispatch in \code{\link{readObject}}
 #'
 #' @param path String containing a path to the directory, itself created with \code{\link{saveObject}} method for \linkS4class{DataFrame}s.
+#' @param metadata Named list containing metadata for the object, see \code{\link{readObjectFile}} for details.
 #' @param ... Further arguments, passed to \code{\link{altLoadObject}} for complex nested columns.
 #'
 #' @return The \linkS4class{DataFrame} represented by \code{path}.
@@ -18,12 +20,12 @@
 #'
 #' tmp <- tempfile()
 #' saveObject(df, tmp)
-#' readDataFrame(tmp)
+#' readObject(tmp)
 #'
 #' @export
 #' @aliases loadDataFrame
 #' @importFrom S4Vectors DataFrame make_zero_col_DFrame
-readDataFrame <- function(path, ...) {
+readDataFrame <- function(path, metadata, ...) {
     fpath <- file.path(path, "basic_columns.h5")
     fhandle <- H5Fopen(fpath)
     on.exit(H5Fclose(fhandle), add=TRUE, after=FALSE)

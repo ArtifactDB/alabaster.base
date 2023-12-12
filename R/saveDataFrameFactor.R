@@ -30,7 +30,6 @@ setMethod("saveObject", "DataFrameFactor", function(x, path, ...) {
     on.exit(H5Fclose(fhandle), add=TRUE, after=FALSE)
     ghandle <- H5Gcreate(fhandle, "data_frame_factor")
     on.exit(H5Gclose(ghandle), add=TRUE, after=FALSE)
-    h5_write_attribute(ghandle, "version", "1.0", scalar=TRUE)
 
     .simple_save_codes(ghandle, x)
     stuff <- levels(x)
@@ -42,7 +41,7 @@ setMethod("saveObject", "DataFrameFactor", function(x, path, ...) {
         ...
     )
 
-    write("data_frame_factor", file=file.path(path, "OBJECT"))
+    saveObjectFile(path, "data_frame_factor", list(data_frame_factor=list(version="1.0")))
 })
 
 .anyDuplicated_fallback <- function(path, ...) {

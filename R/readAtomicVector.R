@@ -3,6 +3,7 @@
 #' Read a vector consisting of atomic elements from its on-disk representation.
 #'
 #' @param path Path to a directory created with any of the vector methods for \code{\link{saveObject}}.
+#' @param metadata Named list containing metadata for the object, see \code{\link{readObjectFile}} for details.
 #' @param ... Further arguments, ignored.
 #'
 #' @return 
@@ -20,7 +21,7 @@
 #' 
 #' @export
 #' @aliases loadAtomicVector
-readAtomicVector <- function(path, ...) {
+readAtomicVector <- function(path, metadata, ...) {
     fpath <- file.path(path, "contents.h5")
     fhandle <- H5Fopen(fpath)
     on.exit(H5Fclose(fhandle), add=TRUE, after=FALSE)

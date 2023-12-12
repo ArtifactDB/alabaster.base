@@ -18,9 +18,9 @@ namespace takane {
 /**
  * @cond
  */
-void validate(const std::filesystem::path&, const std::string&, const Options& options);
-size_t height(const std::filesystem::path&, const std::string&, const Options& options);
-std::vector<size_t> dimensions(const std::filesystem::path&, const std::string&, const Options& options);
+void validate(const std::filesystem::path&, const ObjectMetadata&, const Options& options);
+size_t height(const std::filesystem::path&, const ObjectMetadata&, const Options& options);
+std::vector<size_t> dimensions(const std::filesystem::path&, const ObjectMetadata&, const Options& options);
 /**
  * @endcond
  */
@@ -32,63 +32,52 @@ std::vector<size_t> dimensions(const std::filesystem::path&, const std::string&,
 namespace summarized_experiment {
 
 /**
- * @cond
+ * @param path Path to the directory containing the summarized experiment.
+ * @param metadata Metadata for the object, typically read from its `OBJECT` file.
+ * @param options Validation options, typically for reading performance.
  */
-namespace internal {
+inline void validate(const std::filesystem::path& path, const ObjectMetadata& metadata, const Options& options) {
+    const auto& semap = internal_json::extract_typed_object_from_metadata(metadata.other, "summarized_experiment");
 
-inline void validate(const std::filesystem::path& path, const std::string& objname, const Options& options) {
-    auto mpath = path / "summarized_experiment.json";
-    auto parsed = millijson::parse_file(mpath.c_str());
+    const std::string& vstring = internal_json::extract_string_from_typed_object(semap, "version", "summarized_experiment");
+    auto version = ritsuko::parse_version_string(vstring.c_str(), vstring.size(), /* skip_patch = */ true);
+    if (version.major != 1) {
+        throw std::runtime_error("unsupported version string '" + vstring + "'");
+    }
 
+    // Validating the dimensions.
     size_t num_rows = 0, num_cols = 0;
-    try {
-        if (parsed->type() != millijson::OBJECT) {
-            throw std::runtime_error("expected a top-level object");
+    {
+        auto dIt = semap.find("dimensions");
+        if (dIt == semap.end()) {
+            throw std::runtime_error("expected a 'dimensions' property");
         }
-        auto optr = reinterpret_cast<const millijson::Object*>(parsed.get());
-
-        const auto& vstring = internal_summarized_experiment::validate_version_json(optr);
-        auto version = ritsuko::parse_version_string(vstring.c_str(), vstring.size(), /* skip_patch = */ true);
-        if (version.major != 1) {
-            throw std::runtime_error("unsupported version string '" + vstring + "'");
+        const auto& dims = dIt->second;
+        if (dims->type() != millijson::ARRAY) {
+            throw std::runtime_error("expected 'dimensions' to be an array");
         }
 
-        // Validating the dimensions.
-        {
-            auto dIt = optr->values.find("dimensions");
-            if (dIt == optr->values.end()) {
-                throw std::runtime_error("expected a 'dimensions' property");
-            }
-            const auto& dims = dIt->second;
-            if (dims->type() != millijson::ARRAY) {
-                throw std::runtime_error("expected 'dimensions' to be an array");
-            }
-
-            auto dptr = reinterpret_cast<const millijson::Array*>(dims.get());
-            if (dptr->values.size() != 2) {
-                throw std::runtime_error("expected 'dimensions' to be an array of length 2");
-            }
-
-            size_t counter = 0;
-            for (const auto& x : dptr->values) {
-                if (x->type() != millijson::NUMBER) {
-                    throw std::runtime_error("expected 'dimensions' to be an array of numbers");
-                }
-                auto val = reinterpret_cast<const millijson::Number*>(x.get())->value;
-                if (val < 0 || std::floor(val) != val) {
-                    throw std::runtime_error("expected 'dimensions' to contain non-negative integers");
-                }
-                if (counter == 0) {
-                    num_rows = val;
-                } else {
-                    num_cols = val;
-                }
-                ++counter;
-            }
+        auto dptr = reinterpret_cast<const millijson::Array*>(dims.get());
+        if (dptr->values.size() != 2) {
+            throw std::runtime_error("expected 'dimensions' to be an array of length 2");
         }
 
-    } catch (std::exception& e) {
-        throw std::runtime_error("invalid 'summarized_experiment.json' file; " + std::string(e.what()));
+        size_t counter = 0;
+        for (const auto& x : dptr->values) {
+            if (x->type() != millijson::NUMBER) {
+                throw std::runtime_error("expected 'dimensions' to be an array of numbers");
+            }
+            auto val = reinterpret_cast<const millijson::Number*>(x.get())->value;
+            if (val < 0 || std::floor(val) != val) {
+                throw std::runtime_error("expected 'dimensions' to contain non-negative integers");
+            }
+            if (counter == 0) {
+                num_rows = val;
+            } else {
+                num_cols = val;
+            }
+            ++counter;
+        }
     }
 
     // Checking the assays. The directory is also allowed to not exist, 
@@ -99,18 +88,18 @@ inline void validate(const std::filesystem::path& path, const std::string& objna
         for (size_t i = 0; i < num_assays; ++i) {
             auto aname = std::to_string(i);
             auto apath = adir / aname;
-            auto atype = read_object_type(apath);
-            ::takane::validate(apath, atype, options);
+            auto ameta = read_object_metadata(apath);
+            ::takane::validate(apath, ameta, options);
 
-            auto dims = ::takane::dimensions(apath, atype, options);
+            auto dims = ::takane::dimensions(apath, ameta, options);
             if (dims.size() < 2) {
                 throw std::runtime_error("object in 'assays/" + aname + "' should have two or more dimensions");
             }
             if (dims[0] != num_rows) {
-                throw std::runtime_error("object in 'assays/" + aname + "' should have the same number of rows as its parent '" + objname + "'");
+                throw std::runtime_error("object in 'assays/" + aname + "' should have the same number of rows as its parent '" + metadata.type + "'");
             }
             if (dims[1] != num_cols) {
-                throw std::runtime_error("object in 'assays/" + aname + "' should have the same number of columns as its parent '" + objname + "'");
+                throw std::runtime_error("object in 'assays/" + aname + "' should have the same number of columns as its parent '" + metadata.type + "'");
             }
         }
 
@@ -122,58 +111,41 @@ inline void validate(const std::filesystem::path& path, const std::string& objna
 
     auto rd_path = path / "row_data";
     if (std::filesystem::exists(rd_path)) {
-        auto rd_type = read_object_type(rd_path);
-        if (!satisfies_interface(rd_type, "DATA_FRAME")) {
+        auto rdmeta = read_object_metadata(rd_path);
+        if (!satisfies_interface(rdmeta.type, "DATA_FRAME")) {
             throw std::runtime_error("object in 'row_data' should satisfy the 'DATA_FRAME' interface");
         }
-        ::takane::validate(rd_path, rd_type, options);
-        if (::takane::height(rd_path, rd_type, options) != num_rows) {
-            throw std::runtime_error("data frame at 'row_data' should have number of rows equal to that of the '" + objname + "'");
+        ::takane::validate(rd_path, rdmeta, options);
+        if (::takane::height(rd_path, rdmeta, options) != num_rows) {
+            throw std::runtime_error("data frame at 'row_data' should have number of rows equal to that of the '" + metadata.type + "'");
         }
     }
 
     auto cd_path = path / "column_data";
     if (std::filesystem::exists(cd_path)) {
-        auto cd_type = read_object_type(cd_path);
-        if (!satisfies_interface(cd_type, "DATA_FRAME")) {
+        auto cdmeta = read_object_metadata(cd_path);
+        if (!satisfies_interface(cdmeta.type, "DATA_FRAME")) {
             throw std::runtime_error("object in 'column_data' should satisfy the 'DATA_FRAME' interface");
         }
-        ::takane::validate(cd_path, cd_type, options);
-        if (::takane::height(cd_path, cd_type, options) != num_cols) {
-            throw std::runtime_error("data frame at 'column_data' should have number of rows equal to the number of columns of its parent '" + objname + "'");
+        ::takane::validate(cd_path, cdmeta, options);
+        if (::takane::height(cd_path, cdmeta, options) != num_cols) {
+            throw std::runtime_error("data frame at 'column_data' should have number of rows equal to the number of columns of its parent '" + metadata.type + "'");
         }
     }
 
     internal_other::validate_metadata(path, "other_data", options);
 }
 
-}
-/**
- * @endcond
- */
-
-/**
- * @param path Path to the directory containing the summarized experiment.
- * @param options Validation options, typically for reading performance.
- */
-inline void validate(const std::filesystem::path& path, const Options& options) try {
-    internal::validate(path, "summarized_experiment", options);
-} catch (std::exception& e) {
-    throw std::runtime_error("failed to validate 'summarized_experiment' object at '" + path.string() + "'; " + std::string(e.what()));
-}
-
 /**
  * @param path Path to a directory containing a summarized experiment.
+ * @param metadata Metadata for the object, typically read from its `OBJECT` file.
  * @param options Validation options, mostly for input performance.
  * @return Number of rows in the summarized experiment.
  */
-inline size_t height(const std::filesystem::path& path, [[maybe_unused]] const Options& options) {
-    auto mpath = path / "summarized_experiment.json";
-    auto parsed = millijson::parse_file(mpath.c_str());
-
-    // Assume it's all valid, so we go sraight for the kill.
-    auto optr = reinterpret_cast<const millijson::Object*>(parsed.get());
-    auto dIt = optr->values.find("dimensions");
+inline size_t height([[maybe_unused]] const std::filesystem::path& path, const ObjectMetadata& metadata, [[maybe_unused]] const Options& options) {
+    // Assume it's all valid, so we go straight for the kill.
+    const auto& semap = internal_json::extract_object(metadata.other, "summarized_experiment");
+    auto dIt = semap.find("dimensions");
     const auto& dims = dIt->second;
     auto dptr = reinterpret_cast<const millijson::Array*>(dims.get());
     return reinterpret_cast<const millijson::Number*>(dptr->values[0].get())->value;
@@ -181,16 +153,14 @@ inline size_t height(const std::filesystem::path& path, [[maybe_unused]] const O
 
 /**
  * @param path Path to a directory containing a summarized experiment.
+ * @param metadata Metadata for the object, typically read from its `OBJECT` file.
  * @param options Validation options, mostly for input performance.
  * @return A vector of length 2 containing the dimensions of the summarized experiment.
  */
-inline std::vector<size_t> dimensions(const std::filesystem::path& path, [[maybe_unused]] const Options& options) {
-    auto mpath = path / "summarized_experiment.json";
-    auto parsed = millijson::parse_file(mpath.c_str());
-
-    // Assume it's all valid, so we go sraight for the kill.
-    auto optr = reinterpret_cast<const millijson::Object*>(parsed.get());
-    auto dIt = optr->values.find("dimensions");
+inline std::vector<size_t> dimensions([[maybe_unused]] const std::filesystem::path& path, const ObjectMetadata& metadata, [[maybe_unused]] const Options& options) {
+    // Assume it's all valid, so we go straight for the kill.
+    const auto& semap = internal_json::extract_object(metadata.other, "summarized_experiment");
+    auto dIt = semap.find("dimensions");
     const auto& dims = dIt->second;
     auto dptr = reinterpret_cast<const millijson::Array*>(dims.get());
 

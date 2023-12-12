@@ -124,13 +124,13 @@ BEGIN_RCPP
 END_RCPP
 }
 // validate
-Rcpp::RObject validate(std::string path, std::string type);
-RcppExport SEXP _alabaster_base_validate(SEXP pathSEXP, SEXP typeSEXP) {
+Rcpp::RObject validate(std::string path, Rcpp::RObject metadata);
+RcppExport SEXP _alabaster_base_validate(SEXP pathSEXP, SEXP metadataSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::traits::input_parameter< std::string >::type path(pathSEXP);
-    Rcpp::traits::input_parameter< std::string >::type type(typeSEXP);
-    rcpp_result_gen = Rcpp::wrap(validate(path, type));
+    Rcpp::traits::input_parameter< Rcpp::RObject >::type metadata(metadataSEXP);
+    rcpp_result_gen = Rcpp::wrap(validate(path, metadata));
     return rcpp_result_gen;
 END_RCPP
 }

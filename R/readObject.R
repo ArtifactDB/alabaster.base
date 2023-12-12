@@ -5,9 +5,10 @@
 #'
 #' @param path String containing a path to a directory, itself created with a \code{\link{saveObject}} method.
 #' @param ... Further arguments to pass to individual methods.
+#' @param metadata Named list containing metadata for the object.
+#' If \code{NULL}, this is automatically read by \code{\link{readObjectFile}(path)}.
 #' @param type String specifying the name of type of the object.
-#' If this is not supplied for \code{readObject}, it is automatically determined from the \code{OBJECT} file in \code{path}.
-#' @param fun A loading function that accepts \code{path} and \code{...}, and returns the associated object.
+#' @param fun A loading function that accepts \code{path}, \code{metadata} and \code{...} (in that order), and returns the associated object.
 #' This may also be \code{NULL} to delete an existing entry in the registry.
 #' 
 #' @return 
@@ -48,10 +49,11 @@
 #' 
 #' @export
 #' @aliases loadObject schemaLocations customloadObjectHelper .loadObjectInternal 
-readObject <- function(path, type=NULL, ...) {
-    if (is.null(type)) {
-        type <- readLines(file.path(path, "OBJECT"))
+readObject <- function(path, metadata=NULL, ...) {
+    if (is.null(metadata)) {
+        metadata <- readObjectFile(path)
     }
+    type <- metadata$type
 
     meth <- read.registry$registry[[type]]
     if (is.null(meth)) {
@@ -60,7 +62,7 @@ readObject <- function(path, type=NULL, ...) {
         meth <- eval(parse(text=meth))
         read.registry$registry[[type]] <- meth
     }
-    meth(path, ...)
+    meth(path, metadata=metadata, ...)
 }
 
 read.registry <- new.env()

@@ -4,12 +4,14 @@
 #' This is done by dispatching to an appropriate validation function based on the type in the \code{OBJECT} file.
 #'
 #' @param path String containing a path to a directory, itself created with a \code{\link{saveObject}} method.
+#' @param metadata List containing metadata for the object.
+#' If this is not supplied, it is automatically read from the \code{OBJECT} file inside \code{path}.
 #' @param type String specifying the name of type of the object.
-#' If this is not supplied for \code{validateObject}, it is automatically determined from the \code{OBJECT} file in \code{path}.
 #' @param fun 
-#' For \code{registerValidateObjectFunction}, a function that accepts \code{path} and raises an error if the object at \code{path} is invalid.
+#' For \code{registerValidateObjectFunction}, a function that accepts \code{path} and \code{metadata}, and raises an error if the object at \code{path} is invalid.
+#' It can be assumed that \code{metadata} is a list created by reading \code{OBJECT}.
 #'
-#' For \code{registerValidateObjectHeightFunction}, a function that accepts \code{path} and returns an integer specifying the \dQuote{height} of the object.
+#' For \code{registerValidateObjectHeightFunction}, a function that accepts \code{path} and \code{metadata}, and returns an integer specifying the \dQuote{height} of the object.
 #' This is usually the length for vector-like or 1-dimensional objects, and the extent of the first dimension for higher-dimensional objects.
 #' 
 #' This may also be \code{NULL} to delete an existing registry.
@@ -33,11 +35,8 @@
 #' validateObject(tmp)
 #' 
 #' @export
-validateObject <- function(path, type=NULL) {
-    if (is.null(type)) {
-        type <- readLines(file.path(path, "OBJECT"))
-    }
-    validate(path, type)
+validateObject <- function(path, metadata=NULL) {
+    validate(path, metadata)
     invisible(NULL)
 }
 

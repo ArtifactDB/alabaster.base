@@ -80,7 +80,7 @@ test_that("DFs handle their column types correctly", {
     # Works in the new world.
     tmp2 <- tempfile()
     saveObject(df, tmp2)
-    expect_identical(readLines(file.path(tmp2, "OBJECT")), "data_frame")
+    expect_identical(readObjectFile(tmp2)$type, "data_frame")
     round2 <- readDataFrame(tmp2)
     expect_identical(round2, df)
 })
@@ -131,7 +131,7 @@ test_that("staging of weird objects within DFs works correctly", {
     # Works in the new world.
     tmp2 <- tempfile()
     saveObject(df, tmp2)
-    expect_identical(readLines(file.path(tmp2, "OBJECT")), "data_frame")
+    expect_identical(readObjectFile(tmp2)$type, "data_frame")
     round2 <- readDataFrame(tmp2)
     expect_identical(round2, df)
 })
@@ -180,7 +180,7 @@ test_that("staging with row names works correctly", {
     # Works in the new world.
     tmp2 <- tempfile()
     saveObject(df, tmp2)
-    expect_identical(readLines(file.path(tmp2, "OBJECT")), "data_frame")
+    expect_identical(readObjectFile(tmp2)$type, "data_frame")
     round2 <- readDataFrame(tmp2)
     expect_identical(df, round2)
 })
@@ -397,13 +397,13 @@ test_that("handling of IEEE special values work correctly", {
     # Works in the new world.
     tmp2a <- tempfile()
     saveObject(df, tmp2a)
-    expect_identical(readLines(file.path(tmp2a, "OBJECT")), "data_frame")
+    expect_identical(readObjectFile(tmp2a)$type, "data_frame")
     round2 <- readDataFrame(tmp2a)
     expect_identical(round2, df)
 
     tmp2b <- tempfile()
     saveObject(df2, tmp2b)
-    expect_identical(readLines(file.path(tmp2b, "OBJECT")), "data_frame")
+    expect_identical(readObjectFile(tmp2b)$type, "data_frame")
     round2 <- readDataFrame(tmp2b)
     expect_identical(round2, df2)
 })

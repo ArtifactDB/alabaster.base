@@ -13,8 +13,7 @@ namespace takane {
 namespace internal_summarized_experiment {
 
 inline void check_names_json(const std::filesystem::path& dir, std::unordered_set<std::string>& present) try {
-    auto npath = dir / "names.json";
-    auto parsed = millijson::parse_file(npath.c_str());
+    auto parsed = internal_json::parse_file(dir / "names.json");
     if (parsed->type() != millijson::ARRAY) {
         throw std::runtime_error("expected an array");
     }
@@ -48,18 +47,6 @@ inline size_t check_names_json(const std::filesystem::path& dir) {
     std::unordered_set<std::string> present;
     check_names_json(dir, present);
     return present.size();
-}
-
-inline const std::string& validate_version_json(const millijson::Object* optr) {
-    auto vIt = optr->values.find("version");
-    if (vIt == optr->values.end()) {
-        throw std::runtime_error("expected a 'version' property");
-    }
-    const auto& ver = vIt->second;
-    if (ver->type() != millijson::STRING) {
-        throw std::runtime_error("expected 'version' to be a string");
-    }
-    return reinterpret_cast<const millijson::String*>(ver.get())->value;
 }
 
 }

@@ -10,7 +10,7 @@
 \alias{registerReadObjectFunction}
 \title{Read an object from disk}
 \usage{
-readObject(path, type = NULL, ...)
+readObject(path, metadata = NULL, ...)
 
 readObjectFunctionRegistry()
 
@@ -19,12 +19,14 @@ registerReadObjectFunction(type, fun)
 \arguments{
 \item{path}{String containing a path to a directory, itself created with a \code{\link{saveObject}} method.}
 
-\item{type}{String specifying the name of type of the object.
-If this is not supplied for \code{readObject}, it is automatically determined from the \code{OBJECT} file in \code{path}.}
+\item{metadata}{Named list containing metadata for the object.
+If \code{NULL}, this is automatically read by \code{\link{readObjectFile}(path)}.}
 
 \item{...}{Further arguments to pass to individual methods.}
 
-\item{fun}{A loading function that accepts \code{path} and \code{...}, and returns the associated object.
+\item{type}{String specifying the name of type of the object.}
+
+\item{fun}{A loading function that accepts \code{path}, \code{metadata} and \code{...} (in that order), and returns the associated object.
 This may also be \code{NULL} to delete an existing entry in the registry.}
 }
 \value{

@@ -17,7 +17,8 @@
 #' For more complex objects, multiple files and subdirectories may be created within \code{path}. 
 #' The only strict requirements are:
 #' \itemize{
-#' \item There must be an \code{OBJECT} file inside \code{path}, containing a single word specifying the class of the object that was saved, e.g., \code{data_frame}, \code{summarized_experiment}.
+#' \item There must be an \code{OBJECT} file inside \code{path}, 
+#' containing a JSON object with a \code{"type"} string property that specifies the class of the object, e.g., \code{"data_frame"}, \code{"summarized_experiment"}.
 #' This will be used by loading functions to determine how to load the files into memory.
 #' \item The names of files and subdirectories should not start with \code{_} or \code{.}.
 #' These are reserved for applications, e.g., to build manifests or to store additional metadata.

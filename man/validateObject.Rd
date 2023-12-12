@@ -6,7 +6,7 @@
 \alias{registerValidateObjectHeightFunction}
 \title{Validate an object's on-disk representation}
 \usage{
-validateObject(path, type = NULL)
+validateObject(path, metadata = NULL)
 
 registerValidateObjectFunction(type, fun)
 
@@ -15,12 +15,15 @@ registerValidateObjectHeightFunction(type, fun)
 \arguments{
 \item{path}{String containing a path to a directory, itself created with a \code{\link{saveObject}} method.}
 
-\item{type}{String specifying the name of type of the object.
-If this is not supplied for \code{validateObject}, it is automatically determined from the \code{OBJECT} file in \code{path}.}
+\item{metadata}{List containing metadata for the object.
+If this is not supplied, it is automatically read from the \code{OBJECT} file inside \code{path}.}
 
-\item{fun}{For \code{registerValidateObjectFunction}, a function that accepts \code{path} and raises an error if the object at \code{path} is invalid.
+\item{type}{String specifying the name of type of the object.}
 
-For \code{registerValidateObjectHeightFunction}, a function that accepts \code{path} and returns an integer specifying the \dQuote{height} of the object.
+\item{fun}{For \code{registerValidateObjectFunction}, a function that accepts \code{path} and \code{metadata}, and raises an error if the object at \code{path} is invalid.
+It can be assumed that \code{metadata} is a list created by reading \code{OBJECT}.
+
+For \code{registerValidateObjectHeightFunction}, a function that accepts \code{path} and \code{metadata}, and returns an integer specifying the \dQuote{height} of the object.
 This is usually the length for vector-like or 1-dimensional objects, and the extent of the first dimension for higher-dimensional objects.
 
 This may also be \code{NULL} to delete an existing registry.}

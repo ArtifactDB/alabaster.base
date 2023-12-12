@@ -4,10 +4,10 @@
 test_that("validation registration works as expected", {
     tmp <- tempfile()
     dir.create(tmp)
-    write("foobar", file.path(tmp, "OBJECT"))
+    saveObjectFile(tmp, "foobar")
     expect_error(validateObject(tmp), "foobar");
 
-    registerValidateObjectFunction("foobar", function(path) {})
+    registerValidateObjectFunction("foobar", function(path, metadata) {})
     expect_error(validateObject(tmp), NA);
 
     registerValidateObjectFunction("foobar", NULL)
@@ -20,16 +20,51 @@ test_that("height registration works as expected", {
     tmp <- tempfile()
     saveObject(X, tmp)
 
-    write("foobar", file.path(tmp, "other_columns", "0", "OBJECT"))
-    registerValidateObjectFunction("foobar", function(path) {})
+    saveObjectFile(file.path(tmp, "other_columns", "0"), "foobar", list())
+    registerValidateObjectFunction("foobar", function(path, metadata) {})
     on.exit(registerValidateObjectFunction("foobar", NULL))
 
     expect_error(validateObject(tmp), "no registered 'height'");
 
-    registerValidateObjectHeightFunction("foobar", function(path) { nrow(X) })
+    registerValidateObjectHeightFunction("foobar", function(path, metadata) { nrow(X) })
     expect_error(validateObject(tmp), NA);
 
     registerValidateObjectHeightFunction("foobar", NULL)
     expect_error(validateObject(tmp), "no registered 'height'");
 })
 
+test_that("conversion from R list to C++ JSON during validation works as expected", {
+    ncols <- 123
+    df <- DataFrame(
+        stuff = rep(LETTERS[1:3], length.out=ncols),
+        whee = as.numeric(10 + seq_len(ncols))
+    )
+
+    tmp <- tempfile()
+    saveObject(df, tmp)
+    expect_error(validateObject(tmp), NA)
+
+    meta <- readObjectFile(tmp)
+    expect_error(validateObject(tmp, metadata=meta), NA)
+
+    meta$type <- "FOO"
+    expect_error(validateObject(tmp, metadata=meta), "no registered 'validate'")
+})
+
+test_that("conversion from C++ JSON to R list during validation works as expected", {
+    registerValidateObjectFunction("foobar", function(path, metadata) { 
+        stopifnot(metadata$type == "foobar")
+        if (metadata$foobar==2) {
+            stop("ARGGGGH")
+        }
+    })
+    on.exit(registerValidateObjectFunction("foobar", NULL))
+
+    tmp <- tempfile()
+    dir.create(tmp)
+    saveObjectFile(tmp, "foobar", list(foobar=3))
+    expect_error(validateObject(tmp), NA);
+
+    saveObjectFile(tmp, "foobar", list(foobar=2))
+    expect_error(validateObject(tmp), "ARGGGGH");
+})

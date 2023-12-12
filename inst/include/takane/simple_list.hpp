@@ -33,10 +33,43 @@ void validate(const std::filesystem::path&, const Options&);
 namespace simple_list {
 
 /**
+ * @cond
+ */
+namespace internal {
+
+inline std::string extract_format(const internal_json::JsonObjectMap& map) {
+    auto fIt = map.find("format");
+    if (fIt == map.end()) {
+        return "hdf5";
+    }
+    const auto& val = fIt->second;
+    if (val->type() != millijson::STRING) {
+        throw std::runtime_error("'simple_list.format' in the object metadata should be a JSON string");
+    }
+    return reinterpret_cast<millijson::String*>(val.get())->value;
+}
+
+}
+/**
+ * @endcond
+ */
+
+/**
  * @param path Path to the directory containing the simple list.
+ * @param metadata Metadata for the object, typically read from its `OBJECT` file.
  * @param options Validation options, typically for reading performance.
  */
-inline void validate(const std::filesystem::path& path, const Options& options) try {
+inline void validate(const std::filesystem::path& path, const ObjectMetadata& metadata, const Options& options) {
+    const auto& metamap = internal_json::extract_typed_object_from_metadata(metadata.other, "simple_list");
+
+    const std::string& vstring = internal_json::extract_string_from_typed_object(metamap, "version", "simple_list");
+    auto version = ritsuko::parse_version_string(vstring.c_str(), vstring.size(), /* skip_patch = */ true);
+    if (version.major != 1) {
+        throw std::runtime_error("unsupported version string '" + vstring + "'");
+    }
+
+    std::string format = internal::extract_format(metamap);
+
     auto other_dir = path / "other_contents";
     int num_external = 0;
     if (std::filesystem::exists(other_dir)) {
@@ -47,7 +80,7 @@ inline void validate(const std::filesystem::path& path, const Options& options) 
 
         for (const auto& entry : std::filesystem::directory_iterator(other_dir)) {
             try {
-                ::takane::validate(entry.path().string(), options);
+                ::takane::validate(entry.path(), options);
             } catch (std::exception& e) {
                 throw std::runtime_error("failed to validate external list object at '" + std::filesystem::relative(entry.path(), path).string() + "'; " + std::string(e.what()));
             }
@@ -55,61 +88,54 @@ inline void validate(const std::filesystem::path& path, const Options& options) 
         }
     }
 
-    {
+    if (format == "json.gz") {
         auto candidate = path / "list_contents.json.gz";
-        if (std::filesystem::exists(candidate)) {
-            uzuki2::json::Options opt;
-            opt.parallel = options.parallel_reads;
-            byteme::SomeFileReader gzreader(candidate.string());
-            uzuki2::json::validate(gzreader, num_external, opt);
-            return;
-        } 
-    }
-
-    {
+        uzuki2::json::Options opt;
+        opt.parallel = options.parallel_reads;
+        byteme::SomeFileReader gzreader(candidate.string());
+        uzuki2::json::validate(gzreader, num_external, opt);
+    } else if (format == "hdf5") {
         auto candidate = path / "list_contents.h5";
-        if (std::filesystem::exists(candidate)) {
-            uzuki2::hdf5::validate(candidate.string(), "simple_list", num_external);
-            return;
-        } 
+        uzuki2::hdf5::validate(candidate.string(), "simple_list", num_external);
+    } else {
+        throw std::runtime_error("unknown format '" + format + "'");
     }
-
-    throw std::runtime_error("could not determine format from the file names");
-} catch (std::exception& e) {
-    throw std::runtime_error("failed to validate a 'simple_list' at '" + path.string() + "'; " + std::string(e.what()));
 }
 
 /**
  * @param path Path to the directory containing the simple list.
+ * @param metadata Metadata for the object, typically read from its `OBJECT` file.
  * @param options Validation options, typically for reading performance.
  * @return The number of list elements.
  */
-inline size_t height(const std::filesystem::path& path, const Options& options) {
-    {
+inline size_t height(const std::filesystem::path& path, const ObjectMetadata& metadata, const Options& options) {
+    const auto& metamap = internal_json::extract_typed_object_from_metadata(metadata.other, "simple_list");
+    std::string format = internal::extract_format(metamap);
+
+    if (format == "hdf5") {
         auto candidate = path / "list_contents.h5";
-        if (std::filesystem::exists(candidate)) {
-            H5::H5File handle(candidate, H5F_ACC_RDONLY);
-            auto lhandle = handle.openGroup("simple_list");
-            auto vhandle = lhandle.openGroup("data");
-            return vhandle.getNumObjs();
-        } 
-    }
+        H5::H5File handle(candidate, H5F_ACC_RDONLY);
+        auto lhandle = handle.openGroup("simple_list");
+        auto vhandle = lhandle.openGroup("data");
+        return vhandle.getNumObjs();
 
-    // Not much choice but to parse the entire list here. We do so using the
-    // dummy, which still has enough self-awareness to hold its own length.
-    auto other_dir = path / "other_contents";
-    int num_external = 0;
-    if (std::filesystem::exists(other_dir)) {
-        num_external = internal_other::count_directory_entries(other_dir);
-    }
+    } else {
+        // Not much choice but to parse the entire list here. We do so using the
+        // dummy, which still has enough self-awareness to hold its own length.
+        auto other_dir = path / "other_contents";
+        int num_external = 0;
+        if (std::filesystem::exists(other_dir)) {
+            num_external = internal_other::count_directory_entries(other_dir);
+        }
 
-    uzuki2::json::Options opt;
-    opt.parallel = options.parallel_reads;
-    auto candidate = path / "list_contents.json.gz";
-    byteme::SomeFileReader gzreader(candidate.string());
-    uzuki2::DummyExternals ext(num_external);
-    auto ptr = uzuki2::json::parse<uzuki2::DummyProvisioner>(gzreader, std::move(ext), std::move(opt));
-    return reinterpret_cast<const uzuki2::List*>(ptr.get())->size();
+        uzuki2::json::Options opt;
+        opt.parallel = options.parallel_reads;
+        auto candidate = path / "list_contents.json.gz";
+        byteme::SomeFileReader gzreader(candidate.string());
+        uzuki2::DummyExternals ext(num_external);
+        auto ptr = uzuki2::json::parse<uzuki2::DummyProvisioner>(gzreader, std::move(ext), std::move(opt));
+        return reinterpret_cast<const uzuki2::List*>(ptr.get())->size();
+    }
 }
 
 }

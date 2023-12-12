@@ -1,8 +1,10 @@
 #' Read a base list from disk
 #'
 #' Read a \link{list} from its on-disk representation.
+#' This is usually not directly called by users, but is instead called by dispatch in \code{\link{readObject}}
 #'
 #' @param path String containing a path to a directory, itself created with the list method for \code{\link{stageObject}}. 
+#' @param metadata Named list containing metadata for the object, see \code{\link{readObjectFile}} for details.
 #' @param list.parallel Whether to perform reading and parsing in parallel for greater speed.
 #' Only relevant for lists stored in the JSON format.
 #' @param ... Further arguments to be passed to \code{\link{altReadObject}} for complex child objects.
@@ -21,11 +23,11 @@
 #'
 #' tmp <- tempfile()
 #' saveObject(ll, tmp)
-#' readBaseList(tmp)
+#' readObject(tmp)
 #'
 #' @export
 #' @aliases loadBaseList
-readBaseList <- function(path, list.parallel=TRUE, ...) {
+readBaseList <- function(path, metadata, list.parallel=TRUE, ...) {
     all.children <- list()
     child.path <- file.path(path, "other_contents")
     if (file.exists(child.path)) {
@@ -35,8 +37,9 @@ readBaseList <- function(path, list.parallel=TRUE, ...) {
         }
     }
 
-    lpath <- file.path(path, "list_contents.h5")
-    if (file.exists(lpath)) {
+    format <- metadata$simple_list$format
+    if (is.null(format) || format == "hdf5") {
+        lpath <- file.path(path, "list_contents.h5")
         output <- load_list_hdf5(lpath, "simple_list", all.children)
     } else {
         lpath <- file.path(path, "list_contents.json.gz")

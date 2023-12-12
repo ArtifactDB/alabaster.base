@@ -34,7 +34,6 @@ setMethod("saveObject", "factor", function(x, path, ...) {
     ghandle <- H5Gcreate(fhandle, "string_factor")
     on.exit(H5Gclose(ghandle), add=TRUE, after=FALSE)
 
-    h5_write_attribute(ghandle, "version", "1.0", scalar=TRUE)
     if (is.ordered(x)) {
         h5_write_attribute(ghandle, "ordered", 1L, scalar=TRUE)
     }
@@ -42,7 +41,7 @@ setMethod("saveObject", "factor", function(x, path, ...) {
     .simple_save_codes(ghandle, x)
     h5_write_vector(ghandle, "levels", levels(x))
 
-    write("string_factor", file=file.path(path, "OBJECT"))
+    saveObjectFile(path, "string_factor", list(string_factor=list(version="1.0")))
     invisible(NULL)
 })
 

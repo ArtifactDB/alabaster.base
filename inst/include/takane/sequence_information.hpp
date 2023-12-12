@@ -10,6 +10,7 @@
 #include <string>
 
 #include "utils_public.hpp"
+#include "utils_json.hpp"
 
 /**
  * @file sequence_information.hpp
@@ -26,17 +27,18 @@ namespace sequence_information {
 
 /**
  * @param path Path to the directory containing the data frame.
+ * @param metadata Metadata for the object, typically read from its `OBJECT` file.
  * @param options Validation options, typically for reading performance.
  */
-inline void validate(const std::filesystem::path& path, const Options& options) try {
-    auto handle = ritsuko::hdf5::open_file(path / "info.h5");
-    auto ghandle = ritsuko::hdf5::open_group(handle, "sequence_information");
-
-    auto vstring = ritsuko::hdf5::open_and_load_scalar_string_attribute(ghandle, "version");
+inline void validate(const std::filesystem::path& path, const ObjectMetadata& metadata, const Options& options) {
+    auto vstring = internal_json::extract_version_for_type(metadata.other, "sequence_information");
     auto version = ritsuko::parse_version_string(vstring.c_str(), vstring.size(), /* skip_patch = */ true);
     if (version.major != 1) {
         throw std::runtime_error("unsupported version string '" + vstring + "'");
     }
+
+    auto handle = ritsuko::hdf5::open_file(path / "info.h5");
+    auto ghandle = ritsuko::hdf5::open_group(handle, "sequence_information");
 
     size_t nseq = 0;
     {
@@ -100,8 +102,6 @@ inline void validate(const std::filesystem::path& path, const Options& options) 
             ritsuko::hdf5::check_missing_placeholder_attribute(gnhandle, ahandle);
         }
     }
-} catch (std::exception& e) {
-    throw std::runtime_error("failed to validate 'sequence_information' object at '" + path.string() + "'; " + std::string(e.what()));
 }
 
 }

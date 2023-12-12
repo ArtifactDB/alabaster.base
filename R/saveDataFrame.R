@@ -44,7 +44,7 @@ setMethod("saveObject", "DataFrame", function(x, path, ...) {
         mcols.path=file.path(path, "column_annotations"),
         ...
     )
-    write("data_frame", file=file.path(path, "OBJECT"))
+    saveObjectFile(path, "data_frame", list(data_frame=list(version="1.0")))
 })
 
 #' @importFrom rhdf5 h5write h5createGroup h5createFile H5Gopen H5Gclose H5Acreate H5Aclose H5Awrite H5Fopen H5Fclose H5Dopen H5Dclose
@@ -56,7 +56,6 @@ setMethod("saveObject", "DataFrame", function(x, path, ...) {
     on.exit(H5Fclose(fhandle), add=TRUE, after=FALSE)
     ghandle <- H5Gcreate(fhandle, "data_frame")
     on.exit(H5Gclose(ghandle), add=TRUE, after=FALSE)
-    h5_write_attribute(ghandle, "version", "1.0", scalar=TRUE)
     h5_write_attribute(ghandle, "row-count", nrow(x), scalar=TRUE, type="H5T_NATIVE_UINT32")
 
     gdhandle <- H5Gcreate(ghandle, "data")

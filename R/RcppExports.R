@@ -41,8 +41,8 @@ load_list_json <- function(file, obj, parallel) {
     .Call(`_alabaster_base_load_list_json`, file, obj, parallel)
 }
 
-validate <- function(path, type) {
-    .Call(`_alabaster_base_validate`, path, type)
+validate <- function(path, metadata) {
+    .Call(`_alabaster_base_validate`, path, metadata)
 }
 
 register_validate_function <- function(type, fun) {

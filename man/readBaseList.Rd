@@ -5,10 +5,12 @@
 \alias{loadBaseList}
 \title{Read a base list from disk}
 \usage{
-readBaseList(path, list.parallel = TRUE, ...)
+readBaseList(path, metadata, list.parallel = TRUE, ...)
 }
 \arguments{
 \item{path}{String containing a path to a directory, itself created with the list method for \code{\link{stageObject}}.}
+
+\item{metadata}{Named list containing metadata for the object, see \code{\link{readObjectFile}} for details.}
 
 \item{list.parallel}{Whether to perform reading and parsing in parallel for greater speed.
 Only relevant for lists stored in the JSON format.}
@@ -20,6 +22,7 @@ The list represented by \code{path}.
 }
 \description{
 Read a \link{list} from its on-disk representation.
+This is usually not directly called by users, but is instead called by dispatch in \code{\link{readObject}}
 }
 \examples{
 library(S4Vectors)
@@ -27,7 +30,7 @@ ll <- list(A=1, B=LETTERS, C=DataFrame(X=letters))
 
 tmp <- tempfile()
 saveObject(ll, tmp)
-readBaseList(tmp)
+readObject(tmp)
 
 }
 \seealso{

@@ -16,6 +16,7 @@
 #include "utils_string.hpp"
 #include "utils_factor.hpp"
 #include "utils_other.hpp"
+#include "utils_json.hpp"
 
 /**
  * @file data_frame.hpp
@@ -27,8 +28,8 @@ namespace takane {
 /**
  * @cond
  */
-void validate(const std::filesystem::path&, const Options&);
-size_t height(const std::filesystem::path&, const Options&);
+void validate(const std::filesystem::path&, const ObjectMetadata&, const Options&);
+size_t height(const std::filesystem::path&, const ObjectMetadata&, const Options&);
 /**
  * @endcond
  */
@@ -151,17 +152,18 @@ inline void validate_column(const H5::Group& dhandle, const std::string& dset_na
 
 /**
  * @param path Path to the directory containing the data frame.
+ * @param metadata Metadata for the object, typically read from its `OBJECT` file.
  * @param options Validation options, typically for reading performance.
  */
-inline void validate(const std::filesystem::path& path, const Options& options) {
-    auto handle = ritsuko::hdf5::open_file(path / "basic_columns.h5");
-    auto ghandle = ritsuko::hdf5::open_group(handle, "data_frame");
-
-    auto vstring = ritsuko::hdf5::open_and_load_scalar_string_attribute(ghandle, "version");
+inline void validate(const std::filesystem::path& path, const ObjectMetadata& metadata, const Options& options) {
+    const auto& vstring = internal_json::extract_version_for_type(metadata.other, "data_frame");
     auto version = ritsuko::parse_version_string(vstring.c_str(), vstring.size(), /* skip_patch = */ true);
     if (version.major != 1) {
         throw std::runtime_error("unsupported version '" + vstring + "'");
     }
+
+    auto handle = ritsuko::hdf5::open_file(path / "basic_columns.h5");
+    auto ghandle = ritsuko::hdf5::open_group(handle, "data_frame");
 
     // Checking the number of rows.
     auto attr = ritsuko::hdf5::open_scalar_attribute(ghandle, "row-count");
@@ -188,13 +190,14 @@ inline void validate(const std::filesystem::path& path, const Options& options) 
 
         if (!dhandle.exists(dset_name)) {
             auto opath = other_dir / dset_name;
+            auto ometa = read_object_metadata(opath);
             try {
-                ::takane::validate(opath, options);
+                ::takane::validate(opath, ometa, options);
             } catch (std::exception& e) {
                 throw std::runtime_error("failed to validate 'other' column " + dset_name + "; " + std::string(e.what()));
             }
-            if (::takane::height(opath, options) != num_rows) {
-                throw std::runtime_error("height of column " + dset_name + " of class '" + read_object_type(opath) + "' is not the same as the number of rows");
+            if (::takane::height(opath, ometa, options) != num_rows) {
+                throw std::runtime_error("height of column " + dset_name + " of class '" + ometa.type + "' is not the same as the number of rows");
             }
 
         } else {
@@ -219,10 +222,11 @@ inline void validate(const std::filesystem::path& path, const Options& options) 
 
 /**
  * @param path Path to a directory containing a data frame.
+ * @param metadata Metadata for the object, typically read from its `OBJECT` file.
  * @param options Validation options, mostly for input performance.
  * @return The number of rows.
  */
-inline size_t height(const std::filesystem::path& path, const Options&) {
+inline size_t height(const std::filesystem::path& path, [[maybe_unused]] const ObjectMetadata& metadata, [[maybe_unused]] const Options& options) {
     auto h5path = path / "basic_columns.h5";
 
     // Assume it's all valid already.
@@ -233,10 +237,11 @@ inline size_t height(const std::filesystem::path& path, const Options&) {
 
 /**
  * @param path Path to a directory containing a data frame.
+ * @param metadata Metadata for the object, typically read from its `OBJECT` file.
  * @param options Validation options, mostly for input performance.
  * @return A vector of length 2 containing the number of rows and columns in the data frame.
  */
-inline std::vector<size_t> dimensions(const std::filesystem::path& path, const Options&) {
+inline std::vector<size_t> dimensions(const std::filesystem::path& path, [[maybe_unused]] const ObjectMetadata& metadata, [[maybe_unused]] const Options& options) {
     auto h5path = path / "basic_columns.h5";
 
     // Assume it's all valid already.

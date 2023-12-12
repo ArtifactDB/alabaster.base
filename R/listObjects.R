@@ -38,11 +38,11 @@ listObjects <- function(dir, include.children=FALSE) {
 }
 
 .traverse_directory_listing <- function(root, dir, already.child=FALSE, include.children=FALSE) {
-    fpath <- file.path(root, dir, "OBJECT")
-    is.obj <- file.exists(fpath)
+    full <- file.path(root, dir)
+    is.obj <- file.exists(file.path(full, "OBJECT"))
     if (is.obj) {
         paths <- dir
-        types <- readLines(fpath)
+        types <- readObjectFile(full)$type
         childs <- already.child
     } else {
         paths <- character(0)
@@ -51,7 +51,7 @@ listObjects <- function(dir, include.children=FALSE) {
     }
 
     if (include.children || !is.obj) {
-        more.dirs <- list.dirs(file.path(root, dir), recursive=FALSE, full.names=FALSE)
+        more.dirs <- list.dirs(full, recursive=FALSE, full.names=FALSE)
         for (k in more.dirs) {
             if (dir != ".") {
                 subdir <- file.path(dir, k)
