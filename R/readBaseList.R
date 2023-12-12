@@ -78,7 +78,7 @@ loadBaseList <- function(info, project, parallel=TRUE) {
     # This is done manually because the C++ code already uses Rfc3339 and I don't
     # want to have to compile a separate version just to handle the old case.
     to_posix <- function(x) {
-        if (is.list(x) && class(x) == "list") {
+        if (is.list(x) && class(x)[1] == "list") {
             lapply(x, to_posix)
         } else if (is.Rfc3339(x)) {
             as.POSIXct(x)
