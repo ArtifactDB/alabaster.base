@@ -33,6 +33,13 @@ test_that("height registration works as expected", {
     expect_error(validateObject(tmp), "no registered 'height'");
 })
 
+test_that("dimensions registration works as expected", {
+    # Don't have an object that calls dimensions() at the C++ level, so we just
+    # check that the registration works correctly.
+    registerValidateObjectDimensionsFunction("foobar", function(path, metadata) c(1L, 2L))
+    expect_true(registerValidateObjectDimensionsFunction("foobar", NULL))
+})
+
 test_that("conversion from R list to C++ JSON during validation works as expected", {
     ncols <- 123
     df <- DataFrame(

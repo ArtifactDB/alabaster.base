@@ -176,6 +176,27 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// register_dimensions_function
+Rcpp::RObject register_dimensions_function(std::string type, Rcpp::Function fun);
+RcppExport SEXP _alabaster_base_register_dimensions_function(SEXP typeSEXP, SEXP funSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::traits::input_parameter< std::string >::type type(typeSEXP);
+    Rcpp::traits::input_parameter< Rcpp::Function >::type fun(funSEXP);
+    rcpp_result_gen = Rcpp::wrap(register_dimensions_function(type, fun));
+    return rcpp_result_gen;
+END_RCPP
+}
+// deregister_dimensions_function
+Rcpp::RObject deregister_dimensions_function(std::string type);
+RcppExport SEXP _alabaster_base_deregister_dimensions_function(SEXP typeSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::traits::input_parameter< std::string >::type type(typeSEXP);
+    rcpp_result_gen = Rcpp::wrap(deregister_dimensions_function(type));
+    return rcpp_result_gen;
+END_RCPP
+}
 // register_any_duplicated
 Rcpp::RObject register_any_duplicated(bool set);
 RcppExport SEXP _alabaster_base_register_any_duplicated(SEXP setSEXP) {
@@ -203,6 +224,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_alabaster_base_deregister_validate_function", (DL_FUNC) &_alabaster_base_deregister_validate_function, 1},
     {"_alabaster_base_register_height_function", (DL_FUNC) &_alabaster_base_register_height_function, 2},
     {"_alabaster_base_deregister_height_function", (DL_FUNC) &_alabaster_base_deregister_height_function, 1},
+    {"_alabaster_base_register_dimensions_function", (DL_FUNC) &_alabaster_base_register_dimensions_function, 2},
+    {"_alabaster_base_deregister_dimensions_function", (DL_FUNC) &_alabaster_base_deregister_dimensions_function, 1},
     {"_alabaster_base_register_any_duplicated", (DL_FUNC) &_alabaster_base_register_any_duplicated, 1},
     {NULL, NULL, 0}
 };

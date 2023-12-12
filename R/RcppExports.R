@@ -61,6 +61,14 @@ deregister_height_function <- function(type) {
     .Call(`_alabaster_base_deregister_height_function`, type)
 }
 
+register_dimensions_function <- function(type, fun) {
+    .Call(`_alabaster_base_register_dimensions_function`, type, fun)
+}
+
+deregister_dimensions_function <- function(type) {
+    .Call(`_alabaster_base_deregister_dimensions_function`, type)
+}
+
 register_any_duplicated <- function(set) {
     .Call(`_alabaster_base_register_any_duplicated`, set)
 }

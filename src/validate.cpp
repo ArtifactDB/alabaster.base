@@ -174,6 +174,26 @@ Rcpp::RObject deregister_height_function(std::string type) {
 }
 
 //[[Rcpp::export(rng=false)]]
+Rcpp::RObject register_dimensions_function(std::string type, Rcpp::Function fun) {
+    takane::dimensions_registry[type] = [fun](const std::filesystem::path& path, const takane::ObjectMetadata& metadata, const takane::Options&) -> std::vector<size_t> {
+        Rcpp::IntegerVector output = fun(Rcpp::String(path.c_str()), convert_to_R(metadata));
+        return std::vector<size_t>(output.begin(), output.end());
+    };
+    return R_NilValue;
+}
+
+//[[Rcpp::export(rng=false)]]
+Rcpp::RObject deregister_dimensions_function(std::string type) {
+    auto it = takane::dimensions_registry.find(type);
+    if (it != takane::dimensions_registry.end()) {
+        takane::dimensions_registry.erase(it);
+        return Rf_ScalarLogical(true);
+    } else {
+        return Rf_ScalarLogical(false);
+    }
+}
+
+//[[Rcpp::export(rng=false)]]
 Rcpp::RObject register_any_duplicated(bool set) {
     if (set) {
         takane::data_frame_factor::any_duplicated = [](const std::filesystem::path& path, const takane::ObjectMetadata& metadata, const takane::Options&) -> bool {
