@@ -60,7 +60,9 @@ This is done by dispatching to an appropriate validation function based on the t
 <span></span>
 <span><span class="fu">registerValidateObjectFunction</span><span class="op">(</span><span class="va">type</span>, <span class="va">fun</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">registerValidateObjectHeightFunction</span><span class="op">(</span><span class="va">type</span>, <span class="va">fun</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">registerValidateObjectHeightFunction</span><span class="op">(</span><span class="va">type</span>, <span class="va">fun</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">registerValidateObjectDimensionsFunction</span><span class="op">(</span><span class="va">type</span>, <span class="va">fun</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -83,7 +85,8 @@ If this is not supplied, it is automatically read from the <code>OBJECT</code> f
 It can be assumed that <code>metadata</code> is a list created by reading <code>OBJECT</code>.</p>
 <p>For <code>registerValidateObjectHeightFunction</code>, a function that accepts <code>path</code> and <code>metadata</code>, and returns an integer specifying the “height” of the object.
 This is usually the length for vector-like or 1-dimensional objects, and the extent of the first dimension for higher-dimensional objects.</p>
-<p>This may also be <code>NULL</code> to delete an existing registry.</p></dd>
+<p>For <code>registerValidateObjectDimensionsFunction</code>, a function that accepts <code>path</code> and <code>metadata</code>, and returns an integer vector specifying the dimensions of the object.</p>
+<p>This may also be <code>NULL</code> to delete an existing registry from any of the functions mentioned above.</p></dd>
 
 </dl></div>
     <div id="value">
@@ -93,11 +96,7 @@ This is usually the length for vector-like or 1-dimensional objects, and the ext
 <p>For <code>validateObject</code>, <code>NULL</code> is returned invisibly upon success, otherwise an error is raised.</p>
 
 
-<p>For <code>registerValidateObjectFunction</code>, the function is added to the registry for <code>type</code>.
-If <code>fun = NULL</code>, any existing entry for <code>type</code> is removed.</p>
-
-
-<p>For <code>registerValidateObjectHeightFunction</code>, the function is added to the registry for <code>type</code>.
+<p>For the <code>register*</code> functions, the supplied <code>fun</code> is added to the corresponding registry for <code>type</code>.
 If <code>fun = NULL</code>, any existing entry for <code>type</code> is removed.</p>
     </div>
     <div id="author">
