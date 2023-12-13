@@ -19,7 +19,7 @@ The \linkS4class{DataFrame} represented by \code{path}.
 }
 \description{
 Read a \linkS4class{DataFrame} from its on-disk representation.
-This is usually not directly called by users, but is instead called by dispatch in \code{\link{readObject}}
+This is usually not directly called by users, but is instead called by dispatch in \code{\link{readObject}}.
 }
 \examples{
 library(S4Vectors)

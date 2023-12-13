@@ -22,7 +22,7 @@ The list represented by \code{path}.
 }
 \description{
 Read a \link{list} from its on-disk representation.
-This is usually not directly called by users, but is instead called by dispatch in \code{\link{readObject}}
+This is usually not directly called by users, but is instead called by dispatch in \code{\link{readObject}}.
 }
 \examples{
 library(S4Vectors)

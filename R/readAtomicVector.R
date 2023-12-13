@@ -1,6 +1,7 @@
 #' Read an atomic vector from disk
 #'
 #' Read a vector consisting of atomic elements from its on-disk representation.
+#' This is usually not directly called by users, but is instead called by dispatch in \code{\link{readObject}}.
 #'
 #' @param path Path to a directory created with any of the vector methods for \code{\link{saveObject}}.
 #' @param metadata Named list containing metadata for the object, see \code{\link{readObjectFile}} for details.
@@ -17,7 +18,7 @@
 #' @examples
 #' tmp <- tempfile()
 #' saveObject(setNames(runif(26), letters), tmp)
-#' readAtomicVector(tmp)
+#' readObject(tmp)
 #' 
 #' @export
 #' @aliases loadAtomicVector

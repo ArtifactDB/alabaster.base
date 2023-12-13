@@ -19,11 +19,12 @@ The vector described by \code{info}.
 }
 \description{
 Read a vector consisting of atomic elements from its on-disk representation.
+This is usually not directly called by users, but is instead called by dispatch in \code{\link{readObject}}.
 }
 \examples{
 tmp <- tempfile()
 saveObject(setNames(runif(26), letters), tmp)
-readAtomicVector(tmp)
+readObject(tmp)
 
 }
 \seealso{

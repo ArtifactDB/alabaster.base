@@ -19,7 +19,7 @@ The vector described by \code{info}.
 }
 \description{
 Read a base R \link{factor} from its on-disk representation.
-This is usually not directly called by users, but is instead called by dispatch in \code{\link{readObject}}
+This is usually not directly called by users, but is instead called by dispatch in \code{\link{readObject}}.
 }
 \examples{
 tmp <- tempfile()

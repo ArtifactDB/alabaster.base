@@ -1,7 +1,7 @@
 #' Read a DataFrame from disk
 #'
 #' Read a \linkS4class{DataFrame} from its on-disk representation.
-#' This is usually not directly called by users, but is instead called by dispatch in \code{\link{readObject}}
+#' This is usually not directly called by users, but is instead called by dispatch in \code{\link{readObject}}.
 #'
 #' @param path String containing a path to the directory, itself created with \code{\link{saveObject}} method for \linkS4class{DataFrame}s.
 #' @param metadata Named list containing metadata for the object, see \code{\link{readObjectFile}} for details.
