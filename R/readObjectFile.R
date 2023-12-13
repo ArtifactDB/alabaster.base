@@ -8,7 +8,7 @@
 #' @param path Path to the directory representing an object.
 #' @param type String specifying the type of the object.
 #' @param extra Named list containing extra metadata to be written to the OBJECT file in \code{path}.
-#' None of the names should be \code{"type"}.
+#' Names should be unique, and any element named \code{"type"} will be overwritten by \code{type}.
 #'
 #' @return \code{readObjectFile} returns a named list of metadata for \code{path}.
 #'
@@ -32,6 +32,7 @@ readObjectFile <- function(path) {
 #' @rdname readObjectFile
 #' @importFrom jsonlite toJSON
 saveObjectFile <- function(path, type, extra=list()) {
-    metadata <- c(list(type=type), extra)
-    write(toJSON(metadata, auto_unbox=TRUE, pretty=4), file=file.path(path, "OBJECT"))
+    extra$type <- type
+    stopifnot(anyDuplicated(names(extra)) == 0L)
+    write(toJSON(extra, auto_unbox=TRUE, pretty=4), file=file.path(path, "OBJECT"))
 }

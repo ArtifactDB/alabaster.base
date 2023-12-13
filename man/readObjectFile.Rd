@@ -15,7 +15,7 @@ saveObjectFile(path, type, extra = list())
 \item{type}{String specifying the type of the object.}
 
 \item{extra}{Named list containing extra metadata to be written to the OBJECT file in \code{path}.
-None of the names should be \code{"type"}.}
+Names should be unique, and any element named \code{"type"} will be overwritten by \code{type}.}
 }
 \value{
 \code{readObjectFile} returns a named list of metadata for \code{path}.
