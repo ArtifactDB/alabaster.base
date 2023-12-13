@@ -85,7 +85,7 @@ inline void validate(const std::filesystem::path& path, const ObjectMetadata& me
  * @return Length of the vector.
  */
 inline size_t height(const std::filesystem::path& path, [[maybe_unused]] const ObjectMetadata& metadata, const Options&) {
-    H5::H5File handle((path / "contents.h5").string(), H5F_ACC_RDONLY);
+    auto handle = ritsuko::hdf5::open_file(path / "contents.h5");
     auto ghandle = handle.openGroup("atomic_vector");
     auto dhandle = ghandle.openDataSet("values");
     return ritsuko::hdf5::get_1d_length(dhandle.getSpace(), false);

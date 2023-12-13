@@ -49,6 +49,15 @@ inline std::string extract_format(const internal_json::JsonObjectMap& map) {
     return reinterpret_cast<millijson::String*>(val.get())->value;
 }
 
+template<class Reader, typename ... Args_>
+inline Reader open_reader(const std::filesystem::path& path, Args_&& ... args) {
+    if constexpr(std::is_same<std::filesystem::path::value_type, char>::value) {
+        return Reader(path.c_str(), std::forward<Args_>(args)...);
+    } else {
+        return Reader(path.string(), std::forward<Args_>(args)...);
+    }
+}
+
 }
 /**
  * @endcond
@@ -89,14 +98,14 @@ inline void validate(const std::filesystem::path& path, const ObjectMetadata& me
     }
 
     if (format == "json.gz") {
-        auto candidate = path / "list_contents.json.gz";
         uzuki2::json::Options opt;
         opt.parallel = options.parallel_reads;
-        byteme::SomeFileReader gzreader(candidate.string());
+        auto gzreader = internal::open_reader<byteme::GzipFileReader>(path / "list_contents.json.gz");
         uzuki2::json::validate(gzreader, num_external, opt);
     } else if (format == "hdf5") {
-        auto candidate = path / "list_contents.h5";
-        uzuki2::hdf5::validate(candidate.string(), "simple_list", num_external);
+        auto handle = ritsuko::hdf5::open_file(path / "list_contents.h5");
+        auto ghandle = ritsuko::hdf5::open_group(handle, "simple_list");
+        uzuki2::hdf5::validate(ghandle, num_external);
     } else {
         throw std::runtime_error("unknown format '" + format + "'");
     }
@@ -113,8 +122,7 @@ inline size_t height(const std::filesystem::path& path, const ObjectMetadata& me
     std::string format = internal::extract_format(metamap);
 
     if (format == "hdf5") {
-        auto candidate = path / "list_contents.h5";
-        H5::H5File handle(candidate, H5F_ACC_RDONLY);
+        auto handle = ritsuko::hdf5::open_file(path / "list_contents.h5");
         auto lhandle = handle.openGroup("simple_list");
         auto vhandle = lhandle.openGroup("data");
         return vhandle.getNumObjs();
@@ -130,8 +138,7 @@ inline size_t height(const std::filesystem::path& path, const ObjectMetadata& me
 
         uzuki2::json::Options opt;
         opt.parallel = options.parallel_reads;
-        auto candidate = path / "list_contents.json.gz";
-        byteme::SomeFileReader gzreader(candidate.string());
+        auto gzreader = internal::open_reader<byteme::GzipFileReader>(path / "list_contents.json.gz");
         uzuki2::DummyExternals ext(num_external);
         auto ptr = uzuki2::json::parse<uzuki2::DummyProvisioner>(gzreader, std::move(ext), std::move(opt));
         return reinterpret_cast<const uzuki2::List*>(ptr.get())->size();

@@ -227,10 +227,8 @@ inline void validate(const std::filesystem::path& path, const ObjectMetadata& me
  * @return The number of rows.
  */
 inline size_t height(const std::filesystem::path& path, [[maybe_unused]] const ObjectMetadata& metadata, [[maybe_unused]] const Options& options) {
-    auto h5path = path / "basic_columns.h5";
-
     // Assume it's all valid already.
-    H5::H5File handle(h5path, H5F_ACC_RDONLY);
+    auto handle = ritsuko::hdf5::open_file(path / "basic_columns.h5");
     auto ghandle = handle.openGroup("data_frame");
     return ritsuko::hdf5::load_scalar_numeric_attribute<uint64_t>(ghandle.openAttribute("row-count"));
 }
@@ -242,12 +240,9 @@ inline size_t height(const std::filesystem::path& path, [[maybe_unused]] const O
  * @return A vector of length 2 containing the number of rows and columns in the data frame.
  */
 inline std::vector<size_t> dimensions(const std::filesystem::path& path, [[maybe_unused]] const ObjectMetadata& metadata, [[maybe_unused]] const Options& options) {
-    auto h5path = path / "basic_columns.h5";
-
     // Assume it's all valid already.
-    H5::H5File handle(h5path, H5F_ACC_RDONLY);
+    auto handle = ritsuko::hdf5::open_file(path / "basic_columns.h5");
     auto ghandle = handle.openGroup("data_frame");
-
     std::vector<size_t> output(2);
     output[0] = ritsuko::hdf5::load_scalar_numeric_attribute<uint64_t>(ghandle.openAttribute("row-count"));
     output[1] = ritsuko::hdf5::get_1d_length(ghandle.openDataSet("column_names"), false);

@@ -55,8 +55,7 @@ inline SequenceLimits find_sequence_limits(const std::filesystem::path& path, co
     }
     ::takane::validate(path, smeta, options);
 
-    auto fpath = path / "info.h5";
-    H5::H5File handle(fpath, H5F_ACC_RDONLY);
+    auto handle = ritsuko::hdf5::open_file(path / "info.h5");
     auto ghandle = handle.openGroup("sequence_information");
 
     auto lhandle = ghandle.openDataSet("length");
@@ -215,10 +214,8 @@ inline void validate(const std::filesystem::path& path, const ObjectMetadata& me
  * @return The number of ranges.
  */
 inline size_t height(const std::filesystem::path& path, [[maybe_unused]] const ObjectMetadata& metadata, [[maybe_unused]] const Options& options) {
-    auto h5path = path / "ranges.h5";
-
     // Assume it's all valid already.
-    H5::H5File handle(h5path, H5F_ACC_RDONLY);
+    auto handle = ritsuko::hdf5::open_file(path / "ranges.h5");
     auto ghandle = handle.openGroup("genomic_ranges");
     auto dhandle = ghandle.openDataSet("sequence");
     return ritsuko::hdf5::get_1d_length(dhandle, false);

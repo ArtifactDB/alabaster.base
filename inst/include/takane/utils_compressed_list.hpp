@@ -83,7 +83,7 @@ void validate_directory(const std::filesystem::path& path, const std::string& ob
 }
 
 inline size_t height(const std::filesystem::path& path, const std::string& name, [[maybe_unused]] const ObjectMetadata& metadata, [[maybe_unused]] const Options& options) {
-    H5::H5File handle(path / "partitions.h5", H5F_ACC_RDONLY);
+    auto handle = ritsuko::hdf5::open_file(path / "partitions.h5");
     auto ghandle = handle.openGroup(name);
     auto dhandle = ghandle.openDataSet("lengths");
     return ritsuko::hdf5::get_1d_length(dhandle, false);

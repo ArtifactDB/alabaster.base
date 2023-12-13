@@ -95,7 +95,7 @@ inline void validate(const std::filesystem::path& path, const ObjectMetadata& me
  * @return Length of the factor.
  */
 inline size_t height(const std::filesystem::path& path, [[maybe_unused]] const ObjectMetadata& metadata, [[maybe_unused]] const Options& options) {
-    H5::H5File handle(path / "contents.h5", H5F_ACC_RDONLY);
+    auto handle = ritsuko::hdf5::open_file(path / "contents.h5");
     auto ghandle = handle.openGroup("data_frame_factor");
     auto dhandle = ghandle.openDataSet("codes");
     return ritsuko::hdf5::get_1d_length(dhandle.getSpace(), false);
