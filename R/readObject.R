@@ -5,7 +5,7 @@
 #'
 #' @param path String containing a path to a directory, itself created with a \code{\link{saveObject}} method.
 #' @param ... Further arguments to pass to individual methods.
-#' @param metadata Named list containing metadata for the object.
+#' @param metadata Named list containing metadata for the object - most importantly, the \code{type} field that controls dispatch to the correct loading function.
 #' If \code{NULL}, this is automatically read by \code{\link{readObjectFile}(path)}.
 #' @param type String specifying the name of type of the object.
 #' @param fun A loading function that accepts \code{path}, \code{metadata} and \code{...} (in that order), and returns the associated object.
@@ -19,11 +19,6 @@
 #' For \code{registerReadObjectFunction}, the function is added to the registry.
 #'
 #' @section Comments for extension developers:
-#' When writing alabaster extensions, developers may need to load child objects inside the loading functions for their classes. 
-#' In such cases, developers should use \code{\link{altReadObject}} rather than calling \code{readObject} directly.
-#' This ensures that any application-level overrides of the loading functions are respected. 
-#' Once in memory, the child objects can then be assembled into more complex objects by the developer's loading function.
-#'
 #' \code{readObject} uses an internal registry of functions to decide how an object should be loaded into memory.
 #' Developers of alabaster extensions can add extra functions to this registry, usually in the \code{\link{.onLoad}} function of their packages.
 #' Alternatively, extension developers can request the addition of their packages to default registry.
@@ -31,6 +26,15 @@
 #' If a loading function makes use of additional arguments, it should be scoped by the name of the class for each method, e.g., \code{list.parallel}, \code{dataframe.include.nested}.
 #' This avoids problems with conflicts in the interpretation of identically named arguments between different functions.
 #' It is expected that arguments in \code{...} are forwarded to internal \code{\link{altReadObject}} calls.
+#'
+#' When writing alabaster extensions, developers may need to load child objects inside the loading functions for their classes. 
+#' In such cases, developers should use \code{\link{altReadObject}} rather than calling \code{readObject} directly.
+#' This ensures that any application-level overrides of the loading functions are respected. 
+#' Once in memory, the child objects can then be assembled into more complex objects by the developer's loading function.
+#'
+#' Developers can manually control \code{\link{readObject}} dispatch by suppling a \code{metadata} list where \code{metadata$type} is set to the desired object type.
+#' This pattern is commonly used inside the loading function for a subclass, to construct the base class first before adding the subclass-specific components.
+#' In practice, base construction should be done using \code{\link{altReadObject}} so as to respect application-specific overrides.
 #'
 #' @section Comments for application developers:
 #' Application developers can override the behavior of \code{readObject} by specifying a custom function in \code{\link{altReadObject}}.
