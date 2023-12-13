@@ -239,11 +239,11 @@ directory, and fiddling with them may cause unexpected results.</p>
 <pre><code><span><span class="co">## DataFrame with 5 rows and 2 columns</span></span>
 <span><span class="co">##           B         C</span></span>
 <span><span class="co">##   &lt;numeric&gt; &lt;numeric&gt;</span></span>
-<span><span class="co">## 1  0.513281  2.955275</span></span>
-<span><span class="co">## 2  0.299750  0.703988</span></span>
-<span><span class="co">## 3  0.154384 -1.007085</span></span>
-<span><span class="co">## 4  0.892823  1.031233</span></span>
-<span><span class="co">## 5  0.128113  2.282841</span></span></code></pre>
+<span><span class="co">## 1  0.422117  0.579444</span></span>
+<span><span class="co">## 2  0.434331 -0.659966</span></span>
+<span><span class="co">## 3  0.673904  1.557064</span></span>
+<span><span class="co">## 4  0.723976 -0.713839</span></span>
+<span><span class="co">## 5  0.676530 -0.105254</span></span></code></pre>
 </div>
 <div class="section level2">
 <h2 id="extending-to-new-classes">Extending to new classes<a class="anchor" aria-label="anchor" href="#extending-to-new-classes"></a>
@@ -336,16 +336,16 @@ function.</p>
 <span><span class="va">x</span></span></code></pre></div>
 <pre><code><span><span class="co">## 10 x 10 sparse Matrix of class "dgTMatrix"</span></span>
 <span><span class="co">##                                                           </span></span>
-<span><span class="co">##  [1,] .         . 0.4526404 . . .        . .           . .</span></span>
-<span><span class="co">##  [2,] .         . .         . . 0.490979 . .           . .</span></span>
-<span><span class="co">##  [3,] 0.7644298 . .         . . .        . .           . .</span></span>
-<span><span class="co">##  [4,] .         . .         . . .        . .           . .</span></span>
-<span><span class="co">##  [5,] .         . 0.7266461 . . .        . .           . .</span></span>
-<span><span class="co">##  [6,] .         . .         . . .        . 0.001766704 . .</span></span>
-<span><span class="co">##  [7,] .         . .         . . .        . .           . .</span></span>
-<span><span class="co">##  [8,] .         . .         . . .        . .           . .</span></span>
-<span><span class="co">##  [9,] .         . .         . . .        . .           . .</span></span>
-<span><span class="co">## [10,] .         . .         . . .        . .           . .</span></span></code></pre>
+<span><span class="co">##  [1,] .         . 0.02759865 . . .         . .         . .</span></span>
+<span><span class="co">##  [2,] .         . .          . . 0.3055723 . .         . .</span></span>
+<span><span class="co">##  [3,] 0.7603352 . .          . . .         . .         . .</span></span>
+<span><span class="co">##  [4,] .         . .          . . .         . .         . .</span></span>
+<span><span class="co">##  [5,] .         . 0.25208026 . . .         . .         . .</span></span>
+<span><span class="co">##  [6,] .         . .          . . .         . 0.2058319 . .</span></span>
+<span><span class="co">##  [7,] .         . .          . . .         . .         . .</span></span>
+<span><span class="co">##  [8,] .         . .          . . .         . .         . .</span></span>
+<span><span class="co">##  [9,] .         . .          . . .         . .         . .</span></span>
+<span><span class="co">## [10,] .         . .          . . .         . .         . .</span></span></code></pre>
 <div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">tmp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/saveObject.html">saveObject</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">tmp</span><span class="op">)</span></span>
@@ -355,16 +355,16 @@ function.</p>
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/readObject.html">readObject</a></span><span class="op">(</span><span class="va">tmp</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## 10 x 10 sparse Matrix of class "dgTMatrix"</span></span>
 <span><span class="co">##                                                           </span></span>
-<span><span class="co">##  [1,] .         . 0.4526404 . . .        . .           . .</span></span>
-<span><span class="co">##  [2,] .         . .         . . 0.490979 . .           . .</span></span>
-<span><span class="co">##  [3,] 0.7644298 . .         . . .        . .           . .</span></span>
-<span><span class="co">##  [4,] .         . .         . . .        . .           . .</span></span>
-<span><span class="co">##  [5,] .         . 0.7266461 . . .        . .           . .</span></span>
-<span><span class="co">##  [6,] .         . .         . . .        . 0.001766704 . .</span></span>
-<span><span class="co">##  [7,] .         . .         . . .        . .           . .</span></span>
-<span><span class="co">##  [8,] .         . .         . . .        . .           . .</span></span>
-<span><span class="co">##  [9,] .         . .         . . .        . .           . .</span></span>
-<span><span class="co">## [10,] .         . .         . . .        . .           . .</span></span></code></pre>
+<span><span class="co">##  [1,] .         . 0.02759865 . . .         . .         . .</span></span>
+<span><span class="co">##  [2,] .         . .          . . 0.3055723 . .         . .</span></span>
+<span><span class="co">##  [3,] 0.7603352 . .          . . .         . .         . .</span></span>
+<span><span class="co">##  [4,] .         . .          . . .         . .         . .</span></span>
+<span><span class="co">##  [5,] .         . 0.25208026 . . .         . .         . .</span></span>
+<span><span class="co">##  [6,] .         . .          . . .         . 0.2058319 . .</span></span>
+<span><span class="co">##  [7,] .         . .          . . .         . .         . .</span></span>
+<span><span class="co">##  [8,] .         . .          . . .         . .         . .</span></span>
+<span><span class="co">##  [9,] .         . .          . . .         . .         . .</span></span>
+<span><span class="co">## [10,] .         . .          . . .         . .         . .</span></span></code></pre>
 <p>For more complex objects that are composed of multiple smaller
 “child” objects, developers should consider saving each of their
 children in subdirectories of <code>path</code>. This can be achieved by
@@ -447,13 +447,13 @@ something with the metadata that we just added.</p>
 <span><span class="co">## I am a data_frame created by root.</span></span>
 <span><span class="co">## I have the following columns: B, C.</span></span></code></pre>
 <pre><code><span><span class="co">## DataFrame with 5 rows and 2 columns</span></span>
-<span><span class="co">##          Z                  AA</span></span>
-<span><span class="co">##   &lt;factor&gt;         &lt;DataFrame&gt;</span></span>
-<span><span class="co">## 1        1 0.218404:-1.1719323</span></span>
-<span><span class="co">## 2        2 0.919137:-0.1715050</span></span>
-<span><span class="co">## 3        3 0.495785:-0.0349416</span></span>
-<span><span class="co">## 4        4 0.725315: 0.6881643</span></span>
-<span><span class="co">## 5        5 0.976891: 1.0999593</span></span></code></pre>
+<span><span class="co">##          Z                 AA</span></span>
+<span><span class="co">##   &lt;factor&gt;        &lt;DataFrame&gt;</span></span>
+<span><span class="co">## 1        1 0.885782: 0.992684</span></span>
+<span><span class="co">## 2        2 0.696063: 0.355049</span></span>
+<span><span class="co">## 3        3 0.496434:-0.374398</span></span>
+<span><span class="co">## 4        4 0.316818: 0.705190</span></span>
+<span><span class="co">## 5        5 0.137655:-0.165158</span></span></code></pre>
 <div class="sourceCode" id="cb39"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Unsetting the override for other applications.</span></span>
 <span><span class="fu"><a href="../reference/altReadObject.html">altReadObjectFunction</a></span><span class="op">(</span><span class="va">old</span><span class="op">)</span> </span></code></pre></div>
