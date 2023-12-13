@@ -93,14 +93,16 @@ This is usually not directly called by users, but is instead called by dispatch 
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">tmp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="saveObject.html">saveObject</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/setNames.html" class="external-link">setNames</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html" class="external-link">runif</a></span><span class="op">(</span><span class="fl">26</span><span class="op">)</span>, <span class="va">letters</span><span class="op">)</span>, <span class="va">tmp</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="readObject.html">readObject</a></span><span class="op">(</span><span class="va">tmp</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>          a          b          c          d          e          f          g </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 0.32932224 0.24453988 0.71939224 0.04170798 0.42897224 0.87502793 0.93938207 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>          h          i          j          k          l          m          n </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 0.90349194 0.92688951 0.19903607 0.65999539 0.35415813 0.14137278 0.13194578 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>          o          p          q          r          s          t          u </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 0.23141267 0.18937572 0.56854616 0.41002892 0.51620417 0.64693299 0.71998351 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>          v          w          x          y          z </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 0.24681595 0.67748022 0.94618959 0.86075028 0.48237589 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           a           b           c           d           e           f </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 0.225161800 0.844417925 0.418638651 0.773248669 0.349448317 0.508110185 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           g           h           i           j           k           l </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 0.721506628 0.897255355 0.665443572 0.035333530 0.909575419 0.614471349 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           m           n           o           p           q           r </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 0.301189276 0.423185242 0.507847583 0.743843276 0.006798348 0.234644845 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           s           t           u           v           w           x </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 0.367486873 0.926589109 0.858778402 0.481590959 0.317093653 0.927727531 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           y           z </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 0.919890268 0.743260819 </span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
