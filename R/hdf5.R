@@ -62,7 +62,8 @@ h5_create_vector <- function(handle, name, len, type, compress=6, chunks=NULL, s
 
     phandle <- H5Pcreate("H5P_DATASET_CREATE")
     on.exit(H5Pclose(phandle), add=TRUE, after=FALSE)
-    H5Pset_fill_time(phandle, "H5D_FILL_TIME_ALLOC")
+    H5Pset_fill_time(phandle, "H5D_FILL_TIME_NEVER")
+    H5Pset_obj_track_times(phandle, FALSE)
 
     if (compress > 0 && len) {
         H5Pset_deflate(phandle, level=compress)
