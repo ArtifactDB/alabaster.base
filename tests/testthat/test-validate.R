@@ -10,6 +10,14 @@ test_that("validation registration works as expected", {
     registerValidateObjectFunction("foobar", function(path, metadata) {})
     expect_error(validateObject(tmp), NA);
 
+    registerValidateObjectFunction("foobar", function(path, metadata) { stop("YAY") }, existing="old")
+    expect_error(validateObject(tmp), NA);
+
+    registerValidateObjectFunction("foobar", function(path, metadata) { stop("YAY") }, existing="new")
+    expect_error(validateObject(tmp), "YAY");
+
+    expect_error(registerValidateObjectFunction("foobar", function(path, metadata) { stop("YAY") }, existing="error"), "already been registered")
+
     registerValidateObjectFunction("foobar", NULL)
     expect_error(validateObject(tmp), "foobar");
 })

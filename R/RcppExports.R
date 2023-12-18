@@ -45,24 +45,24 @@ validate <- function(path, metadata) {
     .Call(`_alabaster_base_validate`, path, metadata)
 }
 
-register_validate_function <- function(type, fun) {
-    .Call(`_alabaster_base_register_validate_function`, type, fun)
+register_validate_function <- function(type, fun, existing) {
+    .Call(`_alabaster_base_register_validate_function`, type, fun, existing)
 }
 
 deregister_validate_function <- function(type) {
     .Call(`_alabaster_base_deregister_validate_function`, type)
 }
 
-register_height_function <- function(type, fun) {
-    .Call(`_alabaster_base_register_height_function`, type, fun)
+register_height_function <- function(type, fun, existing) {
+    .Call(`_alabaster_base_register_height_function`, type, fun, existing)
 }
 
 deregister_height_function <- function(type) {
     .Call(`_alabaster_base_deregister_height_function`, type)
 }
 
-register_dimensions_function <- function(type, fun) {
-    .Call(`_alabaster_base_register_dimensions_function`, type, fun)
+register_dimensions_function <- function(type, fun, existing) {
+    .Call(`_alabaster_base_register_dimensions_function`, type, fun, existing)
 }
 
 deregister_dimensions_function <- function(type) {

@@ -17,6 +17,8 @@
 #' For \code{registerValidateObjectDimensionsFunction}, a function that accepts \code{path} and \code{metadata}, and returns an integer vector specifying the dimensions of the object.
 #'
 #' This may also be \code{NULL} to delete an existing registry from any of the functions mentioned above.
+#' @param existing Logical scalar indicating the action to take if a function has already been registered for \code{type} -
+#' keep the old or new function, or throw an error.
 #' 
 #' @return 
 #' For \code{validateObject}, \code{NULL} is returned invisibly upon success, otherwise an error is raised.
@@ -41,9 +43,9 @@ validateObject <- function(path, metadata=NULL) {
 
 #' @export
 #' @rdname validateObject
-registerValidateObjectFunction <- function(type, fun) {
+registerValidateObjectFunction <- function(type, fun, existing=c("old", "new", "error")) {
     if (!is.null(fun)) {
-        register_validate_function(type, fun)
+        register_validate_function(type, fun, match.arg(existing))
     } else {
         deregister_validate_function(type);
     }
@@ -51,9 +53,9 @@ registerValidateObjectFunction <- function(type, fun) {
 
 #' @export
 #' @rdname validateObject
-registerValidateObjectHeightFunction <- function(type, fun) {
+registerValidateObjectHeightFunction <- function(type, fun, existing=c("old", "new", "error")) {
     if (!is.null(fun)) {
-        register_height_function(type, fun)
+        register_height_function(type, fun, match.arg(existing))
     } else {
         deregister_height_function(type);
     }
@@ -61,9 +63,9 @@ registerValidateObjectHeightFunction <- function(type, fun) {
 
 #' @export
 #' @rdname validateObject
-registerValidateObjectDimensionsFunction <- function(type, fun) {
+registerValidateObjectDimensionsFunction <- function(type, fun, existing=c("old", "new", "error")) {
     if (!is.null(fun)) {
-        register_dimensions_function(type, fun)
+        register_dimensions_function(type, fun, match.arg(existing))
     } else {
         deregister_dimensions_function(type);
     }

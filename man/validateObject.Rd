@@ -9,11 +9,19 @@
 \usage{
 validateObject(path, metadata = NULL)
 
-registerValidateObjectFunction(type, fun)
+registerValidateObjectFunction(type, fun, existing = c("old", "new", "error"))
 
-registerValidateObjectHeightFunction(type, fun)
+registerValidateObjectHeightFunction(
+  type,
+  fun,
+  existing = c("old", "new", "error")
+)
 
-registerValidateObjectDimensionsFunction(type, fun)
+registerValidateObjectDimensionsFunction(
+  type,
+  fun,
+  existing = c("old", "new", "error")
+)
 }
 \arguments{
 \item{path}{String containing a path to a directory, itself created with a \code{\link{saveObject}} method.}
@@ -32,6 +40,9 @@ This is usually the length for vector-like or 1-dimensional objects, and the ext
 For \code{registerValidateObjectDimensionsFunction}, a function that accepts \code{path} and \code{metadata}, and returns an integer vector specifying the dimensions of the object.
 
 This may also be \code{NULL} to delete an existing registry from any of the functions mentioned above.}
+
+\item{existing}{Logical scalar indicating the action to take if a function has already been registered for \code{type} -
+keep the old or new function, or throw an error.}
 }
 \value{
 For \code{validateObject}, \code{NULL} is returned invisibly upon success, otherwise an error is raised.
