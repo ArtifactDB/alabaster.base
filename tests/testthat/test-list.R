@@ -284,6 +284,28 @@ test_that("external references work correctly", {
     expect_identical(readObject(tmp2), vals)
 })
 
+test_that("external references work correctly with lots of objects", {
+    tmp <- tempfile()
+    dir.create(tmp)
+
+    # We use lots of objects to check that the sorting order is reproduced;
+    # this is not always safe to assume, as the directories in other_content
+    # are sorted by string and not number, e.g., 10 sorts before 2.
+    vals <- list()
+    for (i in 1:20) {
+        vals[[i]] <- DataFrame(X = i)
+    }
+
+    tmp <- tempfile()
+    saveObject(vals, tmp)
+    expect_identical(readObject(tmp), vals)
+
+    # Same result with HDF5.
+    tmp2 <- tempfile()
+    saveObject(vals, tmp2, list.format="hdf5")
+    expect_identical(readObject(tmp2), vals)
+})
+
 test_that("we handle lists with NAs", {
     vals <- list(
         A=NA, 

@@ -31,9 +31,10 @@ readBaseList <- function(path, metadata, list.parallel=TRUE, ...) {
     all.children <- list()
     child.path <- file.path(path, "other_contents")
     if (file.exists(child.path)) {
-        all.children <- as.list(list.files(child.path))
-        for (i in seq_along(all.children)) {
-            all.children[[i]] <- altReadObject(file.path(child.path, all.children[[i]]), list.parallel=list.parallel, ...)
+        all.dirs <- list.files(child.path)
+        all.children <- vector("list", length(all.children))
+        for (n in all.dirs) {
+            all.children[[as.integer(n) + 1L]] <- altReadObject(file.path(child.path, n), list.parallel=list.parallel, ...)
         }
     }
 

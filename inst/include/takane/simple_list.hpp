@@ -87,13 +87,18 @@ inline void validate(const std::filesystem::path& path, const ObjectMetadata& me
             throw std::runtime_error("expected 'other_contents' to be a directory");
         } 
 
-        for (const auto& entry : std::filesystem::directory_iterator(other_dir)) {
-            try {
-                ::takane::validate(entry.path(), options);
-            } catch (std::exception& e) {
-                throw std::runtime_error("failed to validate external list object at '" + std::filesystem::relative(entry.path(), path).string() + "'; " + std::string(e.what()));
+        num_external = internal_other::count_directory_entries(other_dir);
+        for (int e = 0; e < num_external; ++e) {
+            auto epath = other_dir / std::to_string(e);
+            if (!std::filesystem::exists(epath)) {
+                throw std::runtime_error("expected an external list object at '" + std::filesystem::relative(epath, path).string() + "'");
             }
-            ++num_external;
+
+            try {
+                ::takane::validate(epath, options);
+            } catch (std::exception& e) {
+                throw std::runtime_error("failed to validate external list object at '" + std::filesystem::relative(epath, path).string() + "'; " + std::string(e.what()));
+            }
         }
     }
 

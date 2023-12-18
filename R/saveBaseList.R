@@ -242,7 +242,6 @@ saveBaseListFormat <- (function() {
     n <- length(env$collected)
     h5_write_vector(ghandle, "index", n, compress=0, scalar=TRUE)
 
-    n <- n + 1L
     if (is.data.frame(x)) {
         x <- DataFrame(x, check.names=FALSE)
     }
@@ -251,10 +250,11 @@ saveBaseListFormat <- (function() {
             other.dir <- file.path(path, "other_contents")
             dir.create(other.dir, showWarnings=FALSE)
             do.call(altSaveObject, c(list(x, file.path(other.dir, n)), extra))
-            env$collected[[n]] <- TRUE
+            env$collected[[n + 1L]] <- TRUE
         } else {
-            meta <- altStageObject(x, dir, paste0(path, paste0("/child-", n)), child=TRUE)
-            env$collected[[n]] <- list(resource=writeMetadata(meta, dir=dir))
+            np <- n + 1L
+            meta <- altStageObject(x, dir, paste0(path, paste0("/child-", np)), child=TRUE)
+            env$collected[[np]] <- list(resource=writeMetadata(meta, dir=dir))
         }
     }, error=function(e) {
         stop("failed to stage '", class(x)[1], "' entry inside a list\n  - ", e$message)
@@ -382,7 +382,6 @@ saveBaseListFormat <- (function() {
         index=n
     )
 
-    n <- n + 1L
     if (is.data.frame(x)) {
         x <- DataFrame(x, check.names=FALSE)
     }
@@ -391,10 +390,11 @@ saveBaseListFormat <- (function() {
             other.dir <- file.path(path, "other_contents")
             dir.create(other.dir, showWarnings=FALSE)
             do.call(altSaveObject, c(list(x, file.path(other.dir, n)), extra))
-            env$collected[[n]] <- TRUE
+            env$collected[[n + 1L]] <- TRUE
         } else {
-            meta <- altStageObject(x, dir, paste0(path, paste0("/child-", n)), child=TRUE)
-            env$collected[[n]] <- list(resource=writeMetadata(meta, dir=dir))
+            np <- n + 1L
+            meta <- altStageObject(x, dir, paste0(path, paste0("/child-", np)), child=TRUE)
+            env$collected[[np]] <- list(resource=writeMetadata(meta, dir=dir))
         }
     }, error=function(e) {
         stop("failed to stage '", class(x)[1], "' entry inside a list\n  - ", e$message)
