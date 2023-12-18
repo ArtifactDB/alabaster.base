@@ -51,7 +51,7 @@ inline std::string extract_format(const internal_json::JsonObjectMap& map) {
 
 template<class Reader, typename ... Args_>
 inline Reader open_reader(const std::filesystem::path& path, Args_&& ... args) {
-    if constexpr(std::is_same<std::filesystem::path::value_type, char>::value) {
+    if constexpr(std::is_same<decltype(path.c_str()), const char*>::value) {
         return Reader(path.c_str(), std::forward<Args_>(args)...);
     } else {
         return Reader(path.string(), std::forward<Args_>(args)...);

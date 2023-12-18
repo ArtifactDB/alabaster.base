@@ -26,7 +26,7 @@ inline H5::H5File open_file(const std::filesystem::path& path) try {
         throw std::runtime_error("no file is present at '" + path.string() + "'");
     }
 
-    if constexpr(std::is_same<std::filesystem::path::value_type, char>::value) {
+    if constexpr(std::is_same<decltype(path.c_str()), const char*>::value) {
         // Avoid copy on POSIX...
         return H5::H5File(path.c_str(), H5F_ACC_RDONLY);
     } else {
