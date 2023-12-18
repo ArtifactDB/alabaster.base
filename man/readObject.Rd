@@ -14,7 +14,7 @@ readObject(path, metadata = NULL, ...)
 
 readObjectFunctionRegistry()
 
-registerReadObjectFunction(type, fun)
+registerReadObjectFunction(type, fun, existing = c("old", "new", "error"))
 }
 \arguments{
 \item{path}{String containing a path to a directory, itself created with a \code{\link{saveObject}} method.}
@@ -28,6 +28,9 @@ If \code{NULL}, this is automatically read by \code{\link{readObjectFile}(path)}
 
 \item{fun}{A loading function that accepts \code{path}, \code{metadata} and \code{...} (in that order), and returns the associated object.
 This may also be \code{NULL} to delete an existing entry in the registry.}
+
+\item{existing}{Logical scalar indicating the action to take if a function has already been registered for \code{type} -
+keep the old or new function, or throw an error.}
 }
 \value{
 For \code{readObject}, an object created from the on-disk representation in \code{path}.

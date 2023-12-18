@@ -105,7 +105,7 @@ registerReadObjectFunction <- function(type, fun, existing=c("old", "new", "erro
             if (existing == "old") {
                 return(invisible(NULL))
             } else if (existing == "error") {
-                stop("readObject function has already been registered for object type '", type, "'")
+                stop("function has already been registered for object type '", type, "'")
             }
         }
     }
