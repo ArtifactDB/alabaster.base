@@ -10,6 +10,8 @@
 #' @param type String specifying the name of type of the object.
 #' @param fun A loading function that accepts \code{path}, \code{metadata} and \code{...} (in that order), and returns the associated object.
 #' This may also be \code{NULL} to delete an existing entry in the registry.
+#' @param existing Logical scalar indicating the action to take if a function has already been registered for \code{type} -
+#' keep the old or new function, or throw an error.
 #' 
 #' @return 
 #' For \code{readObject}, an object created from the on-disk representation in \code{path}.
@@ -96,11 +98,19 @@ readObjectFunctionRegistry <- function() {
 
 #' @export
 #' @rdname readObject
-registerReadObjectFunction <- function(type, fun) {
-    if (!is.null(fun) && !is.null(read.registry$registry[[type]])) {
-        warning("readObject function has already been registered for object type '", type, "'")
+registerReadObjectFunction <- function(type, fun, existing=c("old", "new", "error")) {
+    if (!is.null(fun)) {
+        if (!is.null(read.registry$registry[[type]])) {
+            existing <- match.arg(existing)
+            if (existing == "old") {
+                return(invisible(NULL))
+            } else if (existing == "error") {
+                stop("readObject function has already been registered for object type '", type, "'")
+            }
+        }
     }
     read.registry$registry[[type]] <- fun
+    invisible(NULL)
 }
 
 #######################################
