@@ -75,7 +75,17 @@ read.registry$registry <- list(
     string_factor="alabaster.base::readBaseFactor",
     simple_list="alabaster.base::readBaseList",
     data_frame="alabaster.base::readDataFrame",
-    data_frame_factor="alabaster.base::readDataFrameFactor"
+    data_frame_factor="alabaster.base::readDataFrameFactor",
+    dense_array="alabaster.matrix::readArray",
+    compressed_sparse_matrix="alabaster.matrix::readSparseMatrix",
+    summarized_experiment="alabaster.se::readSummarizedExperiment",
+    ranged_summarized_experiment="alabaster.se::readRangedSummarizedExperiment",
+    single_cell_experiment="alabaster.sce::readSingleCellExperiment",
+    genomic_ranges="alabaster.ranges::readGRanges",
+    genomic_ranges_list="alabaster.ranges::readGRangesList",
+    data_frame_list="alabaster.ranges::readDataFrameList",
+    atomic_vector_list="alabaster.ranges::readAtomicVectorList",
+    sequence_information="alabaster.ranges::readSeqinfo"
 )
 
 #' @export
@@ -88,7 +98,7 @@ readObjectFunctionRegistry <- function() {
 #' @rdname readObject
 registerReadObjectFunction <- function(type, fun) {
     if (!is.null(fun) && !is.null(read.registry$registry[[type]])) {
-        stop("readObject function has already been registered for object type '", type, "'")
+        warning("readObject function has already been registered for object type '", type, "'")
     }
     read.registry$registry[[type]] <- fun
 }
