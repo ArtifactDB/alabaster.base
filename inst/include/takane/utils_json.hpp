@@ -14,8 +14,9 @@ namespace internal_json {
 
 typedef std::unordered_map<std::string, std::shared_ptr<millijson::Base> > JsonObjectMap;
 
-inline std::shared_ptr<millijson::Base> parse_file(const std::filesystem::path& path) {
-    if constexpr(std::is_same<decltype(path.c_str()), const char*>::value) {
+template<typename Path_>
+std::shared_ptr<millijson::Base> parse_file(const Path_& path) {
+    if constexpr(std::is_same<typename Path_::value_type, char>::value) {
         return millijson::parse_file(path.c_str());
     } else {
         auto cpath = path.string();

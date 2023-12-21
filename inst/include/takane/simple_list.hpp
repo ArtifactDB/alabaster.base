@@ -49,9 +49,9 @@ inline std::string extract_format(const internal_json::JsonObjectMap& map) {
     return reinterpret_cast<millijson::String*>(val.get())->value;
 }
 
-template<class Reader, typename ... Args_>
-inline Reader open_reader(const std::filesystem::path& path, Args_&& ... args) {
-    if constexpr(std::is_same<decltype(path.c_str()), const char*>::value) {
+template<class Reader, typename Path_, typename ... Args_>
+Reader open_reader(const Path_& path, Args_&& ... args) {
+    if constexpr(std::is_same<typename Path_::value_type, char>::value) {
         return Reader(path.c_str(), std::forward<Args_>(args)...);
     } else {
         return Reader(path.string(), std::forward<Args_>(args)...);

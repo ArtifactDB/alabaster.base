@@ -18,23 +18,36 @@ namespace hdf5 {
 
 /**
  * @param path Path to a HDF5 file.
+ * @tparam Path_ Type of the path, either as a C-style array, a `std::string`, or a `filesystem::path`.
  * @return Handle to the file.
  * An error is raised if `path` does not exist.
  */
-inline H5::H5File open_file(const std::filesystem::path& path) try {
+template<class Path_>
+inline H5::H5File open_file(const Path_& path) try {
     if (!std::filesystem::exists(path)) {
-        throw std::runtime_error("no file is present at '" + path.string() + "'");
+        throw std::runtime_error("no file exists");
     }
 
-    if constexpr(std::is_same<decltype(path.c_str()), const char*>::value) {
-        // Avoid copy on POSIX...
-        return H5::H5File(path.c_str(), H5F_ACC_RDONLY);
+    if constexpr(std::is_same<Path_, std::filesystem::path>::value) {
+        if constexpr(std::is_same<typename Path_::value_type, char>::value) {
+            // Avoid copy on POSIX...
+            return H5::H5File(path.c_str(), H5F_ACC_RDONLY);
+        } else {
+            // But still get it to work on Windows...
+            return H5::H5File(path.string(), H5F_ACC_RDONLY);
+        }
     } else {
-        // But still get it to work on Windows...
-        return H5::H5File(path.string(), H5F_ACC_RDONLY);
+        return H5::H5File(path, H5F_ACC_RDONLY);
     }
 } catch (H5::Exception& e) {
-    throw std::runtime_error("failed to open the HDF5 file at '" + path.string() + "'; " + e.getDetailMsg());
+    std::string message = "failed to open the HDF5 file at '";
+    if constexpr(std::is_same<Path_, std::filesystem::path>::value) {
+        message += path.string();
+    } else {
+        message += path;
+    }
+    message += "'; " + e.getDetailMsg();
+    throw std::runtime_error(message);
 }
 
 /**
