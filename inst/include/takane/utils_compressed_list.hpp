@@ -31,7 +31,7 @@ inline hsize_t validate_group(const H5::Group& handle, size_t concatenated_lengt
     }
 
     size_t len = ritsuko::hdf5::get_1d_length(lhandle.getSpace(), false);
-    ritsuko::hdf5::Stream1dNumericDataset<int32_t> stream(&lhandle, len, buffer_size);
+    ritsuko::hdf5::Stream1dNumericDataset<uint64_t> stream(&lhandle, len, buffer_size);
     size_t total = 0;
     for (size_t i = 0; i < len; ++i, stream.next()) {
         total += stream.get();

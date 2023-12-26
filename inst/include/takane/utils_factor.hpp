@@ -57,15 +57,15 @@ inline hsize_t validate_factor_codes(const H5::Group& handle, const std::string&
     }
 
     bool has_missing = false;
-    int32_t missing_placeholder = 0;
+    uint64_t missing_placeholder = 0;
     if (allow_missing) {
-        auto missingness = ritsuko::hdf5::open_and_load_optional_numeric_missing_placeholder<int32_t>(chandle, "missing-value-placeholder");
+        auto missingness = ritsuko::hdf5::open_and_load_optional_numeric_missing_placeholder<uint64_t>(chandle, "missing-value-placeholder");
         has_missing = missingness.first;
         missing_placeholder = missingness.second;
     }
 
     auto len = ritsuko::hdf5::get_1d_length(chandle.getSpace(), false);
-    ritsuko::hdf5::Stream1dNumericDataset<int32_t> stream(&chandle, len, buffer_size);
+    ritsuko::hdf5::Stream1dNumericDataset<uint64_t> stream(&chandle, len, buffer_size);
     for (hsize_t i = 0; i < len; ++i, stream.next()) {
         auto x = stream.get();
         if (has_missing && x == missing_placeholder) {

@@ -87,7 +87,8 @@ read.registry$registry <- list(
     genomic_ranges_list="alabaster.ranges::readGRangesList",
     data_frame_list="alabaster.ranges::readDataFrameList",
     atomic_vector_list="alabaster.ranges::readAtomicVectorList",
-    sequence_information="alabaster.ranges::readSeqinfo"
+    sequence_information="alabaster.ranges::readSeqinfo",
+    multi_sample_dataset="alabaster.mae::readMultiAssayExperiment"
 )
 
 #' @export
