@@ -88,7 +88,8 @@ read.registry$registry <- list(
     data_frame_list="alabaster.ranges::readDataFrameList",
     atomic_vector_list="alabaster.ranges::readAtomicVectorList",
     sequence_information="alabaster.ranges::readSeqinfo",
-    multi_sample_dataset="alabaster.mae::readMultiAssayExperiment"
+    multi_sample_dataset="alabaster.mae::readMultiAssayExperiment",
+    sequence_string_set="alabaster.string::readXStringSet"
 )
 
 #' @export

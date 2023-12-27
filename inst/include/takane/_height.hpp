@@ -19,6 +19,7 @@
 #include "dense_array.hpp"
 #include "compressed_sparse_matrix.hpp"
 #include "summarized_experiment.hpp"
+#include "sequence_string_set.hpp"
 
 /**
  * @file _height.hpp
@@ -55,6 +56,8 @@ inline HeightRegistry default_registry() {
     registry["summarized_experiment"] = [](const std::filesystem::path& p, const ObjectMetadata& m, const Options& o) -> size_t { return summarized_experiment::height(p, m, o); };
     registry["ranged_summarized_experiment"] = [](const std::filesystem::path& p, const ObjectMetadata& m, const Options& o) -> size_t { return summarized_experiment::height(p, m, o); };
     registry["single_cell_experiment"] = [](const std::filesystem::path& p, const ObjectMetadata& m, const Options& o) -> size_t { return summarized_experiment::height(p, m, o); };
+
+    registry["sequence_string_set"] = [](const std::filesystem::path& p, const ObjectMetadata& m, const Options& o) -> size_t { return sequence_string_set::height(p, m, o); };
     return registry;
 } 
 

@@ -49,15 +49,6 @@ inline std::string extract_format(const internal_json::JsonObjectMap& map) {
     return reinterpret_cast<millijson::String*>(val.get())->value;
 }
 
-template<class Reader, typename Path_, typename ... Args_>
-Reader open_reader(const Path_& path, Args_&& ... args) {
-    if constexpr(std::is_same<typename Path_::value_type, char>::value) {
-        return Reader(path.c_str(), std::forward<Args_>(args)...);
-    } else {
-        return Reader(path.string(), std::forward<Args_>(args)...);
-    }
-}
-
 }
 /**
  * @endcond
@@ -105,7 +96,7 @@ inline void validate(const std::filesystem::path& path, const ObjectMetadata& me
     if (format == "json.gz") {
         uzuki2::json::Options opt;
         opt.parallel = options.parallel_reads;
-        auto gzreader = internal::open_reader<byteme::GzipFileReader>(path / "list_contents.json.gz");
+        auto gzreader = internal_other::open_reader<byteme::GzipFileReader>(path / "list_contents.json.gz");
         uzuki2::json::validate(gzreader, num_external, opt);
     } else if (format == "hdf5") {
         auto handle = ritsuko::hdf5::open_file(path / "list_contents.h5");
@@ -143,7 +134,7 @@ inline size_t height(const std::filesystem::path& path, const ObjectMetadata& me
 
         uzuki2::json::Options opt;
         opt.parallel = options.parallel_reads;
-        auto gzreader = internal::open_reader<byteme::GzipFileReader>(path / "list_contents.json.gz");
+        auto gzreader = internal_other::open_reader<byteme::GzipFileReader>(path / "list_contents.json.gz");
         uzuki2::DummyExternals ext(num_external);
         auto ptr = uzuki2::json::parse<uzuki2::DummyProvisioner>(gzreader, std::move(ext), std::move(opt));
         return reinterpret_cast<const uzuki2::List*>(ptr.get())->size();
