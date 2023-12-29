@@ -39,6 +39,7 @@ inline DimensionsRegistry default_registry() {
     registry["summarized_experiment"] = [](const std::filesystem::path& p, const ObjectMetadata& m, const Options& o) -> std::vector<size_t> { return summarized_experiment::dimensions(p, m, o); };
     registry["ranged_summarized_experiment"] = [](const std::filesystem::path& p, const ObjectMetadata& m, const Options& o) -> std::vector<size_t> { return summarized_experiment::dimensions(p, m, o); };
     registry["single_cell_experiment"] = [](const std::filesystem::path& p, const ObjectMetadata& m, const Options& o) -> std::vector<size_t> { return summarized_experiment::dimensions(p, m, o); };
+    registry["spatial_experiment"] = [](const std::filesystem::path& p, const ObjectMetadata& m, const Options& o) -> std::vector<size_t> { return summarized_experiment::dimensions(p, m, o); };
 
     return registry;
 } 

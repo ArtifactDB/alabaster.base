@@ -29,7 +29,16 @@ void check_ordered_attribute(const H5Object_& handle) {
     }
 }
 
-inline hsize_t validate_factor_levels(const H5::Group& handle, const std::string& name, hsize_t buffer_size) {
+struct DefaultFactorMessenger {
+    static std::string level() { return "factor level"; }
+    static std::string levels() { return "levels"; }
+    static std::string codes() { return "factor codes"; }
+};
+
+// These factor level/code checks are useful elsewhere but with different error messages;
+// in such cases, we just do some compile-time switches that only affect the error message.
+template<class ErrorMessenger_ = DefaultFactorMessenger>
+hsize_t validate_factor_levels(const H5::Group& handle, const std::string& name, hsize_t buffer_size) {
     auto lhandle = ritsuko::hdf5::open_dataset(handle, name.c_str());
     if (lhandle.getTypeClass() != H5T_STRING) {
         throw std::runtime_error("expected a string datatype for '" + name + "'");
@@ -42,7 +51,7 @@ inline hsize_t validate_factor_levels(const H5::Group& handle, const std::string
     for (hsize_t i = 0; i < len; ++i, stream.next()) {
         auto x = stream.steal();
         if (present.find(x) != present.end()) {
-            throw std::runtime_error("'" + name + "' contains duplicated factor level '" + x + "'");
+            throw std::runtime_error("'" + name + "' contains duplicated " + ErrorMessenger_::level() + " '" + x + "'");
         }
         present.insert(std::move(x));
     }
@@ -50,7 +59,8 @@ inline hsize_t validate_factor_levels(const H5::Group& handle, const std::string
     return len;
 }
 
-inline hsize_t validate_factor_codes(const H5::Group& handle, const std::string& name, hsize_t num_levels, hsize_t buffer_size, bool allow_missing = true) {
+template<class ErrorMessenger_ = DefaultFactorMessenger>
+hsize_t validate_factor_codes(const H5::Group& handle, const std::string& name, hsize_t num_levels, hsize_t buffer_size, bool allow_missing = true) {
     auto chandle = ritsuko::hdf5::open_dataset(handle, name.c_str());
     if (ritsuko::hdf5::exceeds_integer_limit(chandle, 64, false)) {
         throw std::runtime_error("expected a datatype for '" + name + "' that fits in a 64-bit unsigned integer");
@@ -72,7 +82,7 @@ inline hsize_t validate_factor_codes(const H5::Group& handle, const std::string&
             continue;
         }
         if (static_cast<hsize_t>(x) >= num_levels) {
-            throw std::runtime_error("expected factor codes to be less than the number of levels");
+            throw std::runtime_error("expected " + ErrorMessenger_::codes() + " to be less than the number of " + ErrorMessenger_::levels() + " in '" + name + "'");
         }
     }
 
