@@ -7,6 +7,7 @@
 #include "utils_factor.hpp"
 #include "utils_public.hpp"
 #include "utils_other.hpp"
+#include "utils_files.hpp"
 
 #include <filesystem>
 #include <stdexcept>
@@ -67,42 +68,19 @@ inline void validate_image(const std::filesystem::path& path, size_t i, const st
 
     if (format == "PNG") {
         ipath += ".png";
-        byteme::RawFileReader reader(ipath, 10);
-        byteme::PerByte<unsigned char> pb(&reader);
-        bool okay = pb.valid();
-
         // Magic number from http://www.libpng.org/pub/png/spec/1.2/png-1.2-pdg.html#PNG-file-signature
         std::array<unsigned char, 8> expected { 137, 80, 78, 71, 13, 10, 26, 10 };
-        for (size_t i = 0; i < 8; ++i) {
-            if (!okay) {
-                throw std::runtime_error("incomplete PNG file signature for '" + ipath.string() + "'");
-            }
-            if (pb.get() != expected[i]) {
-                throw std::runtime_error("incorrect file signature for '" + ipath.string() + "'");
-            }
-            okay = pb.advance();
-        }
+        internal_files::check_signature(ipath, expected.data(), expected.size(), "PNG");
 
     } else if (format == "TIFF") {
         ipath += ".tif";
-        byteme::RawFileReader reader(ipath, 10);
-        byteme::PerByte<unsigned char> pb(&reader);
-        bool okay = pb.valid();
-
         std::array<unsigned char, 4> observed;
-        for (size_t i = 0; i < 4; ++i) {
-            if (!okay) {
-                throw std::runtime_error("incomplete TIFF file signature for '" + ipath.string() + "'");
-            }
-            observed[i] = pb.get();
-            okay = pb.advance();
-        }
-
-        // Magic number from https://en.wikipedia.org/wiki/Magic_number_(programming)
+        internal_files::extract_signature(ipath, observed.data(), observed.size());
+        // Magic numbers from https://en.wikipedia.org/wiki/Magic_number_(programming)
         std::array<unsigned char, 4> iisig = { 0x49, 0x49, 0x2A, 0x00 };
         std::array<unsigned char, 4> mmsig = { 0x4D, 0x4D, 0x00, 0x2A };
         if (observed != iisig && observed != mmsig) {
-            throw std::runtime_error("incorrect file signature for '" + ipath.string() + "'");
+            throw std::runtime_error("incorrect TIFF file signature for '" + ipath.string() + "'");
         }
 
     } else {
