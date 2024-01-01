@@ -90,7 +90,17 @@ read.registry$registry <- list(
     sequence_information="alabaster.ranges::readSeqinfo",
     multi_sample_dataset="alabaster.mae::readMultiAssayExperiment",
     sequence_string_set="alabaster.string::readXStringSet",
-    spatial_experiment="alabaster.spatial::readSpatialExperiment"
+    spatial_experiment="alabaster.spatial::readSpatialExperiment",
+    bam_file="alabaster.files::readBamFileReference",
+    bcf_file="alabaster.files::readBcfFileReference",
+    bigbed_file="alabaster.files::readBigBedFileReference",
+    bigwig_file="alabaster.files::readBigWigFileReference",
+    bed_file="alabaster.files::readBedFileReference",
+    gff_file="alabaster.files::readGffFileReference",
+    gmt_file="alabaster.files::readGmtFileReference",
+    fasta_file="alabaster.files::readFastaFileReference",
+    fastq_file="alabaster.files::readFastqFileReference",
+    bumpy_data_frame_array="alabaster.bumpy::readBumpyDataFrameMatrix"
 )
 
 #' @export
