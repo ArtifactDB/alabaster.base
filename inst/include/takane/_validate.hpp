@@ -34,6 +34,8 @@
 #include "bed_file.hpp"
 #include "gmt_file.hpp"
 #include "gff_file.hpp"
+#include "bumpy_atomic_array.hpp"
+#include "bumpy_data_frame_array.hpp"
 
 /**
  * @file _validate.hpp
@@ -81,6 +83,8 @@ inline ValidateRegistry default_registry() {
     registry["bed_file"] = [](const std::filesystem::path& p, const ObjectMetadata& m, const Options& o) { bed_file::validate(p, m, o); };
     registry["gmt_file"] = [](const std::filesystem::path& p, const ObjectMetadata& m, const Options& o) { gmt_file::validate(p, m, o); };
     registry["gff_file"] = [](const std::filesystem::path& p, const ObjectMetadata& m, const Options& o) { gff_file::validate(p, m, o); };
+    registry["bumpy_atomic_array"] = [](const std::filesystem::path& p, const ObjectMetadata& m, const Options& o) { bumpy_atomic_array::validate(p, m, o); };
+    registry["bumpy_data_frame_array"] = [](const std::filesystem::path& p, const ObjectMetadata& m, const Options& o) { bumpy_data_frame_array::validate(p, m, o); };
     return registry;
 } 
 
