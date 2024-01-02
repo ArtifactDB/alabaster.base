@@ -3,11 +3,15 @@
 
 #include "byteme/byteme.hpp"
 
+#include "ritsuko/ritsuko.hpp"
+#include "utils_other.hpp"
+
 #include <array>
 #include <algorithm>
 #include <stdexcept>
 #include <limits>
 #include <cctype>
+#include <filesystem>
 
 /**
  * @file sequence_string_set.hpp

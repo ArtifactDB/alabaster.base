@@ -46,39 +46,9 @@ inline void validate(const std::filesystem::path& path, const ObjectMetadata& me
     }
 
     // Validating the dimensions.
-    size_t num_rows = 0, num_cols = 0;
-    {
-        auto dIt = semap.find("dimensions");
-        if (dIt == semap.end()) {
-            throw std::runtime_error("expected a 'dimensions' property");
-        }
-        const auto& dims = dIt->second;
-        if (dims->type() != millijson::ARRAY) {
-            throw std::runtime_error("expected 'dimensions' to be an array");
-        }
-
-        auto dptr = reinterpret_cast<const millijson::Array*>(dims.get());
-        if (dptr->values.size() != 2) {
-            throw std::runtime_error("expected 'dimensions' to be an array of length 2");
-        }
-
-        size_t counter = 0;
-        for (const auto& x : dptr->values) {
-            if (x->type() != millijson::NUMBER) {
-                throw std::runtime_error("expected 'dimensions' to be an array of numbers");
-            }
-            auto val = reinterpret_cast<const millijson::Number*>(x.get())->value;
-            if (val < 0 || std::floor(val) != val) {
-                throw std::runtime_error("expected 'dimensions' to contain non-negative integers");
-            }
-            if (counter == 0) {
-                num_rows = val;
-            } else {
-                num_cols = val;
-            }
-            ++counter;
-        }
-    }
+    auto dims = internal_summarized_experiment::extract_dimensions_json(semap, "summarized_experiment");
+    size_t num_rows = dims.first;
+    size_t num_cols = dims.second;
 
     // Checking the assays. The directory is also allowed to not exist, 
     // in which case we have no assays.
@@ -145,10 +115,8 @@ inline void validate(const std::filesystem::path& path, const ObjectMetadata& me
 inline size_t height([[maybe_unused]] const std::filesystem::path& path, const ObjectMetadata& metadata, [[maybe_unused]] const Options& options) {
     // Assume it's all valid, so we go straight for the kill.
     const auto& semap = internal_json::extract_object(metadata.other, "summarized_experiment");
-    auto dIt = semap.find("dimensions");
-    const auto& dims = dIt->second;
-    auto dptr = reinterpret_cast<const millijson::Array*>(dims.get());
-    return reinterpret_cast<const millijson::Number*>(dptr->values[0].get())->value;
+    auto dims = internal_summarized_experiment::extract_dimensions_json(semap, "summarized_experiment");
+    return dims.first;
 }
 
 /**
@@ -160,14 +128,8 @@ inline size_t height([[maybe_unused]] const std::filesystem::path& path, const O
 inline std::vector<size_t> dimensions([[maybe_unused]] const std::filesystem::path& path, const ObjectMetadata& metadata, [[maybe_unused]] const Options& options) {
     // Assume it's all valid, so we go straight for the kill.
     const auto& semap = internal_json::extract_object(metadata.other, "summarized_experiment");
-    auto dIt = semap.find("dimensions");
-    const auto& dims = dIt->second;
-    auto dptr = reinterpret_cast<const millijson::Array*>(dims.get());
-
-    std::vector<size_t> output(2);
-    output[0] = reinterpret_cast<const millijson::Number*>(dptr->values[0].get())->value;
-    output[1] = reinterpret_cast<const millijson::Number*>(dptr->values[1].get())->value;
-    return output;
+    auto dims = internal_summarized_experiment::extract_dimensions_json(semap, "summarized_experiment");
+    return std::vector<size_t>{ dims.first, dims.second };
 }
 
 }

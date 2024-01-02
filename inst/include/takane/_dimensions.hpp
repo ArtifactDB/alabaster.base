@@ -10,8 +10,10 @@
 #include "data_frame.hpp"
 #include "dense_array.hpp"
 #include "compressed_sparse_matrix.hpp"
+#include "summarized_experiment.hpp"
 #include "bumpy_atomic_array.hpp"
 #include "bumpy_data_frame_array.hpp"
+#include "vcf_experiment.hpp"
 
 /**
  * @file _dimensions.hpp
@@ -45,6 +47,7 @@ inline DimensionsRegistry default_registry() {
 
     registry["bumpy_atomic_array"] = [](const std::filesystem::path& p, const ObjectMetadata& m, const Options& o) -> std::vector<size_t> { return bumpy_atomic_array::dimensions(p, m, o); };
     registry["bumpy_data_frame_array"] = [](const std::filesystem::path& p, const ObjectMetadata& m, const Options& o) -> std::vector<size_t> { return bumpy_data_frame_array::dimensions(p, m, o); };
+    registry["vcf_experiment"] = [](const std::filesystem::path& p, const ObjectMetadata& m, const Options& o) -> std::vector<size_t> { return vcf_experiment::dimensions(p, m, o); };
 
     return registry;
 } 

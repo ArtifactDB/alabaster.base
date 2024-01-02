@@ -11,6 +11,7 @@
 #include "utils_string.hpp"
 #include "utils_factor.hpp"
 #include "utils_json.hpp"
+#include "utils_other.hpp"
 
 /**
  * @file data_frame_factor.hpp

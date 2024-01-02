@@ -2,6 +2,9 @@
 #define TAKANE_BIGWIG_FILE_HPP
 
 #include "utils_files.hpp"
+
+#include "ritsuko/ritsuko.hpp"
+
 #include <filesystem>
 #include <stdexcept>
 #include <string>
