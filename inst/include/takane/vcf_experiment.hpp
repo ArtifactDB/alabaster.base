@@ -123,12 +123,11 @@ std::pair<size_t, size_t> scan_vcf_dimensions(const std::filesystem::path& path,
                 }
             }
 
-            // Scanning the number of commas, as each comma represents another alternative allele.
-            // (Zero alternative alleles manifests as a '.', which counts as a single row.)
+            // Checking that we don't have any commas if it's expanded.
             while (true) {
                 char current = pb.get();
                 if (current == ',') {
-                    ++expected_rows;
+                    throw std::runtime_error("expected a 1:1 mapping of rows to alternative alleles when 'vcf_experiment.expanded = true'");
                 } else if (current == '\t') {
                     break;
                 } else if (current == '\n') {
