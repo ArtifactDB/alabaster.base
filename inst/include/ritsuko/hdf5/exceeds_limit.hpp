@@ -116,7 +116,6 @@ inline bool exceeds_float_limit(const H5::DataSet& handle, size_t precision) {
  *
  * @param handle Handle for a HDF5 attribute.
  * @param precision Number of bits in the limiting integer type, assuming 2's complement.
- * @param is_signed Whether the limiting integer type is signed.
  *
  * @return Whether the dataset uses a datatype than cannot be represented by the limiting integer type.
  */

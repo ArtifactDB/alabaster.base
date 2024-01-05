@@ -532,8 +532,6 @@ ParsedList parse(const std::string& file, const std::string& name, Options optio
  * Any invalid representations will cause an error to be thrown.
  *
  * @param handle Handle for a HDF5 group corresponding to the list.
- * @param name Name of the HDF5 group corresponding to `handle`. 
- * Only used for error messages.
  * @param num_external Expected number of external references. 
  * @param options Optional parameters.
  */

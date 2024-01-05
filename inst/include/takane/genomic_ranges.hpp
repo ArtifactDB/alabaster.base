@@ -27,6 +27,7 @@ namespace takane {
  * @cond
  */
 void validate(const std::filesystem::path&, const ObjectMetadata&, const Options& options);
+bool derived_from(const std::string&, const std::string&);
 /**
  * @endcond
  */
@@ -43,14 +44,14 @@ namespace genomic_ranges {
 namespace internal {
 
 struct SequenceLimits {
-    SequenceLimits(size_t n) : restricted(n), seqlen(n) {}
-    std::vector<unsigned char> restricted;
+    SequenceLimits(size_t n) : has_circular(n), circular(n), has_seqlen(n), seqlen(n) {}
+    std::vector<unsigned char> has_circular, circular, has_seqlen;
     std::vector<uint64_t> seqlen;
 };
 
 inline SequenceLimits find_sequence_limits(const std::filesystem::path& path, const Options& options) {
     auto smeta = read_object_metadata(path);
-    if (smeta.type != "sequence_information") {
+    if (!derived_from(smeta.type, "sequence_information")) {
         throw std::runtime_error("'sequence_information' directory should contain a 'sequence_information' object");
     }
     ::takane::validate(path, smeta, options);
@@ -68,23 +69,13 @@ inline SequenceLimits find_sequence_limits(const std::filesystem::path& path, co
     auto cmissing = ritsuko::hdf5::open_and_load_optional_numeric_missing_placeholder<int32_t>(chandle, "missing-value-placeholder");
 
     SequenceLimits output(num_seq);
-    auto& restricted = output.restricted;
-    auto& seqlen = output.seqlen;
-
     for (size_t i = 0; i < num_seq; ++i, lstream.next(), cstream.next()) {
         auto slen = lstream.get();
         auto circ = cstream.get();
-        seqlen[i] = slen;
-
-        // Skipping restriction if the sequence length is missing OR the sequence is circular.
-        if (lmissing.first && lmissing.second == slen) {
-            continue;
-        }
-        if (circ && !(cmissing.first && cmissing.second == circ)) {
-            continue;
-        }
-
-        restricted[i] = true;
+        output.has_seqlen[i] = !(lmissing.first && lmissing.second == slen);
+        output.seqlen[i] = slen;
+        output.has_circular[i] = !(cmissing.first && cmissing.second == circ);
+        output.circular[i] = circ;
     }
 
     return output;
@@ -109,9 +100,7 @@ inline void validate(const std::filesystem::path& path, const ObjectMetadata& me
 
     // Figuring out the sequence length constraints.
     auto limits = internal::find_sequence_limits(path / "sequence_information", options);
-    const auto& restricted = limits.restricted;
-    const auto& seqlen = limits.seqlen;
-    size_t num_sequences = restricted.size();
+    size_t num_sequences = limits.seqlen.size();
 
     // Now loading all three components.
     auto handle = ritsuko::hdf5::open_file(path / "ranges.h5");
@@ -151,22 +140,26 @@ inline void validate(const std::filesystem::path& path, const ObjectMetadata& me
         auto start = start_stream.get();
         auto width = width_stream.get();
 
-        if (restricted[id]) {
+        // If it's definitely non-circular, the start position should be positive.
+        if (limits.has_circular[id] && !limits.circular[id]) {
             if (start < 1) {
                 throw std::runtime_error("non-positive start position (" + std::to_string(start) + ") for non-circular sequence");
             }
 
-            auto spos = static_cast<uint64_t>(start);
-            auto limit = seqlen[id];
-            if (spos > limit) {
-                throw std::runtime_error("start position beyond sequence length (" + std::to_string(start) + " > " + std::to_string(limit) + ") for non-circular sequence");
-            }
+            if (limits.has_seqlen[id]) {
+                // If the sequence length is provided, the end position shouldn't overflow.
+                auto spos = static_cast<uint64_t>(start);
+                auto limit = limits.seqlen[id];
+                if (spos > limit) {
+                    throw std::runtime_error("start position beyond sequence length (" + std::to_string(start) + " > " + std::to_string(limit) + ") for non-circular sequence");
+                }
 
-            // The LHS should not overflow as 'spos >= 1' so 'limit - spos + 1' should still be no greater than 'limit'.
-            if (limit - spos + 1 < width) {
-                throw std::runtime_error("end position beyond sequence length (" + 
-                    std::to_string(start) + " + " + std::to_string(width) + " > " + std::to_string(limit) + 
-                    ") for non-circular sequence");
+                // The LHS should not overflow as 'spos >= 1' so 'limit - spos + 1' should still be no greater than 'limit'.
+                if (limit - spos + 1 < width) {
+                    throw std::runtime_error("end position beyond sequence length (" + 
+                        std::to_string(start) + " + " + std::to_string(width) + " > " + std::to_string(limit) + 
+                        ") for non-circular sequence");
+                }
             }
         }
 

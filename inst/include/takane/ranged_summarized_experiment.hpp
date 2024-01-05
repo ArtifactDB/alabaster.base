@@ -47,7 +47,7 @@ inline void validate(const std::filesystem::path& path, const ObjectMetadata& me
     auto rangedir = path / "row_ranges";
     if (std::filesystem::exists(rangedir)) {
         auto rangemeta = read_object_metadata(rangedir);
-        if (rangemeta.type != "genomic_ranges" && rangemeta.type != "genomic_ranges_list") {
+        if (!derived_from(rangemeta.type, "genomic_ranges") && !derived_from(rangemeta.type, "genomic_ranges_list")) {
             throw std::runtime_error("object in 'row_ranges' must be a 'genomic_ranges' or 'genomic_ranges_list'");
         }
 

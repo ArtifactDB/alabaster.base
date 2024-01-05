@@ -91,7 +91,7 @@ inline void validate_1d_string_dataset(const H5::DataSet& handle, hsize_t buffer
  * Currently, this involves checking that there are no `NULL` entries for variable-length string datatypes.
  * For fixed-width string attributes, this function is a no-op.
  *
- * @param handle Handle to the HDF5 string attribute.
+ * @param attr Handle to the HDF5 string attribute.
  */
 inline void validate_scalar_string_attribute(const H5::Attribute& attr) {
     auto dtype = attr.getDataType();
@@ -113,7 +113,7 @@ inline void validate_scalar_string_attribute(const H5::Attribute& attr) {
  * Currently, this involves checking that there are no `NULL` entries for variable-length string datatypes.
  * For fixed-width string attributes, this function is a no-op.
  *
- * @param handle Handle to the HDF5 string attribute.
+ * @param attr Handle to the HDF5 string attribute.
  * @param full_length Length of the attribute as a 1-dimensional vector.
  */
 inline void validate_1d_string_attribute(const H5::Attribute& attr, hsize_t full_length) {
@@ -135,7 +135,7 @@ inline void validate_1d_string_attribute(const H5::Attribute& attr, hsize_t full
 
 /**
  * Overload for `validate_1d_string_attribute()` that automatically determines its length via `get_1d_length()`.
- * @param handle Handle to the HDF5 string attribute.
+ * @param attr Handle to the HDF5 string attribute.
  */
 inline void validate_1d_string_attribute(const H5::Attribute& attr) {
     validate_1d_string_attribute(attr, get_1d_length(attr, false));

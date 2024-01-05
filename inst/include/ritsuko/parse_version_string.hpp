@@ -4,6 +4,11 @@
 #include <stdexcept>
 #include <string>
 
+/**
+ * @file parse_version_string.hpp
+ * @brief Parse version strings.
+ */
+
 namespace ritsuko {
 
 /**
@@ -179,6 +184,13 @@ inline void throw_version_error(const char* version_string, size_t size, const c
  * @endcond
  */
 
+/**
+ * @param[in] version_string Pointer to a version string.
+ * @param size Length of the `version_string`.
+ * @param skip_patch Whether to skip the patch number.
+ * @return A `Version` object containing the version number.
+ * If `skip_patch = true`, the `patch` number is always zero.
+ */
 inline Version parse_version_string(const char* version_string, size_t size, bool skip_patch = false) {
     int major = 0, minor = 0, patch = 0;
     size_t i = 0, end = size;

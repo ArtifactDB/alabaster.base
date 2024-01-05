@@ -4,6 +4,7 @@
 #include <unordered_set>
 #include <unordered_map>
 #include <string>
+#include "_derived_from.hpp"
 
 namespace takane {
 
@@ -16,7 +17,7 @@ inline auto default_registry() {
     std::unordered_map<std::string, std::unordered_set<std::string> > registry;
     registry["SIMPLE_LIST"] = { "simple_list" };
     registry["DATA_FRAME"] = { "data_frame" };
-    registry["SUMMARIZED_EXPERIMENT"] = { "summarized_experiment", "ranged_summarized_experiment", "single_cell_experiment" };
+    registry["SUMMARIZED_EXPERIMENT"] = { "summarized_experiment", "vcf_experiment" };
     return registry;
 }
 
@@ -28,7 +29,9 @@ inline auto default_registry() {
 /**
  * Registry of object types that satisfy a particular object interface.
  * Each key is the interface and each value is the set of all types that satisfy it.
+ *
  * Applications can extend the **takane** framework by adding custom types to each set.
+ * Note that, if a type is included in a particular set, it is not necessary to add its derived types, as `satisfies_interface()` will automatically call `derived_from()`.
  */
 inline std::unordered_map<std::string, std::unordered_set<std::string> > satisfies_interface_registry = internal_satisfies_interface::default_registry();
 
@@ -45,8 +48,19 @@ inline bool satisfies_interface(const std::string& type, const std::string& inte
     if (it == satisfies_interface_registry.end()) {
         return false;
     }
+
     const auto& listing = it->second;
-    return listing.find(type) != listing.end();
+    if (listing.find(type) != listing.end()) {
+        return true;
+    }
+
+    for (const auto& d : listing) {
+        if (derived_from(type, d)) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 }

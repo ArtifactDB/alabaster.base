@@ -32,7 +32,7 @@ class Stream1dNumericDataset {
 public:
     /**
      * @param ptr Pointer to a HDF5 dataset handle.
-     * @param size Length of the dataset as a 1-dimensional vector.
+     * @param length Length of the dataset as a 1-dimensional vector.
      * @param buffer_size Size of the buffer for holding streamed blocks of values.
      * Larger buffers improve speed at the cost of some memory efficiency.
      */

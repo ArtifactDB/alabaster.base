@@ -22,6 +22,7 @@ namespace takane {
 void validate(const std::filesystem::path&, const ObjectMetadata&, const Options&);
 size_t height(const std::filesystem::path&, const ObjectMetadata&, const Options&);
 bool satisfies_interface(const std::string&, const std::string&);
+bool derived_from(const std::string&, const std::string&);
 
 namespace internal_bumpy_array {
 
@@ -139,7 +140,7 @@ void validate_directory(const std::filesystem::path& path, const std::string& ob
             throw std::runtime_error("'concatenated' should satisfy the '" + concatenated_type + "' interface");
         }
     } else {
-        if (catmeta.type != concatenated_type) {
+        if (!derived_from(catmeta.type, concatenated_type)) {
             throw std::runtime_error("'concatenated' should contain an '" + concatenated_type + "' object");
         }
     }

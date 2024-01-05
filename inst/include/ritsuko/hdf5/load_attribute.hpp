@@ -11,8 +11,8 @@
 #include "_strings.hpp"
 
 /**
- * @file load_scalar_string_attribute.hpp
- * @brief Load a scalar string HDF5 attribute.
+ * @file load_attribute.hpp
+ * @brief Load HDF5 attributes.
  */
 
 namespace ritsuko {

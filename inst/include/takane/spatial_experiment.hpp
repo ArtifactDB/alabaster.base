@@ -19,6 +19,14 @@
 namespace takane {
 
 /**
+ * @cond
+ */
+bool derived_from(const std::string&, const std::string&);
+/**
+ * @endcond
+ */
+
+/**
  * @namespace takane::spatial_experiment
  * @brief Definitions for spatial experiments.
  */
@@ -32,7 +40,7 @@ namespace internal {
 inline void validate_coordinates(const std::filesystem::path& path, size_t ncols, const Options& options) {
     auto coord_path = path / "coordinates";
     auto coord_meta = read_object_metadata(coord_path);
-    if (coord_meta.type != "dense_array") {
+    if (!derived_from(coord_meta.type, "dense_array")) {
         throw std::runtime_error("'coordinates' should be a dense array");
     }
 

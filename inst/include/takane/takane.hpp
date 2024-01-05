@@ -4,6 +4,7 @@
 #include "_validate.hpp"
 #include "_height.hpp"
 #include "_satisfies_interface.hpp"
+#include "_derived_from.hpp"
 #include "_dimensions.hpp"
 
 /**
