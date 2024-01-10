@@ -7,6 +7,7 @@
 #include "exceeds_limit.hpp"
 #include "get_1d_length.hpp"
 #include "get_name.hpp"
+#include "is_utf8_string.hpp"
 #include "load_attribute.hpp"
 #include "load_dataset.hpp"
 #include "missing_placeholder.hpp"

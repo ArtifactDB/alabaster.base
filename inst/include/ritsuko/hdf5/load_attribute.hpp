@@ -105,7 +105,7 @@ inline std::vector<std::string> load_1d_string_attribute(const H5::Attribute& at
 template<typename Type_>
 Type_ load_scalar_numeric_attribute(const H5::Attribute& attr) {
     Type_ val;
-    auto mtype = as_numeric_datatype<Type_>();
+    const auto& mtype = as_numeric_datatype<Type_>();
     attr.read(mtype, &val);
     return val;
 }
@@ -119,7 +119,7 @@ Type_ load_scalar_numeric_attribute(const H5::Attribute& attr) {
  */
 template<typename Type_>
 std::vector<Type_> load_1d_numeric_attribute(const H5::Attribute& attr, hsize_t full_length) {
-    auto mtype = as_numeric_datatype<Type_>();
+    const auto& mtype = as_numeric_datatype<Type_>();
     std::vector<Type_> buffer(full_length);
     attr.read(mtype, buffer.data());
     return buffer;

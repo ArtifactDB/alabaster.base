@@ -14,7 +14,7 @@ namespace ritsuko {
 namespace hdf5 {
 
 /**
- * Check if a HDF5 dataset has a type that might hold values beyond the range of a limiting integer type. 
+ * Check if a HDF5 datatype could hold values beyond the range of a limiting integer type. 
  * This is used by validators to ensure that a dataset can be represented in memory by the limiting type.
  *
  * @param itype HDF5 integer datatype.
@@ -90,7 +90,7 @@ inline bool exceeds_float_limit_by_integer(const H5::IntType itype, size_t preci
  */
 
 /**
- * Check if a HDF5 dataset has a type that might hold values beyond the range of a limiting float type. 
+ * Check if a HDF5 datatype could hold values beyond the range of a limiting float type. 
  * This is used by validators to ensure that a dataset can be represented in memory by the limiting type.
  *
  * @param handle Handle for a HDF5 dataset.

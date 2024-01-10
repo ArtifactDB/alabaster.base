@@ -6,6 +6,8 @@
 
 #include "open.hpp"
 #include "load_attribute.hpp"
+#include "is_utf8_string.hpp"
+#include "get_1d_length.hpp"
 
 /**
  * @file miscellaneous.hpp
@@ -43,8 +45,8 @@ inline H5::Attribute open_scalar_attribute(const H5Object_& handle, const char* 
 template<class H5Object_>
 std::string open_and_load_scalar_string_attribute(const H5Object_& handle, const char* name) {
     auto attr = open_scalar_attribute(handle, name);
-    if (attr.getTypeClass() != H5T_STRING) {
-        throw std::runtime_error("expected '" + std::string(name) + "' attribute to be a string");
+    if (!is_utf8_string(attr)) {
+        throw std::runtime_error("expected '" + std::string(name) + "' attribute to be a string with a UTF-8 compatible encoding");
     }
     return load_scalar_string_attribute(attr);
 }
