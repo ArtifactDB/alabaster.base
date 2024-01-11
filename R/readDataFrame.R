@@ -141,7 +141,7 @@ loadDataFrame <- function(info, project, include.nested=TRUE, parallel=TRUE) {
 
                 if (!is.null(current)) {
                     attrs <- h5readAttributes(path, prefix(paste0("data/", d)))
-                    current <- h5_cast(current, expected.type=NULL, missing.placeholder=attrs[[missingPlaceholderName]])
+                    current <- h5_cast(current, expected.type=NULL, missing.placeholder=attrs[[missingPlaceholderName]], respect.nan.payload=TRUE)
                     df[[i]] <- as.vector(current) # remove 1d arrays.
 
                 } else {

@@ -158,7 +158,7 @@ h5_read_attribute <- function(handle, name, check=FALSE, default=NULL, bit64conv
 }
 
 #' @export
-h5_cast <- function(current, expected.type, missing.placeholder) {
+h5_cast <- function(current, expected.type, missing.placeholder, respect.nan.payload=FALSE) {
     restore_min_integer <- function(y) {
         z <- FALSE
         if (is.integer(y) && anyNA(y)) { # promote integer NAs back to the actual number.
@@ -175,10 +175,18 @@ h5_cast <- function(current, expected.type, missing.placeholder) {
         current <- out$y
         converted <- out$converted
     } else if (is.na(missing.placeholder)) {
-        if (!is.nan(missing.placeholder)) {
+        if (!is.double(current)) {
             # No-op as the placeholder is already R's NA of the relevant type.
-        } else { 
-            current[is.nan(current)] <- NA # avoid equality checks to an NaN.
+        } else {
+            if (respect.nan.payload && !is.nan(missing.placeholder)) {
+                # No-op as we're considering the NaN payload and the placeholder
+                # is not NaN (and thus must be an R NA).
+            } else { 
+                # We set all NaN values to missing, regardless of their payloads.
+                # This is possible because is.na(), despite its name, calls the
+                # C isnan() under the hood, which just returns TRUE for all NaNs.
+                current[is.na(current)] <- NA 
+            }
         }
     } else {
         out <- restore_min_integer(current)
