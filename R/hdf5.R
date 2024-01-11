@@ -128,9 +128,15 @@ h5_read_vector <- function(handle, name, check=FALSE, default=NULL, bit64convers
             return(default)
         }
     }
+
     dhandle <- H5Dopen(handle, name)
     on.exit(H5Dclose(dhandle), add=TRUE, after=FALSE)
-    H5Dread(dhandle, bit64conversion=bit64conversion, drop=TRUE)
+    output <- H5Dread(dhandle, bit64conversion=bit64conversion, drop=TRUE)
+
+    if (is.raw(output)) {
+        storage.mode(output) <- "integer"
+    }
+    output
 }
 
 #' @export
@@ -140,9 +146,15 @@ h5_read_attribute <- function(handle, name, check=FALSE, default=NULL, bit64conv
             return(default)
         }
     }
+
     ahandle <- H5Aopen_by_name(handle, name=name)
     on.exit(H5Aclose(ahandle), add=TRUE, after=FALSE)
-    H5Aread(ahandle, bit64conversion=bit64conversion)
+    output <- H5Aread(ahandle, bit64conversion=bit64conversion)
+
+    if (is.raw(output)) {
+        storage.mode(output) <- "integer"
+    }
+    output
 }
 
 #' @export
