@@ -164,7 +164,7 @@ saveBaseListFormat <- (function() {
 
             h5_write_vector(ghandle, "levels", levels(x))
             if (.version > 1 && is.ordered(x)) {
-                h5_write_vector(ghandle, "ordered", 1L, compress=0, scalar=TRUE)
+                h5_write_vector(ghandle, "ordered", 1L, scalar=TRUE)
             }
             if (!is.null(names(x))) {
                 h5_write_vector(ghandle, "names", names(x))
@@ -176,7 +176,7 @@ saveBaseListFormat <- (function() {
             h5_write_attribute(ghandle, "uzuki_type", if (.version == 1) sltype else "string", scalar=TRUE)
 
             if (.version > 1 && sltype != "string") {
-                h5_write_vector(ghandle, "format", sltype, compress=0, scalar=TRUE)
+                h5_write_vector(ghandle, "format", sltype, scalar=TRUE)
             }
 
             y <- .sanitize_stringlike(x, sltype)
@@ -240,7 +240,7 @@ saveBaseListFormat <- (function() {
     # External object fallback.
     h5_write_attribute(ghandle, "uzuki_object", "external", scalar=TRUE)
     n <- length(env$collected)
-    h5_write_vector(ghandle, "index", n, compress=0, scalar=TRUE)
+    h5_write_vector(ghandle, "index", n, scalar=TRUE)
 
     if (is.data.frame(x)) {
         x <- DataFrame(x, check.names=FALSE)

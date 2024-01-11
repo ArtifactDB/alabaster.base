@@ -55,6 +55,7 @@ h5_guess_vector_chunks <- function(len) {
 h5_create_vector <- function(handle, name, len, type, compress=6, chunks=NULL, scalar=FALSE, emit=FALSE) {
     if (len == 1 && scalar) {
         shandle <- H5Screate("H5S_SCALAR")
+        compress <- 0
     } else {
         shandle <- H5Screate_simple(len)
     }
