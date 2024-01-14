@@ -9,6 +9,11 @@
 #include <stdexcept>
 #include <string>
 
+/**
+ * @file bcf_file.hpp
+ * @brief Validation for BCF files.
+ */
+
 namespace takane {
 
 /**

@@ -9,6 +9,11 @@
 #include <stdexcept>
 #include <string>
 
+/**
+ * @file bigbed_file.hpp
+ * @brief Validation for bigBed files.
+ */
+
 namespace takane {
 
 /**

@@ -37,6 +37,7 @@
 #include "bumpy_atomic_array.hpp"
 #include "bumpy_data_frame_array.hpp"
 #include "vcf_experiment.hpp"
+#include "delayed_array.hpp"
 
 /**
  * @file _validate.hpp
@@ -87,6 +88,7 @@ inline ValidateRegistry default_registry() {
     registry["bumpy_atomic_array"] = [](const std::filesystem::path& p, const ObjectMetadata& m, const Options& o) { bumpy_atomic_array::validate(p, m, o); };
     registry["bumpy_data_frame_array"] = [](const std::filesystem::path& p, const ObjectMetadata& m, const Options& o) { bumpy_data_frame_array::validate(p, m, o); };
     registry["vcf_experiment"] = [](const std::filesystem::path& p, const ObjectMetadata& m, const Options& o) { vcf_experiment::validate(p, m, o); };
+    registry["delayed_array"] = [](const std::filesystem::path& p, const ObjectMetadata& m, const Options& o) { delayed_array::validate(p, m, o); };
     return registry;
 } 
 

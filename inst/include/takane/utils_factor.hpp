@@ -40,8 +40,8 @@ struct DefaultFactorMessenger {
 template<class ErrorMessenger_ = DefaultFactorMessenger>
 hsize_t validate_factor_levels(const H5::Group& handle, const std::string& name, hsize_t buffer_size) {
     auto lhandle = ritsuko::hdf5::open_dataset(handle, name.c_str());
-    if (lhandle.getTypeClass() != H5T_STRING) {
-        throw std::runtime_error("expected a string datatype for '" + name + "'");
+    if (!ritsuko::hdf5::is_utf8_string(lhandle)) {
+        throw std::runtime_error("expected '" + name + "' to have a datatype that can be represented by a UTF-8 encoded string");
     }
 
     auto len = ritsuko::hdf5::get_1d_length(lhandle.getSpace(), false);

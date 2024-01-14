@@ -8,6 +8,11 @@
 #include <stdexcept>
 #include <string>
 
+/**
+ * @file gmt_file.hpp
+ * @brief Validation for GMT files.
+ */
+
 namespace takane {
 
 /**

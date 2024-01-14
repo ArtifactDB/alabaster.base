@@ -5,6 +5,11 @@
 #include <unordered_map>
 #include <string>
 
+/**
+ * @file _derived_from.hpp
+ * @brief Registry of derived object types.
+ */
+
 namespace takane {
 
 /**

@@ -12,6 +12,11 @@
 #include <unordered_set>
 #include <string>
 
+/**
+ * @file single_cell_experiment.hpp
+ * @brief Validation for single cell experiments.
+ */
+
 namespace takane {
 
 /**
@@ -31,6 +36,7 @@ namespace single_cell_experiment {
 
 /**
  * @param path Path to the directory containing the single cell experiment.
+ * @param metadata Metadata for the object, typically read from its `OBJECT` file.
  * @param options Validation options, typically for reading performance.
  */
 inline void validate(const std::filesystem::path& path, const ObjectMetadata& metadata, const Options& options) {

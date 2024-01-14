@@ -26,6 +26,9 @@ namespace takane {
  */
 namespace vcf_experiment {
 
+/**
+ * @cond
+ */
 namespace internal {
 
 // Format specification taken from https://samtools.github.io/hts-specs/VCFv4.1.pdf.
@@ -172,6 +175,9 @@ std::pair<size_t, size_t> scan_vcf_dimensions(const std::filesystem::path& path,
 }
 
 }
+/**
+ * @endcond
+ */
 
 /**
  * @param path Path to the directory containing the VCF experiment.

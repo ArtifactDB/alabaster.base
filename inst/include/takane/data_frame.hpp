@@ -43,10 +43,12 @@ inline void validate_row_names(const H5::Group& handle, hsize_t num_rows, const 
     if (handle.childObjType("row_names") != H5O_TYPE_DATASET) {
         throw std::runtime_error("expected a 'row_names' dataset when row names are present");
     }
+
     auto rnhandle = handle.openDataSet("row_names");
-    if (rnhandle.getTypeClass() != H5T_STRING) {
-        throw std::runtime_error("expected 'row_names' to be a string dataset");
+    if (!ritsuko::hdf5::is_utf8_string(rnhandle)) {
+        throw std::runtime_error("expected a datatype for 'row_names' that can be represented by a UTF-8 encoded string");
     }
+
     if (ritsuko::hdf5::get_1d_length(rnhandle.getSpace(), false) != num_rows) {
         throw std::runtime_error("expected 'row_names' to have length equal to the number of rows");
     }
@@ -57,8 +59,8 @@ inline void validate_row_names(const H5::Group& handle, hsize_t num_rows, const 
 
 inline hsize_t validate_column_names(const H5::Group& ghandle, const Options& options) try {
     auto cnhandle = ritsuko::hdf5::open_dataset(ghandle, "column_names");
-    if (cnhandle.getTypeClass() != H5T_STRING) {
-        throw std::runtime_error("expected 'column_names' to be a string dataset");
+    if (!ritsuko::hdf5::is_utf8_string(cnhandle)) {
+        throw std::runtime_error("expected a datatype for 'column_names' that can be represented by a UTF-8 encoded string");
     }
     
     auto num_cols = ritsuko::hdf5::get_1d_length(cnhandle.getSpace(), false);
@@ -109,8 +111,8 @@ inline void validate_column(const H5::Group& dhandle, const std::string& dset_na
 
         auto type = ritsuko::hdf5::open_and_load_scalar_string_attribute(xhandle, "type");
         if (type == "string") {
-            if (xhandle.getTypeClass() != H5T_STRING) {
-                throw std::runtime_error("expected column " + dset_name + " to be a string dataset");
+            if (!ritsuko::hdf5::is_utf8_string(xhandle)) {
+                throw std::runtime_error("expected a datatype for '" + dset_name + "' that can be represented by a UTF-8 encoded string");
             }
             auto missingness = ritsuko::hdf5::open_and_load_optional_string_missing_placeholder(xhandle, missing_attr_name);
             std::string format = internal_string::fetch_format_attribute(xhandle);

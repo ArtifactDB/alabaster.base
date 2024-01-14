@@ -48,6 +48,7 @@ inline DimensionsRegistry default_registry() {
     registry["bumpy_atomic_array"] = [](const std::filesystem::path& p, const ObjectMetadata& m, const Options& o) -> std::vector<size_t> { return bumpy_atomic_array::dimensions(p, m, o); };
     registry["bumpy_data_frame_array"] = [](const std::filesystem::path& p, const ObjectMetadata& m, const Options& o) -> std::vector<size_t> { return bumpy_data_frame_array::dimensions(p, m, o); };
     registry["vcf_experiment"] = [](const std::filesystem::path& p, const ObjectMetadata& m, const Options& o) -> std::vector<size_t> { return vcf_experiment::dimensions(p, m, o); };
+    registry["delayed_array"] = [](const std::filesystem::path& p, const ObjectMetadata& m, const Options& o) -> std::vector<size_t> { return delayed_array::dimensions(p, m, o); };
 
     return registry;
 } 

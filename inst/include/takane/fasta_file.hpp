@@ -8,6 +8,11 @@
 #include <stdexcept>
 #include <string>
 
+/**
+ * @file fasta_file.hpp
+ * @brief Validation for FASTA files.
+ */
+
 namespace takane {
 
 /**

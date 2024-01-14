@@ -8,6 +8,11 @@
 #include "_dimensions.hpp"
 
 /**
+ * @file takane.hpp
+ * @brief Umbrella header for **takane**.
+ */
+
+/**
  * @namespace takane
  * @brief **takane** validation functions.
  */

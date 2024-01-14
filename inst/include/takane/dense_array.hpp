@@ -176,8 +176,8 @@ inline void validate(const std::filesystem::path& path, const ObjectMetadata& me
             throw std::runtime_error("expected number array to have a datatype that fits into a 64-bit float");
         }
     } else if (type == "string") {
-        if (dhandle.getTypeClass() != H5T_STRING) {
-            throw std::runtime_error("expected string array to have a string datatype class");
+        if (!ritsuko::hdf5::is_utf8_string(dhandle)) {
+            throw std::runtime_error("expected string array to have a datatype that can be represented by a UTF-8 encoded string");
         }
         internal::validate_string_contents(dhandle, extents, options.hdf5_buffer_size);
     } else {

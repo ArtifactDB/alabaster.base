@@ -6,6 +6,11 @@
 #include <string>
 #include "_derived_from.hpp"
 
+/**
+ * @file _satisfies_interface.hpp
+ * @brief Registry of object interfaces.
+ */
+
 namespace takane {
 
 /**

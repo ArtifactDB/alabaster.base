@@ -9,6 +9,11 @@
 #include <stdexcept>
 #include <string>
 
+/**
+ * @file bigwig_file.hpp
+ * @brief Validation for bigWig files.
+ */
+
 namespace takane {
 
 /**

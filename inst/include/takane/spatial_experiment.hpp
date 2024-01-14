@@ -16,6 +16,11 @@
 #include <vector>
 #include <cmath>
 
+/**
+ * @file spatial_experiment.hpp
+ * @brief Validation for spatial experiments.
+ */
+
 namespace takane {
 
 /**
@@ -124,8 +129,8 @@ inline void validate_images(const std::filesystem::path& path, size_t ncols, con
         auto num_images = ritsuko::hdf5::get_1d_length(sample_handle.getSpace(), false);
 
         auto id_handle = ritsuko::hdf5::open_dataset(ghandle, "image_ids");
-        if (id_handle.getTypeClass() != H5T_STRING) {
-            throw std::runtime_error("expected a string datatype for 'image_ids'");
+        if (!ritsuko::hdf5::is_utf8_string(id_handle)) {
+            throw std::runtime_error("expected 'image_ids' to have a datatype that can be represented by a UTF-8 encoded string");
         }
         if (ritsuko::hdf5::get_1d_length(id_handle.getSpace(), false) != num_images) {
             throw std::runtime_error("expected 'image_ids' to have the same length as 'image_samples'");
@@ -140,8 +145,8 @@ inline void validate_images(const std::filesystem::path& path, size_t ncols, con
         }
 
         auto format_handle = ritsuko::hdf5::open_dataset(ghandle, "image_formats");
-        if (format_handle.getTypeClass() != H5T_STRING) {
-            throw std::runtime_error("expected a string datatype for 'image_formats'");
+        if (!ritsuko::hdf5::is_utf8_string(format_handle)) {
+            throw std::runtime_error("expected 'image_formats' to have a datatype that can be represented by a UTF-8 encoded string");
         }
         if (ritsuko::hdf5::get_1d_length(format_handle.getSpace(), false) != num_images) {
             throw std::runtime_error("expected 'image_formats' to have the same length as 'image_samples'");

@@ -40,8 +40,8 @@ void check_dimnames(const H5::Group& handle, const std::string& name, const std:
                 std::to_string(len) + ", expected " + std::to_string(dimensions[d]) + ")"); 
         }
 
-        if (dhandle.getTypeClass() != H5T_STRING) {
-            throw std::runtime_error("expected '" + name + "/" + dname + "' to have a string datatype class");
+        if (!ritsuko::hdf5::is_utf8_string(dhandle)) {
+            throw std::runtime_error("expected '" + name + "/" + dname + "' to have a datatype that can be represented by a UTF-8 encoded string");
         }
 
         ritsuko::hdf5::validate_1d_string_dataset(dhandle, len, options.hdf5_buffer_size);
@@ -55,9 +55,7 @@ void check_dimnames(const H5::Group& handle, const std::string& name, const std:
 } catch (std::exception& e) {
     throw std::runtime_error("failed to validate dimnames for '" + ritsuko::hdf5::get_name(handle) + "'; " + std::string(e.what()));
 }
-/**
- * @endcond
- */
+
 }
 
 }

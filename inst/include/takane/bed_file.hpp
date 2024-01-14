@@ -9,6 +9,11 @@
 #include <stdexcept>
 #include <string>
 
+/**
+ * @file bed_file.hpp
+ * @brief Validation for BED files.
+ */
+
 namespace takane {
 
 /**

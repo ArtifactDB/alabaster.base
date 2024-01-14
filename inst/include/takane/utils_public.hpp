@@ -18,7 +18,7 @@
 namespace takane {
 
 /**
- * Object metadata, including the type and other fields.
+ * @brief Object metadata, including the type and other fields.
  */
 struct ObjectMetadata {
     /**

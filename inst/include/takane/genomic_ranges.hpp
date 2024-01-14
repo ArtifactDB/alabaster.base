@@ -1,8 +1,9 @@
 #ifndef TAKANE_GENOMIC_RANGES_HPP
 #define TAKANE_GENOMIC_RANGES_HPP
 
+#include "H5Cpp.h"
 #include "ritsuko/ritsuko.hpp"
-#include "comservatory/comservatory.hpp"
+#include "ritsuko/hdf5/hdf5.hpp"
 
 #include <string>
 #include <filesystem>

@@ -10,6 +10,11 @@
 #include "utils_other.hpp"
 #include "utils_summarized_experiment.hpp"
 
+/**
+ * @file multi_sample_dataset.hpp
+ * @brief Validation for multi-sample datasets.
+ */
+
 namespace takane {
 
 /**

@@ -9,6 +9,11 @@
 #include <stdexcept>
 #include <string>
 
+/**
+ * @file bam_file.hpp
+ * @brief Validation for BAM files.
+ */
+
 namespace takane {
 
 /**

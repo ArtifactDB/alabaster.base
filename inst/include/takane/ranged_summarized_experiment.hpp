@@ -11,6 +11,11 @@
 #include <unordered_set>
 #include <string>
 
+/**
+ * @file ranged_summarized_experiment.hpp
+ * @brief Validation for ranged summarized experiments.
+ */
+
 namespace takane {
 
 /**

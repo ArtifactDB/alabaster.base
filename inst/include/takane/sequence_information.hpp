@@ -43,8 +43,8 @@ inline void validate(const std::filesystem::path& path, const ObjectMetadata& me
     size_t nseq = 0;
     {
         auto nhandle = ritsuko::hdf5::open_dataset(ghandle, "name");
-        if (nhandle.getTypeClass() != H5T_STRING) {
-            throw std::runtime_error("expected a string datatype class for 'name'");
+        if (!ritsuko::hdf5::is_utf8_string(nhandle)) {
+            throw std::runtime_error("expected 'name' to have a datatype that can be represented by a UTF-8 encoded string");
         }
 
         nseq = ritsuko::hdf5::get_1d_length(nhandle.getSpace(), false);
@@ -91,8 +91,8 @@ inline void validate(const std::filesystem::path& path, const ObjectMetadata& me
 
     {
         auto gnhandle = ritsuko::hdf5::open_dataset(ghandle, "genome");
-        if (gnhandle.getTypeClass() != H5T_STRING) {
-            throw std::runtime_error("expected a string datatype class for 'genome'");
+        if (!ritsuko::hdf5::is_utf8_string(gnhandle)) {
+            throw std::runtime_error("expected 'genome' to have a datatype that can be represented by a UTF-8 encoded string");
         }
         if (ritsuko::hdf5::get_1d_length(gnhandle.getSpace(), false) != nseq) {
             throw std::runtime_error("expected lengths of 'length' and 'genome' to be equal");

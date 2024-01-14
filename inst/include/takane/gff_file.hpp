@@ -8,6 +8,11 @@
 #include <stdexcept>
 #include <string>
 
+/**
+ * @file gff_file.hpp
+ * @brief Validation for GFF files.
+ */
+
 namespace takane {
 
 /**

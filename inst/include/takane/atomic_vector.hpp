@@ -45,8 +45,8 @@ inline void validate(const std::filesystem::path& path, const ObjectMetadata& me
     const char* missing_attr_name = "missing-value-placeholder";
 
     if (type == "string") {
-        if (dhandle.getTypeClass() != H5T_STRING) {
-            throw std::runtime_error("expected a string datatype for 'values'");
+        if (!ritsuko::hdf5::is_utf8_string(dhandle)) {
+            throw std::runtime_error("expected a datatype for 'values' that can be represented by a UTF-8 encoded string");
         }
         auto missingness = ritsuko::hdf5::open_and_load_optional_string_missing_placeholder(dhandle, missing_attr_name);
         std::string format = internal_string::fetch_format_attribute(ghandle);
@@ -84,7 +84,7 @@ inline void validate(const std::filesystem::path& path, const ObjectMetadata& me
  * @param options Validation options, typically for reading performance.
  * @return Length of the vector.
  */
-inline size_t height(const std::filesystem::path& path, [[maybe_unused]] const ObjectMetadata& metadata, const Options&) {
+inline size_t height(const std::filesystem::path& path, [[maybe_unused]] const ObjectMetadata& metadata, [[maybe_unused]] const Options& options) {
     auto handle = ritsuko::hdf5::open_file(path / "contents.h5");
     auto ghandle = handle.openGroup("atomic_vector");
     auto dhandle = ghandle.openDataSet("values");

@@ -24,9 +24,10 @@ std::string fetch_format_attribute(const H5Object_& handle) {
     if (!ritsuko::hdf5::is_scalar(attr)) {
         throw std::runtime_error("expected 'format' attribute to be a scalar");
     }
-    if (attr.getTypeClass() != H5T_STRING) {
-        throw std::runtime_error("expected 'format' attribute to be a string");
+    if (!ritsuko::hdf5::is_utf8_string(attr)) {
+        throw std::runtime_error("expected 'format' to have a datatype that can be represented by a UTF-8 encoded string");
     }
+
     return ritsuko::hdf5::load_scalar_string_attribute(attr);
 }
 
@@ -69,8 +70,8 @@ inline void validate_names(const H5::Group& handle, const std::string& name, siz
     }
 
     auto nhandle = ritsuko::hdf5::open_dataset(handle, name.c_str());
-    if (nhandle.getTypeClass() != H5T_STRING) {
-        throw std::runtime_error("'" + name + "' should be a string datatype class");
+    if (!ritsuko::hdf5::is_utf8_string(nhandle)) {
+        throw std::runtime_error("expected '" + name + "' to have a datatype that can be represented by a UTF-8 encoded string");
     }
 
     auto nlen = ritsuko::hdf5::get_1d_length(nhandle.getSpace(), false);

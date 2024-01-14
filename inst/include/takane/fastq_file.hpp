@@ -8,6 +8,11 @@
 #include <stdexcept>
 #include <string>
 
+/**
+ * @file fastq_file.hpp
+ * @brief Validation for FASTQ files.
+ */
+
 namespace takane {
 
 /**
