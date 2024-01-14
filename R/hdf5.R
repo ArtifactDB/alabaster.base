@@ -197,7 +197,10 @@ h5_cast <- function(current, expected.type, missing.placeholder, respect.nan.pay
     }
 
     if (!converted && !is.null(expected.type)) {
-        current <- .cast_atomic(current, expected.type)
+        target.type <- as.character(.atomics[expected.type])
+        if (target.type != typeof(current)) {
+            storage.mode(current) <- target.type
+        }
     }
 
     current
