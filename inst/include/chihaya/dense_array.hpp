@@ -65,13 +65,13 @@ inline ArrayDetails validate(const H5::Group& handle, const ritsuko::Version& ve
         }
     }
 
+    bool native;
     {
         auto nhandle = ritsuko::hdf5::open_dataset(handle, "native");
         if (!ritsuko::hdf5::is_scalar(nhandle)) {
             throw std::runtime_error("'native' should be a scalar");
         }
 
-        bool native;
         if (version.lt(1, 1, 0)) {
             if (nhandle.getTypeClass() != H5T_INTEGER) {
                 throw std::runtime_error("'native' should have an integer datatype");
@@ -84,13 +84,15 @@ inline ArrayDetails validate(const H5::Group& handle, const ritsuko::Version& ve
             native = ritsuko::hdf5::load_scalar_numeric_dataset<int8_t>(nhandle);
         }
 
-        if (!native) {
-            std::reverse(output.dimensions.begin(), output.dimensions.end());
-        }
     }
 
+    // Do this before the 'native' check.
     if (handle.exists("dimnames")) {
         internal_dimnames::validate(handle, output.dimensions, version);
+    }
+
+    if (!native) {
+        std::reverse(output.dimensions.begin(), output.dimensions.end());
     }
 
     return output;

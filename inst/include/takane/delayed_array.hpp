@@ -91,7 +91,12 @@ inline void validate(const std::filesystem::path& path, const ObjectMetadata& me
 
     chihaya::validate(ghandle, chihaya_version, state);
 
-    if (max != internal_other::count_directory_entries(path / "seeds")) {
+    size_t found = 0;
+    auto seed_path = path / "seeds";
+    if (std::filesystem::exists(seed_path)) {
+        found = internal_other::count_directory_entries(seed_path);
+    }
+    if (max != found) {
         throw std::runtime_error("number of objects in 'seeds' is not consistent with the number of 'index' references in 'array.h5'");
     }
 }
