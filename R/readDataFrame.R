@@ -70,7 +70,7 @@ readDataFrame <- function(path, metadata, ...) {
                 columns[[col]] <- local({
                     colhandle <- H5Dopen(gdhandle, expected)
                     on.exit(H5Dclose(colhandle), add=TRUE, after=FALSE)
-                    contents <- H5Dread(colhandle)
+                    contents <- H5Dread(colhandle, drop=TRUE)
 
                     missing.placeholder <- h5_read_attribute(colhandle, missingPlaceholderName, check=TRUE, default=NULL)
                     contents <- h5_cast(contents, expected.type=type, missing.placeholder=missing.placeholder)
