@@ -30,7 +30,7 @@ LinkingTo:
     Rhdf5lib
 VignetteBuilder: knitr
 SystemRequirements: C++17, GNU make
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.0
 biocViews:
     DataRepresentation,
     DataImport
