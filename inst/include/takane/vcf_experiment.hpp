@@ -182,9 +182,9 @@ std::pair<size_t, size_t> scan_vcf_dimensions(const std::filesystem::path& path,
 /**
  * @param path Path to the directory containing the VCF experiment.
  * @param metadata Metadata for the object, typically read from its `OBJECT` file.
- * @param options Validation options, typically for reading performance.
+ * @param options Validation options.
  */
-inline void validate(const std::filesystem::path& path, const ObjectMetadata& metadata, const Options& options) {
+inline void validate(const std::filesystem::path& path, const ObjectMetadata& metadata, Options& options) {
     const auto& vcfmap = internal_json::extract_typed_object_from_metadata(metadata.other, "vcf_experiment");
 
     const std::string& vstring = internal_json::extract_string_from_typed_object(vcfmap, "version", "vcf_experiment");
@@ -232,10 +232,10 @@ inline void validate(const std::filesystem::path& path, const ObjectMetadata& me
 /**
  * @param path Path to a directory containing a VCF experiment.
  * @param metadata Metadata for the object, typically read from its `OBJECT` file.
- * @param options Validation options, mostly for input performance.
+ * @param options Validation options.
  * @return Number of rows in the VCF experiment.
  */
-inline size_t height([[maybe_unused]] const std::filesystem::path& path, const ObjectMetadata& metadata, [[maybe_unused]] const Options& options) {
+inline size_t height([[maybe_unused]] const std::filesystem::path& path, const ObjectMetadata& metadata, [[maybe_unused]] Options& options) {
     const auto& vcfmap = internal_json::extract_typed_object_from_metadata(metadata.other, "vcf_experiment");
     auto dims = internal_summarized_experiment::extract_dimensions_json(vcfmap, "vcf_experiment");
     return dims.first;
@@ -244,10 +244,10 @@ inline size_t height([[maybe_unused]] const std::filesystem::path& path, const O
 /**
  * @param path Path to a directory containing a VCF experiment.
  * @param metadata Metadata for the object, typically read from its `OBJECT` file.
- * @param options Validation options, mostly for input performance.
+ * @param options Validation options.
  * @return A vector of length 2 containing the dimensions of the VCF experiment.
  */
-inline std::vector<size_t> dimensions([[maybe_unused]] const std::filesystem::path& path, const ObjectMetadata& metadata, [[maybe_unused]] const Options& options) {
+inline std::vector<size_t> dimensions([[maybe_unused]] const std::filesystem::path& path, const ObjectMetadata& metadata, [[maybe_unused]] Options& options) {
     const auto& vcfmap = internal_json::extract_typed_object_from_metadata(metadata.other, "vcf_experiment");
     auto dims = internal_summarized_experiment::extract_dimensions_json(vcfmap, "vcf_experiment");
     return std::vector<size_t>{ dims.first, dims.second };

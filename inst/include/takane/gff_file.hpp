@@ -22,23 +22,14 @@ namespace takane {
 namespace gff_file {
 
 /**
- * Application-specific function to check the validity of a GFF file.
+ * If `Options::gff_file` is provided, this enables stricter checking of the GFF file contents.
+ * By default, we just look at the first few bytes to verify the files. 
  *
- * This should accept a path to the directory containing the GFF file, the object metadata, additional reading options.
- * and a boolean indicating whether indices are expected to be present in the directory.
- * It should throw an error if the GFF file is not valid, e.g., corrupted file, mismatched indices.
- *
- * If provided, this enables stricter checking of the GFF file contents.
- * Currently, we don't look past the magic number to verify the files.
- */
-inline std::function<void(const std::filesystem::path&, const ObjectMetadata&, const Options&, bool)> strict_check;
-
-/**
  * @param path Path to the directory containing the GFF file.
  * @param metadata Metadata for the object, typically read from its `OBJECT` file.
- * @param options Validation options, typically for reading performance.
+ * @param options Validation options.
  */
-inline void validate(const std::filesystem::path& path, const ObjectMetadata& metadata, [[maybe_unused]] const Options& options) {
+inline void validate(const std::filesystem::path& path, const ObjectMetadata& metadata, Options& options) {
     const auto& gffmap = internal_json::extract_typed_object_from_metadata(metadata.other, "gff_file");
 
     const std::string& vstring = internal_json::extract_string_from_typed_object(gffmap, "version", "gff_file");
@@ -96,8 +87,8 @@ inline void validate(const std::filesystem::path& path, const ObjectMetadata& me
         internal_files::check_signature<byteme::GzipFileReader>(ixpath, "TBI\1", 4, "tabix");
     }
 
-    if (strict_check) {
-        strict_check(path, metadata, options, indexed);
+    if (options.gff_file_strict_check) {
+        options.gff_file_strict_check(path, metadata, options, indexed);
     }
 }
 

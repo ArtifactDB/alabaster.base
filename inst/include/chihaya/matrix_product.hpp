@@ -27,9 +27,9 @@ namespace matrix_product {
  */
 namespace internal {
 
-inline std::pair<ArrayDetails, bool> fetch_seed(const H5::Group& handle, const std::string& target, const std::string& orientation, const ritsuko::Version& version, State& state) {
+inline std::pair<ArrayDetails, bool> fetch_seed(const H5::Group& handle, const std::string& target, const std::string& orientation, const ritsuko::Version& version, Options& options) {
     // Checking the seed.
-    auto seed_details = internal_misc::load_seed_details(handle, target, version, state);
+    auto seed_details = internal_misc::load_seed_details(handle, target, version, options);
     if (seed_details.dimensions.size() != 2) {
         throw std::runtime_error("expected '" + target + "' to be a 2-dimensional array for a matrix product");
     }
@@ -54,14 +54,14 @@ inline std::pair<ArrayDetails, bool> fetch_seed(const H5::Group& handle, const s
 /**
  * @param handle An open handle on a HDF5 group representing a matrix product.
  * @param version Version of the **chihaya** specification.
- * @param state Validation state, passed to `validate()`.
+ * @param options Validation options.
  *
  * @return Details of the matrix product.
  * Otherwise, if the validation failed, an error is raised.
  */
-inline ArrayDetails validate(const H5::Group& handle, const ritsuko::Version& version, State& state) {
-    auto left_details = internal::fetch_seed(handle, "left_seed", "left_orientation", version, state);
-    auto right_details = internal::fetch_seed(handle, "right_seed", "right_orientation", version, state);
+inline ArrayDetails validate(const H5::Group& handle, const ritsuko::Version& version, Options& options) {
+    auto left_details = internal::fetch_seed(handle, "left_seed", "left_orientation", version, options);
+    auto right_details = internal::fetch_seed(handle, "right_seed", "right_orientation", version, options);
 
     ArrayDetails output;
     output.dimensions.resize(2);
@@ -85,8 +85,10 @@ inline ArrayDetails validate(const H5::Group& handle, const ritsuko::Version& ve
         common2 = right_details.first.dimensions[0];
     }
 
-    if (common != common2) {
-        throw std::runtime_error("inconsistent common dimensions (" + std::to_string(common) + " vs " + std::to_string(common2) + ")");
+    if (!options.details_only) {
+        if (common != common2) {
+            throw std::runtime_error("inconsistent common dimensions (" + std::to_string(common) + " vs " + std::to_string(common2) + ")");
+        }
     }
 
     if (left_details.first.type == FLOAT || right_details.first.type == FLOAT) {

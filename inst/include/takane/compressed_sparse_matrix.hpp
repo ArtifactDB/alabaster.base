@@ -163,9 +163,9 @@ inline void validate_indices(const H5::Group& handle, const std::vector<uint64_t
 /**
  * @param path Path to a directory containing a compressed sparse matrix.
  * @param metadata Metadata for the object, typically read from its `OBJECT` file.
- * @param options Validation options, usually for reading performance.
+ * @param options Validation options.
  */
-inline void validate(const std::filesystem::path& path, const ObjectMetadata& metadata, const Options& options) {
+inline void validate(const std::filesystem::path& path, const ObjectMetadata& metadata, Options& options) {
     const auto& vstring = internal_json::extract_version_for_type(metadata.other, "compressed_sparse_matrix");
     auto version = ritsuko::parse_version_string(vstring.c_str(), vstring.size(), /* skip_patch = */ true);
     if (version.major != 1) {
@@ -196,10 +196,10 @@ inline void validate(const std::filesystem::path& path, const ObjectMetadata& me
 /**
  * @param path Path to the directory containing a compressed sparse matrix.
  * @param metadata Metadata for the object, typically read from its `OBJECT` file.
- * @param options Validation options, mostly related to reading performance.
+ * @param options Validation options.
  * @return Number of rows in the matrix.
  */
-inline size_t height(const std::filesystem::path& path, [[maybe_unused]] const ObjectMetadata& metadata, [[maybe_unused]] const Options& options) {
+inline size_t height(const std::filesystem::path& path, [[maybe_unused]] const ObjectMetadata& metadata, [[maybe_unused]] Options& options) {
     auto handle = ritsuko::hdf5::open_file(path / "matrix.h5");
     auto ghandle = ritsuko::hdf5::open_group(handle, "compressed_sparse_matrix");
     auto shandle = ritsuko::hdf5::open_dataset(ghandle, "shape");
@@ -211,10 +211,10 @@ inline size_t height(const std::filesystem::path& path, [[maybe_unused]] const O
 /**
  * @param path Path to the directory containing a compressed sparse matrix.
  * @param metadata Metadata for the object, typically read from its `OBJECT` file.
- * @param options Validation options, mostly related to reading performance.
+ * @param options Validation options.
  * @return Dimensions of the matrix.
  */
-inline std::vector<size_t> dimensions(const std::filesystem::path& path, [[maybe_unused]] const ObjectMetadata& metadata, [[maybe_unused]] const Options& options) {
+inline std::vector<size_t> dimensions(const std::filesystem::path& path, [[maybe_unused]] const ObjectMetadata& metadata, [[maybe_unused]] Options& options) {
     auto handle = ritsuko::hdf5::open_file(path / "matrix.h5");
     auto ghandle = ritsuko::hdf5::open_group(handle, "compressed_sparse_matrix");
     auto shandle = ritsuko::hdf5::open_dataset(ghandle, "shape");

@@ -21,7 +21,7 @@ namespace takane {
 /**
  * @cond
  */
-void validate(const std::filesystem::path&, const Options&);
+void validate(const std::filesystem::path&, Options&);
 /**
  * @endcond
  */
@@ -57,9 +57,9 @@ inline std::string extract_format(const internal_json::JsonObjectMap& map) {
 /**
  * @param path Path to the directory containing the simple list.
  * @param metadata Metadata for the object, typically read from its `OBJECT` file.
- * @param options Validation options, typically for reading performance.
+ * @param options Validation options.
  */
-inline void validate(const std::filesystem::path& path, const ObjectMetadata& metadata, const Options& options) {
+inline void validate(const std::filesystem::path& path, const ObjectMetadata& metadata, Options& options) {
     const auto& metamap = internal_json::extract_typed_object_from_metadata(metadata.other, "simple_list");
 
     const std::string& vstring = internal_json::extract_string_from_typed_object(metamap, "version", "simple_list");
@@ -110,10 +110,10 @@ inline void validate(const std::filesystem::path& path, const ObjectMetadata& me
 /**
  * @param path Path to the directory containing the simple list.
  * @param metadata Metadata for the object, typically read from its `OBJECT` file.
- * @param options Validation options, typically for reading performance.
+ * @param options Validation options.
  * @return The number of list elements.
  */
-inline size_t height(const std::filesystem::path& path, const ObjectMetadata& metadata, const Options& options) {
+inline size_t height(const std::filesystem::path& path, const ObjectMetadata& metadata, Options& options) {
     const auto& metamap = internal_json::extract_typed_object_from_metadata(metadata.other, "simple_list");
     std::string format = internal::extract_format(metamap);
 

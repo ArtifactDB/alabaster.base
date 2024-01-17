@@ -16,7 +16,7 @@ namespace chihaya {
 
 namespace minimal_array {
 
-inline ArrayDetails validate(const H5::Group& handle, const ritsuko::Version& version) {
+inline ArrayDetails validate(const H5::Group& handle, const ritsuko::Version& version, [[maybe_unused]] Options& options) {
     auto dhandle = ritsuko::hdf5::open_dataset(handle, "dimensions");
     auto len = ritsuko::hdf5::get_1d_length(dhandle, false);
     std::vector<uint64_t> dimensions(len);

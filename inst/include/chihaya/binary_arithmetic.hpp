@@ -30,23 +30,26 @@ namespace binary_arithmetic {
 /**
  * @param handle An open handle on a HDF5 group representing a binary arithmetic operation.
  * @param version Version of the **chihaya** specification.
- * @param state Validation state, passed to `validate()`.
+ * @param options Validation options.
  *
  * @return Details of the object after applying the arithmetic operation.
  * Otherwise, if the validation failed, an error is raised.
  */
-inline ArrayDetails validate(const H5::Group& handle, const ritsuko::Version& version, State& state) {
-    auto left_details = internal_arithmetic::fetch_seed(handle, "left", version, state);
-    auto right_details = internal_arithmetic::fetch_seed(handle, "right", version, state);
+inline ArrayDetails validate(const H5::Group& handle, const ritsuko::Version& version, Options& options) {
+    auto left_details = internal_arithmetic::fetch_seed(handle, "left", version, options);
+    auto right_details = internal_arithmetic::fetch_seed(handle, "right", version, options);
 
-    bool okay = internal_misc::are_dimensions_equal(left_details.dimensions, right_details.dimensions);
-    if (!okay) {
-        throw std::runtime_error("'left' and 'right' should have the same dimensions");
+    if (!options.details_only) {
+        if (!internal_misc::are_dimensions_equal(left_details.dimensions, right_details.dimensions)) {
+            throw std::runtime_error("'left' and 'right' should have the same dimensions");
+        }
     }
 
     auto method = internal_unary::load_method(handle);
-    if (!internal_arithmetic::is_valid_operation(method)) {
-        throw std::runtime_error("unrecognized 'method' (" + method + ")");
+    if (!options.details_only) {
+        if (!internal_arithmetic::is_valid_operation(method)) {
+            throw std::runtime_error("unrecognized 'method' (" + method + ")");
+        }
     }
 
     left_details.type = internal_arithmetic::determine_output_type(left_details.type, right_details.type, method);

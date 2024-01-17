@@ -45,6 +45,26 @@ std::set<Type> create_unique_set(Iterator start, Iterator end, Mask mask) {
         return output;
     }
 }
+
+template<class Iterator, class Mask, class Type = typename std::remove_cv<typename std::remove_reference<decltype(*(std::declval<Iterator>()))>::type>::type>
+bool check_for_nan(Iterator start, Iterator end, Mask mask) {
+    if constexpr(std::is_same<Mask, bool>::value) {
+        for (auto x = start; x != end; ++x) {
+            if (std::isnan(*x)) {
+                return true;
+            }
+        }
+    } else {
+        auto sIt = mask;
+        for (auto x = start; x != end; ++x, ++sIt) {
+            if (!*sIt && std::isnan(*x)) {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
 /**
  * @endcond
  */
@@ -71,32 +91,21 @@ std::pair<bool, Type_> choose_missing_integer_placeholder(Iterator start, Iterat
 
     // Trying important points first; minima and maxima, and 0.
     if constexpr(std::numeric_limits<Type_>::is_signed) {
-        for (int i = 0; i < 3; ++i) {
-            Type_ candidate;
-            if (i == 0) {
-                candidate = std::numeric_limits<Type_>::min();
-            } else if (i ==1) {
-                candidate = std::numeric_limits<Type_>::max();
-            } else {
-                candidate = 0;
-            }
-            if (!found(start, end, mask, candidate)) {
-                return std::make_pair(true, candidate);
-            }
+        auto candidate = std::numeric_limits<Type_>::min();
+        if (!found(start, end, mask, candidate)) {
+            return std::make_pair(true, candidate);
         }
+    }
 
-    } else {
-        for (int i = 0; i < 2; ++i) {
-            Type_ candidate;
-            if (i == 0) {
-                candidate = std::numeric_limits<Type_>::max();
-            } else {
-                candidate = 0;
-            }
-            if (!found(start, end, mask, candidate)) {
-                return std::make_pair(true, candidate);
-            }
+    {
+        auto candidate = std::numeric_limits<Type_>::max();
+        if (!found(start, end, mask, candidate)) {
+            return std::make_pair(true, candidate);
         }
+    }
+
+    if (!found(start, end, mask, 0)) {
+        return std::make_pair(true, 0);
     }
 
     // Well... going through it in order.
@@ -148,51 +157,40 @@ template<class Iterator, class Mask, class Type_ = typename std::remove_cv<typen
 std::pair<bool, Type_> choose_missing_float_placeholder(Iterator start, Iterator end, Mask mask, bool skip_nan) {
     if constexpr(std::numeric_limits<Type_>::is_iec559) {
         if (!skip_nan) {
-            bool has_nan = false;
-
-            if constexpr(std::is_same<Mask, bool>::value) {
-                for (auto x = start; x != end; ++x) {
-                    if (std::isnan(*x)) {
-                        has_nan = true;
-                        break;
-                    }
-                }
-            } else {
-                auto sIt = mask;
-                for (auto x = start; x != end; ++x, ++sIt) {
-                    if (!*sIt && std::isnan(*x)) {
-                        has_nan = true;
-                        break;
-                    }
-                }
-            }
-
-            if (!has_nan) {
+            if (!check_for_nan(start, end, mask)) {
                 return std::make_pair(true, std::numeric_limits<Type_>::quiet_NaN());
             }
         }
 
-        for (int i = 0; i < 2; ++i) {
-            Type_ candidate = std::numeric_limits<Type_>::infinity() * (i == 0 ? 1 : -1);
-            if (!found(start, end, mask, candidate)) {
-                return std::make_pair(true, candidate);
-            }
+        // Trying positive and negative Infs.
+        auto inf = std::numeric_limits<Type_>::infinity();
+        if (!found(start, end, mask, inf)) {
+            return std::make_pair(true, inf);
+        }
+
+        auto ninf = -inf;
+        if (!found(start, end, mask, ninf)) {
+            return std::make_pair(true, ninf);
         }
     }
 
     // Trying important points first; minima and maxima, and 0.
-    for (int i = 0; i < 3; ++i) {
-        Type_ candidate;
-        if (i == 0) {
-            candidate = std::numeric_limits<Type_>::lowest();
-        } else if (i ==1) {
-            candidate = std::numeric_limits<Type_>::max();
-        } else {
-            candidate = 0;
-        }
+    {
+        auto candidate = std::numeric_limits<Type_>::lowest();
         if (!found(start, end, mask, candidate)) {
             return std::make_pair(true, candidate);
         }
+    }
+
+    {
+        auto candidate = std::numeric_limits<Type_>::max();
+        if (!found(start, end, mask, candidate)) {
+            return std::make_pair(true, candidate);
+        }
+    }
+
+    if (!found(start, end, mask, 0)) {
+        return std::make_pair(true, 0);
     }
 
     // Well... going through it in order.

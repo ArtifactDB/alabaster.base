@@ -209,9 +209,9 @@ size_t parse_names(const std::filesystem::path& path) {
 /**
  * @param path Path to a directory containing a sequence string set.
  * @param metadata Metadata for the object, typically read from its `OBJECT` file.
- * @param options Validation options, mostly for input performance.
+ * @param options Validation options.
  */
-inline void validate(const std::filesystem::path& path, const ObjectMetadata& metadata, const Options& options) {
+inline void validate(const std::filesystem::path& path, const ObjectMetadata& metadata, Options& options) {
     const auto& obj = internal_json::extract_typed_object_from_metadata(metadata.other, "sequence_string_set");
     const auto& vstring = internal_json::extract_string_from_typed_object(obj, "version", "sequence_string_set");
     auto version = ritsuko::parse_version_string(vstring.c_str(), vstring.size(), /* skip_patch = */ true);
@@ -355,10 +355,10 @@ inline void validate(const std::filesystem::path& path, const ObjectMetadata& me
 /**
  * @param path Path to a directory containing a sequence string set.
  * @param metadata Metadata for the object, typically read from its `OBJECT` file.
- * @param options Validation options, mostly for input performance.
+ * @param options Validation options.
  * @return The number of sequences.
  */
-inline size_t height([[maybe_unused]] const std::filesystem::path& path, const ObjectMetadata& metadata, [[maybe_unused]] const Options& options) {
+inline size_t height([[maybe_unused]] const std::filesystem::path& path, const ObjectMetadata& metadata, [[maybe_unused]] Options& options) {
     const auto& obj = internal_json::extract_typed_object_from_metadata(metadata.other, "sequence_string_set");
     auto lIt = obj.find("length");
     const auto& val = lIt->second;

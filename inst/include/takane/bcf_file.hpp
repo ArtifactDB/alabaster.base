@@ -23,22 +23,14 @@ namespace takane {
 namespace bcf_file {
 
 /**
- * Application-specific function to check the validity of a BCF file and its indices.
+ * If `Options::bcf_file_strict_check` is provided, it is used to perform stricter checking of the BCF file contents and indices.
+ * By default, we don't look past the magic number to verify the files as this requires a dependency on heavy-duty libraries like, e.g., HTSlib.
  *
- * This should accept a path to the directory containing the BCF file and indices, the object metadata, and additional reading options.
- * It should throw an error if the BCF file is not valid, e.g., corrupted file, mismatched indices.
- *
- * If provided, this enables stricter checking of the BCF file contents and indices.
- * Currently, we don't look past the magic number to verify the files as this requires a dependency on heavy-duty libraries like, e.g., HTSlib.
- */
-inline std::function<void(const std::filesystem::path&, const ObjectMetadata&, const Options&)> strict_check;
-
-/**
  * @param path Path to the directory containing the BCF file.
  * @param metadata Metadata for the object, typically read from its `OBJECT` file.
- * @param options Validation options, typically for reading performance.
+ * @param options Validation options.
  */
-inline void validate(const std::filesystem::path& path, const ObjectMetadata& metadata, [[maybe_unused]] const Options& options) {
+inline void validate(const std::filesystem::path& path, const ObjectMetadata& metadata, Options& options) {
     const std::string& vstring = internal_json::extract_version_for_type(metadata.other, "bcf_file");
     auto version = ritsuko::parse_version_string(vstring.c_str(), vstring.size(), /* skip_patch = */ true);
     if (version.major != 1) {
@@ -67,8 +59,8 @@ inline void validate(const std::filesystem::path& path, const ObjectMetadata& me
         internal_files::check_signature<byteme::GzipFileReader>(ixpath, "CSI\1", 4, "CSI index");
     }
 
-    if (strict_check) {
-        strict_check(path, metadata, options);
+    if (options.bcf_file_strict_check) {
+        options.bcf_file_strict_check(path, metadata, options);
     }
 }
 

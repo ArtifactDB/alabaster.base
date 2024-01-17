@@ -19,10 +19,10 @@
 
 namespace takane {
 
-void validate(const std::filesystem::path&, const ObjectMetadata&, const Options&);
-size_t height(const std::filesystem::path&, const ObjectMetadata&, const Options&);
-bool satisfies_interface(const std::string&, const std::string&);
-bool derived_from(const std::string&, const std::string&);
+void validate(const std::filesystem::path&, const ObjectMetadata&, Options&);
+size_t height(const std::filesystem::path&, const ObjectMetadata&, Options&);
+bool satisfies_interface(const std::string&, const std::string&, const Options&);
+bool derived_from(const std::string&, const std::string&, const Options&);
 
 namespace internal_bumpy_array {
 
@@ -126,7 +126,7 @@ inline void validate_sparse_indices(const H5::Group& handle, const std::vector<u
 }
 
 template<bool satisfies_interface_>
-void validate_directory(const std::filesystem::path& path, const std::string& object_type, const std::string& concatenated_type, const ObjectMetadata& metadata, const Options& options) try {
+void validate_directory(const std::filesystem::path& path, const std::string& object_type, const std::string& concatenated_type, const ObjectMetadata& metadata, Options& options) try {
     auto vstring = internal_json::extract_version_for_type(metadata.other, object_type);
     auto version = ritsuko::parse_version_string(vstring.c_str(), vstring.size(), /* skip_patch = */ true);
     if (version.major != 1) {
@@ -136,11 +136,11 @@ void validate_directory(const std::filesystem::path& path, const std::string& ob
     auto catdir = path / "concatenated";
     auto catmeta = read_object_metadata(catdir);
     if constexpr(satisfies_interface_) {
-        if (!satisfies_interface(catmeta.type, concatenated_type)) {
+        if (!satisfies_interface(catmeta.type, concatenated_type, options)) {
             throw std::runtime_error("'concatenated' should satisfy the '" + concatenated_type + "' interface");
         }
     } else {
-        if (!derived_from(catmeta.type, concatenated_type)) {
+        if (!derived_from(catmeta.type, concatenated_type, options)) {
             throw std::runtime_error("'concatenated' should contain an '" + concatenated_type + "' object");
         }
     }
@@ -180,7 +180,7 @@ void validate_directory(const std::filesystem::path& path, const std::string& ob
     throw std::runtime_error("failed to validate a '" + object_type + "' object at '" + path.string() + "'; " + std::string(e.what()));
 }
 
-inline size_t height(const std::filesystem::path& path, const std::string& name, [[maybe_unused]] const ObjectMetadata& metadata, [[maybe_unused]] const Options& options) {
+inline size_t height(const std::filesystem::path& path, const std::string& name, [[maybe_unused]] const ObjectMetadata& metadata, [[maybe_unused]] Options& options) {
     auto handle = ritsuko::hdf5::open_file(path / "partitions.h5");
     auto ghandle = handle.openGroup(name);
     auto dhandle = ghandle.openDataSet("dimensions");
@@ -189,7 +189,7 @@ inline size_t height(const std::filesystem::path& path, const std::string& name,
     return dims[0];
 }
 
-inline std::vector<size_t> dimensions(const std::filesystem::path& path, const std::string& name, [[maybe_unused]] const ObjectMetadata& metadata, [[maybe_unused]] const Options& options) {
+inline std::vector<size_t> dimensions(const std::filesystem::path& path, const std::string& name, [[maybe_unused]] const ObjectMetadata& metadata, [[maybe_unused]] Options& options) {
     auto handle = ritsuko::hdf5::open_file(path / "partitions.h5");
     auto ghandle = handle.openGroup(name);
     auto dhandle = ghandle.openDataSet("dimensions");

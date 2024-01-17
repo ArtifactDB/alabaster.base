@@ -10,7 +10,6 @@
 
 #include <filesystem>
 #include <stdexcept>
-#include <unordered_set>
 #include <string>
 
 /**
@@ -23,9 +22,10 @@ namespace takane {
 /**
  * @cond
  */
-void validate(const std::filesystem::path&, const ObjectMetadata&, const Options& options);
-size_t height(const std::filesystem::path&, const ObjectMetadata&, const Options& options);
-std::vector<size_t> dimensions(const std::filesystem::path&, const ObjectMetadata&, const Options& options);
+void validate(const std::filesystem::path&, const ObjectMetadata&, Options& options);
+size_t height(const std::filesystem::path&, const ObjectMetadata&, Options& options);
+std::vector<size_t> dimensions(const std::filesystem::path&, const ObjectMetadata&, Options& options);
+bool satisfies_interface(const std::string&, const std::string&, const Options&);
 /**
  * @endcond
  */
@@ -39,9 +39,9 @@ namespace summarized_experiment {
 /**
  * @param path Path to the directory containing the summarized experiment.
  * @param metadata Metadata for the object, typically read from its `OBJECT` file.
- * @param options Validation options, typically for reading performance.
+ * @param options Validation options.
  */
-inline void validate(const std::filesystem::path& path, const ObjectMetadata& metadata, const Options& options) {
+inline void validate(const std::filesystem::path& path, const ObjectMetadata& metadata, Options& options) {
     const auto& semap = internal_json::extract_typed_object_from_metadata(metadata.other, "summarized_experiment");
 
     const std::string& vstring = internal_json::extract_string_from_typed_object(semap, "version", "summarized_experiment");
@@ -87,7 +87,7 @@ inline void validate(const std::filesystem::path& path, const ObjectMetadata& me
     auto rd_path = path / "row_data";
     if (std::filesystem::exists(rd_path)) {
         auto rdmeta = read_object_metadata(rd_path);
-        if (!satisfies_interface(rdmeta.type, "DATA_FRAME")) {
+        if (!satisfies_interface(rdmeta.type, "DATA_FRAME", options)) {
             throw std::runtime_error("object in 'row_data' should satisfy the 'DATA_FRAME' interface");
         }
         ::takane::validate(rd_path, rdmeta, options);
@@ -99,7 +99,7 @@ inline void validate(const std::filesystem::path& path, const ObjectMetadata& me
     auto cd_path = path / "column_data";
     if (std::filesystem::exists(cd_path)) {
         auto cdmeta = read_object_metadata(cd_path);
-        if (!satisfies_interface(cdmeta.type, "DATA_FRAME")) {
+        if (!satisfies_interface(cdmeta.type, "DATA_FRAME", options)) {
             throw std::runtime_error("object in 'column_data' should satisfy the 'DATA_FRAME' interface");
         }
         ::takane::validate(cd_path, cdmeta, options);
@@ -114,10 +114,10 @@ inline void validate(const std::filesystem::path& path, const ObjectMetadata& me
 /**
  * @param path Path to a directory containing a summarized experiment.
  * @param metadata Metadata for the object, typically read from its `OBJECT` file.
- * @param options Validation options, mostly for input performance.
+ * @param options Validation options.
  * @return Number of rows in the summarized experiment.
  */
-inline size_t height([[maybe_unused]] const std::filesystem::path& path, const ObjectMetadata& metadata, [[maybe_unused]] const Options& options) {
+inline size_t height([[maybe_unused]] const std::filesystem::path& path, const ObjectMetadata& metadata, [[maybe_unused]] Options& options) {
     // Assume it's all valid, so we go straight for the kill.
     const auto& semap = internal_json::extract_object(metadata.other, "summarized_experiment");
     auto dims = internal_summarized_experiment::extract_dimensions_json(semap, "summarized_experiment");
@@ -127,10 +127,10 @@ inline size_t height([[maybe_unused]] const std::filesystem::path& path, const O
 /**
  * @param path Path to a directory containing a summarized experiment.
  * @param metadata Metadata for the object, typically read from its `OBJECT` file.
- * @param options Validation options, mostly for input performance.
+ * @param options Validation options.
  * @return A vector of length 2 containing the dimensions of the summarized experiment.
  */
-inline std::vector<size_t> dimensions([[maybe_unused]] const std::filesystem::path& path, const ObjectMetadata& metadata, [[maybe_unused]] const Options& options) {
+inline std::vector<size_t> dimensions([[maybe_unused]] const std::filesystem::path& path, const ObjectMetadata& metadata, [[maybe_unused]] Options& options) {
     // Assume it's all valid, so we go straight for the kill.
     const auto& semap = internal_json::extract_object(metadata.other, "summarized_experiment");
     auto dims = internal_summarized_experiment::extract_dimensions_json(semap, "summarized_experiment");

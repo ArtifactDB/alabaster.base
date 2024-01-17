@@ -8,7 +8,6 @@
 
 #include <filesystem>
 #include <stdexcept>
-#include <unordered_set>
 #include <string>
 
 /**
@@ -21,8 +20,9 @@ namespace takane {
 /**
  * @cond
  */
-void validate(const std::filesystem::path&, const ObjectMetadata&, const Options& options);
-size_t height(const std::filesystem::path&, const ObjectMetadata&, const Options& options);
+void validate(const std::filesystem::path&, const ObjectMetadata&, Options& options);
+size_t height(const std::filesystem::path&, const ObjectMetadata&, Options& options);
+bool derived_from(const std::string&, const std::string&, const Options&);
 /**
  * @endcond
  */
@@ -36,9 +36,9 @@ namespace ranged_summarized_experiment {
 /**
  * @param path Path to the directory containing the ranged summarized experiment.
  * @param metadata Metadata for the object, typically read from its `OBJECT` file.
- * @param options Validation options, typically for reading performance.
+ * @param options Validation options.
  */
-inline void validate(const std::filesystem::path& path, const ObjectMetadata& metadata, const Options& options) {
+inline void validate(const std::filesystem::path& path, const ObjectMetadata& metadata, Options& options) {
     ::takane::summarized_experiment::validate(path, metadata, options);
 
     const auto& rsemap = internal_json::extract_typed_object_from_metadata(metadata.other, "ranged_summarized_experiment");
@@ -52,7 +52,7 @@ inline void validate(const std::filesystem::path& path, const ObjectMetadata& me
     auto rangedir = path / "row_ranges";
     if (std::filesystem::exists(rangedir)) {
         auto rangemeta = read_object_metadata(rangedir);
-        if (!derived_from(rangemeta.type, "genomic_ranges") && !derived_from(rangemeta.type, "genomic_ranges_list")) {
+        if (!derived_from(rangemeta.type, "genomic_ranges", options) && !derived_from(rangemeta.type, "genomic_ranges_list", options)) {
             throw std::runtime_error("object in 'row_ranges' must be a 'genomic_ranges' or 'genomic_ranges_list'");
         }
 

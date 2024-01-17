@@ -29,13 +29,13 @@ namespace unary_math {
 /**
  * @param handle An open handle on a HDF5 group representing an unary math operation.
  * @param version Version of the **chihaya** specification.
- * @param state Validation state, passed to `validate()`.
+ * @param options Validation options.
  *
  * @return Details of the object after applying the mathal operation.
  * Otherwise, if the validation failed, an error is raised.
  */
-inline ArrayDetails validate(const H5::Group& handle, const ritsuko::Version& version, State& state) {
-    auto seed_details = internal_misc::load_seed_details(handle, "seed", version, state);
+inline ArrayDetails validate(const H5::Group& handle, const ritsuko::Version& version, Options& options) {
+    auto seed_details = internal_misc::load_seed_details(handle, "seed", version, options);
     if (seed_details.type == STRING) {
         throw std::runtime_error("type of 'seed' should be integer, float or boolean");
     }
@@ -72,40 +72,44 @@ inline ArrayDetails validate(const H5::Group& handle, const ritsuko::Version& ve
         seed_details.type = FLOAT;
 
     } else if (method == "log") {
-        if (handle.exists("base")) {
-            if (handle.childObjType("base") != H5O_TYPE_DATASET) {
-                throw std::runtime_error("expected 'base' to be a dataset for a log transformation");
-            }
-            auto vhandle = handle.openDataSet("base");
-            if (!ritsuko::hdf5::is_scalar(vhandle)) {
-                throw std::runtime_error("'base' should be a scalar");
-            }
-
-            if (version.lt(1, 1, 0)) {
-                if (vhandle.getTypeClass() != H5T_FLOAT) {
-                    throw std::runtime_error("'base' should be a floating-point number");
+        if (!options.details_only) {
+            if (handle.exists("base")) {
+                if (handle.childObjType("base") != H5O_TYPE_DATASET) {
+                    throw std::runtime_error("expected 'base' to be a dataset for a log transformation");
                 }
-            } else {
-                if (ritsuko::hdf5::exceeds_float_limit(vhandle, 64)) {
-                    throw std::runtime_error("'base' should have a datatype that fits into a 64-bit float");
+                auto vhandle = handle.openDataSet("base");
+                if (!ritsuko::hdf5::is_scalar(vhandle)) {
+                    throw std::runtime_error("'base' should be a scalar");
+                }
+
+                if (version.lt(1, 1, 0)) {
+                    if (vhandle.getTypeClass() != H5T_FLOAT) {
+                        throw std::runtime_error("'base' should be a floating-point number");
+                    }
+                } else {
+                    if (ritsuko::hdf5::exceeds_float_limit(vhandle, 64)) {
+                        throw std::runtime_error("'base' should have a datatype that fits into a 64-bit float");
+                    }
                 }
             }
         }
         seed_details.type = FLOAT;
 
     } else if (method == "round" || method == "signif") {
-        auto vhandle = ritsuko::hdf5::open_dataset(handle, "digits");
-        if (!ritsuko::hdf5::is_scalar(vhandle)) {
-            throw std::runtime_error("'digits' should be a scalar");
-        }
-
-        if (version.lt(1, 1, 0)) {
-            if (vhandle.getTypeClass() != H5T_INTEGER) {
-                throw std::runtime_error("'digits' should be an integer");
+        if (!options.details_only) {
+            auto vhandle = ritsuko::hdf5::open_dataset(handle, "digits");
+            if (!ritsuko::hdf5::is_scalar(vhandle)) {
+                throw std::runtime_error("'digits' should be a scalar");
             }
-        } else {
-            if (ritsuko::hdf5::exceeds_integer_limit(vhandle, 32, true)) {
-                throw std::runtime_error("'digits' should have a datatype that fits into a 32-bit signed integer");
+
+            if (version.lt(1, 1, 0)) {
+                if (vhandle.getTypeClass() != H5T_INTEGER) {
+                    throw std::runtime_error("'digits' should be an integer");
+                }
+            } else {
+                if (ritsuko::hdf5::exceeds_integer_limit(vhandle, 32, true)) {
+                    throw std::runtime_error("'digits' should have a datatype that fits into a 32-bit signed integer");
+                }
             }
         }
         seed_details.type = FLOAT;

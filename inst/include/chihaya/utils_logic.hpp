@@ -17,8 +17,8 @@ inline bool is_valid_operation(const std::string& method) {
     return method == "&&" || method == "||";
 }
 
-inline ArrayDetails fetch_seed(const H5::Group& handle, const std::string& target, const ritsuko::Version& version, State& state) {
-    auto output = internal_misc::load_seed_details(handle, target, version, state);
+inline ArrayDetails fetch_seed(const H5::Group& handle, const std::string& target, const ritsuko::Version& version, Options& options) {
+    auto output = internal_misc::load_seed_details(handle, target, version, options);
     if (output.type == STRING) {
         throw std::runtime_error("type of '" + target + "' should be integer, float or boolean");
     }

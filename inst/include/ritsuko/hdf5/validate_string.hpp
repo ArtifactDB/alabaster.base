@@ -8,7 +8,11 @@
 #include "H5Cpp.h"
 
 #include "get_name.hpp"
+#include "get_1d_length.hpp"
+#include "get_dimensions.hpp"
 #include "pick_1d_block_size.hpp"
+#include "pick_nd_block_dimensions.hpp"
+#include "IterateNdDataset.hpp"
 #include "_strings.hpp"
 
 /**
@@ -84,6 +88,55 @@ inline void validate_1d_string_dataset(const H5::DataSet& handle, hsize_t full_l
  */
 inline void validate_1d_string_dataset(const H5::DataSet& handle, hsize_t buffer_size) {
     validate_1d_string_dataset(handle, get_1d_length(handle, false), buffer_size);
+}
+
+/**
+ * Check that an N-dimensional string dataset is valid.
+ * Currently, this involves checking that there are no `NULL` entries for variable-length string datatypes.
+ * For fixed-width string datasets, this function is a no-op.
+ *
+ * @param handle Handle to the HDF5 string dataset.
+ * @param dimensions Dimensions of the dataset.
+ * @param buffer_size Size of the buffer for holding loaded strings.
+ */
+inline void validate_nd_string_dataset(const H5::DataSet& handle, const std::vector<hsize_t>& dimensions, hsize_t buffer_size) {
+    auto stype = handle.getDataType();
+    if (!stype.isVariableStr()) {
+        return;
+    }
+
+    auto blocks = pick_nd_block_dimensions(handle.getCreatePlist(), dimensions, buffer_size);
+    IterateNdDataset iter(dimensions, blocks);
+    std::vector<char*> buffer;
+
+    while (!iter.finished()) {
+        buffer.resize(iter.current_block_size());
+
+        // Scope this to ensure that 'mspace' doesn't get changed by
+        // 'iter.next()' before the destructor is called.
+        {
+            const auto& mspace = iter.memory_space();
+            [[maybe_unused]] VariableStringCleaner stream(stype.getId(), mspace.getId(), buffer.data());
+            handle.read(buffer.data(), stype, mspace, iter.file_space());
+            for (auto x : buffer) {
+                if (x == NULL) {
+                    throw std::runtime_error("detected NULL pointer in a variable-length string dataset");
+                }
+            }
+        }
+
+        iter.next();
+    }
+}
+
+/**
+ * Overload for `validate_nd_string_dataset()` that automatically determines the dimensions.
+ * @param handle Handle to the HDF5 string dataset.
+ * @param buffer_size Size of the buffer for holding loaded strings.
+ */
+inline void validate_nd_string_dataset(const H5::DataSet& handle, hsize_t buffer_size) {
+    auto dimensions = get_dimensions(handle, false);
+    validate_nd_string_dataset(handle, dimensions, buffer_size);
 }
 
 /**

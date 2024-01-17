@@ -11,9 +11,9 @@ namespace takane {
 /**
  * @cond
  */
-void validate(const std::filesystem::path&, const ObjectMetadata&, const Options&);
-size_t height(const std::filesystem::path&, const ObjectMetadata&, const Options&);
-bool satisfies_interface(const std::string&, const std::string&);
+void validate(const std::filesystem::path&, const ObjectMetadata&, Options&);
+size_t height(const std::filesystem::path&, const ObjectMetadata&, Options&);
+bool satisfies_interface(const std::string&, const std::string&, const Options&);
 /**
  * @endcond
  */
@@ -29,14 +29,14 @@ Reader open_reader(const Path_& path, Args_&& ... args) {
     }
 }
 
-inline void validate_mcols(const std::filesystem::path& parent, const std::string& name, size_t expected, const Options& options) try {
+inline void validate_mcols(const std::filesystem::path& parent, const std::string& name, size_t expected, Options& options) try {
     auto path = parent / name;
     if (!std::filesystem::exists(path)) {
         return;
     }
 
     auto xmeta = read_object_metadata(path);
-    if (!satisfies_interface(xmeta.type, "DATA_FRAME")) {
+    if (!satisfies_interface(xmeta.type, "DATA_FRAME", options)) {
         throw std::runtime_error("expected an object that satisfies the 'DATA_FRAME' interface");
     }
     ::takane::validate(path, xmeta, options);
@@ -48,14 +48,14 @@ inline void validate_mcols(const std::filesystem::path& parent, const std::strin
     throw std::runtime_error("failed to validate '" + name + "'; " + std::string(e.what()));
 }
 
-inline void validate_metadata(const std::filesystem::path& parent, const std::string& name, const Options& options) try {
+inline void validate_metadata(const std::filesystem::path& parent, const std::string& name, Options& options) try {
     auto path = parent / name;
     if (!std::filesystem::exists(path)) {
         return;
     }
 
     auto xmeta = read_object_metadata(path);
-    if (!satisfies_interface(xmeta.type, "SIMPLE_LIST")) {
+    if (!satisfies_interface(xmeta.type, "SIMPLE_LIST", options)) {
         throw std::runtime_error("expected an object that satisfies the 'SIMPLE_LIST' interface'");
     }
     ::takane::validate(path, xmeta, options);

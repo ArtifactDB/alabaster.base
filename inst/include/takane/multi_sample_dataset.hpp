@@ -20,9 +20,9 @@ namespace takane {
 /**
  * @cond
  */
-void validate(const std::filesystem::path&, const ObjectMetadata&, const Options& options);
-size_t height(const std::filesystem::path&, const ObjectMetadata&, const Options& options);
-bool satisfies_interface(const std::string&, const std::string&);
+void validate(const std::filesystem::path&, const ObjectMetadata&, Options&);
+size_t height(const std::filesystem::path&, const ObjectMetadata&, Options&);
+bool satisfies_interface(const std::string&, const std::string&, const Options&);
 /**
  * @endcond
  */
@@ -36,9 +36,9 @@ namespace multi_sample_dataset {
 /**
  * @param path Path to the directory containing the multi-sample dataset.
  * @param metadata Metadata for the object, typically read from its `OBJECT` file.
- * @param options Validation options, typically for reading performance.
+ * @param options Validation options.
  */
-inline void validate(const std::filesystem::path& path, const ObjectMetadata& metadata, const Options& options) {
+inline void validate(const std::filesystem::path& path, const ObjectMetadata& metadata, Options& options) {
     const auto& dmap = internal_json::extract_typed_object_from_metadata(metadata.other, "multi_sample_dataset");
 
     const std::string& vstring = internal_json::extract_string_from_typed_object(dmap, "version", "multi_sample_dataset");
@@ -50,7 +50,7 @@ inline void validate(const std::filesystem::path& path, const ObjectMetadata& me
     // Sample data should exist.
     auto sd_path = path / "sample_data";
     auto sdmeta = read_object_metadata(sd_path);
-    if (!satisfies_interface(sdmeta.type, "DATA_FRAME")) {
+    if (!satisfies_interface(sdmeta.type, "DATA_FRAME", options)) {
         throw std::runtime_error("object in 'sample_data' should satisfy the 'DATA_FRAME' interface");
     }
     try {
@@ -72,7 +72,7 @@ inline void validate(const std::filesystem::path& path, const ObjectMetadata& me
             auto epath = edir / ename;
             auto emeta = read_object_metadata(epath);
 
-            if (!satisfies_interface(emeta.type, "SUMMARIZED_EXPERIMENT")) {
+            if (!satisfies_interface(emeta.type, "SUMMARIZED_EXPERIMENT", options)) {
                 throw std::runtime_error("object in 'experiments/" + ename + "' should satisfy the 'SUMMARIZED_EXPERIMENT' interface");
             }
 

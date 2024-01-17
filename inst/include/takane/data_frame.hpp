@@ -28,8 +28,8 @@ namespace takane {
 /**
  * @cond
  */
-void validate(const std::filesystem::path&, const ObjectMetadata&, const Options&);
-size_t height(const std::filesystem::path&, const ObjectMetadata&, const Options&);
+void validate(const std::filesystem::path&, const ObjectMetadata&, Options& options);
+size_t height(const std::filesystem::path&, const ObjectMetadata&, Options& options);
 /**
  * @endcond
  */
@@ -155,9 +155,9 @@ inline void validate_column(const H5::Group& dhandle, const std::string& dset_na
 /**
  * @param path Path to the directory containing the data frame.
  * @param metadata Metadata for the object, typically read from its `OBJECT` file.
- * @param options Validation options, typically for reading performance.
+ * @param options Validation options.
  */
-inline void validate(const std::filesystem::path& path, const ObjectMetadata& metadata, const Options& options) {
+inline void validate(const std::filesystem::path& path, const ObjectMetadata& metadata, Options& options) {
     const auto& vstring = internal_json::extract_version_for_type(metadata.other, "data_frame");
     auto version = ritsuko::parse_version_string(vstring.c_str(), vstring.size(), /* skip_patch = */ true);
     if (version.major != 1) {
@@ -225,10 +225,10 @@ inline void validate(const std::filesystem::path& path, const ObjectMetadata& me
 /**
  * @param path Path to a directory containing a data frame.
  * @param metadata Metadata for the object, typically read from its `OBJECT` file.
- * @param options Validation options, mostly for input performance.
+ * @param options Validation options.
  * @return The number of rows.
  */
-inline size_t height(const std::filesystem::path& path, [[maybe_unused]] const ObjectMetadata& metadata, [[maybe_unused]] const Options& options) {
+inline size_t height(const std::filesystem::path& path, [[maybe_unused]] const ObjectMetadata& metadata, [[maybe_unused]] Options& options) {
     // Assume it's all valid already.
     auto handle = ritsuko::hdf5::open_file(path / "basic_columns.h5");
     auto ghandle = handle.openGroup("data_frame");
@@ -238,10 +238,10 @@ inline size_t height(const std::filesystem::path& path, [[maybe_unused]] const O
 /**
  * @param path Path to a directory containing a data frame.
  * @param metadata Metadata for the object, typically read from its `OBJECT` file.
- * @param options Validation options, mostly for input performance.
+ * @param options Validation options.
  * @return A vector of length 2 containing the number of rows and columns in the data frame.
  */
-inline std::vector<size_t> dimensions(const std::filesystem::path& path, [[maybe_unused]] const ObjectMetadata& metadata, [[maybe_unused]] const Options& options) {
+inline std::vector<size_t> dimensions(const std::filesystem::path& path, [[maybe_unused]] const ObjectMetadata& metadata, [[maybe_unused]] Options& options) {
     // Assume it's all valid already.
     auto handle = ritsuko::hdf5::open_file(path / "basic_columns.h5");
     auto ghandle = handle.openGroup("data_frame");

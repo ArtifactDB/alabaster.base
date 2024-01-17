@@ -10,7 +10,7 @@
 
 namespace chihaya {
 
-ArrayDetails validate(const H5::Group&, const ritsuko::Version&, State&);
+ArrayDetails validate(const H5::Group&, const ritsuko::Version&, Options&);
 
 namespace internal_misc {
 
@@ -67,11 +67,11 @@ inline uint64_t load_along(const H5::Group& handle, const ritsuko::Version& vers
     }
 }
 
-inline ArrayDetails load_seed_details(const H5::Group& handle, const std::string& name, const ritsuko::Version& version, State& state) {
+inline ArrayDetails load_seed_details(const H5::Group& handle, const std::string& name, const ritsuko::Version& version, Options& options) {
     ArrayDetails output;
     auto shandle = ritsuko::hdf5::open_group(handle, name.c_str());
     try {
-        output = ::chihaya::validate(shandle, version, state);
+        output = ::chihaya::validate(shandle, version, options);
     } catch (std::exception& e) {
         throw std::runtime_error("failed to validate '" + name + "'; " + std::string(e.what()));
     }

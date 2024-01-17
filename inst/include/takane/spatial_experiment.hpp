@@ -26,7 +26,7 @@ namespace takane {
 /**
  * @cond
  */
-bool derived_from(const std::string&, const std::string&);
+bool derived_from(const std::string&, const std::string&, const Options& options);
 /**
  * @endcond
  */
@@ -42,10 +42,10 @@ namespace spatial_experiment {
  */
 namespace internal {
 
-inline void validate_coordinates(const std::filesystem::path& path, size_t ncols, const Options& options) {
+inline void validate_coordinates(const std::filesystem::path& path, size_t ncols, Options& options) {
     auto coord_path = path / "coordinates";
     auto coord_meta = read_object_metadata(coord_path);
-    if (!derived_from(coord_meta.type, "dense_array")) {
+    if (!derived_from(coord_meta.type, "dense_array", options)) {
         throw std::runtime_error("'coordinates' should be a dense array");
     }
 
@@ -101,7 +101,7 @@ inline void validate_image(const std::filesystem::path& path, size_t i, const st
     }
 }
 
-inline void validate_images(const std::filesystem::path& path, size_t ncols, const Options& options) {
+inline void validate_images(const std::filesystem::path& path, size_t ncols, Options& options) {
     auto image_dir = path / "images";
     auto mappath = image_dir / "mapping.h5";
     auto ihandle = ritsuko::hdf5::open_file(mappath);
@@ -215,9 +215,9 @@ inline void validate_images(const std::filesystem::path& path, size_t ncols, con
 /**
  * @param path Path to the directory containing the spatial experiment.
  * @param metadata Metadata for the object, typically read from its `OBJECT` file.
- * @param options Validation options, typically for reading performance.
+ * @param options Validation options.
  */
-inline void validate(const std::filesystem::path& path, const ObjectMetadata& metadata, const Options& options) {
+inline void validate(const std::filesystem::path& path, const ObjectMetadata& metadata, Options& options) {
     ::takane::single_cell_experiment::validate(path, metadata, options);
 
     const std::string& vstring = internal_json::extract_version_for_type(metadata.other, "spatial_experiment");

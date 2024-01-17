@@ -23,32 +23,28 @@
 namespace takane {
 
 /**
- * Class to map object types to `dimensions()` functions.
- */
-typedef std::unordered_map<std::string, std::function<std::vector<size_t>(const std::filesystem::path&, const ObjectMetadata&, const Options&)> > DimensionsRegistry;
-
-/**
  * @cond
  */
 namespace internal_dimensions {
 
-inline DimensionsRegistry default_registry() {
-    DimensionsRegistry registry;
+inline auto default_registry() {
+    std::unordered_map<std::string, std::function<std::vector<size_t>(const std::filesystem::path&, const ObjectMetadata&, Options& os)> > registry;
+    typedef std::vector<size_t> Dims;
 
-    registry["data_frame"] = [](const std::filesystem::path& p, const ObjectMetadata& m, const Options& o) -> std::vector<size_t> { return data_frame::dimensions(p, m, o); };
-    registry["dense_array"] = [](const std::filesystem::path& p, const ObjectMetadata& m, const Options& o) -> std::vector<size_t> { return dense_array::dimensions(p, m, o); };
-    registry["compressed_sparse_matrix"] = [](const std::filesystem::path& p, const ObjectMetadata& m, const Options& o) -> std::vector<size_t> { return compressed_sparse_matrix::dimensions(p, m, o); };
+    registry["data_frame"] = [](const std::filesystem::path& p, const ObjectMetadata& m, Options& o) -> Dims { return data_frame::dimensions(p, m, o); };
+    registry["dense_array"] = [](const std::filesystem::path& p, const ObjectMetadata& m, Options& o) -> Dims { return dense_array::dimensions(p, m, o); };
+    registry["compressed_sparse_matrix"] = [](const std::filesystem::path& p, const ObjectMetadata& m, Options& o) -> Dims { return compressed_sparse_matrix::dimensions(p, m, o); };
 
     // Subclasses of SE, so we just re-use the SE methods here.
-    registry["summarized_experiment"] = [](const std::filesystem::path& p, const ObjectMetadata& m, const Options& o) -> std::vector<size_t> { return summarized_experiment::dimensions(p, m, o); };
-    registry["ranged_summarized_experiment"] = [](const std::filesystem::path& p, const ObjectMetadata& m, const Options& o) -> std::vector<size_t> { return summarized_experiment::dimensions(p, m, o); };
-    registry["single_cell_experiment"] = [](const std::filesystem::path& p, const ObjectMetadata& m, const Options& o) -> std::vector<size_t> { return summarized_experiment::dimensions(p, m, o); };
-    registry["spatial_experiment"] = [](const std::filesystem::path& p, const ObjectMetadata& m, const Options& o) -> std::vector<size_t> { return summarized_experiment::dimensions(p, m, o); };
+    registry["summarized_experiment"] = [](const std::filesystem::path& p, const ObjectMetadata& m, Options& o) -> Dims { return summarized_experiment::dimensions(p, m, o); };
+    registry["ranged_summarized_experiment"] = [](const std::filesystem::path& p, const ObjectMetadata& m, Options& o) -> Dims { return summarized_experiment::dimensions(p, m, o); };
+    registry["single_cell_experiment"] = [](const std::filesystem::path& p, const ObjectMetadata& m, Options& o) -> Dims { return summarized_experiment::dimensions(p, m, o); };
+    registry["spatial_experiment"] = [](const std::filesystem::path& p, const ObjectMetadata& m, Options& o) -> Dims { return summarized_experiment::dimensions(p, m, o); };
 
-    registry["bumpy_atomic_array"] = [](const std::filesystem::path& p, const ObjectMetadata& m, const Options& o) -> std::vector<size_t> { return bumpy_atomic_array::dimensions(p, m, o); };
-    registry["bumpy_data_frame_array"] = [](const std::filesystem::path& p, const ObjectMetadata& m, const Options& o) -> std::vector<size_t> { return bumpy_data_frame_array::dimensions(p, m, o); };
-    registry["vcf_experiment"] = [](const std::filesystem::path& p, const ObjectMetadata& m, const Options& o) -> std::vector<size_t> { return vcf_experiment::dimensions(p, m, o); };
-    registry["delayed_array"] = [](const std::filesystem::path& p, const ObjectMetadata& m, const Options& o) -> std::vector<size_t> { return delayed_array::dimensions(p, m, o); };
+    registry["bumpy_atomic_array"] = [](const std::filesystem::path& p, const ObjectMetadata& m, Options& o) -> Dims { return bumpy_atomic_array::dimensions(p, m, o); };
+    registry["bumpy_data_frame_array"] = [](const std::filesystem::path& p, const ObjectMetadata& m, Options& o) -> Dims { return bumpy_data_frame_array::dimensions(p, m, o); };
+    registry["vcf_experiment"] = [](const std::filesystem::path& p, const ObjectMetadata& m, Options& o) -> Dims { return vcf_experiment::dimensions(p, m, o); };
+    registry["delayed_array"] = [](const std::filesystem::path& p, const ObjectMetadata& m, Options& o) -> Dims { return delayed_array::dimensions(p, m, o); };
 
     return registry;
 } 
@@ -59,26 +55,24 @@ inline DimensionsRegistry default_registry() {
  */
 
 /**
- * Registry of functions to be used by `dimensions()`.
- * Applications can extend **takane** by adding new dimension functions for custom object types.
- */
-inline DimensionsRegistry dimensions_registry = internal_dimensions::default_registry();
-
-/**
  * Get the dimensions of a multi-dimensional object in a subdirectory, based on the supplied object type.
- * This searches the `dimensions_registry` to find a dimension function for the given type.
+ *
+ * Applications can supply custom dimension functions for a given type via `Options::custom_dimensions`.
+ * If available, the supplied custom function will be used instead of the default.
  *
  * @param path Path to a directory representing an object.
  * @param metadata Metadata for the object, typically determined from its `OBJECT` file.
- * @param options Validation options, mostly for input performance.
+ * @param options Validation options.
  *
  * @return Vector containing the object's dimensions.
  */
-inline std::vector<size_t> dimensions(const std::filesystem::path& path, const ObjectMetadata& metadata, const Options& options) {
-    if (!std::filesystem::exists(path) || std::filesystem::status(path).type() != std::filesystem::file_type::directory) {
-        throw std::runtime_error("expected '" + path.string() + "' to be a directory");
+inline std::vector<size_t> dimensions(const std::filesystem::path& path, const ObjectMetadata& metadata, Options& options) {
+    auto cIt = options.custom_dimensions.find(metadata.type);
+    if (cIt != options.custom_dimensions.end()) {
+        return (cIt->second)(path, metadata, options);
     }
 
+    static const auto dimensions_registry = internal_dimensions::default_registry();
     auto vrIt = dimensions_registry.find(metadata.type);
     if (vrIt == dimensions_registry.end()) {
         throw std::runtime_error("no registered 'dimensions' function for object type '" + metadata.type + "' at '" + path.string() + "'");
@@ -91,21 +85,22 @@ inline std::vector<size_t> dimensions(const std::filesystem::path& path, const O
  * Get the dimensions of an object in a subdirectory, using its `OBJECT` file to automatically determine the type.
  *
  * @param path Path to a directory containing an object.
- * @param options Validation options, mostly for input performance.
+ * @param options Validation options.
  * @return The object's dimensions.
  */
-inline std::vector<size_t> dimensions(const std::filesystem::path& path, const Options& options) {
+inline std::vector<size_t> dimensions(const std::filesystem::path& path, Options& options) {
     return dimensions(path, read_object_metadata(path), options);
 }
 
 /**
- * Overload of `dimensions()` with default options.
+ * Overload of `dimensions()` with default settings.
  *
  * @param path Path to a directory containing an object.
  * @return The object's dimensions.
  */
 inline std::vector<size_t> dimensions(const std::filesystem::path& path) {
-    return dimensions(path, Options());
+    Options options;
+    return dimensions(path, options);
 }
 
 }

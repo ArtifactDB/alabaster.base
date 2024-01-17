@@ -5,6 +5,8 @@
 #include <string>
 #include <stdexcept>
 
+static takane::Options global_options;
+
 std::shared_ptr<millijson::Base> convert_to_millijson(Rcpp::RObject x) {
     std::shared_ptr<millijson::Base> output;
 
@@ -118,11 +120,11 @@ Rcpp::RObject convert_to_R(const takane::ObjectMetadata& x) {
 //[[Rcpp::export(rng=false)]]
 Rcpp::RObject validate(std::string path, Rcpp::RObject metadata) {
     if (metadata.isNULL()) {
-        takane::validate(path, takane::Options());
+        takane::validate(path, global_options);
     } else {
         auto converted = convert_to_millijson(metadata);
         auto objmeta = takane::reformat_object_metadata(converted.get());
-        takane::validate(path, objmeta, takane::Options());
+        takane::validate(path, objmeta, global_options);
     }
     return R_NilValue;
 }
@@ -152,9 +154,10 @@ Rcpp::RObject deregister(std::string type, Registry& registry) {
 
 //[[Rcpp::export(rng=false)]]
 Rcpp::RObject register_validate_function(std::string type, Rcpp::Function fun, std::string existing) {
-    if (!has_existing(type, takane::validate_registry, existing)) {
-        takane::validate_registry[type] = [fun](const std::filesystem::path& path, const takane::ObjectMetadata& metadata, const takane::Options&) {
-            return fun(Rcpp::String(path.c_str()), convert_to_R(metadata));
+    if (!has_existing(type, global_options.custom_validate, existing)) {
+        global_options.custom_validate[type] = [fun](const std::filesystem::path& path, const takane::ObjectMetadata& metadata, takane::Options&) {
+            fun(Rcpp::String(path.c_str()), convert_to_R(metadata));
+            return;
         };
     }
     return R_NilValue;
@@ -162,13 +165,13 @@ Rcpp::RObject register_validate_function(std::string type, Rcpp::Function fun, s
 
 //[[Rcpp::export(rng=false)]]
 Rcpp::RObject deregister_validate_function(std::string type) {
-    return deregister(type, takane::validate_registry);
+    return deregister(type, global_options.custom_validate);
 }
 
 //[[Rcpp::export(rng=false)]]
 Rcpp::RObject register_height_function(std::string type, Rcpp::Function fun, std::string existing) {
-    if (!has_existing(type, takane::height_registry, existing)) {
-        takane::height_registry[type] = [fun](const std::filesystem::path& path, const takane::ObjectMetadata& metadata, const takane::Options&) -> size_t {
+    if (!has_existing(type, global_options.custom_height, existing)) {
+        global_options.custom_height[type] = [fun](const std::filesystem::path& path, const takane::ObjectMetadata& metadata, takane::Options&) -> size_t {
             Rcpp::IntegerVector output = fun(Rcpp::String(path.c_str()), convert_to_R(metadata));
             if (output.size() != 1) {
                 throw std::runtime_error("expected a integer scalar from height function on '" + path.string() + "'");
@@ -181,13 +184,13 @@ Rcpp::RObject register_height_function(std::string type, Rcpp::Function fun, std
 
 //[[Rcpp::export(rng=false)]]
 Rcpp::RObject deregister_height_function(std::string type) {
-    return deregister(type, takane::height_registry);
+    return deregister(type, global_options.custom_height);
 }
 
 //[[Rcpp::export(rng=false)]]
 Rcpp::RObject register_dimensions_function(std::string type, Rcpp::Function fun, std::string existing) {
-    if (!has_existing(type, takane::dimensions_registry, existing)) {
-        takane::dimensions_registry[type] = [fun](const std::filesystem::path& path, const takane::ObjectMetadata& metadata, const takane::Options&) -> std::vector<size_t> {
+    if (!has_existing(type, global_options.custom_dimensions, existing)) {
+        global_options.custom_dimensions[type] = [fun](const std::filesystem::path& path, const takane::ObjectMetadata& metadata, takane::Options&) -> std::vector<size_t> {
             Rcpp::IntegerVector output = fun(Rcpp::String(path.c_str()), convert_to_R(metadata));
             return std::vector<size_t>(output.begin(), output.end());
         };
@@ -197,13 +200,13 @@ Rcpp::RObject register_dimensions_function(std::string type, Rcpp::Function fun,
 
 //[[Rcpp::export(rng=false)]]
 Rcpp::RObject deregister_dimensions_function(std::string type) {
-    return deregister(type, takane::dimensions_registry);
+    return deregister(type, global_options.custom_dimensions);
 }
 
 //[[Rcpp::export(rng=false)]]
 Rcpp::RObject register_any_duplicated(bool set) {
     if (set) {
-        takane::data_frame_factor::any_duplicated = [](const std::filesystem::path& path, const takane::ObjectMetadata& metadata, const takane::Options&) -> bool {
+        global_options.data_frame_factor_any_duplicated = [](const std::filesystem::path& path, const takane::ObjectMetadata& metadata, takane::Options&) -> bool {
             auto pkg = Rcpp::Environment::namespace_env("alabaster.base");
             Rcpp::Function f = pkg[".anyDuplicated_fallback"];
             Rcpp::IntegerVector output = f(Rcpp::String(path.c_str()), convert_to_R(metadata));
@@ -213,7 +216,7 @@ Rcpp::RObject register_any_duplicated(bool set) {
             return output[0] != 0;
         };
     } else {
-        takane::data_frame_factor::any_duplicated = nullptr;
+        global_options.data_frame_factor_any_duplicated = nullptr;
     }
     return R_NilValue;
 }

@@ -23,9 +23,9 @@ namespace takane {
 /**
  * @cond
  */
-void validate(const std::filesystem::path&, const ObjectMetadata&, const Options&);
-size_t height(const std::filesystem::path&, const ObjectMetadata&, const Options&);
-bool satisfies_interface(const std::string&, const std::string&);
+void validate(const std::filesystem::path&, const ObjectMetadata&, Options&);
+size_t height(const std::filesystem::path&, const ObjectMetadata&, Options&);
+bool satisfies_interface(const std::string&, const std::string&, const Options&);
 /**
  * @endcond
  */
@@ -37,22 +37,14 @@ bool satisfies_interface(const std::string&, const std::string&);
 namespace data_frame_factor {
 
 /**
- * Application-specific function to determine whether there are duplicated rows in the data frame containing the levels of a `data_frame_factor`.
- *
- * This should accept a path to the directory containing the data frame, the object metadata, and additional reading options.
- * It should return a boolean indicating whether any duplicate rows were found. 
- *
- * If provided, this enables stricter checking of the uniqueness of the data frame levels.
+ * If `Options::data_frame_factor_any_duplicated` provided, it enables stricter checking of the uniqueness of the data frame levels.
  * Currently, we don't provide a default method for `data_frame` objects, as it's kind of tedious and we haven't gotten around to it yet.
- */
-inline std::function<bool(const std::filesystem::path&, const ObjectMetadata&, const Options& options)> any_duplicated;
-
-/**
+ *
  * @param path Path to the directory containing the data frame factor.
  * @param metadata Metadata for the object, typically read from its `OBJECT` file.
- * @param options Validation options, typically for reading performance.
+ * @param options Validation options.
  */
-inline void validate(const std::filesystem::path& path, const ObjectMetadata& metadata, const Options& options) {
+inline void validate(const std::filesystem::path& path, const ObjectMetadata& metadata, Options& options) {
     const auto& vstring = internal_json::extract_version_for_type(metadata.other, "data_frame_factor");
     auto version = ritsuko::parse_version_string(vstring.c_str(), vstring.size(), /* skip_patch = */ true);
     if (version.major != 1) {
@@ -62,7 +54,7 @@ inline void validate(const std::filesystem::path& path, const ObjectMetadata& me
     // Validating the levels.
     auto lpath = path / "levels";
     auto lmeta = read_object_metadata(lpath);
-    if (!satisfies_interface(lmeta.type, "DATA_FRAME")) {
+    if (!satisfies_interface(lmeta.type, "DATA_FRAME", options)) {
         throw std::runtime_error("expected 'levels' to be an object that satifies the 'DATA_FRAME' interface");
     }
 
@@ -73,8 +65,8 @@ inline void validate(const std::filesystem::path& path, const ObjectMetadata& me
     }
     size_t num_levels = ::takane::height(lpath, lmeta, options);
 
-    if (any_duplicated) {
-        if (any_duplicated(lpath, lmeta, options)) {
+    if (options.data_frame_factor_any_duplicated) {
+        if (options.data_frame_factor_any_duplicated(lpath, lmeta, options)) {
             throw std::runtime_error("'levels' should not contain duplicated rows");
         }
     }
@@ -92,10 +84,10 @@ inline void validate(const std::filesystem::path& path, const ObjectMetadata& me
 /**
  * @param path Path to the directory containing the data frame factor.
  * @param metadata Metadata for the object, typically read from its `OBJECT` file.
- * @param options Validation options, typically for reading performance.
+ * @param options Validation options.
  * @return Length of the factor.
  */
-inline size_t height(const std::filesystem::path& path, [[maybe_unused]] const ObjectMetadata& metadata, [[maybe_unused]] const Options& options) {
+inline size_t height(const std::filesystem::path& path, [[maybe_unused]] const ObjectMetadata& metadata, [[maybe_unused]] Options& options) {
     auto handle = ritsuko::hdf5::open_file(path / "contents.h5");
     auto ghandle = handle.openGroup("data_frame_factor");
     auto dhandle = ghandle.openDataSet("codes");

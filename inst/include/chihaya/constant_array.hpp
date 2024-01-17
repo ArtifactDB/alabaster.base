@@ -25,11 +25,12 @@ namespace constant_array {
 /**
  * @param handle An open handle on a HDF5 group representing a dense array.
  * @param version Version of the **chihaya** specification.
+ * @param options Validation options.
  *
  * @return Details of the constant array.
  * Otherwise, if the validation failed, an error is raised.
  */
-inline ArrayDetails validate(const H5::Group& handle, const ritsuko::Version& version) {
+inline ArrayDetails validate(const H5::Group& handle, const ritsuko::Version& version, [[maybe_unused]] Options& options) {
     ArrayDetails output;
 
     {
@@ -77,7 +78,14 @@ inline ArrayDetails validate(const H5::Group& handle, const ritsuko::Version& ve
                 internal_type::check_type_1_1(vhandle, output.type);
             }
 
-            internal_misc::validate_missing_placeholder(vhandle, version);
+            if (!options.details_only) {
+                internal_misc::validate_missing_placeholder(vhandle, version);
+            }
+
+            if (vhandle.getTypeClass() == H5T_STRING) {
+                ritsuko::hdf5::validate_scalar_string_dataset(vhandle);
+            }
+
         } catch (std::exception& e) {
             throw std::runtime_error("failed to validate 'value'; " + std::string(e.what()));
         }

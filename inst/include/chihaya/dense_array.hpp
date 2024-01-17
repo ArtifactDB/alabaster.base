@@ -28,11 +28,12 @@ namespace dense_array {
 /**
  * @param handle An open handle on a HDF5 group representing a dense array.
  * @param version Version of the **chihaya** specification.
+ * @param options Validation options.
  *
  * @return Details of the dense array.
  * Otherwise, if the validation failed, an error is raised.
  */
-inline ArrayDetails validate(const H5::Group& handle, const ritsuko::Version& version) {
+inline ArrayDetails validate(const H5::Group& handle, const ritsuko::Version& version, [[maybe_unused]] Options& options) {
     ArrayDetails output;
 
     {
@@ -59,7 +60,14 @@ inline ArrayDetails validate(const H5::Group& handle, const ritsuko::Version& ve
                 internal_type::check_type_1_1(dhandle, output.type);
             }
 
-            internal_misc::validate_missing_placeholder(dhandle, version);
+            if (!options.details_only) {
+                internal_misc::validate_missing_placeholder(dhandle, version);
+            }
+
+            if (dhandle.getTypeClass() == H5T_STRING) {
+                ritsuko::hdf5::validate_nd_string_dataset(dhandle, dims, 1000000);
+            }
+
         } catch (std::exception& e) {
             throw std::runtime_error("failed to validate 'data'; " + std::string(e.what()));
         }
@@ -83,12 +91,13 @@ inline ArrayDetails validate(const H5::Group& handle, const ritsuko::Version& ve
             }
             native = ritsuko::hdf5::load_scalar_numeric_dataset<int8_t>(nhandle);
         }
-
     }
 
     // Do this before the 'native' check.
-    if (handle.exists("dimnames")) {
-        internal_dimnames::validate(handle, output.dimensions, version);
+    if (!options.details_only) {
+        if (handle.exists("dimnames")) {
+            internal_dimnames::validate(handle, output.dimensions, version);
+        }
     }
 
     if (!native) {

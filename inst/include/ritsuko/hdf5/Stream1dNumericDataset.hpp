@@ -13,7 +13,7 @@
 
 /**
  * @file Stream1dNumericDataset.hpp
- * @brief Stream a numeric 1D HDF5 dataset into memory.
+ * @brief Stream a numeric 1-dimensional HDF5 dataset into memory.
  */
 
 namespace ritsuko {
@@ -21,10 +21,10 @@ namespace ritsuko {
 namespace hdf5 {
 
 /**
- * @brief Stream a numeric 1D HDF5 dataset into memory.
+ * @brief Stream a numeric 1-dimensional HDF5 dataset into memory.
  * @tparam Type_ Type to represent the data in memory.
  *
- * This streams in a HDF5 dataset in contiguous blocks, using block sizes defined by `pick_1d_block_size()`.
+ * This streams in a 1-dimensional HDF5 numeric dataset in contiguous blocks, using block sizes defined by `pick_1d_block_size()`.
  * Callers can then extract one value at a time or they can acquire the entire block.
  */
 template<typename Type_>

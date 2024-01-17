@@ -22,8 +22,9 @@ namespace takane {
 /**
  * @cond
  */
-void validate(const std::filesystem::path&, const ObjectMetadata&, const Options& options);
-std::vector<size_t> dimensions(const std::filesystem::path&, const ObjectMetadata&, const Options& options);
+void validate(const std::filesystem::path&, const ObjectMetadata&, Options& options);
+std::vector<size_t> dimensions(const std::filesystem::path&, const ObjectMetadata&, Options& options);
+bool satisfies_interface(const std::string&, const std::string&, const Options&);
 /**
  * @endcond
  */
@@ -37,9 +38,9 @@ namespace single_cell_experiment {
 /**
  * @param path Path to the directory containing the single cell experiment.
  * @param metadata Metadata for the object, typically read from its `OBJECT` file.
- * @param options Validation options, typically for reading performance.
+ * @param options Validation options.
  */
-inline void validate(const std::filesystem::path& path, const ObjectMetadata& metadata, const Options& options) {
+inline void validate(const std::filesystem::path& path, const ObjectMetadata& metadata, Options& options) {
     ::takane::ranged_summarized_experiment::validate(path, metadata, options);
 
     auto sedims = ::takane::summarized_experiment::dimensions(path, metadata, options);
@@ -90,7 +91,7 @@ inline void validate(const std::filesystem::path& path, const ObjectMetadata& me
             auto aename = std::to_string(i);
             auto aepath = aedir / aename;
             auto aemeta = read_object_metadata(aepath);
-            if (!satisfies_interface(aemeta.type, "SUMMARIZED_EXPERIMENT")) {
+            if (!satisfies_interface(aemeta.type, "SUMMARIZED_EXPERIMENT", options)) {
                 throw std::runtime_error("object in 'alternative_experiments/" + aename + "' should satisfy the 'SUMMARIZED_EXPERIMENT' interface");
             }
 

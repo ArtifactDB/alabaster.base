@@ -6,6 +6,7 @@
 #include "as_numeric_datatype.hpp"
 #include "exceeds_limit.hpp"
 #include "get_1d_length.hpp"
+#include "get_dimensions.hpp"
 #include "get_name.hpp"
 #include "is_utf8_string.hpp"
 #include "load_attribute.hpp"
@@ -14,6 +15,8 @@
 #include "miscellaneous.hpp"
 #include "open.hpp"
 #include "pick_1d_block_size.hpp"
+#include "pick_nd_block_dimensions.hpp"
+#include "IterateNdDataset.hpp"
 #include "validate_string.hpp"
 
 /**

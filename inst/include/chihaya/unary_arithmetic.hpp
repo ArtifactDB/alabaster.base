@@ -29,26 +29,30 @@ namespace unary_arithmetic {
 /**
  * @param handle An open handle on a HDF5 group representing an unary arithmetic operation.
  * @param version Version of the **chihaya** specification.
- * @param state Validation state, passed to `validate()`.
+ * @param options Validation options.
  *
  * @return Details of the object after applying the arithmetic operation.
  * Otherwise, if the validation failed, an error is raised.
  */
-inline ArrayDetails validate(const H5::Group& handle, const ritsuko::Version& version, State& state) {
-    auto seed_details = internal_arithmetic::fetch_seed(handle, "seed", version, state);
+inline ArrayDetails validate(const H5::Group& handle, const ritsuko::Version& version, Options& options) {
+    auto seed_details = internal_arithmetic::fetch_seed(handle, "seed", version, options);
 
     auto method = internal_unary::load_method(handle);
-    if (!internal_arithmetic::is_valid_operation(method)) {
-        throw std::runtime_error("unrecognized operation in 'method' (got '" + method + "')");
+    if (!options.details_only) {
+        if (!internal_arithmetic::is_valid_operation(method)) {
+            throw std::runtime_error("unrecognized operation in 'method' (got '" + method + "')");
+        }
     }
 
     auto side = internal_unary::load_side(handle);
-    if (side == "none") {
-        if (method != "+" && method != "-") {
-            throw std::runtime_error("'side' cannot be 'none' for operation '" + method + "'");
-        } 
-    } else if (side != "left" && side != "right") {
-        throw std::runtime_error("'side' for operation '" + method + "' should be 'left' or 'right' (got '" + side + "')");
+    if (!options.details_only) {
+        if (side == "none") {
+            if (method != "+" && method != "-") {
+                throw std::runtime_error("'side' cannot be 'none' for operation '" + method + "'");
+            } 
+        } else if (side != "left" && side != "right") {
+            throw std::runtime_error("'side' for operation '" + method + "' should be 'left' or 'right' (got '" + side + "')");
+        }
     }
 
     // If side = none, we set it to INTEGER to promote BOOLEANs to integer (implicit multiplication by +/-1).
@@ -73,19 +77,22 @@ inline ArrayDetails validate(const H5::Group& handle, const ritsuko::Version& ve
                 internal_type::check_type_1_1(vhandle, min_type);
             }
 
-            internal_misc::validate_missing_placeholder(vhandle, version);
+            if (!options.details_only) {
+                internal_misc::validate_missing_placeholder(vhandle, version);
         
-            auto vspace = vhandle.getSpace();
-            size_t ndims = vspace.getSimpleExtentNdims();
-            if (ndims == 0) {
-                // scalar operation.
-            } else if (ndims == 1) {
-                hsize_t extent;
-                vspace.getSimpleExtentDims(&extent);
-                internal_unary::check_along(handle, version, seed_details.dimensions, extent);
-            } else { 
-                throw std::runtime_error("dataset should be scalar or 1-dimensional for an unary arithmetic operation");
+                auto vspace = vhandle.getSpace();
+                size_t ndims = vspace.getSimpleExtentNdims();
+                if (ndims == 0) {
+                    // scalar operation.
+                } else if (ndims == 1) {
+                    hsize_t extent;
+                    vspace.getSimpleExtentDims(&extent);
+                    internal_unary::check_along(handle, version, seed_details.dimensions, extent);
+                } else { 
+                    throw std::runtime_error("dataset should be scalar or 1-dimensional");
+                }
             }
+
         } catch (std::exception& e) {
             throw std::runtime_error("failed to validate 'value'; " + std::string(e.what()));
         }
