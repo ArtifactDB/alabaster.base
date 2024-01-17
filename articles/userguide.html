@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">alabaster.base</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.3.7</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.3.18</span>
       </span>
     </div>
 
@@ -237,13 +237,13 @@ directory, and fiddling with them may cause unexpected results.</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/readObject.html">readObject</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">tmp</span>, <span class="st">"other_columns/1"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## DataFrame with 5 rows and 2 columns</span></span>
-<span><span class="co">##           B         C</span></span>
-<span><span class="co">##   &lt;numeric&gt; &lt;numeric&gt;</span></span>
-<span><span class="co">## 1  0.290810 -2.035383</span></span>
-<span><span class="co">## 2  0.805483 -1.510026</span></span>
-<span><span class="co">## 3  0.356740  0.645156</span></span>
-<span><span class="co">## 4  0.271476  1.135115</span></span>
-<span><span class="co">## 5  0.789922 -0.228095</span></span></code></pre>
+<span><span class="co">##           B          C</span></span>
+<span><span class="co">##   &lt;numeric&gt;  &lt;numeric&gt;</span></span>
+<span><span class="co">## 1  0.961003  0.0629404</span></span>
+<span><span class="co">## 2  0.236407 -0.6586793</span></span>
+<span><span class="co">## 3  0.460739  0.9310429</span></span>
+<span><span class="co">## 4  0.653661  1.0452313</span></span>
+<span><span class="co">## 5  0.286885 -1.4998568</span></span></code></pre>
 </div>
 <div class="section level2">
 <h2 id="extending-to-new-classes">Extending to new classes<a class="anchor" aria-label="anchor" href="#extending-to-new-classes"></a>
@@ -335,17 +335,17 @@ function.</p>
 <span><span class="op">)</span></span>
 <span><span class="va">x</span></span></code></pre></div>
 <pre><code><span><span class="co">## 10 x 10 sparse Matrix of class "dgTMatrix"</span></span>
-<span><span class="co">##                                                          </span></span>
-<span><span class="co">##  [1,] .         . 0.1691103 . . .         . .         . .</span></span>
-<span><span class="co">##  [2,] .         . .         . . 0.3288572 . .         . .</span></span>
-<span><span class="co">##  [3,] 0.1305164 . .         . . .         . .         . .</span></span>
-<span><span class="co">##  [4,] .         . .         . . .         . .         . .</span></span>
-<span><span class="co">##  [5,] .         . 0.5745149 . . .         . .         . .</span></span>
-<span><span class="co">##  [6,] .         . .         . . .         . 0.9555644 . .</span></span>
-<span><span class="co">##  [7,] .         . .         . . .         . .         . .</span></span>
-<span><span class="co">##  [8,] .         . .         . . .         . .         . .</span></span>
-<span><span class="co">##  [9,] .         . .         . . .         . .         . .</span></span>
-<span><span class="co">## [10,] .         . .         . . .         . .         . .</span></span></code></pre>
+<span><span class="co">##                                                         </span></span>
+<span><span class="co">##  [1,] .         . 0.2534712 . . .        . .         . .</span></span>
+<span><span class="co">##  [2,] .         . .         . . 0.170955 . .         . .</span></span>
+<span><span class="co">##  [3,] 0.5636015 . .         . . .        . .         . .</span></span>
+<span><span class="co">##  [4,] .         . .         . . .        . .         . .</span></span>
+<span><span class="co">##  [5,] .         . 0.5558745 . . .        . .         . .</span></span>
+<span><span class="co">##  [6,] .         . .         . . .        . 0.8529648 . .</span></span>
+<span><span class="co">##  [7,] .         . .         . . .        . .         . .</span></span>
+<span><span class="co">##  [8,] .         . .         . . .        . .         . .</span></span>
+<span><span class="co">##  [9,] .         . .         . . .        . .         . .</span></span>
+<span><span class="co">## [10,] .         . .         . . .        . .         . .</span></span></code></pre>
 <div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">tmp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/saveObject.html">saveObject</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">tmp</span><span class="op">)</span></span>
@@ -354,17 +354,17 @@ function.</p>
 <div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/readObject.html">readObject</a></span><span class="op">(</span><span class="va">tmp</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## 10 x 10 sparse Matrix of class "dgTMatrix"</span></span>
-<span><span class="co">##                                                          </span></span>
-<span><span class="co">##  [1,] .         . 0.1691103 . . .         . .         . .</span></span>
-<span><span class="co">##  [2,] .         . .         . . 0.3288572 . .         . .</span></span>
-<span><span class="co">##  [3,] 0.1305164 . .         . . .         . .         . .</span></span>
-<span><span class="co">##  [4,] .         . .         . . .         . .         . .</span></span>
-<span><span class="co">##  [5,] .         . 0.5745149 . . .         . .         . .</span></span>
-<span><span class="co">##  [6,] .         . .         . . .         . 0.9555644 . .</span></span>
-<span><span class="co">##  [7,] .         . .         . . .         . .         . .</span></span>
-<span><span class="co">##  [8,] .         . .         . . .         . .         . .</span></span>
-<span><span class="co">##  [9,] .         . .         . . .         . .         . .</span></span>
-<span><span class="co">## [10,] .         . .         . . .         . .         . .</span></span></code></pre>
+<span><span class="co">##                                                         </span></span>
+<span><span class="co">##  [1,] .         . 0.2534712 . . .        . .         . .</span></span>
+<span><span class="co">##  [2,] .         . .         . . 0.170955 . .         . .</span></span>
+<span><span class="co">##  [3,] 0.5636015 . .         . . .        . .         . .</span></span>
+<span><span class="co">##  [4,] .         . .         . . .        . .         . .</span></span>
+<span><span class="co">##  [5,] .         . 0.5558745 . . .        . .         . .</span></span>
+<span><span class="co">##  [6,] .         . .         . . .        . 0.8529648 . .</span></span>
+<span><span class="co">##  [7,] .         . .         . . .        . .         . .</span></span>
+<span><span class="co">##  [8,] .         . .         . . .        . .         . .</span></span>
+<span><span class="co">##  [9,] .         . .         . . .        . .         . .</span></span>
+<span><span class="co">## [10,] .         . .         . . .        . .         . .</span></span></code></pre>
 <p>For more complex objects that are composed of multiple smaller
 “child” objects, developers should consider saving each of their
 children in subdirectories of <code>path</code>. This can be achieved by
@@ -447,13 +447,13 @@ something with the metadata that we just added.</p>
 <span><span class="co">## I am a data_frame created by root.</span></span>
 <span><span class="co">## I have the following columns: B, C.</span></span></code></pre>
 <pre><code><span><span class="co">## DataFrame with 5 rows and 2 columns</span></span>
-<span><span class="co">##          Z                 AA</span></span>
-<span><span class="co">##   &lt;factor&gt;        &lt;DataFrame&gt;</span></span>
-<span><span class="co">## 1        1 0.686395:-0.794435</span></span>
-<span><span class="co">## 2        2 0.523155: 1.385990</span></span>
-<span><span class="co">## 3        3 0.559033: 0.951902</span></span>
-<span><span class="co">## 4        4 0.145238:-1.074408</span></span>
-<span><span class="co">## 5        5 0.393282: 0.561963</span></span></code></pre>
+<span><span class="co">##          Z                  AA</span></span>
+<span><span class="co">##   &lt;factor&gt;         &lt;DataFrame&gt;</span></span>
+<span><span class="co">## 1        1 0.659959: 0.9793586</span></span>
+<span><span class="co">## 2        2 0.760880: 0.0117877</span></span>
+<span><span class="co">## 3        3 0.331610: 1.2999491</span></span>
+<span><span class="co">## 4        4 0.187239: 0.3339832</span></span>
+<span><span class="co">## 5        5 0.608918:-0.6603510</span></span></code></pre>
 <div class="sourceCode" id="cb39"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Unsetting the override for other applications.</span></span>
 <span><span class="fu"><a href="../reference/altReadObject.html">altReadObjectFunction</a></span><span class="op">(</span><span class="va">old</span><span class="op">)</span> </span></code></pre></div>
@@ -463,7 +463,7 @@ something with the metadata that we just added.</p>
 </h2>
 <div class="sourceCode" id="cb40"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/sessionInfo.html" class="external-link">sessionInfo</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## R Under development (unstable) (2023-11-22 r85609)</span></span>
+<pre><code><span><span class="co">## R Under development (unstable) (2024-01-09 r85796)</span></span>
 <span><span class="co">## Platform: x86_64-pc-linux-gnu</span></span>
 <span><span class="co">## Running under: Ubuntu 22.04.3 LTS</span></span>
 <span><span class="co">## </span></span>
@@ -487,24 +487,24 @@ something with the metadata that we just added.</p>
 <span><span class="co">## [8] base     </span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## other attached packages:</span></span>
-<span><span class="co">## [1] Matrix_1.6-4         alabaster.base_1.3.7 S4Vectors_0.41.2    </span></span>
-<span><span class="co">## [4] BiocGenerics_0.49.1  BiocStyle_2.31.0    </span></span>
+<span><span class="co">## [1] Matrix_1.6-5          alabaster.base_1.3.18 S4Vectors_0.41.3     </span></span>
+<span><span class="co">## [4] BiocGenerics_0.49.1   BiocStyle_2.31.0     </span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## loaded via a namespace (and not attached):</span></span>
 <span><span class="co">##  [1] jsonlite_1.8.8          compiler_4.4.0          BiocManager_1.30.22    </span></span>
-<span><span class="co">##  [4] Rcpp_1.0.11             stringr_1.5.1           rhdf5filters_1.15.1    </span></span>
+<span><span class="co">##  [4] Rcpp_1.0.12             stringr_1.5.1           rhdf5filters_1.15.1    </span></span>
 <span><span class="co">##  [7] jquerylib_0.1.4         systemfonts_1.0.5       textshaping_0.3.7      </span></span>
-<span><span class="co">## [10] yaml_2.3.7              fastmap_1.1.1           lattice_0.22-5         </span></span>
+<span><span class="co">## [10] yaml_2.3.8              fastmap_1.1.1           lattice_0.22-5         </span></span>
 <span><span class="co">## [13] R6_2.5.1                knitr_1.45              bookdown_0.37          </span></span>
-<span><span class="co">## [16] desc_1.4.2              rprojroot_2.0.4         bslib_0.6.1            </span></span>
-<span><span class="co">## [19] rlang_1.1.2             cachem_1.0.8            stringi_1.8.2          </span></span>
-<span><span class="co">## [22] xfun_0.41               fs_1.6.3                sass_0.4.7             </span></span>
-<span><span class="co">## [25] memoise_2.0.1           cli_3.6.1               pkgdown_2.0.7          </span></span>
-<span><span class="co">## [28] magrittr_2.0.3          Rhdf5lib_1.25.1         grid_4.4.0             </span></span>
-<span><span class="co">## [31] digest_0.6.33           alabaster.schemas_1.3.1 rhdf5_2.47.1           </span></span>
-<span><span class="co">## [34] lifecycle_1.0.4         vctrs_0.6.4             evaluate_0.23          </span></span>
-<span><span class="co">## [37] glue_1.6.2              ragg_1.2.6              rmarkdown_2.25         </span></span>
-<span><span class="co">## [40] purrr_1.0.2             tools_4.4.0             htmltools_0.5.7</span></span></code></pre>
+<span><span class="co">## [16] desc_1.4.3              bslib_0.6.1             rlang_1.1.3            </span></span>
+<span><span class="co">## [19] cachem_1.0.8            stringi_1.8.3           xfun_0.41              </span></span>
+<span><span class="co">## [22] fs_1.6.3                sass_0.4.8              memoise_2.0.1          </span></span>
+<span><span class="co">## [25] cli_3.6.2               pkgdown_2.0.7           magrittr_2.0.3         </span></span>
+<span><span class="co">## [28] Rhdf5lib_1.25.1         grid_4.4.0              digest_0.6.34          </span></span>
+<span><span class="co">## [31] alabaster.schemas_1.3.1 rhdf5_2.47.2            lifecycle_1.0.4        </span></span>
+<span><span class="co">## [34] vctrs_0.6.5             evaluate_0.23           glue_1.7.0             </span></span>
+<span><span class="co">## [37] ragg_1.2.7              rmarkdown_2.25          purrr_1.0.2            </span></span>
+<span><span class="co">## [40] tools_4.4.0             htmltools_0.5.7</span></span></code></pre>
 </div>
   </div>
 
