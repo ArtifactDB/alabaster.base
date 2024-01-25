@@ -177,7 +177,9 @@ inline size_t height(const std::filesystem::path& path, [[maybe_unused]] const O
     chihaya_options.details_only = true;
 
     auto apath = path / "array.h5";
-    auto output = chihaya::validate(apath, "delayed_array", chihaya_options);
+    auto fhandle = ritsuko::hdf5::open_file(apath);
+    auto ghandle = ritsuko::hdf5::open_group(fhandle, "delayed_array");
+    auto output = chihaya::validate(ghandle, chihaya_options);
     return output.dimensions[0];
 }
 
@@ -193,7 +195,9 @@ inline std::vector<size_t> dimensions(const std::filesystem::path& path, [[maybe
     chihaya_options.details_only = true;
 
     auto apath = path / "array.h5";
-    auto output = chihaya::validate(apath, "delayed_array", chihaya_options);
+    auto fhandle = ritsuko::hdf5::open_file(apath);
+    auto ghandle = ritsuko::hdf5::open_group(fhandle, "delayed_array");
+    auto output = chihaya::validate(ghandle, chihaya_options);
     return std::vector<size_t>(output.dimensions.begin(), output.dimensions.end());
 }
 
