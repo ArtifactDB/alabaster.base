@@ -27,7 +27,7 @@ BiocManager::install("alabaster.base")
 ```
 
 The simplest example involves saving a `DataFrame` inside a staging directory.
-Let's mock one up:
+Let's mock up an object:
 
 ```r
 library(S4Vectors)
@@ -51,16 +51,14 @@ Then we can save it to the staging directory:
 
 ```r
 tmp <- tempfile()
-dir.create(tmp)
-
 library(alabaster.base)
-saveLocalObject(df, tmp, path="my_df")
+saveObject(df, tmp)
 ```
   
-Loading it back into memory is straightforward:
+We can copy the directory to another location, over a network, etc., and then easily load it back into memory:
 
 ```r
-readLocalObject(tmp, "my_df")
+readObject(tmp)
 ## DataFrame with 10 rows and 2 columns
 ##            X           Y
 ##    <integer> <character>
@@ -102,16 +100,8 @@ To install all packages in one go, users can install the [**alabaster**](https:/
 ## Extensions and applications
 
 Developers can _extend_ this framework to support more R/Bioconductor classes by creating their own **alabaster** package.
-Check out the [extension guide](https://bioconductor.org/packages/release/bioc/vignettes/alabaster.base/inst/doc/extensions.html) for more details.
+Check out the [extension section](https://artifactdb.github.io/alabaster.base/articles/userguide.html#extending-to-new-classes) for more details.
 
-Developers can also _customize_ this framework for specific applications, most typically to save bespoke metadata in the JSON file.
-The JSON file can then be indexed by systems like MongoDB and Elasticsearch to provide search capabilities.
-Check out the [applications guide](https://bioconductor.org/packages/release/bioc/vignettes/alabaster.base/inst/doc/applications.html) for more details.
-
-## Links
-
-The [**BiocObjectSchemas**](https://github.com/ArtifactDB/BiocObjectSchemas) repository contains schema definitions for many Bioconductor objects.
-
-For use in an R installation, all schemas are packaged in the [**alabaster.schemas**](https://github.com/ArtifactDB/alabaster.schemas) R package.
-
-A [Docker image](https://github.com/ArtifactDB/alabaster-docker/pkgs/container/alabaster-docker%2Fbuilder) is available, containing several pre-installed **alabaster** packages.
+Developers can also _customize_ this framework for specific applications, most typically to bespoke metadata in the staging directory.
+This metadata can then be indexed by systems like MongoDB and Elasticsearch to provide search capabilities.
+Check out the [applications section](https://artifactdb.github.io/alabaster.base/articles/userguide.html#creating-applications) for more details.

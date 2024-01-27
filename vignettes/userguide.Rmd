@@ -83,8 +83,7 @@ Third-party developers can also add support for their own classes by defining ne
 Users can move freely rename or relocate directories and `readObject()` function will still work.
 For example, we can easily copy the entire directory to a new file system and everything will still be correctly referenced.
 The simplest way to share objects is to just `zip` or `tar` the staging directory for _ad hoc_ distribution.
-For more serious applications, `r self` can be used in conjunction with centralized file storage systems - 
-see the [_Applications_](applications.html) vignette for more details.
+For more serious applications, `r self` can be used in conjunction with storage systems like AWS S3 for easier distribution.
 
 ```{r}
 tmp <- tempfile()
@@ -122,8 +121,8 @@ The _alabaster_ framework is easily extended to new classes by:
    This should accept a path to a directory and read its contents to determine if it is a valid on-disk representation.
    The registered type should be the same as that used in the `OBJECT` file.
    - (optional) Devleopers can alternatively formalize the on-disk representation by adding a specification to the [**takane**](https://github.com/ArtifactDB/takane) repository.
-   This aims to provide C++-based validators for each representation, allowing us to enforce consistency across multiple languages (e.g., Python).
-   Any **takane** validator is automatically used by `validateObject()` so no registration is required.
+     This aims to provide C++-based validators for each representation, allowing us to enforce consistency across multiple languages (e.g., Python).
+     Any **takane** validator is automatically used by `validateObject()` so no registration is required.
 
 To illustrate, let's extend _alabaster_ to the `dgTMatrix` from the `r CRANpkg("Matrix")` package.
 First, the saving method:
@@ -197,8 +196,9 @@ This can be achieved by calling `altSaveObject()` and `altReadObject()` in the s
 # Creating applications
 
 Developers can also create applications that customize the machinery of the _alabaster_ framework for specific needs.
-For example, we might want to deposit some metadata for each saved object - say, the authoring user.
-This is achieved by creating an application-specific saving generic:
+In most cases, this involves storing more metadata to describe the object in more detail.
+For example, we might want to remember the identity of the author for each object.
+This is achieved by creating an application-specific saving generic with the same signature as `saveObject()`:
 
 ```{r}
 setGeneric("appSaveObject", function(x, path, ...) {
@@ -214,39 +214,42 @@ setMethod("appSaveObject", "ANY", function(x, path, ...) {
     saveObject(x, path, ...) # does the real work
     list(authors=I(Sys.info()[["user"]])) # adds the desired metadata
 })
-```
 
-We can specialize the behavior for specific classes like `DataFrame`s:
-
-```{r}
-setMethod("appSaveObject", "DFrame", function(x, path, child=FALSE, ...) {
+# We can specialize the behavior for specific classes like DataFrames.
+setMethod("appSaveObject", "DFrame", function(x, path, ...) {
     ans <- callNextMethod()
     ans$columns <- I(colnames(x))
     ans
 })
 ```
 
-Applications can then override any `altSaveObject()` calls with their generic.
+Applications should call `altSaveObjectFunction()` to instruct `altSaveObject()` to use this generic.
 This ensures that the customizations are applied to all child objects, such as the nested `DataFrame` below.
 
 ```{r}
+# Create a friendly user-visible function to handle the generic override; this
+# is reversed on function exit to avoid interfering with other applications. 
+saveForApplication <- function(x, path, ...) { 
+    old <- altSaveObjectFunction(appSaveObject)
+    on.exit(altSaveObjectFunction(old)) 
+    altSaveObject(x, path, ...)
+}
+
+# Saving our mocked up DataFrame with our overrides active.
 df2 <- DataFrame(Z=factor(1:5), AA=I(DataFrame(B=runif(5), C=rnorm(5))))
-
-old <- altSaveObjectFunction(appSaveObject)
 tmp <- tempfile()
-altSaveObject(df2, tmp)
+saveForApplication(df2, tmp)
 
-# Both the parent and child DataFrames have metadata.
+# Both the parent and child DataFrames have new metadata.
 cat(readLines(file.path(tmp, "_metadata.json")), sep="\n")
 cat(readLines(file.path(tmp, "other_columns/1/_metadata.json")), sep="\n")
-
-# Unsetting the override for other applications.
-altSaveObjectFunction(old) 
 ```
 
-The reading function can be similarly overridden, e.g., to do something with the metadata that we just added.
+The reading function can be similarly overridden by setting `altReadObjectFunction()` to instruct all `altReadObject()` calls to use the override.
+This allows applications to, e.g., do something with the metadata that we just added.
 
 ```{r}
+# Defining the override for altReadObject().
 appReadObject <- function(path, metadata=NULL, ...) {
     if (is.null(metadata)) {
         metadata <- readObjectFile(path)
@@ -263,12 +266,21 @@ appReadObject <- function(path, metadata=NULL, ...) {
     readObject(path, metadata=metadata, ...)
 }
 
-old <- altReadObjectFunction(appReadObject)
-altReadObject(tmp)
+# Creating a user-friendly function to set the override before the read.
+readForApplication <- function(path, metadata=NULL, ...) {
+    old <- altReadObjectFunction(appReadObject)
+    on.exit(altReadObjectFunction(old))
+    altReadObject(path, metadata, ...)
+}
 
-# Unsetting the override for other applications.
-altReadObjectFunction(old) 
+# This diverts to the override with printing of custom messages.
+readForApplication(tmp)
 ```
+
+By overriding the saving and reading process for one or more classes, each application can customize the behavior of _alabaster_ to their own needs.
+In general, applications should avoid modifying the files created by `saveObject()`, to avoid violating any **takane** format specifications 
+(unless the application maintainer really knows what they're doing).
+Applications are free to write to any path starting with an underscore as this will not be used by any specification.
 
 # Session information {-}
 
