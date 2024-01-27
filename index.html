@@ -92,7 +92,7 @@
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># install.packages("BiocManager")</span></span>
 <span><span class="fu">BiocManager</span><span class="fu">::</span><span class="fu"><a href="https://bioconductor.github.io/BiocManager/reference/install.html" class="external-link">install</a></span><span class="op">(</span><span class="st">"alabaster.base"</span><span class="op">)</span></span></code></pre></div>
-<p>The simplest example involves saving a <code>DataFrame</code> inside a staging directory. Let’s mock one up:</p>
+<p>The simplest example involves saving a <code>DataFrame</code> inside a staging directory. Let’s mock up an object:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://bioconductor.org/packages/S4Vectors" class="external-link">S4Vectors</a></span><span class="op">)</span></span>
 <span><span class="va">df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/DataFrame-class.html" class="external-link">DataFrame</a></span><span class="op">(</span>X<span class="op">=</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span>, Y<span class="op">=</span><span class="va">letters</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">]</span><span class="op">)</span></span>
@@ -112,13 +112,11 @@
 <p>Then we can save it to the staging directory:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">tmp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/files2.html" class="external-link">dir.create</a></span><span class="op">(</span><span class="va">tmp</span><span class="op">)</span></span>
-<span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">alabaster.base</span><span class="op">)</span></span>
-<span><span class="fu"><a href="reference/quickLoadObject.html">saveLocalObject</a></span><span class="op">(</span><span class="va">df</span>, <span class="va">tmp</span>, path<span class="op">=</span><span class="st">"my_df"</span><span class="op">)</span></span></code></pre></div>
-<p>Loading it back into memory is straightforward:</p>
+<span><span class="fu"><a href="reference/saveObject.html">saveObject</a></span><span class="op">(</span><span class="va">df</span>, <span class="va">tmp</span><span class="op">)</span></span></code></pre></div>
+<p>We can copy the directory to another location, over a network, etc., and then easily load it back into memory:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="reference/quickLoadObject.html">readLocalObject</a></span><span class="op">(</span><span class="va">tmp</span>, <span class="st">"my_df"</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="reference/readObject.html">readObject</a></span><span class="op">(</span><span class="va">tmp</span><span class="op">)</span></span>
 <span><span class="co">## DataFrame with 10 rows and 2 columns</span></span>
 <span><span class="co">##            X           Y</span></span>
 <span><span class="co">##    &lt;integer&gt; &lt;character&gt;</span></span>
@@ -235,15 +233,8 @@
 <div class="section level2">
 <h2 id="extensions-and-applications">Extensions and applications<a class="anchor" aria-label="anchor" href="#extensions-and-applications"></a>
 </h2>
-<p>Developers can <em>extend</em> this framework to support more R/Bioconductor classes by creating their own <strong>alabaster</strong> package. Check out the <a href="https://bioconductor.org/packages/release/bioc/vignettes/alabaster.base/inst/doc/extensions.html" class="external-link">extension guide</a> for more details.</p>
-<p>Developers can also <em>customize</em> this framework for specific applications, most typically to save bespoke metadata in the JSON file. The JSON file can then be indexed by systems like MongoDB and Elasticsearch to provide search capabilities. Check out the <a href="https://bioconductor.org/packages/release/bioc/vignettes/alabaster.base/inst/doc/applications.html" class="external-link">applications guide</a> for more details.</p>
-</div>
-<div class="section level2">
-<h2 id="links">Links<a class="anchor" aria-label="anchor" href="#links"></a>
-</h2>
-<p>The <a href="https://github.com/ArtifactDB/BiocObjectSchemas" class="external-link"><strong>BiocObjectSchemas</strong></a> repository contains schema definitions for many Bioconductor objects.</p>
-<p>For use in an R installation, all schemas are packaged in the <a href="https://github.com/ArtifactDB/alabaster.schemas" class="external-link"><strong>alabaster.schemas</strong></a> R package.</p>
-<p>A <a href="https://github.com/ArtifactDB/alabaster-docker/pkgs/container/alabaster-docker%2Fbuilder" class="external-link">Docker image</a> is available, containing several pre-installed <strong>alabaster</strong> packages.</p>
+<p>Developers can <em>extend</em> this framework to support more R/Bioconductor classes by creating their own <strong>alabaster</strong> package. Check out the <a href="https://artifactdb.github.io/alabaster.base/articles/userguide.html#extending-to-new-classes" class="external-link">extension section</a> for more details.</p>
+<p>Developers can also <em>customize</em> this framework for specific applications, most typically to bespoke metadata in the staging directory. This metadata can then be indexed by systems like MongoDB and Elasticsearch to provide search capabilities. Check out the <a href="https://bioconductor.org/packages/release/bioc/vignettes/alabaster.base/inst/doc/applications.html" class="external-link">applications section</a> for more details.</p>
 </div>
 </div>
   </div>
