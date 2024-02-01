@@ -96,7 +96,7 @@ The saving/reading process can be applied to a range of data structures, provide
 | [**alabaster.files**](https://github.com/ArtifactDB/alabaster.files) | Common bioinformatics files, e.g., FASTQ, BAM | [![](http://bioconductor.org/shields/build/devel/bioc/alabaster.files.svg)](http://bioconductor.org/checkResults/devel/bioc-LATEST/alabaster.files) | [![](http://bioconductor.org/shields/build/release/bioc/alabaster.files.svg)](http://bioconductor.org/checkResults/release/bioc-LATEST/alabaster.files) |
 
 All packages are available from Bioconductor and can be installed with the usual `BiocManager::install()` process.
-To install all packages in one go, users can install the [**alabaster**](https://bioconductor.org/packages/alabaster) umbrella package.
+Alternatively, to install all packages in one go, users can install the [**alabaster**](https://bioconductor.org/packages/alabaster) umbrella package.
 
 ## Extensions and applications
 
