@@ -27,7 +27,7 @@ This aims to provide a functional equivalent to RDS-based serialization that is:
 - More stable to changes in the class definition.
   Such changes would typically require costly `updateObject()` operations at best, or invalidate RDS files at worst.
 - More interoperable with other analysis frameworks.
-  All artifacts are saved in standard formats (e.g., CSV, HDF5) and can be easily parsed by applications in other languages.
+  All artifacts are saved in standard formats (e.g., JSON, HDF5) and can be easily parsed by applications in other languages by following the [relevant specifications](https://github.com/ArtifactDB/takane).
 - More modular, with each object split into multiple artifacts. 
   This enables parts of the object to be loaded into memory according to each application's needs.
   Parts can also be updated cheaply on disk without rewriting all files.
@@ -72,6 +72,15 @@ The correct loading function for each class is automatically called by the `read
 
 ```{r}
 readObject(tmp)
+```
+
+`r self` also provides a `validateObject()` function, which checks that each object's on-disk representation follows its associated specification.
+For all **alabaster**-supported objects, this validates the file contents against the [**takane** specifications](https://github.com/ArtifactDB/takane) -
+successful validation provides guarantees for readers like `readObject()` and [**dolomite-base**](https://github.com/ArtifactDB/dolomite-base) (for Python).
+In fact, `saveObject()` will automatically run `validateObject()` on the directory to ensure compliance. 
+
+```{r}
+validateObject(tmp)
 ```
 
 `r self` itself supports a small set of classes from the `r Biocpkg("S4Vectors")` packages;
