@@ -105,7 +105,7 @@ readObject(tmp2)
 
 That said, it is unwise to manipulate the files inside the directory created by `saveObject()`.
 Reading functions will usually depend on specific file names or subdirectory structures within the directory, and fiddling with them may cause unexpected results.
-Advanced users can exploit this by loading components from subdirectories if that part of the object is required:
+Advanced users can exploit this by loading components from subdirectories if only the full object is not required:
 
 ```{r}
 # Creating a nested DF to be a little spicy:
@@ -202,7 +202,8 @@ readObject(tmp)
 ```
 
 For more complex objects that are composed of multiple smaller "child" objects, developers should consider saving each of their children in subdirectories of `path`.
-This can be achieved by calling `altSaveObject()` and `altReadObject()` in the saving and loading functions, respectively.
+This can be achieved by calling `altSaveObject()` and `altReadObject()` in the saving and reading functions, respectively.
+(We use the `alt*` versions of these functions to respect application overrides, see below.)
 
 # Creating applications
 
