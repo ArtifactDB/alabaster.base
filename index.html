@@ -80,10 +80,10 @@
 <p>The <strong>alabaster</strong> framework implements methods to save a variety of R/Bioconductor objects to on-disk representations. This is a more robust and portable alternative to the typical approach of saving objects in RDS files.</p>
 <ul>
 <li>By separating the on-disk representation from the in-memory object structure, we can more easily adapt to changes in S4 class definitions. This improves robustness to R environment updates, especially when <code><a href="https://rdrr.io/pkg/BiocGenerics/man/updateObject.html" class="external-link">updateObject()</a></code> is not correctly configured.</li>
-<li>By using standard file formats like HDF5 and CSV, we ensure that the contents of R/Bioconductor objects to be easily read from other languages like Python and Javascript. This improves interoperability between application ecosystems.</li>
+<li>By using standard file formats like HDF5 and JSON, we ensure that Bioconductor objects can be easily read from other languages like Python and Javascript. This improves interoperability between application ecosystems.</li>
 <li>By breaking up complex Bioconductor objects into their components, we enable modular reads and writes to the backing store. We can easily read or update part of an object without having to consider the other parts.</li>
 </ul>
-<p>The <strong>alabaster.base</strong> package defines the base methods to read and write the file structures along with the associated metadata. Implementations of these methods for various Bioconductor packages can be found in the other <strong>alabaster</strong> packages like <strong>alabaster.se</strong> and <strong>alabaster.bumpy</strong>.</p>
+<p>The <strong>alabaster.base</strong> package defines the base generics to read and write the file structures along with the associated metadata. Implementations of these methods for various Bioconductor classes can be found in the other <strong>alabaster</strong> packages like <a href="https://github.com/ArtifactDB/alabaster.se" class="external-link"><strong>alabaster.se</strong></a> and <a href="https://github.com/ArtifactDB/alabaster.bumpy" class="external-link"><strong>alabaster.bumpy</strong></a>.</p>
 </div>
 <div class="section level2">
 <h2 id="quick-start">Quick start<a class="anchor" aria-label="anchor" href="#quick-start"></a>
@@ -114,7 +114,7 @@
 <code class="sourceCode R"><span><span class="va">tmp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">alabaster.base</span><span class="op">)</span></span>
 <span><span class="fu"><a href="reference/saveObject.html">saveObject</a></span><span class="op">(</span><span class="va">df</span>, <span class="va">tmp</span><span class="op">)</span></span></code></pre></div>
-<p>We can copy the directory to another location, over a network, etc., and then easily load it back into memory:</p>
+<p>We can copy the directory to another location, over a network, etc., and then easily load it back into a new R session:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="reference/readObject.html">readObject</a></span><span class="op">(</span><span class="va">tmp</span><span class="op">)</span></span>
 <span><span class="co">## DataFrame with 10 rows and 2 columns</span></span>
@@ -135,7 +135,7 @@
 <div class="section level2">
 <h2 id="supported-classes">Supported classes<a class="anchor" aria-label="anchor" href="#supported-classes"></a>
 </h2>
-<p>The staging/loading process can be applied to a range of data structures, provided the appropriate <strong>alabaster</strong> package is installed.</p>
+<p>The saving/reading process can be applied to a range of data structures, provided the appropriate <strong>alabaster</strong> package is installed.</p>
 <table class="table">
 <colgroup>
 <col width="27%">
@@ -153,14 +153,15 @@
 <tr class="odd">
 <td><a href="https://github.com/ArtifactDB/alabaster.base" class="external-link"><strong>alabaster.base</strong></a></td>
 <td>
-<code>DataFrame</code>, list, <code>List</code>
+<code>list</code>, <code>factor</code>, <a href="https://bioconductor.org/packages/S4Vectors" class="external-link"><code>DataFrame</code></a>, <code>List</code>
 </td>
 <td><a href="http://bioconductor.org/checkResults/devel/bioc-LATEST/alabaster.base" class="external-link"><img src="http://bioconductor.org/shields/build/devel/bioc/alabaster.base.svg"></a></td>
 <td><a href="http://bioconductor.org/checkResults/release/bioc-LATEST/alabaster.base" class="external-link"><img src="http://bioconductor.org/shields/build/release/bioc/alabaster.base.svg"></a></td>
 </tr>
 <tr class="even">
 <td><a href="https://github.com/ArtifactDB/alabaster.matrix" class="external-link"><strong>alabaster.matrix</strong></a></td>
-<td>Ordinary matrix, <code>Matrix</code> instance, <a href="https://bioconductor.org/packages/DelayedArray" class="external-link"><code>DelayedArray</code></a>
+<td>
+<code>matrix</code>, <a href="https://cran.r-project.org/web/packages/Matrix/index.html" class="external-link"><code>Matrix</code></a> objects, <a href="https://bioconductor.org/packages/DelayedArray" class="external-link"><code>DelayedArray</code></a>
 </td>
 <td><a href="http://bioconductor.org/checkResults/devel/bioc-LATEST/alabaster.matrix" class="external-link"><img src="http://bioconductor.org/shields/build/devel/bioc/alabaster.matrix.svg"></a></td>
 <td><a href="http://bioconductor.org/checkResults/release/bioc-LATEST/alabaster.matrix" class="external-link"><img src="http://bioconductor.org/shields/build/release/bioc/alabaster.matrix.svg"></a></td>
@@ -200,9 +201,7 @@
 </tr>
 <tr class="even">
 <td><a href="https://github.com/ArtifactDB/alabaster.spatial" class="external-link"><strong>alabaster.spatial</strong></a></td>
-<td>
-<a href="https://bioconductor.org/packages/SpatialExperiment" class="external-link"><code>SpatialExperiment</code></a>, <code>VirtualSpatialImage</code>
-</td>
+<td><a href="https://bioconductor.org/packages/SpatialExperiment" class="external-link"><code>SpatialExperiment</code></a></td>
 <td><a href="http://bioconductor.org/checkResults/devel/bioc-LATEST/alabaster.spatial" class="external-link"><img src="http://bioconductor.org/shields/build/devel/bioc/alabaster.spatial.svg"></a></td>
 <td><a href="http://bioconductor.org/checkResults/release/bioc-LATEST/alabaster.spatial" class="external-link"><img src="http://bioconductor.org/shields/build/release/bioc/alabaster.spatial.svg"></a></td>
 </tr>
@@ -228,7 +227,7 @@
 </tr>
 </tbody>
 </table>
-<p>All packages are available from Bioconductor and can be installed with the usual <code><a href="https://bioconductor.github.io/BiocManager/reference/install.html" class="external-link">BiocManager::install()</a></code> process. To install all packages in one go, users can install the <a href="https://bioconductor.org/packages/alabaster" class="external-link"><strong>alabaster</strong></a> umbrella package.</p>
+<p>All packages are available from Bioconductor and can be installed with the usual <code><a href="https://bioconductor.github.io/BiocManager/reference/install.html" class="external-link">BiocManager::install()</a></code> process. Alternatively, to install all packages in one go, users can install the <a href="https://bioconductor.org/packages/alabaster" class="external-link"><strong>alabaster</strong></a> umbrella package.</p>
 </div>
 <div class="section level2">
 <h2 id="extensions-and-applications">Extensions and applications<a class="anchor" aria-label="anchor" href="#extensions-and-applications"></a>

@@ -73,8 +73,8 @@
                   <a class="author_email" href="mailto:#"></a><a href="mailto:infinite.monkeys.with.keyboards@gmail.com" class="email">infinite.monkeys.with.keyboards@gmail.com</a>
       
                   
-            <h4 data-toc-skip class="date">Revised: November 16,
-2023</h4>
+            <h4 data-toc-skip class="date">Revised: February 1,
+2024</h4>
       
       
       <div class="hidden name"><code>userguide.Rmd</code></div>
@@ -95,8 +95,9 @@ provide a functional equivalent to RDS-based serialization that is:</p>
 typically require costly <code><a href="https://rdrr.io/pkg/BiocGenerics/man/updateObject.html" class="external-link">updateObject()</a></code> operations at best,
 or invalidate RDS files at worst.</li>
 <li>More interoperable with other analysis frameworks. All artifacts are
-saved in standard formats (e.g., CSV, HDF5) and can be easily parsed by
-applications in other languages.</li>
+saved in standard formats (e.g., JSON, HDF5) and can be easily parsed by
+applications in other languages by following the <a href="https://github.com/ArtifactDB/takane" class="external-link">relevant
+specifications</a>.</li>
 <li>More modular, with each object split into multiple artifacts. This
 enables parts of the object to be loaded into memory according to each
 application’s needs. Parts can also be updated cheaply on disk without
@@ -154,7 +155,7 @@ package.</p>
 <p>Each class implements a saving and reading method for use by the
 <em>alabaster</em> framework. The saving method (for the
 <code><a href="../reference/saveObject.html">saveObject()</a></code> generic) will save the object to one or more
-files, given a path to a directory:</p>
+files inside a user-specified directory:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">tmp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/saveObject.html">saveObject</a></span><span class="op">(</span><span class="va">df</span>, <span class="va">tmp</span><span class="op">)</span></span>
@@ -180,6 +181,17 @@ correct loading function for each class is automatically called by the
 <span><span class="co">## 9          9           i</span></span>
 <span><span class="co">## 10        10           j</span></span></code></pre>
 <p><em><a href="https://bioconductor.org/packages/3.19/alabaster.base" class="external-link">alabaster.base</a></em>
+also provides a <code><a href="../reference/validateObject.html">validateObject()</a></code> function, which checks
+that each object’s on-disk representation follows its associated
+specification. For all <strong>alabaster</strong>-supported objects,
+this validates the file contents against the <a href="https://github.com/ArtifactDB/takane" class="external-link"><strong>takane</strong>
+specifications</a> - successful validation provides guarantees for
+readers like <code><a href="../reference/readObject.html">readObject()</a></code> and <a href="https://github.com/ArtifactDB/dolomite-base" class="external-link"><strong>dolomite-base</strong></a>
+(for Python). In fact, <code><a href="../reference/saveObject.html">saveObject()</a></code> will automatically run
+<code><a href="../reference/validateObject.html">validateObject()</a></code> on the directory to ensure compliance.</p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/validateObject.html">validateObject</a></span><span class="op">(</span><span class="va">tmp</span><span class="op">)</span></span></code></pre></div>
+<p><em><a href="https://bioconductor.org/packages/3.19/alabaster.base" class="external-link">alabaster.base</a></em>
 itself supports a small set of classes from the <em><a href="https://bioconductor.org/packages/3.19/S4Vectors" class="external-link">S4Vectors</a></em>
 packages; support for additional classes can be found in other packages
 like <em><a href="https://bioconductor.org/packages/3.19/alabaster.ranges" class="external-link">alabaster.ranges</a></em>
@@ -193,19 +205,20 @@ defining new methods, see the <a href="extensions.html"><em>Extensions</em></a> 
 <p>Users can move freely rename or relocate directories and
 <code><a href="../reference/readObject.html">readObject()</a></code> function will still work. For example, we can
 easily copy the entire directory to a new file system and everything
-will still be correctly referenced. The simplest way to share objects is
-to just <code>zip</code> or <code>tar</code> the staging directory for
-<em>ad hoc</em> distribution. For more serious applications, <em><a href="https://bioconductor.org/packages/3.19/alabaster.base" class="external-link">alabaster.base</a></em>
-can be used in conjunction with storage systems like AWS S3 for easier
-distribution.</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+will still be correctly referenced within the directory. The simplest
+way to share objects is to just <code>zip</code> or <code>tar</code> the
+staging directory for <em>ad hoc</em> distribution. For more serious
+applications, <em><a href="https://bioconductor.org/packages/3.19/alabaster.base" class="external-link">alabaster.base</a></em>
+can be used in conjunction with storage systems like AWS S3 for
+large-scale distribution.</p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">tmp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/saveObject.html">saveObject</a></span><span class="op">(</span><span class="va">df</span>, <span class="va">tmp</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">tmp2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/files.html" class="external-link">file.rename</a></span><span class="op">(</span><span class="va">tmp</span>, <span class="va">tmp2</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## [1] TRUE</span></span></code></pre>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/readObject.html">readObject</a></span><span class="op">(</span><span class="va">tmp2</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## DataFrame with 10 rows and 2 columns</span></span>
 <span><span class="co">##            X           Y</span></span>
@@ -223,26 +236,29 @@ distribution.</p>
 <p>That said, it is unwise to manipulate the files inside the directory
 created by <code><a href="../reference/saveObject.html">saveObject()</a></code>. Reading functions will usually
 depend on specific file names or subdirectory structures within the
-directory, and fiddling with them may cause unexpected results.</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+directory, and fiddling with them may cause unexpected results. Advanced
+users can exploit this by loading components from subdirectories if only
+the full object is not required:</p>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Creating a nested DF to be a little spicy:</span></span>
 <span><span class="va">df2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/DataFrame-class.html" class="external-link">DataFrame</a></span><span class="op">(</span>Z<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">)</span>, AA<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/AsIs.html" class="external-link">I</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/DataFrame-class.html" class="external-link">DataFrame</a></span><span class="op">(</span>B<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html" class="external-link">runif</a></span><span class="op">(</span><span class="fl">5</span><span class="op">)</span>, C<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">5</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">tmp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="va">meta2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/saveObject.html">saveObject</a></span><span class="op">(</span><span class="va">df2</span>, <span class="va">tmp</span><span class="op">)</span></span>
 <span></span>
+<span><span class="co"># Now reading in the nested DF:</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/list.files.html" class="external-link">list.files</a></span><span class="op">(</span><span class="va">tmp</span>, recursive<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## [1] "basic_columns.h5"                 "OBJECT"                          </span></span>
 <span><span class="co">## [3] "other_columns/1/basic_columns.h5" "other_columns/1/OBJECT"</span></span></code></pre>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/readObject.html">readObject</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">tmp</span>, <span class="st">"other_columns/1"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## DataFrame with 5 rows and 2 columns</span></span>
-<span><span class="co">##           B          C</span></span>
-<span><span class="co">##   &lt;numeric&gt;  &lt;numeric&gt;</span></span>
-<span><span class="co">## 1  0.232070 -1.0009871</span></span>
-<span><span class="co">## 2  0.753360 -0.0926779</span></span>
-<span><span class="co">## 3  0.942432  0.2090197</span></span>
-<span><span class="co">## 4  0.540028  0.7458400</span></span>
-<span><span class="co">## 5  0.750574 -1.7320269</span></span></code></pre>
+<span><span class="co">##           B         C</span></span>
+<span><span class="co">##   &lt;numeric&gt; &lt;numeric&gt;</span></span>
+<span><span class="co">## 1  0.515822  1.427655</span></span>
+<span><span class="co">## 2  0.616838 -0.818859</span></span>
+<span><span class="co">## 3  0.191102  1.322430</span></span>
+<span><span class="co">## 4  0.431568  0.384797</span></span>
+<span><span class="co">## 5  0.563091 -1.333424</span></span></code></pre>
 </div>
 <div class="section level2">
 <h2 id="extending-to-new-classes">Extending to new classes<a class="anchor" aria-label="anchor" href="#extending-to-new-classes"></a>
@@ -281,7 +297,7 @@ is required.</li>
 <p>To illustrate, let’s extend <em>alabaster</em> to the
 <code>dgTMatrix</code> from the <em><a href="https://CRAN.R-project.org/package=Matrix" class="external-link">Matrix</a></em>
 package. First, the saving method:</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://Matrix.R-forge.R-project.org" class="external-link">Matrix</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/methods/setMethod.html" class="external-link">setMethod</a></span><span class="op">(</span><span class="st">"saveObject"</span>, <span class="st">"dgTMatrix"</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span>, <span class="va">path</span>, <span class="va">...</span><span class="op">)</span> <span class="op">{</span></span>
 <span>    <span class="co"># Create a directory to stash our contents.</span></span>
@@ -300,7 +316,7 @@ package. First, the saving method:</p>
 <p>And now the reading and validation methods. The registration is
 usually done in the extension package’s <code>onLoad()</code>
 function.</p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">readSparseTripletMatrix</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">path</span>, <span class="va">metadata</span>, <span class="va">...</span><span class="op">)</span> <span class="op">{</span></span>
 <span>    <span class="va">df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.table</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">path</span>, <span class="st">"matrix.csv"</span><span class="op">)</span>, header<span class="op">=</span><span class="cn">TRUE</span>, sep<span class="op">=</span><span class="st">","</span><span class="op">)</span></span>
 <span>    <span class="va">dims</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readLines.html" class="external-link">readLines</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">path</span>, <span class="st">"dimensions.txt"</span><span class="op">)</span><span class="op">)</span></span>
@@ -324,7 +340,7 @@ function.</p>
 <span><span class="fu"><a href="../reference/validateObject.html">registerValidateObjectFunction</a></span><span class="op">(</span><span class="st">"triplet_sparse_matrix"</span>, <span class="va">validateSparseTripletMatrix</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## NULL</span></span></code></pre>
 <p>Let’s run them and see how it works:</p>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/Matrix/man/sparseMatrix.html" class="external-link">sparseMatrix</a></span><span class="op">(</span></span>
 <span>    i<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">2</span>,<span class="fl">3</span>,<span class="fl">5</span>,<span class="fl">6</span><span class="op">)</span>, </span>
 <span>    j<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3</span>,<span class="fl">6</span>,<span class="fl">1</span>,<span class="fl">3</span>,<span class="fl">8</span><span class="op">)</span>, </span>
@@ -335,40 +351,42 @@ function.</p>
 <span><span class="va">x</span></span></code></pre></div>
 <pre><code><span><span class="co">## 10 x 10 sparse Matrix of class "dgTMatrix"</span></span>
 <span><span class="co">##                                                          </span></span>
-<span><span class="co">##  [1,] .         . 0.5337748 . . .         . .         . .</span></span>
-<span><span class="co">##  [2,] .         . .         . . 0.5670434 . .         . .</span></span>
-<span><span class="co">##  [3,] 0.9935119 . .         . . .         . .         . .</span></span>
-<span><span class="co">##  [4,] .         . .         . . .         . .         . .</span></span>
-<span><span class="co">##  [5,] .         . 0.8015513 . . .         . .         . .</span></span>
-<span><span class="co">##  [6,] .         . .         . . .         . 0.9142567 . .</span></span>
-<span><span class="co">##  [7,] .         . .         . . .         . .         . .</span></span>
-<span><span class="co">##  [8,] .         . .         . . .         . .         . .</span></span>
-<span><span class="co">##  [9,] .         . .         . . .         . .         . .</span></span>
-<span><span class="co">## [10,] .         . .         . . .         . .         . .</span></span></code></pre>
-<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<span><span class="co">##  [1,] .         . 0.07058945 . . .         . .        . .</span></span>
+<span><span class="co">##  [2,] .         . .          . . 0.6195425 . .        . .</span></span>
+<span><span class="co">##  [3,] 0.6697059 . .          . . .         . .        . .</span></span>
+<span><span class="co">##  [4,] .         . .          . . .         . .        . .</span></span>
+<span><span class="co">##  [5,] .         . 0.59673362 . . .         . .        . .</span></span>
+<span><span class="co">##  [6,] .         . .          . . .         . 0.139699 . .</span></span>
+<span><span class="co">##  [7,] .         . .          . . .         . .        . .</span></span>
+<span><span class="co">##  [8,] .         . .          . . .         . .        . .</span></span>
+<span><span class="co">##  [9,] .         . .          . . .         . .        . .</span></span>
+<span><span class="co">## [10,] .         . .          . . .         . .        . .</span></span></code></pre>
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">tmp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/saveObject.html">saveObject</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">tmp</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/list.files.html" class="external-link">list.files</a></span><span class="op">(</span><span class="va">tmp</span>, recursive<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## [1] "dimensions.txt" "matrix.csv"     "OBJECT"</span></span></code></pre>
-<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/readObject.html">readObject</a></span><span class="op">(</span><span class="va">tmp</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## 10 x 10 sparse Matrix of class "dgTMatrix"</span></span>
 <span><span class="co">##                                                          </span></span>
-<span><span class="co">##  [1,] .         . 0.5337748 . . .         . .         . .</span></span>
-<span><span class="co">##  [2,] .         . .         . . 0.5670434 . .         . .</span></span>
-<span><span class="co">##  [3,] 0.9935119 . .         . . .         . .         . .</span></span>
-<span><span class="co">##  [4,] .         . .         . . .         . .         . .</span></span>
-<span><span class="co">##  [5,] .         . 0.8015513 . . .         . .         . .</span></span>
-<span><span class="co">##  [6,] .         . .         . . .         . 0.9142567 . .</span></span>
-<span><span class="co">##  [7,] .         . .         . . .         . .         . .</span></span>
-<span><span class="co">##  [8,] .         . .         . . .         . .         . .</span></span>
-<span><span class="co">##  [9,] .         . .         . . .         . .         . .</span></span>
-<span><span class="co">## [10,] .         . .         . . .         . .         . .</span></span></code></pre>
+<span><span class="co">##  [1,] .         . 0.07058945 . . .         . .        . .</span></span>
+<span><span class="co">##  [2,] .         . .          . . 0.6195425 . .        . .</span></span>
+<span><span class="co">##  [3,] 0.6697059 . .          . . .         . .        . .</span></span>
+<span><span class="co">##  [4,] .         . .          . . .         . .        . .</span></span>
+<span><span class="co">##  [5,] .         . 0.59673362 . . .         . .        . .</span></span>
+<span><span class="co">##  [6,] .         . .          . . .         . 0.139699 . .</span></span>
+<span><span class="co">##  [7,] .         . .          . . .         . .        . .</span></span>
+<span><span class="co">##  [8,] .         . .          . . .         . .        . .</span></span>
+<span><span class="co">##  [9,] .         . .          . . .         . .        . .</span></span>
+<span><span class="co">## [10,] .         . .          . . .         . .        . .</span></span></code></pre>
 <p>For more complex objects that are composed of multiple smaller
 “child” objects, developers should consider saving each of their
 children in subdirectories of <code>path</code>. This can be achieved by
 calling <code><a href="../reference/altSaveObject.html">altSaveObject()</a></code> and <code><a href="../reference/altReadObject.html">altReadObject()</a></code> in
-the saving and loading functions, respectively.</p>
+the saving and reading functions, respectively. (We use the
+<code>alt*</code> versions of these functions to respect application
+overrides, see below.)</p>
 </div>
 <div class="section level2">
 <h2 id="creating-applications">Creating applications<a class="anchor" aria-label="anchor" href="#creating-applications"></a>
@@ -380,17 +398,17 @@ detail. For example, we might want to remember the identity of the
 author for each object. This is achieved by creating an
 application-specific saving generic with the same signature as
 <code><a href="../reference/saveObject.html">saveObject()</a></code>:</p>
-<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/methods/setGeneric.html" class="external-link">setGeneric</a></span><span class="op">(</span><span class="st">"appSaveObject"</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span>, <span class="va">path</span>, <span class="va">...</span><span class="op">)</span> <span class="op">{</span></span>
 <span>    <span class="va">ans</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/standardGeneric.html" class="external-link">standardGeneric</a></span><span class="op">(</span><span class="st">"appSaveObject"</span><span class="op">)</span></span>
 <span></span>
 <span>    <span class="co"># File names with leading underscores are reserved for application-specific</span></span>
-<span>    <span class="co"># use, so they won't clash with anything produced by stageObject. </span></span>
+<span>    <span class="co"># use, so they won't clash with anything produced by saveObject.</span></span>
 <span>    <span class="va">metapath</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">path</span>, <span class="st">"_metadata.json"</span><span class="op">)</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/write.html" class="external-link">write</a></span><span class="op">(</span><span class="fu">jsonlite</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/jsonlite/man/fromJSON.html" class="external-link">toJSON</a></span><span class="op">(</span><span class="va">ans</span>, auto_unbox<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span>, file<span class="op">=</span><span class="va">metapath</span><span class="op">)</span></span>
 <span><span class="op">}</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## [1] "appSaveObject"</span></span></code></pre>
-<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/methods/setMethod.html" class="external-link">setMethod</a></span><span class="op">(</span><span class="st">"appSaveObject"</span>, <span class="st">"ANY"</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span>, <span class="va">path</span>, <span class="va">...</span><span class="op">)</span> <span class="op">{</span></span>
 <span>    <span class="fu"><a href="../reference/saveObject.html">saveObject</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">path</span>, <span class="va">...</span><span class="op">)</span> <span class="co"># does the real work</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>authors<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/AsIs.html" class="external-link">I</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Sys.info.html" class="external-link">Sys.info</a></span><span class="op">(</span><span class="op">)</span><span class="op">[[</span><span class="st">"user"</span><span class="op">]</span><span class="op">]</span><span class="op">)</span><span class="op">)</span> <span class="co"># adds the desired metadata</span></span>
@@ -403,10 +421,10 @@ application-specific saving generic with the same signature as
 <span>    <span class="va">ans</span></span>
 <span><span class="op">}</span><span class="op">)</span></span></code></pre></div>
 <p>Applications should call <code><a href="../reference/altSaveObject.html">altSaveObjectFunction()</a></code> to
-instruct <code><a href="../reference/altSaveObject.html">altSaveObject()</a></code> to use this generic. This ensures
-that the customizations are applied to all child objects, such as the
-nested <code>DataFrame</code> below.</p>
-<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
+instruct <code><a href="../reference/altSaveObject.html">altSaveObject()</a></code> to use this new generic. This
+ensures that the customizations are applied to all child objects, such
+as the nested <code>DataFrame</code> below.</p>
+<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Create a friendly user-visible function to handle the generic override; this</span></span>
 <span><span class="co"># is reversed on function exit to avoid interfering with other applications. </span></span>
 <span><span class="va">saveForApplication</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span>, <span class="va">path</span>, <span class="va">...</span><span class="op">)</span> <span class="op">{</span> </span>
@@ -423,7 +441,7 @@ nested <code>DataFrame</code> below.</p>
 <span><span class="co"># Both the parent and child DataFrames have new metadata.</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/readLines.html" class="external-link">readLines</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">tmp</span>, <span class="st">"_metadata.json"</span><span class="op">)</span><span class="op">)</span>, sep<span class="op">=</span><span class="st">"\n"</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## {"authors":["root"],"columns":["Z","AA"]}</span></span></code></pre>
-<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/readLines.html" class="external-link">readLines</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">tmp</span>, <span class="st">"other_columns/1/_metadata.json"</span><span class="op">)</span><span class="op">)</span>, sep<span class="op">=</span><span class="st">"\n"</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## {"authors":["root"],"columns":["B","C"]}</span></span></code></pre>
 <p>The reading function can be similarly overridden by setting
@@ -431,7 +449,7 @@ nested <code>DataFrame</code> below.</p>
 <code><a href="../reference/altReadObject.html">altReadObject()</a></code> calls to use the override. This allows
 applications to, e.g., do something with the metadata that we just
 added.</p>
-<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Defining the override for altReadObject().</span></span>
 <span><span class="va">appReadObject</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">path</span>, <span class="va">metadata</span><span class="op">=</span><span class="cn">NULL</span>, <span class="va">...</span><span class="op">)</span> <span class="op">{</span></span>
 <span>    <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NULL.html" class="external-link">is.null</a></span><span class="op">(</span><span class="va">metadata</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
@@ -463,13 +481,13 @@ added.</p>
 <span><span class="co">## I am a data_frame created by root.</span></span>
 <span><span class="co">## I have the following columns: B, C.</span></span></code></pre>
 <pre><code><span><span class="co">## DataFrame with 5 rows and 2 columns</span></span>
-<span><span class="co">##          Z                  AA</span></span>
-<span><span class="co">##   &lt;factor&gt;         &lt;DataFrame&gt;</span></span>
-<span><span class="co">## 1        1 0.0536603:-0.922640</span></span>
-<span><span class="co">## 2        2 0.8577935: 0.855051</span></span>
-<span><span class="co">## 3        3 0.3025096: 0.643718</span></span>
-<span><span class="co">## 4        4 0.6389717: 2.363786</span></span>
-<span><span class="co">## 5        5 0.0771162: 1.563523</span></span></code></pre>
+<span><span class="co">##          Z                 AA</span></span>
+<span><span class="co">##   &lt;factor&gt;        &lt;DataFrame&gt;</span></span>
+<span><span class="co">## 1        1 0.974897:-0.249757</span></span>
+<span><span class="co">## 2        2 0.903841:-0.903249</span></span>
+<span><span class="co">## 3        3 0.414038: 0.539107</span></span>
+<span><span class="co">## 4        4 0.948042: 2.049834</span></span>
+<span><span class="co">## 5        5 0.670357: 1.510986</span></span></code></pre>
 <p>By overriding the saving and reading process for one or more classes,
 each application can customize the behavior of <em>alabaster</em> to
 their own needs. In general, applications should avoid modifying the
@@ -482,7 +500,7 @@ by any specification.</p>
 <div class="section level2">
 <h2 class="unnumbered" id="session-information">Session information<a class="anchor" aria-label="anchor" href="#session-information"></a>
 </h2>
-<div class="sourceCode" id="cb37"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/sessionInfo.html" class="external-link">sessionInfo</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## R Under development (unstable) (2024-01-23 r85822)</span></span>
 <span><span class="co">## Platform: x86_64-pc-linux-gnu</span></span>
