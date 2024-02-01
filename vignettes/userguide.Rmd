@@ -4,7 +4,7 @@ author:
 - name: Aaron Lun
   email: infinite.monkeys.with.keyboards@gmail.com
 package: alabaster.base
-date: "Revised: November 16, 2023"
+date: "Revised: February 1, 2024"
 output:
   BiocStyle::html_document
 vignette: >
@@ -235,7 +235,7 @@ setMethod("appSaveObject", "DFrame", function(x, path, ...) {
 })
 ```
 
-Applications should call `altSaveObjectFunction()` to instruct `altSaveObject()` to use this generic.
+Applications should call `altSaveObjectFunction()` to instruct `altSaveObject()` to use this new generic.
 This ensures that the customizations are applied to all child objects, such as the nested `DataFrame` below.
 
 ```{r}
