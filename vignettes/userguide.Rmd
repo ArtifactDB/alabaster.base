@@ -59,7 +59,7 @@ readObject(tmp)
 # Class-specific methods
 
 Each class implements a saving and reading method for use by the _alabaster_ framework.
-The saving method (for the `saveObject()` generic) will save the object to one or more files, given a path to a directory:
+The saving method (for the `saveObject()` generic) will save the object to one or more files inside a user-specified directory:
 
 ```{r}
 tmp <- tempfile()
@@ -81,9 +81,9 @@ Third-party developers can also add support for their own classes by defining ne
 # Operating on directories
 
 Users can move freely rename or relocate directories and `readObject()` function will still work.
-For example, we can easily copy the entire directory to a new file system and everything will still be correctly referenced.
+For example, we can easily copy the entire directory to a new file system and everything will still be correctly referenced within the directory.
 The simplest way to share objects is to just `zip` or `tar` the staging directory for _ad hoc_ distribution.
-For more serious applications, `r self` can be used in conjunction with storage systems like AWS S3 for easier distribution.
+For more serious applications, `r self` can be used in conjunction with storage systems like AWS S3 for large-scale distribution.
 
 ```{r}
 tmp <- tempfile()
@@ -96,6 +96,7 @@ readObject(tmp2)
 
 That said, it is unwise to manipulate the files inside the directory created by `saveObject()`.
 Reading functions will usually depend on specific file names or subdirectory structures within the directory, and fiddling with them may cause unexpected results.
+Advanced users can exploit this by loading components from subdirectories if that part of the object is required:
 
 ```{r}
 # Creating a nested DF to be a little spicy:
@@ -103,6 +104,7 @@ df2 <- DataFrame(Z=factor(1:5), AA=I(DataFrame(B=runif(5), C=rnorm(5))))
 tmp <- tempfile()
 meta2 <- saveObject(df2, tmp)
 
+# Now reading in the nested DF:
 list.files(tmp, recursive=TRUE)
 readObject(file.path(tmp, "other_columns/1"))
 ```
