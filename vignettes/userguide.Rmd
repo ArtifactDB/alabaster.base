@@ -217,7 +217,7 @@ setGeneric("appSaveObject", function(x, path, ...) {
     ans <- standardGeneric("appSaveObject")
 
     # File names with leading underscores are reserved for application-specific
-    # use, so they won't clash with anything produced by stageObject. 
+    # use, so they won't clash with anything produced by saveObject.
     metapath <- file.path(path, "_metadata.json")
     write(jsonlite::toJSON(ans, auto_unbox=TRUE), file=metapath)
 })
