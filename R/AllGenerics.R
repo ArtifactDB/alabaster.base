@@ -1,18 +1,18 @@
 #' Save objects to disk
 #'
-#' Generic to stage assorted R objects into appropriate on-disk representations.
+#' Generic to save assorted R objects into appropriate on-disk representations.
 #' More methods may be defined by other packages to extend the \pkg{alabaster.base} framework to new classes.
 #'
 #' @param x A Bioconductor object of the specified class.
 #' @param path String containing the path to a directory in which to save \code{x}.
-#' @param ... Further arguments to pass to specific methods.
+#' @param ... Additional named arguments to pass to specific methods.
 #'
 #' @return 
 #' \code{dir} is created and populated with files containing the contents of \code{x}.
 #' \code{NULL} should be invisibly returned.
 #'
-#' @details
-#' Methods for the \code{stageObject} generic should create a directory at \code{path} in which the contents of \code{x} are to be saved.
+#' @section Comments for extension developers:
+#' Methods for the \code{saveObject} generic should create a directory at \code{path} in which the contents of \code{x} are to be saved.
 #' The files may consist of any format, though language-agnostic formats like HDF5, CSV, JSON are preferred.
 #' For more complex objects, multiple files and subdirectories may be created within \code{path}. 
 #' The only strict requirements are:
@@ -24,13 +24,22 @@
 #' These are reserved for applications, e.g., to build manifests or to store additional metadata.
 #' }
 #'
-#' Developers of \code{stageObject} methods may wish to save \dQuote{child} components of \code{x} with a subdirectory of \code{path}.
-#' In such cases, developers should call \code{\link{altSaveObject}} on each child component, rather than calling \link{saveObject} directly.
-#' This ensures that any application-level overrides of the loading functions are respected. 
+#' Callers can pass optional parameters to specific \code{saveObject} methods via \code{...}.
+#' Any options recognized by a method should be prefixed by the name of the class used in the method's signature,
+#' e.g., any options for \code{\link{saveObject,DataFrame-method}} should start with \code{DataFrame.}.
+#' This scoping avoids conflicts between otherwise identically-named options of different methods.
 #'
-#' If a method makes use of additional arguments, it should be scoped by the name of the class for each method, e.g., \code{list.format}, \code{dataframe.include.nested}.
-#' This avoids problems with conflicts in the interpretation of identically named arguments between different methods.
-#' It is expected that arguments in \code{...} are forwarded to internal \code{\link{altSaveObject}} calls.
+#' When developing \code{saveObject} methods of complex objects, a simple approach is to decompose \code{x} into its \dQuote{child} components.
+#' Each component can then be saved into a subdirectory of \code{path}, levering the existing \code{saveObject} methods for the component classes.
+#' In such cases, extension developers should actually call \code{\link{altSaveObject}} on each child component, rather than calling \link{saveObject} directly.
+#' This ensures that any application-level overrides of the loading functions are respected. 
+#' It is expected that each method will forward \code{...} (possibly after modification) to any internal \code{\link{altSaveObject}} calls.
+#'
+#' @section Comments for application developers:
+#' Application developers can override \code{saveObject} by specifying a custom function in \code{\link{altSaveObject}}.
+#' This can be used to point to a different function to handle the saving process for each class.
+#' The custom function can be as simple as a wrapper around \code{saveObject} with some additional actions (e.g., to save more metadata),
+#' or may be as complex as a full-fledged generic with its own methods for class-specific customizations.
 #'
 #' @author Aaron Lun
 #' @examples
@@ -49,11 +58,11 @@
 #' @importFrom jsonlite fromJSON
 setGeneric("saveObject", function(x, path, ...) {
     if (file.exists(path)) {
-        stop("cannot stage ", class(x)[1], " at existing path '", path, "'")
+        stop("cannot save ", class(x)[1], " at existing path '", path, "'")
     }
 
     # Need to search here to pick up any subclasses that might have better
-    # stageObject methods in yet-to-be-loaded packages.
+    # saveObject methods in yet-to-be-loaded packages.
     if (.search_methods(x)) {
         fun <- selectMethod("saveObject", class(x)[1], optional=TRUE)
         if (!is.null(fun)) {

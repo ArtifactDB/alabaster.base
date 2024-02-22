@@ -49,26 +49,28 @@ This is done by dispatching to an appropriate loading function based on the type
 Developers of alabaster extensions can add extra functions to this registry, usually in the \code{\link{.onLoad}} function of their packages.
 Alternatively, extension developers can request the addition of their packages to default registry.
 
-If a loading function makes use of additional arguments, it should be scoped by the name of the class for each method, e.g., \code{list.parallel}, \code{dataframe.include.nested}.
+If a loading function makes use of additional arguments in \code{...}, 
+those arguments should be prefixed by the name of the object type for each method, e.g., \code{simple_list.parallel}.
 This avoids problems with conflicts in the interpretation of identically named arguments between different functions.
-It is expected that arguments in \code{...} are forwarded to internal \code{\link{altReadObject}} calls.
+Unlike the \code{...} arguments in \code{\link{saveObject}}, we prefix by the object type instead of the output class, as the former is used for dispatch here.
 
-When writing alabaster extensions, developers may need to load child objects inside the loading functions for their classes. 
-In such cases, developers should use \code{\link{altReadObject}} rather than calling \code{readObject} directly.
+When writing loading functions for complex classes, extension developers may need to load child objects to compose the output object.
+In such cases, developers should use \code{\link{altReadObject}} on the child subdirectories, rather than calling \code{readObject} directly.
 This ensures that any application-level overrides of the loading functions are respected. 
-Once in memory, the child objects can then be assembled into more complex objects by the developer's loading function.
+It is also expected that arguments in \code{...} are forwarded to internal \code{\link{altReadObject}} calls.
 
-Developers can manually control \code{\link{readObject}} dispatch by suppling a \code{metadata} list where \code{metadata$type} is set to the desired object type.
-This pattern is commonly used inside the loading function for a subclass, to construct the base class first before adding the subclass-specific components.
-In practice, base construction should be done using \code{\link{altReadObject}} so as to respect application-specific overrides.
+Developers can manually control \code{readObject} dispatch by suppling a \code{metadata} list where \code{metadata$type} is set to the desired object type.
+This pattern is commonly used inside the loading function for a subclass -
+an instance of the base class is first constructed by an internal \code{readObject} call with the modified \code{metadata$type}, after which the subclass-specific slots are added.
+(In practice, base construction should be done using \code{\link{altReadObject}} so as to respect application-specific overrides.)
 }
 
 \section{Comments for application developers}{
 
-Application developers can override the behavior of \code{readObject} by specifying a custom function in \code{\link{altReadObject}}.
+Application developers can override \code{readObject} by specifying a custom function in \code{\link{altReadObject}}.
 This can be used to point to a different registry of reading functions, to perform pre- or post-reading actions, etc.
 If customization is type-specific, the custom \code{altReadObject} function can read the type from the \code{OBJECT} file to determine the most appropriate course of action;
-this type information may then be passed to the \code{type} argument of \code{readObject} to avoid a redundant read from the same file.
+the \code{OBJECT} metadata can then be passed to the \code{metadata} argument of any internal \code{readObject} calls to avoid a redundant read from the same file.
 }
 
 \examples{

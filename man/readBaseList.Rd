@@ -5,14 +5,14 @@
 \alias{loadBaseList}
 \title{Read a base list from disk}
 \usage{
-readBaseList(path, metadata, list.parallel = TRUE, ...)
+readBaseList(path, metadata, simple_list.parallel = TRUE, ...)
 }
 \arguments{
 \item{path}{String containing a path to a directory, itself created with the list method for \code{\link{stageObject}}.}
 
 \item{metadata}{Named list containing metadata for the object, see \code{\link{readObjectFile}} for details.}
 
-\item{list.parallel}{Whether to perform reading and parsing in parallel for greater speed.
+\item{simple_list.parallel}{Whether to perform reading and parsing in parallel for greater speed.
 Only relevant for lists stored in the JSON format.}
 
 \item{...}{Further arguments to be passed to \code{\link{altReadObject}} for complex child objects.}
