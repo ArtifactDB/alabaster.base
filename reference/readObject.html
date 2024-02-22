@@ -18,7 +18,7 @@ This is done by dispatching to an appropriate loading function based on the type
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">alabaster.base</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.3.19</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.3.20</span>
       </span>
     </div>
 
@@ -111,25 +111,27 @@ keep the old or new function, or throw an error.</p></dd>
 <p><code>readObject</code> uses an internal registry of functions to decide how an object should be loaded into memory.
 Developers of alabaster extensions can add extra functions to this registry, usually in the <code><a href="https://rdrr.io/r/base/ns-hooks.html" class="external-link">.onLoad</a></code> function of their packages.
 Alternatively, extension developers can request the addition of their packages to default registry.</p>
-<p>If a loading function makes use of additional arguments, it should be scoped by the name of the class for each method, e.g., <code>list.parallel</code>, <code>dataframe.include.nested</code>.
+<p>If a loading function makes use of additional arguments in <code>...</code>, 
+those arguments should be prefixed by the name of the object type for each method, e.g., <code>simple_list.parallel</code>.
 This avoids problems with conflicts in the interpretation of identically named arguments between different functions.
-It is expected that arguments in <code>...</code> are forwarded to internal <code><a href="altReadObject.html">altReadObject</a></code> calls.</p>
-<p>When writing alabaster extensions, developers may need to load child objects inside the loading functions for their classes. 
-In such cases, developers should use <code><a href="altReadObject.html">altReadObject</a></code> rather than calling <code>readObject</code> directly.
+Unlike the <code>...</code> arguments in <code><a href="saveObject.html">saveObject</a></code>, we prefix by the object type instead of the output class, as the former is used for dispatch here.</p>
+<p>When writing loading functions for complex classes, extension developers may need to load child objects to compose the output object.
+In such cases, developers should use <code><a href="altReadObject.html">altReadObject</a></code> on the child subdirectories, rather than calling <code>readObject</code> directly.
 This ensures that any application-level overrides of the loading functions are respected. 
-Once in memory, the child objects can then be assembled into more complex objects by the developer's loading function.</p>
+It is also expected that arguments in <code>...</code> are forwarded to internal <code><a href="altReadObject.html">altReadObject</a></code> calls.</p>
 <p>Developers can manually control <code>readObject</code> dispatch by suppling a <code>metadata</code> list where <code>metadata$type</code> is set to the desired object type.
-This pattern is commonly used inside the loading function for a subclass, to construct the base class first before adding the subclass-specific components.
-In practice, base construction should be done using <code><a href="altReadObject.html">altReadObject</a></code> so as to respect application-specific overrides.</p>
+This pattern is commonly used inside the loading function for a subclass -
+an instance of the base class is first constructed by an internal <code>readObject</code> call with the modified <code>metadata$type</code>, after which the subclass-specific slots are added.
+(In practice, base construction should be done using <code><a href="altReadObject.html">altReadObject</a></code> so as to respect application-specific overrides.)</p>
     </div>
     <div id="comments-for-application-developers">
     <h2>Comments for application developers</h2>
     
 
-<p>Application developers can override the behavior of <code>readObject</code> by specifying a custom function in <code><a href="altReadObject.html">altReadObject</a></code>.
+<p>Application developers can override <code>readObject</code> by specifying a custom function in <code><a href="altReadObject.html">altReadObject</a></code>.
 This can be used to point to a different registry of reading functions, to perform pre- or post-reading actions, etc.
 If customization is type-specific, the custom <code>altReadObject</code> function can read the type from the <code>OBJECT</code> file to determine the most appropriate course of action;
-this type information may then be passed to the <code>type</code> argument of <code>readObject</code> to avoid a redundant read from the same file.</p>
+the <code>OBJECT</code> metadata can then be passed to the <code>metadata</code> argument of any internal <code>readObject</code> calls to avoid a redundant read from the same file.</p>
     </div>
     <div id="author">
     <h2>Author</h2>
