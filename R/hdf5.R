@@ -132,7 +132,7 @@ h5_read_vector <- function(handle, name, check=FALSE, default=NULL, bit64convers
 
     dhandle <- H5Dopen(handle, name)
     on.exit(H5Dclose(dhandle), add=TRUE, after=FALSE)
-    output <- H5Dread(dhandle, bit64conversion=bit64conversion, drop=TRUE)
+    output <- suppressMessages(H5Dread(dhandle, bit64conversion=bit64conversion, drop=TRUE))
 
     if (is.raw(output)) {
         storage.mode(output) <- "integer"
