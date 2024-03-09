@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">alabaster.base</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.3.21</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.3.22</span>
       </span>
     </div>
 
@@ -252,13 +252,13 @@ the full object is not required:</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/readObject.html">readObject</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">tmp</span>, <span class="st">"other_columns/1"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## DataFrame with 5 rows and 2 columns</span></span>
-<span><span class="co">##           B         C</span></span>
-<span><span class="co">##   &lt;numeric&gt; &lt;numeric&gt;</span></span>
-<span><span class="co">## 1  0.848568 -1.175952</span></span>
-<span><span class="co">## 2  0.653786  0.514903</span></span>
-<span><span class="co">## 3  0.432363  1.639140</span></span>
-<span><span class="co">## 4  0.478089 -0.527535</span></span>
-<span><span class="co">## 5  0.448358 -0.428456</span></span></code></pre>
+<span><span class="co">##           B          C</span></span>
+<span><span class="co">##   &lt;numeric&gt;  &lt;numeric&gt;</span></span>
+<span><span class="co">## 1  0.672087 -1.4514964</span></span>
+<span><span class="co">## 2  0.260174  2.6919154</span></span>
+<span><span class="co">## 3  0.761155  0.3600808</span></span>
+<span><span class="co">## 4  0.723479 -0.1673633</span></span>
+<span><span class="co">## 5  0.209206  0.0840021</span></span></code></pre>
 </div>
 <div class="section level2">
 <h2 id="extending-to-new-classes">Extending to new classes<a class="anchor" aria-label="anchor" href="#extending-to-new-classes"></a>
@@ -350,17 +350,17 @@ function.</p>
 <span><span class="op">)</span></span>
 <span><span class="va">x</span></span></code></pre></div>
 <pre><code><span><span class="co">## 10 x 10 sparse Matrix of class "dgTMatrix"</span></span>
-<span><span class="co">##                                                          </span></span>
-<span><span class="co">##  [1,] .         . 0.9374524 . . .         . .         . .</span></span>
-<span><span class="co">##  [2,] .         . .         . . 0.7962818 . .         . .</span></span>
-<span><span class="co">##  [3,] 0.4503746 . .         . . .         . .         . .</span></span>
-<span><span class="co">##  [4,] .         . .         . . .         . .         . .</span></span>
-<span><span class="co">##  [5,] .         . 0.4491277 . . .         . .         . .</span></span>
-<span><span class="co">##  [6,] .         . .         . . .         . 0.2048749 . .</span></span>
-<span><span class="co">##  [7,] .         . .         . . .         . .         . .</span></span>
-<span><span class="co">##  [8,] .         . .         . . .         . .         . .</span></span>
-<span><span class="co">##  [9,] .         . .         . . .         . .         . .</span></span>
-<span><span class="co">## [10,] .         . .         . . .         . .         . .</span></span></code></pre>
+<span><span class="co">##                                                            </span></span>
+<span><span class="co">##  [1,] .         . 0.8517791 . . .          . .          . .</span></span>
+<span><span class="co">##  [2,] .         . .         . . 0.07134757 . .          . .</span></span>
+<span><span class="co">##  [3,] 0.2812288 . .         . . .          . .          . .</span></span>
+<span><span class="co">##  [4,] .         . .         . . .          . .          . .</span></span>
+<span><span class="co">##  [5,] .         . 0.1573475 . . .          . .          . .</span></span>
+<span><span class="co">##  [6,] .         . .         . . .          . 0.05721929 . .</span></span>
+<span><span class="co">##  [7,] .         . .         . . .          . .          . .</span></span>
+<span><span class="co">##  [8,] .         . .         . . .          . .          . .</span></span>
+<span><span class="co">##  [9,] .         . .         . . .          . .          . .</span></span>
+<span><span class="co">## [10,] .         . .         . . .          . .          . .</span></span></code></pre>
 <div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">tmp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/saveObject.html">saveObject</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">tmp</span><span class="op">)</span></span>
@@ -369,17 +369,17 @@ function.</p>
 <div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/readObject.html">readObject</a></span><span class="op">(</span><span class="va">tmp</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## 10 x 10 sparse Matrix of class "dgTMatrix"</span></span>
-<span><span class="co">##                                                          </span></span>
-<span><span class="co">##  [1,] .         . 0.9374524 . . .         . .         . .</span></span>
-<span><span class="co">##  [2,] .         . .         . . 0.7962818 . .         . .</span></span>
-<span><span class="co">##  [3,] 0.4503746 . .         . . .         . .         . .</span></span>
-<span><span class="co">##  [4,] .         . .         . . .         . .         . .</span></span>
-<span><span class="co">##  [5,] .         . 0.4491277 . . .         . .         . .</span></span>
-<span><span class="co">##  [6,] .         . .         . . .         . 0.2048749 . .</span></span>
-<span><span class="co">##  [7,] .         . .         . . .         . .         . .</span></span>
-<span><span class="co">##  [8,] .         . .         . . .         . .         . .</span></span>
-<span><span class="co">##  [9,] .         . .         . . .         . .         . .</span></span>
-<span><span class="co">## [10,] .         . .         . . .         . .         . .</span></span></code></pre>
+<span><span class="co">##                                                            </span></span>
+<span><span class="co">##  [1,] .         . 0.8517791 . . .          . .          . .</span></span>
+<span><span class="co">##  [2,] .         . .         . . 0.07134757 . .          . .</span></span>
+<span><span class="co">##  [3,] 0.2812288 . .         . . .          . .          . .</span></span>
+<span><span class="co">##  [4,] .         . .         . . .          . .          . .</span></span>
+<span><span class="co">##  [5,] .         . 0.1573475 . . .          . .          . .</span></span>
+<span><span class="co">##  [6,] .         . .         . . .          . 0.05721929 . .</span></span>
+<span><span class="co">##  [7,] .         . .         . . .          . .          . .</span></span>
+<span><span class="co">##  [8,] .         . .         . . .          . .          . .</span></span>
+<span><span class="co">##  [9,] .         . .         . . .          . .          . .</span></span>
+<span><span class="co">## [10,] .         . .         . . .          . .          . .</span></span></code></pre>
 <p>For more complex objects that are composed of multiple smaller
 “child” objects, developers should consider saving each of their
 children in subdirectories of <code>path</code>. This can be achieved by
@@ -483,21 +483,14 @@ added.</p>
 <pre><code><span><span class="co">## DataFrame with 5 rows and 2 columns</span></span>
 <span><span class="co">##          Z                  AA</span></span>
 <span><span class="co">##   &lt;factor&gt;         &lt;DataFrame&gt;</span></span>
-<span><span class="co">## 1        1 0.1093651: 0.880143</span></span>
-<span><span class="co">## 2        2 0.0317548: 0.642169</span></span>
-<span><span class="co">## 3        3 0.9014002: 0.432374</span></span>
-<span><span class="co">## 4        4 0.5459208:-1.289034</span></span>
-<span><span class="co">## 5        5 0.5439273:-0.322707</span></span></code></pre>
+<span><span class="co">## 1        1 0.948677: 1.1688925</span></span>
+<span><span class="co">## 2        2 0.532714: 1.2756826</span></span>
+<span><span class="co">## 3        3 0.333554:-0.0720605</span></span>
+<span><span class="co">## 4        4 0.202847:-0.5826062</span></span>
+<span><span class="co">## 5        5 0.139339: 0.2088307</span></span></code></pre>
 <p>By overriding the saving and reading process for one or more classes,
 each application can customize the behavior of <em>alabaster</em> to
-their own needs. Any customization is allowed though applications should
-generally avoid modifying the files created by <code><a href="../reference/saveObject.html">saveObject()</a></code>
-as these must follow the <strong>takane</strong> format specifications
-(unless the application maintainer really knows what they’re doing and
-can perform the modification without violating the relevant
-specifications). If new files must be created, applications may write to
-any path starting with an underscore as this will not interfere by any
-specification.</p>
+their own needs.</p>
 </div>
 <div class="section level2">
 <h2 class="unnumbered" id="session-information">Session information<a class="anchor" aria-label="anchor" href="#session-information"></a>
@@ -528,7 +521,7 @@ specification.</p>
 <span><span class="co">## [8] base     </span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## other attached packages:</span></span>
-<span><span class="co">## [1] Matrix_1.6-5          alabaster.base_1.3.21 S4Vectors_0.41.4     </span></span>
+<span><span class="co">## [1] Matrix_1.6-5          alabaster.base_1.3.22 S4Vectors_0.41.4     </span></span>
 <span><span class="co">## [4] BiocGenerics_0.49.1   BiocStyle_2.31.0     </span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## loaded via a namespace (and not attached):</span></span>

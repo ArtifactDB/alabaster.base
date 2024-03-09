@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">alabaster.base</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.3.21</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.3.22</span>
       </span>
     </div>
 
@@ -81,8 +81,10 @@ If <code>fun</code> is provided, it is used to define the alternative, and the p
     </div>
     <div id="details">
     <h2>Details</h2>
-    <p><code>altReadObject</code> is just a wrapper around <code><a href="readObject.html">readObject</a></code> that responds to any setting of <code>altReadObjectFunction</code>.
-This allows alabaster applications to inject customizations into the reading process, e.g., to add more metadata to particular objects.
+    <p>By default, <code>altReadObject</code> is just a wrapper around <code><a href="readObject.html">readObject</a></code>.
+However, if <code>altReadObjectFunction</code> is called, <code>altReadObject</code> calls the replacement <code>fun</code> instead.
+This allows alabaster applications to inject wholesale or class-specific customizations into the reading process,
+e.g., to add more metadata whenever an instance of a particular class is encountered.
 Developers of alabaster extensions should use <code>altReadObject</code> (instead of <code>readObject</code>) to read child objects when writing their own reading functions,
 to ensure that application-specific customizations are respected for the children.</p>
 <p>To motivate the use of <code>altReadObject</code>, consider the following scenario.</p><ol><li><p>We have created a reading function <code>readX</code> function to read an instance of class X in an alabaster extension.
@@ -96,7 +98,11 @@ Any calls to <code>altReadObject</code> in Y's context will subsequently call <c
 we use <code>altReadObject</code> instead of directly using <code><a href="readObject.html">readObject</a></code>. 
 This ensures that, if a child instance of X is encountered <em>and</em> we are operating in the context of application Y, 
 we correctly call <code>readObject2</code> and then ultimately <code>readX2</code>.</p></li>
-</ol></div>
+</ol><p>The application-specific <code>fun</code> is free to do anything it wants as long as it understands the representation.
+It is usually most convenient to leverage the existing functionality in <code><a href="readObject.html">readObject</a></code>,
+but if the application-specific saver in <code><a href="altSaveObject.html">altSaveObject</a></code> does something unusual,
+then <code>fun</code> is responsible for the correct interpretation of any custom representation.</p>
+    </div>
     <div id="author">
     <h2>Author</h2>
     <p>Aaron Lun</p>
