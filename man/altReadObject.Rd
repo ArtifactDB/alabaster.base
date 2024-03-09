@@ -28,8 +28,10 @@ If \code{fun} is provided, it is used to define the alternative, and the previou
 Allow alabaster applications to specify an alternative reading function in \code{\link{altReadObject}}.
 }
 \details{
-\code{altReadObject} is just a wrapper around \code{\link{readObject}} that responds to any setting of \code{altReadObjectFunction}.
-This allows alabaster applications to inject customizations into the reading process, e.g., to add more metadata to particular objects.
+By default, \code{altReadObject} is just a wrapper around \code{\link{readObject}}.
+However, if \code{altReadObjectFunction} is called, \code{altReadObject} calls the replacement \code{fun} instead.
+This allows alabaster applications to inject wholesale or class-specific customizations into the reading process,
+e.g., to add more metadata whenever an instance of a particular class is encountered.
 Developers of alabaster extensions should use \code{altReadObject} (instead of \code{readObject}) to read child objects when writing their own reading functions,
 to ensure that application-specific customizations are respected for the children.
 
@@ -47,6 +49,11 @@ we use \code{\link{altReadObject}} instead of directly using \code{\link{readObj
 This ensures that, if a child instance of X is encountered \emph{and} we are operating in the context of application Y, 
 we correctly call \code{readObject2} and then ultimately \code{readX2}.
 }
+
+The application-specific \code{fun} is free to do anything it wants as long as it understands the representation.
+It is usually most convenient to leverage the existing functionality in \code{\link{readObject}},
+but if the application-specific saver in \code{\link{altSaveObject}} does something unusual,
+then \code{fun} is responsible for the correct interpretation of any custom representation.
 }
 \examples{
 old <- altReadObjectFunction()

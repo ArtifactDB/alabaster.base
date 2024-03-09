@@ -290,9 +290,6 @@ readForApplication(tmp)
 ```
 
 By overriding the saving and reading process for one or more classes, each application can customize the behavior of _alabaster_ to their own needs.
-Any customization is allowed though applications should generally avoid modifying the files created by `saveObject()` as these must follow the **takane** format specifications 
-(unless the application maintainer really knows what they're doing and can perform the modification without violating the relevant specifications).
-If new files must be created, applications may write to any path starting with an underscore as this will not interfere by any specification.
 
 # Session information {-}
 

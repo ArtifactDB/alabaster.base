@@ -28,16 +28,18 @@ If \code{generic} is provided, it is used to define the alternative, and the pre
 Allow alabaster applications to divert to a different saving generic instead of \code{\link{saveObject}}.
 }
 \details{
-\code{altSaveObject} is just a wrapper around \code{\link{saveObject}} that responds to any setting of \code{altSaveObjectFunction}.
-This allows applications to inject customizations into the staging process, e.g., to store more metadata to particular objects.
-Developers of alabaster extensions should use \code{altSaveObject} to save child objects when writing their \code{saveObject} methods,
+By default, \code{altSaveObject} is just a wrapper around \code{\link{saveObject}}.
+However, if \code{altSaveObjectFunction} is called, \code{altSaveObject} calls the replacement \code{generic} instead.
+This allows alabaster applications to inject wholesale or class-specific customizations into the saving process,
+e.g., to save more metadata whenever an instance of a particular class is encountered.
+Developers of alabaster extensions should use \code{altSaveObject} to save child objects when implementing \code{saveObject} methods,
 to ensure that application-specific customizations are respected for the children.
 
 To motivate the use of \code{altSaveObject}, consider the following scenario.
 \enumerate{
 \item We have created a staging method for class X, defined for the \code{\link{saveObject}} generic.
 \item An alabaster application Y requires the addition of some custom metadata during the staging process for X.
-It defines an alternative staging generic \code{saveObject2} that, upon encountering an instance of X, redirects to a application-specific method.
+It defines an alternative staging generic \code{saveObject2} that, upon encountering an instance of X, redirects to an application-specific method (i.e., \code{saveObject2,X-method}).
 For example, the \code{saveObject2} method for X could call X's \code{saveObject} method and add the necessary metadata to the result.
 \item When operating in the context of application Y, the \code{saveObject2} generic is used to set \code{altSaveObjectFunction}.
 Any calls to \code{altSaveObject} in Y's context will subsequently call \code{saveObject2}.
@@ -46,6 +48,11 @@ we call \code{\link{altSaveObject}} on that X object instead of directly using \
 This ensures that, if a child instance of X is encountered \emph{and} we are operating in the context of application Y, 
 we correctly call \code{saveObject2} and then ultimately the application-specific method.
 }
+
+The application-specific \code{generic} is free to do anything it wants as long as the custom representation is understood by the application-specific reader in \code{\link{altReadObject}}.
+However, it is usually most convenient to re-use the existing representations created by \code{\link{saveObject}}.
+This means that any customizations should not interfere with the validity of those representations, as defined by the \pkg{takane} specifications and enforce by \code{\link{validateObject}}.
+We recommend that any customizations should manifest as new files starting with an underscore, as this will not interfere by any \pkg{takane} file specification.
 }
 \examples{
 old <- altSaveObjectFunction()

@@ -1,6 +1,6 @@
 #' Validate an object's on-disk representation
 #'
-#' Validate an object's on-disk representation.
+#' Validate an object's on-disk representation against the \pkg{takane} specifications.
 #' This is done by dispatching to an appropriate validation function based on the type in the \code{OBJECT} file.
 #'
 #' @param path String containing a path to a directory, itself created with a \code{\link{saveObject}} method.
@@ -25,6 +25,9 @@
 #'
 #' For the \code{register*} functions, the supplied \code{fun} is added to the corresponding registry for \code{type}.
 #' If \code{fun = NULL}, any existing entry for \code{type} is removed.
+#'
+#' @seealso
+#' \url{https://github.com/ArtifactDB/takane}, for detailed specifications of the on-disk representation for various Bioconductor objects.
 #'
 #' @author Aaron Lun
 #' @examples

@@ -51,7 +51,7 @@ For the \code{register*} functions, the supplied \code{fun} is added to the corr
 If \code{fun = NULL}, any existing entry for \code{type} is removed.
 }
 \description{
-Validate an object's on-disk representation.
+Validate an object's on-disk representation against the \pkg{takane} specifications.
 This is done by dispatching to an appropriate validation function based on the type in the \code{OBJECT} file.
 }
 \examples{
@@ -62,6 +62,9 @@ tmp <- tempfile()
 saveObject(df, tmp)
 validateObject(tmp)
 
+}
+\seealso{
+\url{https://github.com/ArtifactDB/takane}, for detailed specifications of the on-disk representation for various Bioconductor objects.
 }
 \author{
 Aaron Lun
