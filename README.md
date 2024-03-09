@@ -103,6 +103,6 @@ Alternatively, to install all packages in one go, users can install the [**alaba
 Developers can _extend_ this framework to support more R/Bioconductor classes by creating their own **alabaster** package.
 Check out the [extension section](https://artifactdb.github.io/alabaster.base/articles/userguide.html#extending-to-new-classes) for more details.
 
-Developers can also _customize_ this framework for specific applications, most typically to bespoke metadata in the staging directory.
-This metadata can then be indexed by systems like MongoDB and Elasticsearch to provide search capabilities.
+Developers can also _customize_ this framework for specific applications, most typically to add bespoke metadata in the staging directory.
+The metadata can then be indexed by database systems like SQLite and MongoDB to provide search capabilities.
 Check out the [applications section](https://artifactdb.github.io/alabaster.base/articles/userguide.html#creating-applications) for more details.
