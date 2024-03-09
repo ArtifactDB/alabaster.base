@@ -136,6 +136,7 @@ This should be either <code>"none"</code>, <code>"gzip"</code>.</p></dd>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">temp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">.quickWriteCsv</span><span class="op">(</span><span class="va">df</span>, path<span class="op">=</span><span class="va">temp</span>, row.names<span class="op">=</span><span class="cn">FALSE</span>, compression<span class="op">=</span><span class="st">"gzip"</span><span class="op">)</span></span></span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Direct call of 'as.data.frame.numeric()' is deprecated.  Use 'as.data.frame.vector()' or 'as.data.frame()' instead</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> NULL</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">.quickReadCsv</span><span class="op">(</span><span class="va">temp</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>A<span class="op">=</span><span class="st">"numeric"</span>, B<span class="op">=</span><span class="st">"character"</span><span class="op">)</span>, <span class="fl">1</span>, <span class="st">"gzip"</span>, <span class="cn">FALSE</span><span class="op">)</span></span></span>

@@ -108,6 +108,9 @@ A <code>NULL</code> is returned invisibly.</p>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Saving it:</span></span></span>
 <span class="r-in"><span><span class="fu">quickStageObject</span><span class="op">(</span><span class="va">df</span>, <span class="va">local</span>, <span class="st">"FOOBAR"</span><span class="op">)</span></span></span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Direct call of 'as.data.frame.numeric()' is deprecated.  Use 'as.data.frame.vector()' or 'as.data.frame()' instead</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Direct call of 'as.data.frame.integer()' is deprecated.  Use 'as.data.frame.vector()' or 'as.data.frame()' instead</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Direct call of 'as.data.frame.integer()' is deprecated.  Use 'as.data.frame.vector()' or 'as.data.frame()' instead</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Reading it back:</span></span></span>
 <span class="r-in"><span><span class="fu">quickLoadObject</span><span class="op">(</span><span class="va">local</span>, <span class="st">"FOOBAR"</span><span class="op">)</span></span></span>
