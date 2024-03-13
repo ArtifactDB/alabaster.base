@@ -45,7 +45,7 @@ readBaseFactor <- function(path, metadata, ...) {
 .simple_read_codes <- function(handle, name="codes") {
     chandle <- H5Dopen(handle, name)
     on.exit(H5Dclose(chandle), add=TRUE, after=FALSE)
-    codes <- suppressMessages(H5Dread(chandle, drop=TRUE))
+    codes <- H5Dread(chandle, drop=TRUE)
     missing.placeholder <- h5_read_attribute(chandle, missingPlaceholderName, check=TRUE, default=NULL)
     codes <- h5_cast(codes, expected.type="integer", missing.placeholder=missing.placeholder)
     codes + 1L
