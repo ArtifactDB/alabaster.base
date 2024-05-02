@@ -2,6 +2,30 @@
 
 #include "uzuki2/uzuki2.hpp"
 
+template<class Input_>
+void scalarize(Input_& object, bool needs_marker) {
+    if (needs_marker) {
+        Rcpp::RObject raw_classes = object.attr("class");
+        if (raw_classes.sexp_type() != CHARSXP) {
+            object.attr("class") = "AsIs";
+            return;
+        }
+
+        Rcpp::CharacterVector classes(raw_classes);
+        Rcpp::CharacterVector new_classes(classes.size() + 1);
+        std::copy(classes.begin(), classes.end(), new_classes.begin());
+        new_classes[new_classes.size() - 1] = "AsIs";
+        object.attr("class") = new_classes;
+    }
+}
+
+template<class Input_>
+void nameify(Input_& object, bool named, const Rcpp::CharacterVector& names) {
+    if (named) {
+        object.names() = names;
+    }
+}
+
 /** Defining the simple vectors first. **/
 
 struct RBase {
@@ -10,7 +34,7 @@ struct RBase {
 };
 
 struct RIntegerVector : public uzuki2::IntegerVector, public RBase {
-    RIntegerVector(size_t l, bool n, bool) : vec(l), named(n), names(n ? l : 0) {}
+    RIntegerVector(size_t l, bool n, bool s) : vec(l), named(n), names(n ? l : 0), scalar(s) {}
 
     size_t size() const { 
         return vec.size();
@@ -33,10 +57,9 @@ struct RIntegerVector : public uzuki2::IntegerVector, public RBase {
     }
 
     Rcpp::RObject extract_object() { 
-        if (named) {
-            vec.names() = names;
-        }
         if (!has_placeholder) {
+            nameify(vec, named, names);
+            scalarize(vec, !scalar && vec.size() == 1);
             return vec;
         }
 
@@ -47,9 +70,9 @@ struct RIntegerVector : public uzuki2::IntegerVector, public RBase {
         for (auto i : true_missing) {
             alt[i] = R_NaReal;
         }
-        if (named) {
-            alt.names() = names;
-        }
+
+        nameify(alt, named, names);
+        scalarize(alt, !scalar && vec.size() == 1);
         return alt; 
     }
 
@@ -58,10 +81,11 @@ struct RIntegerVector : public uzuki2::IntegerVector, public RBase {
     bool has_placeholder = false;
     bool named = false;
     Rcpp::CharacterVector names;
+    bool scalar = false;
 };
 
 struct RNumberVector : public uzuki2::NumberVector, public RBase {
-    RNumberVector(size_t l, bool n, bool) : vec(l), named(n), names(n ? l : 0) {}
+    RNumberVector(size_t l, bool n, bool s) : vec(l), named(n), names(n ? l : 0), scalar(s) {}
 
     size_t size() const { 
         return vec.size();
@@ -80,19 +104,19 @@ struct RNumberVector : public uzuki2::NumberVector, public RBase {
     }
 
     Rcpp::RObject extract_object() { 
-        if (named) {
-            vec.names() = names;
-        }
+        nameify(vec, named, names);
+        scalarize(vec, !scalar && vec.size() == 1);
         return vec; 
     }
 
     Rcpp::NumericVector vec;
     bool named = false;
     Rcpp::CharacterVector names;
+    bool scalar = false;
 };
 
 struct RBooleanVector : public uzuki2::BooleanVector, public RBase {
-    RBooleanVector(size_t l, bool n, bool) : vec(l), named(n), names(n ? l : 0) {}
+    RBooleanVector(size_t l, bool n, bool s) : vec(l), named(n), names(n ? l : 0), scalar(s) {}
 
     size_t size() const { 
         return vec.size();
@@ -111,19 +135,19 @@ struct RBooleanVector : public uzuki2::BooleanVector, public RBase {
     }
 
     Rcpp::RObject extract_object() { 
-        if (named) {
-            vec.names() = names;
-        }
+        nameify(vec, named, names);
+        scalarize(vec, !scalar && vec.size() == 1);
         return vec; 
     }
 
     Rcpp::LogicalVector vec;
     bool named = false;
     Rcpp::CharacterVector names;
+    bool scalar = false;
 };
 
 struct RStringVector : public uzuki2::StringVector, public RBase {
-    RStringVector(size_t l, bool n, bool) : vec(l), named(n), names(n ? l : 0) {}
+    RStringVector(size_t l, bool n, bool s) : vec(l), named(n), names(n ? l : 0), scalar(s) {}
 
     size_t size() const { 
         return vec.size();
@@ -142,19 +166,19 @@ struct RStringVector : public uzuki2::StringVector, public RBase {
     }
 
     Rcpp::RObject extract_object() { 
-        if (named) {
-            vec.names() = names;
-        }
+        nameify(vec, named, names);
+        scalarize(vec, !scalar && vec.size() == 1);
         return vec; 
     }
 
     Rcpp::StringVector vec;
     bool named = false;
     Rcpp::CharacterVector names;
+    bool scalar = false;
 };
 
 struct RDateVector : public uzuki2::StringVector, public RBase {
-    RDateVector(size_t l, bool n, bool) : vec(l), named(n), names(n ? l : 0) {}
+    RDateVector(size_t l, bool n, bool s) : vec(l), named(n), names(n ? l : 0), scalar(s) {}
 
     size_t size() const { 
         return vec.size();
@@ -173,19 +197,19 @@ struct RDateVector : public uzuki2::StringVector, public RBase {
     }
 
     Rcpp::RObject extract_object() { 
-        if (named) {
-            vec.names() = names;
-        }
+        nameify(vec, named, names);
+        scalarize(vec, !scalar && vec.size() == 1);
         return vec; 
     }
 
     Rcpp::DateVector vec;
     bool named = false;
     Rcpp::CharacterVector names;
+    bool scalar = false;
 };
 
 struct RDateTimeVector : public uzuki2::StringVector, public RBase {
-    RDateTimeVector(size_t l, bool n, bool) : vec(l), named(n), names(n ? l : 0) {}
+    RDateTimeVector(size_t l, bool n, bool s) : vec(l), named(n), names(n ? l : 0), scalar(s) {}
 
     size_t size() const { 
         return vec.size();
@@ -206,17 +230,18 @@ struct RDateTimeVector : public uzuki2::StringVector, public RBase {
     }
 
     Rcpp::RObject extract_object() { 
-        if (named) {
-            vec.names() = names;
-        }
+        nameify(vec, named, names);
         Rcpp::Environment ns = Rcpp::Environment::namespace_env("alabaster.base");
         Rcpp::Function f = ns["as.Rfc3339"];
-        return f(vec);
+        Rcpp::RObject output = f(vec);
+        scalarize(output, !scalar && vec.size() == 1);
+        return output;
     }
 
     Rcpp::StringVector vec;
     bool named = false;
     Rcpp::CharacterVector names;
+    bool scalar = false;
 };
 
 /** As do factors. **/

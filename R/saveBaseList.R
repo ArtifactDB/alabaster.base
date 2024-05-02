@@ -179,6 +179,7 @@ saveBaseListFormat <- (function() {
                 h5_write_vector(ghandle, "format", sltype, scalar=TRUE)
             }
 
+            scalarize <- length(x) == 1L && !is(x, "AsIs")
             y <- .sanitize_stringlike(x, sltype)
 
             missing.placeholder <- NULL
@@ -194,7 +195,7 @@ saveBaseListFormat <- (function() {
             }
 
             local({
-                dhandle <- h5_write_vector(ghandle, "data", y, emit=TRUE)
+                dhandle <- h5_write_vector(ghandle, "data", y, emit=TRUE, scalar=scalarize)
                 on.exit(H5Dclose(dhandle), add=TRUE, after=FALSE)
                 if (!is.null(missing.placeholder)) {
                     h5_write_attribute(dhandle, missingPlaceholderName, missing.placeholder, scalar=TRUE)
@@ -207,6 +208,7 @@ saveBaseListFormat <- (function() {
 
         } else if (is.atomic(x)) {
             coerced <- .remap_atomic_type(x)
+            scalarize <- length(x) == 1L && !is(x, "AsIs")
             y <- coerced$values
 
             h5_write_attribute(ghandle, "uzuki_object", "vector", scalar=TRUE)
@@ -224,7 +226,7 @@ saveBaseListFormat <- (function() {
             }
 
             local({
-                dhandle <- h5_write_vector(ghandle, "data", y, emit=TRUE)
+                dhandle <- h5_write_vector(ghandle, "data", y, emit=TRUE, scalar=scalarize)
                 on.exit(H5Dclose(dhandle), add=TRUE, after=FALSE)
                 if (!is.null(missing.placeholder)) {
                     h5_write_attribute(dhandle, missingPlaceholderName, missing.placeholder, scalar=TRUE)
@@ -335,8 +337,12 @@ saveBaseListFormat <- (function() {
         } else if (!is.null(sltype <- .is_stringlike(x))) {
             formatted <- list(
                 type=if (.version == 1) sltype else "string",
-                values=I(.sanitize_stringlike(x, sltype))
+                values=.sanitize_stringlike(x, sltype)
             )
+
+            if (length(x) == 1L && is(x, "AsIs")) {
+                formatted$values <- I(formatted$values)
+            }
 
             if (.version > 1 && sltype != "string") {
                 formatted$format <- sltype
@@ -369,7 +375,10 @@ saveBaseListFormat <- (function() {
                 }
             }
 
-            formatted$values <- I(formatted$values)
+            if (length(x) == 1L && is(x, "AsIs")) {
+                formatted$values <- I(formatted$values)
+            }
+
             formatted <- .add_json_names(x, formatted)
             return(formatted)
        }
