@@ -104,6 +104,15 @@ This is an easily parsed format with low storage overhead.</p>
 <p>If <code>list.format="hdf5"</code>, <code>x</code> is saved into a HDF5 file instead.
 This format is most useful for random access and for preserving the precision of numerical data.</p>
     </div>
+    <div id="storing-scalars">
+    <h2>Storing scalars</h2>
+    
+
+<p>The <span class="pkg">uzuki2</span> specification (see <a href="https://github.com/ArtifactDB/uzuki2" class="external-link">https://github.com/ArtifactDB/uzuki2</a>) allows length-1 vectors to be stored as-is or as a scalar.
+If a list element is of length 1, <code>saveBaseList</code> will store it as a scalar on-disk, effectively “unboxing” it for languages with a concept of scalars.
+Users can override this behavior by adding the <a href="https://rdrr.io/r/base/AsIs.html" class="external-link">AsIs</a> class to the affected list element, which will force storage as a length-1 vector.
+This reflects the decisions made by <code><a href="readBaseList.html">readBaseList</a></code> and mimics the behavior of packages like <span class="pkg">jsonlite</span>.</p>
+    </div>
     <div id="see-also">
     <h2>See also</h2>
     <div class="dont-index"><p><a href="https://github.com/LTLA/uzuki2" class="external-link">https://github.com/LTLA/uzuki2</a> for the specification.</p>

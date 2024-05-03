@@ -84,6 +84,13 @@ Only relevant for lists stored in the JSON format.</p></dd>
 
 <p>The list represented by <code>path</code>.</p>
     </div>
+    <div id="details">
+    <h2>Details</h2>
+    <p>The <span class="pkg">uzuki2</span> specification (see <a href="https://github.com/ArtifactDB/uzuki2" class="external-link">https://github.com/ArtifactDB/uzuki2</a>) allows length-1 vectors to be stored as-is or as a scalar.
+If the file stores a length-1 vector as-is, <code>readBaseList</code> will read the list element as a length-1 vector with the <a href="https://rdrr.io/r/base/AsIs.html" class="external-link">AsIs</a> class.
+If the file stores a length-1 vector as a scalar, <code>readBaseList</code> will read the list element as a length-1 vector without this class.
+This allows downstream users to distinguish between the storage modes in the rare cases that it is necessary.</p>
+    </div>
     <div id="see-also">
     <h2>See also</h2>
     <div class="dont-index"><p><code>"<a href="saveBaseList.html">stageObject,list-method</a>"</code>, for the staging method.</p></div>
