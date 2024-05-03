@@ -75,7 +75,7 @@ setMethod("saveObject", "list", function(x, path, list.format=saveBaseListFormat
         formatted <- .transform_list_json(x, dir=NULL, path=path, env=env, simplified=TRUE, .version=2, extra=args)
         formatted$version <- "1.2"
 
-        str <- toJSON(formatted, auto_unbox=TRUE, ident=4, null="null", na="null")
+        str <- toJSON(formatted, auto_unbox=TRUE, ident=4, null="null", na="null", digits=NA)
         fpath <- file.path(path, "list_contents.json.gz")
         con <- gzfile(fpath, open="wb")
         write(file=con, str)
