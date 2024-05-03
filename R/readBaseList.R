@@ -14,6 +14,12 @@
 #'
 #' @author Aaron Lun
 #'
+#' @details
+#' The \pkg{uzuki2} specification (see \url{https://github.com/ArtifactDB/uzuki2}) allows length-1 vectors to be stored as-is or as a scalar.
+#' If the file stores a length-1 vector as-is, \code{readBaseList} will read the list element as a length-1 vector with the \link{AsIs} class.
+#' If the file stores a length-1 vector as a scalar, \code{readBaseList} will read the list element as a length-1 vector without this class.
+#' This allows downstream users to distinguish between the storage modes in the rare cases that it is necessary.
+#'
 #' @seealso
 #' \code{"\link{stageObject,list-method}"}, for the staging method.
 #'

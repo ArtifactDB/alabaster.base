@@ -24,6 +24,12 @@ The list represented by \code{path}.
 Read a \link{list} from its on-disk representation.
 This is usually not directly called by users, but is instead called by dispatch in \code{\link{readObject}}.
 }
+\details{
+The \pkg{uzuki2} specification (see \url{https://github.com/ArtifactDB/uzuki2}) allows length-1 vectors to be stored as-is or as a scalar.
+If the file stores a length-1 vector as-is, \code{readBaseList} will read the list element as a length-1 vector with the \link{AsIs} class.
+If the file stores a length-1 vector as a scalar, \code{readBaseList} will read the list element as a length-1 vector without this class.
+This allows downstream users to distinguish between the storage modes in the rare cases that it is necessary.
+}
 \examples{
 library(S4Vectors)
 ll <- list(A=1, B=LETTERS, C=DataFrame(X=letters))

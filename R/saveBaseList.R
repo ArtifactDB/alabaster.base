@@ -23,6 +23,12 @@
 #' If \code{list.format="hdf5"}, \code{x} is saved into a HDF5 file instead.
 #' This format is most useful for random access and for preserving the precision of numerical data.
 #'
+#' @section Storing scalars:
+#' The \pkg{uzuki2} specification (see \url{https://github.com/ArtifactDB/uzuki2}) allows length-1 vectors to be stored as-is or as a scalar.
+#' If a list element is of length 1, \code{saveBaseList} will store it as a scalar on-disk, effectively \dQuote{unboxing} it for languages with a concept of scalars.
+#' Users can override this behavior by adding the \link{AsIs} class to the affected list element, which will force storage as a length-1 vector.
+#' This reflects the decisions made by \code{\link{readBaseList}} and mimics the behavior of packages like \pkg{jsonlite}.
+#'
 #' @author Aaron Lun
 #'
 #' @seealso
@@ -179,6 +185,7 @@ saveBaseListFormat <- (function() {
                 h5_write_vector(ghandle, "format", sltype, scalar=TRUE)
             }
 
+            scalarize <- length(x) == 1L && !is(x, "AsIs")
             y <- .sanitize_stringlike(x, sltype)
 
             missing.placeholder <- NULL
@@ -194,7 +201,7 @@ saveBaseListFormat <- (function() {
             }
 
             local({
-                dhandle <- h5_write_vector(ghandle, "data", y, emit=TRUE)
+                dhandle <- h5_write_vector(ghandle, "data", y, emit=TRUE, scalar=scalarize)
                 on.exit(H5Dclose(dhandle), add=TRUE, after=FALSE)
                 if (!is.null(missing.placeholder)) {
                     h5_write_attribute(dhandle, missingPlaceholderName, missing.placeholder, scalar=TRUE)
@@ -207,6 +214,7 @@ saveBaseListFormat <- (function() {
 
         } else if (is.atomic(x)) {
             coerced <- .remap_atomic_type(x)
+            scalarize <- length(x) == 1L && !is(x, "AsIs")
             y <- coerced$values
 
             h5_write_attribute(ghandle, "uzuki_object", "vector", scalar=TRUE)
@@ -224,7 +232,7 @@ saveBaseListFormat <- (function() {
             }
 
             local({
-                dhandle <- h5_write_vector(ghandle, "data", y, emit=TRUE)
+                dhandle <- h5_write_vector(ghandle, "data", y, emit=TRUE, scalar=scalarize)
                 on.exit(H5Dclose(dhandle), add=TRUE, after=FALSE)
                 if (!is.null(missing.placeholder)) {
                     h5_write_attribute(dhandle, missingPlaceholderName, missing.placeholder, scalar=TRUE)
@@ -335,8 +343,12 @@ saveBaseListFormat <- (function() {
         } else if (!is.null(sltype <- .is_stringlike(x))) {
             formatted <- list(
                 type=if (.version == 1) sltype else "string",
-                values=I(.sanitize_stringlike(x, sltype))
+                values=.sanitize_stringlike(x, sltype)
             )
+
+            if (length(x) == 1L && is(x, "AsIs")) {
+                formatted$values <- I(formatted$values)
+            }
 
             if (.version > 1 && sltype != "string") {
                 formatted$format <- sltype
@@ -369,7 +381,10 @@ saveBaseListFormat <- (function() {
                 }
             }
 
-            formatted$values <- I(formatted$values)
+            if (length(x) == 1L && is(x, "AsIs")) {
+                formatted$values <- I(formatted$values)
+            }
+
             formatted <- .add_json_names(x, formatted)
             return(formatted)
        }

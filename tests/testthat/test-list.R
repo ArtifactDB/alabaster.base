@@ -4,7 +4,7 @@
 library(S4Vectors)
 
 vals <- list(
-    A = 1.1,
+    A = 1:5,
     B = (1:5) * 0.5, # numeric...
     C = LETTERS[1:5],
     D1 = factor(LETTERS[1:5], LETTERS),
@@ -94,7 +94,7 @@ test_that("S4 Lists can also be staged", {
 
     library(S4Vectors)
     vals <- List(
-        A = 1.1,
+        A = 1:5,
         B = (1:5) * 0.5,
         C = LETTERS[1:5]
     )
@@ -249,7 +249,7 @@ test_that("external references work correctly", {
     dir.create(tmp)
 
     vals <- list(
-        A = 1.1,
+        A = 1:5,
         B = list(
             C = DataFrame(X = 1:10),
             D = DataFrame(Y = 2:5)
@@ -580,6 +580,75 @@ test_that("we handle lists with times", {
     saveObject(vals, tmp2)
     reloaded <- readObject(tmp2)
     expect_equal(to_posix(reloaded, as.POSIXlt), vals2)
+})
+
+test_that("lists correctly distinguish between scalars and length-1 vectors", {
+    ll <- list(
+        A1 = 1L,
+        A2 = I(2L),
+        B1 = 1.5,
+        B2 = I(2.5),
+        C1 = "foo",
+        C2 = I("bar"),
+        D1 = TRUE,
+        D2 = I(FALSE),
+        E1 = Sys.Date(),
+        E2 = I(Sys.Date()),
+        F1 = as.Rfc3339(Sys.time()),
+        F2 = I(as.Rfc3339(Sys.time()))
+    )
+
+    tmp <- tempfile()
+    saveObject(ll, tmp)
+    reloaded <- readObject(tmp)
+    expect_equal(ll, reloaded)
+
+    # Checking that the values are indeed scalar.
+    y <- jsonlite::fromJSON(file.path(tmp, "list_contents.json.gz"), simplifyVector=FALSE)
+    expect_type(y$values[[1]]$values, "integer")
+    expect_type(y$values[[2]]$values, "list")
+    expect_type(y$values[[3]]$values, "double")
+    expect_type(y$values[[4]]$values, "list")
+    expect_type(y$values[[5]]$values, "character")
+    expect_type(y$values[[6]]$values, "list")
+    expect_type(y$values[[7]]$values, "logical")
+    expect_type(y$values[[8]]$values, "list")
+    expect_type(y$values[[9]]$values, "character")
+    expect_type(y$values[[10]]$values, "list")
+    expect_type(y$values[[11]]$values, "character")
+    expect_type(y$values[[12]]$values, "list")
+
+    # Same for HDF5.
+    tmp2 <- tempfile()
+    saveObject(ll, tmp2, list.format="hdf5")
+    reloaded2 <- readObject(tmp2)
+    expect_equal(ll, reloaded2)
+
+    # Checking that the values are indeed scalar.
+    fhandle <- rhdf5::H5Fopen(file.path(tmp2, "list_contents.h5"))
+    ghandle <- rhdf5::H5Gopen(fhandle, "simple_list")
+    dhandle <- rhdf5::H5Gopen(ghandle, "data")
+    peek_at_shape <- function(name) {
+        ihandle <- rhdf5::H5Gopen(dhandle, name)
+        on.exit(rhdf5::H5Gclose(ihandle), add=TRUE, after=FALSE)
+        xhandle <- rhdf5::H5Dopen(ihandle, "data")
+        on.exit(rhdf5::H5Dclose(xhandle), add=TRUE, after=FALSE)
+        shandle <- rhdf5::H5Dget_space(xhandle)
+        on.exit(rhdf5::H5Sclose(shandle), add=TRUE, after=FALSE)
+        rhdf5::H5Sget_simple_extent_dims(shandle)$size
+    }
+    expect_identical(peek_at_shape("0"), integer(0))
+    expect_identical(peek_at_shape("1"), 1L)
+    expect_identical(peek_at_shape("2"), integer(0))
+    expect_identical(peek_at_shape("3"), 1L)
+    expect_identical(peek_at_shape("4"), integer(0))
+    expect_identical(peek_at_shape("5"), 1L)
+    expect_identical(peek_at_shape("6"), integer(0))
+    expect_identical(peek_at_shape("7"), 1L)
+    expect_identical(peek_at_shape("8"), integer(0))
+    expect_identical(peek_at_shape("9"), 1L)
+    expect_identical(peek_at_shape("10"), integer(0))
+    expect_identical(peek_at_shape("11"), 1L)
 })
 
 test_that("lists work correctly in legacy mode (JSON)", {
