@@ -51,7 +51,7 @@ we correctly call \code{saveObject2} and then ultimately the application-specifi
 
 The application-specific \code{generic} is free to do anything it wants as long as the custom representation is understood by the application-specific reader in \code{\link{altReadObject}}.
 However, it is usually most convenient to re-use the existing representations created by \code{\link{saveObject}}.
-This means that any customizations should not interfere with the validity of those representations, as defined by the \pkg{takane} specifications and enforce by \code{\link{validateObject}}.
+This means that any customizations should not interfere with the validity of those representations, as defined by the \pkg{takane} specifications and enforced by \code{\link{validateObject}}.
 We recommend that any customizations should manifest as new files starting with an underscore, as this will not interfere by any \pkg{takane} file specification.
 }
 \examples{
