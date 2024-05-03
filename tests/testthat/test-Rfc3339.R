@@ -1,5 +1,5 @@
 # This tests the functions around the Rfc3339 class.
-# library(testthat); library(alabaster.base); source("test-misc.R")
+# library(testthat); library(alabaster.base); source("test-Rfc3339.R")
 
 test_that("casting of datetimes works as expected", {
     out <- alabaster.base:::.cast_datetime("2023-12-04T14:41:19+01:00")
@@ -113,3 +113,16 @@ test_that("Rfc3339 combining methods works as expected", {
     expect_identical(unclass(combined), c(unclass(rfc), rep(NA, length(LETTERS)), unclass(val)))
 })
 
+test_that("Rfc3339 behaves nicely with AsIs", {
+    rfc <- I(as.Rfc3339(Sys.time()))
+    expect_true(is(rfc, "Rfc3339"))
+    expect_true(is(rfc, "AsIs"))
+
+    y <- rfc[1]
+    expect_true(is(y, "Rfc3339"))
+    y <- c(rfc, rfc)
+    expect_true(is(y, "Rfc3339"))
+
+    z <- as.POSIXct(rfc)
+    expect_true(is(z, "POSIXct"))
+})

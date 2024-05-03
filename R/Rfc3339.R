@@ -56,7 +56,10 @@
 #' @name Rfc3339
 NULL
 
-Rfc3339 <- function(x) structure(x, class=c("Rfc3339", "character"))
+Rfc3339 <- function(x) {
+    class(x) <- "Rfc3339"
+    x
+}
 
 #' @export
 #' @rdname Rfc3339
@@ -164,4 +167,10 @@ c.Rfc3339 <- function(..., recursive=TRUE) {
 }
 
 #' @export
-setOldClass(c("Rfc3339", "character"))
+setOldClass("Rfc3339")
+
+#' @export
+#' @rdname saveAtomicVector
+setMethod("saveObject", "Rfc3339", function(x, path, ...) .save_atomic_vector(x, path, ...)) 
+# Put it here to ensure Rfc3339 is defined... we wrap the .save_atomic_vector call
+# in a function so it doesn't get evaluated before saveAtomicVector.R is collated.
