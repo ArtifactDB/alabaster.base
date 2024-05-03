@@ -23,6 +23,12 @@
 #' If \code{list.format="hdf5"}, \code{x} is saved into a HDF5 file instead.
 #' This format is most useful for random access and for preserving the precision of numerical data.
 #'
+#' @section Storing scalars:
+#' The \pkg{uzuki2} specification (see \url{https://github.com/ArtifactDB/uzuki2}) allows length-1 vectors to be stored as-is or as a scalar.
+#' If a list element is of length 1, \code{saveBaseList} will store it as a scalar on-disk, effectively \dQuote{unboxing} it for languages with a concept of scalars.
+#' Users can override this behavior by adding the \link{AsIs} class to the affected list element, which will force storage as a length-1 vector.
+#' This reflects the decisions made by \code{\link{readBaseList}} and mimics the behavior of packages like \pkg{jsonlite}.
+#'
 #' @author Aaron Lun
 #'
 #' @seealso
