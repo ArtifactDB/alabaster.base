@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Saving objects to artifacts and back again • alabaster.base</title>
-<!-- jquery --><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script><!-- Bootstrap --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha256-bZLfwXAP04zRMK2BjiO8iu9pf4FbLqX6zitd+tIvLhE=" crossorigin="anonymous">
+<!-- jquery --><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script><!-- Bootstrap --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha256-bZLfwXAP04zRMK2BjiO8iu9pf4FbLqX6zitd+tIvLhE=" crossorigin="anonymous">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script><!-- bootstrap-toc --><link rel="stylesheet" href="../bootstrap-toc.css">
 <script src="../bootstrap-toc.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">alabaster.base</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.3.23</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.5.0</span>
       </span>
     </div>
 
@@ -252,13 +252,13 @@ the full object is not required:</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/readObject.html">readObject</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">tmp</span>, <span class="st">"other_columns/1"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## DataFrame with 5 rows and 2 columns</span></span>
-<span><span class="co">##           B         C</span></span>
-<span><span class="co">##   &lt;numeric&gt; &lt;numeric&gt;</span></span>
-<span><span class="co">## 1  0.588791 -0.072405</span></span>
-<span><span class="co">## 2  0.960695 -1.300238</span></span>
-<span><span class="co">## 3  0.821505 -1.162564</span></span>
-<span><span class="co">## 4  0.161962 -1.376626</span></span>
-<span><span class="co">## 5  0.800039  0.525386</span></span></code></pre>
+<span><span class="co">##            B          C</span></span>
+<span><span class="co">##    &lt;numeric&gt;  &lt;numeric&gt;</span></span>
+<span><span class="co">## 1 0.08075014 -0.0843389</span></span>
+<span><span class="co">## 2 0.83433304 -0.5540648</span></span>
+<span><span class="co">## 3 0.60076089  0.7471766</span></span>
+<span><span class="co">## 4 0.15720844 -0.9348197</span></span>
+<span><span class="co">## 5 0.00739944 -0.4666204</span></span></code></pre>
 </div>
 <div class="section level2">
 <h2 id="extending-to-new-classes">Extending to new classes<a class="anchor" aria-label="anchor" href="#extending-to-new-classes"></a>
@@ -350,17 +350,17 @@ function.</p>
 <span><span class="op">)</span></span>
 <span><span class="va">x</span></span></code></pre></div>
 <pre><code><span><span class="co">## 10 x 10 sparse Matrix of class "dgTMatrix"</span></span>
-<span><span class="co">##                                                          </span></span>
-<span><span class="co">##  [1,] .         . 0.7004769 . . .         . .         . .</span></span>
-<span><span class="co">##  [2,] .         . .         . . 0.1851325 . .         . .</span></span>
-<span><span class="co">##  [3,] 0.9948407 . .         . . .         . .         . .</span></span>
-<span><span class="co">##  [4,] .         . .         . . .         . .         . .</span></span>
-<span><span class="co">##  [5,] .         . 0.2464021 . . .         . .         . .</span></span>
-<span><span class="co">##  [6,] .         . .         . . .         . 0.8338654 . .</span></span>
-<span><span class="co">##  [7,] .         . .         . . .         . .         . .</span></span>
-<span><span class="co">##  [8,] .         . .         . . .         . .         . .</span></span>
-<span><span class="co">##  [9,] .         . .         . . .         . .         . .</span></span>
-<span><span class="co">## [10,] .         . .         . . .         . .         . .</span></span></code></pre>
+<span><span class="co">##                                                           </span></span>
+<span><span class="co">##  [1,] .          . 0.1956698 . . .         . .         . .</span></span>
+<span><span class="co">##  [2,] .          . .         . . 0.4035381 . .         . .</span></span>
+<span><span class="co">##  [3,] 0.06366146 . .         . . .         . .         . .</span></span>
+<span><span class="co">##  [4,] .          . .         . . .         . .         . .</span></span>
+<span><span class="co">##  [5,] .          . 0.3887013 . . .         . .         . .</span></span>
+<span><span class="co">##  [6,] .          . .         . . .         . 0.9755478 . .</span></span>
+<span><span class="co">##  [7,] .          . .         . . .         . .         . .</span></span>
+<span><span class="co">##  [8,] .          . .         . . .         . .         . .</span></span>
+<span><span class="co">##  [9,] .          . .         . . .         . .         . .</span></span>
+<span><span class="co">## [10,] .          . .         . . .         . .         . .</span></span></code></pre>
 <div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">tmp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/saveObject.html">saveObject</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">tmp</span><span class="op">)</span></span>
@@ -369,17 +369,17 @@ function.</p>
 <div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/readObject.html">readObject</a></span><span class="op">(</span><span class="va">tmp</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## 10 x 10 sparse Matrix of class "dgTMatrix"</span></span>
-<span><span class="co">##                                                          </span></span>
-<span><span class="co">##  [1,] .         . 0.7004769 . . .         . .         . .</span></span>
-<span><span class="co">##  [2,] .         . .         . . 0.1851325 . .         . .</span></span>
-<span><span class="co">##  [3,] 0.9948407 . .         . . .         . .         . .</span></span>
-<span><span class="co">##  [4,] .         . .         . . .         . .         . .</span></span>
-<span><span class="co">##  [5,] .         . 0.2464021 . . .         . .         . .</span></span>
-<span><span class="co">##  [6,] .         . .         . . .         . 0.8338654 . .</span></span>
-<span><span class="co">##  [7,] .         . .         . . .         . .         . .</span></span>
-<span><span class="co">##  [8,] .         . .         . . .         . .         . .</span></span>
-<span><span class="co">##  [9,] .         . .         . . .         . .         . .</span></span>
-<span><span class="co">## [10,] .         . .         . . .         . .         . .</span></span></code></pre>
+<span><span class="co">##                                                           </span></span>
+<span><span class="co">##  [1,] .          . 0.1956698 . . .         . .         . .</span></span>
+<span><span class="co">##  [2,] .          . .         . . 0.4035381 . .         . .</span></span>
+<span><span class="co">##  [3,] 0.06366146 . .         . . .         . .         . .</span></span>
+<span><span class="co">##  [4,] .          . .         . . .         . .         . .</span></span>
+<span><span class="co">##  [5,] .          . 0.3887013 . . .         . .         . .</span></span>
+<span><span class="co">##  [6,] .          . .         . . .         . 0.9755478 . .</span></span>
+<span><span class="co">##  [7,] .          . .         . . .         . .         . .</span></span>
+<span><span class="co">##  [8,] .          . .         . . .         . .         . .</span></span>
+<span><span class="co">##  [9,] .          . .         . . .         . .         . .</span></span>
+<span><span class="co">## [10,] .          . .         . . .         . .         . .</span></span></code></pre>
 <p>For more complex objects that are composed of multiple smaller
 “child” objects, developers should consider saving each of their
 children in subdirectories of <code>path</code>. This can be achieved by
@@ -483,11 +483,11 @@ added.</p>
 <pre><code><span><span class="co">## DataFrame with 5 rows and 2 columns</span></span>
 <span><span class="co">##          Z                 AA</span></span>
 <span><span class="co">##   &lt;factor&gt;        &lt;DataFrame&gt;</span></span>
-<span><span class="co">## 1        1 0.600814: 0.042905</span></span>
-<span><span class="co">## 2        2 0.310198:-1.513056</span></span>
-<span><span class="co">## 3        3 0.799090: 0.956953</span></span>
-<span><span class="co">## 4        4 0.917317: 1.016974</span></span>
-<span><span class="co">## 5        5 0.420763: 0.437558</span></span></code></pre>
+<span><span class="co">## 1        1 0.289892: 0.648043</span></span>
+<span><span class="co">## 2        2 0.678380: 0.075804</span></span>
+<span><span class="co">## 3        3 0.735320: 0.491761</span></span>
+<span><span class="co">## 4        4 0.195957:-0.753541</span></span>
+<span><span class="co">## 5        5 0.980540: 0.349027</span></span></code></pre>
 <p>By overriding the saving and reading process for one or more classes,
 each application can customize the behavior of <em>alabaster</em> to
 their own needs.</p>
@@ -497,7 +497,7 @@ their own needs.</p>
 </h2>
 <div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/sessionInfo.html" class="external-link">sessionInfo</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## R Under development (unstable) (2024-03-06 r86056)</span></span>
+<pre><code><span><span class="co">## R version 4.4.0 Patched (2024-04-24 r86483)</span></span>
 <span><span class="co">## Platform: x86_64-pc-linux-gnu</span></span>
 <span><span class="co">## Running under: Ubuntu 22.04.4 LTS</span></span>
 <span><span class="co">## </span></span>
@@ -521,23 +521,23 @@ their own needs.</p>
 <span><span class="co">## [8] base     </span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## other attached packages:</span></span>
-<span><span class="co">## [1] Matrix_1.6-5          alabaster.base_1.3.23 S4Vectors_0.41.4     </span></span>
-<span><span class="co">## [4] BiocGenerics_0.49.1   BiocStyle_2.31.0     </span></span>
+<span><span class="co">## [1] Matrix_1.7-0         alabaster.base_1.5.0 S4Vectors_0.42.0    </span></span>
+<span><span class="co">## [4] BiocGenerics_0.50.0  BiocStyle_2.32.0    </span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## loaded via a namespace (and not attached):</span></span>
 <span><span class="co">##  [1] jsonlite_1.8.8          compiler_4.4.0          BiocManager_1.30.22    </span></span>
-<span><span class="co">##  [4] Rcpp_1.0.12             rhdf5filters_1.15.2     jquerylib_0.1.4        </span></span>
-<span><span class="co">##  [7] systemfonts_1.0.5       textshaping_0.3.7       yaml_2.3.8             </span></span>
-<span><span class="co">## [10] fastmap_1.1.1           lattice_0.22-5          R6_2.5.1               </span></span>
-<span><span class="co">## [13] knitr_1.45              bookdown_0.38           desc_1.4.3             </span></span>
-<span><span class="co">## [16] bslib_0.6.1             rlang_1.1.3             cachem_1.0.8           </span></span>
-<span><span class="co">## [19] xfun_0.42               fs_1.6.3                sass_0.4.8             </span></span>
-<span><span class="co">## [22] memoise_2.0.1           cli_3.6.2               pkgdown_2.0.7          </span></span>
-<span><span class="co">## [25] magrittr_2.0.3          Rhdf5lib_1.25.1         digest_0.6.35          </span></span>
-<span><span class="co">## [28] grid_4.4.0              alabaster.schemas_1.3.1 rhdf5_2.47.6           </span></span>
-<span><span class="co">## [31] lifecycle_1.0.4         vctrs_0.6.5             evaluate_0.23          </span></span>
-<span><span class="co">## [34] ragg_1.2.7              rmarkdown_2.26          purrr_1.0.2            </span></span>
-<span><span class="co">## [37] tools_4.4.0             htmltools_0.5.7</span></span></code></pre>
+<span><span class="co">##  [4] Rcpp_1.0.12             rhdf5filters_1.16.0     jquerylib_0.1.4        </span></span>
+<span><span class="co">##  [7] systemfonts_1.0.6       textshaping_0.3.7       yaml_2.3.8             </span></span>
+<span><span class="co">## [10] fastmap_1.1.1           lattice_0.22-6          R6_2.5.1               </span></span>
+<span><span class="co">## [13] knitr_1.46              htmlwidgets_1.6.4       bookdown_0.39          </span></span>
+<span><span class="co">## [16] desc_1.4.3              bslib_0.7.0             rlang_1.1.3            </span></span>
+<span><span class="co">## [19] cachem_1.0.8            xfun_0.43               fs_1.6.4               </span></span>
+<span><span class="co">## [22] sass_0.4.9              memoise_2.0.1           cli_3.6.2              </span></span>
+<span><span class="co">## [25] pkgdown_2.0.9           magrittr_2.0.3          Rhdf5lib_1.26.0        </span></span>
+<span><span class="co">## [28] grid_4.4.0              digest_0.6.35           alabaster.schemas_1.4.0</span></span>
+<span><span class="co">## [31] rhdf5_2.48.0            lifecycle_1.0.4         vctrs_0.6.5            </span></span>
+<span><span class="co">## [34] evaluate_0.23           ragg_1.3.0              rmarkdown_2.26         </span></span>
+<span><span class="co">## [37] purrr_1.0.2             tools_4.4.0             htmltools_0.5.8.1</span></span></code></pre>
 </div>
   </div>
 
@@ -558,7 +558,7 @@ their own needs.</p>
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.9.</p>
 </div>
 
       </footer>
