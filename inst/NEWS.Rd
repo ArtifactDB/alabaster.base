@@ -1,5 +1,5 @@
-\name{scRNAseqnews}
-\title{scRNAseq News}
+\name{alabaster.base News}
+\title{alabaster.base News}
 \encoding{UTF-8}
 
 \section{Version 1.6.0}{\itemize{
