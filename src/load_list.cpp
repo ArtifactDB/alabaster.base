@@ -6,15 +6,15 @@ template<class Input_>
 void scalarize(Input_& object, bool needs_marker) {
     if (needs_marker) {
         Rcpp::RObject raw_classes = object.attr("class");
-        if (raw_classes.sexp_type() != CHARSXP) {
+        if (raw_classes.sexp_type() != STRSXP) {
             object.attr("class") = "AsIs";
             return;
         }
 
         Rcpp::CharacterVector classes(raw_classes);
         Rcpp::CharacterVector new_classes(classes.size() + 1);
-        std::copy(classes.begin(), classes.end(), new_classes.begin());
-        new_classes[new_classes.size() - 1] = "AsIs";
+        std::copy(classes.begin(), classes.end(), new_classes.begin() + 1);
+        new_classes[0] = "AsIs";
         object.attr("class") = new_classes;
     }
 }
@@ -198,6 +198,7 @@ struct RDateVector : public uzuki2::StringVector, public RBase {
 
     Rcpp::RObject extract_object() { 
         nameify(vec, named, names);
+        std::cout << scalar << std::endl;
         scalarize(vec, !scalar && vec.size() == 1);
         return vec; 
     }
