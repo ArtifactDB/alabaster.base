@@ -198,7 +198,6 @@ struct RDateVector : public uzuki2::StringVector, public RBase {
 
     Rcpp::RObject extract_object() { 
         nameify(vec, named, names);
-        std::cout << scalar << std::endl;
         scalarize(vec, !scalar && vec.size() == 1);
         return vec; 
     }
