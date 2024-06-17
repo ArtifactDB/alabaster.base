@@ -15,6 +15,7 @@
 \alias{[<-.Rfc3339}
 \alias{[[<-.Rfc3339}
 \alias{c.Rfc3339}
+\alias{saveObject,Rfc3339-method}
 \title{Representing Internet date/times}
 \usage{
 as.Rfc3339(x)
@@ -42,6 +43,8 @@ is.Rfc3339(x)
 \method{[[}{Rfc3339}(x, i) <- value
 
 \method{c}{Rfc3339}(..., recursive = TRUE)
+
+\S4method{saveObject}{Rfc3339}(x, path, ...)
 }
 \arguments{
 \item{x}{For \code{as.Rfc3339} methods, object to be coerced to an Rfc3339 instance.
@@ -57,6 +60,8 @@ For \code{is.Rfc3339}, any object to be tested for Rfc3339-ness.}
 \item{i}{Indices specifying elements to extract or replace.}
 
 \item{value}{Replacement values, either as another Rfc3339 instance, a character vector or something that can be coerced into one.}
+
+\item{path}{String containing the path to a directory in which to save \code{x}.}
 }
 \value{
 For \code{as.Rfc3339}, the subset and combining methods, an Rfc3339 instance is returned.

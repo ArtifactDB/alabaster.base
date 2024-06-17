@@ -18,7 +18,6 @@
 \alias{saveObject,Date-method}
 \alias{saveObject,POSIXlt-method}
 \alias{saveObject,POSIXct-method}
-\alias{saveObject,Rfc3339-method}
 \title{Save atomic vectors to disk}
 \usage{
 \S4method{saveObject}{integer}(x, path, ...)
@@ -36,8 +35,6 @@
 \S4method{saveObject}{POSIXlt}(x, path, ...)
 
 \S4method{saveObject}{POSIXct}(x, path, ...)
-
-\S4method{saveObject}{Rfc3339}(x, path, ...)
 }
 \arguments{
 \item{x}{Any of the atomic vector types, or \link{Date} objects, or time objects, e.g., \link{POSIXct}.}

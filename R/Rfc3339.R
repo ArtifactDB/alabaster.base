@@ -13,6 +13,7 @@
 #' @param i Indices specifying elements to extract or replace.
 #' @param value Replacement values, either as another Rfc3339 instance, a character vector or something that can be coerced into one.
 #' @param tz,recursive,... Further arguments to be passed to individual methods.
+#' @param path String containing the path to a directory in which to save \code{x}.
 #'
 #' @return
 #' For \code{as.Rfc3339}, the subset and combining methods, an Rfc3339 instance is returned.
@@ -170,7 +171,7 @@ c.Rfc3339 <- function(..., recursive=TRUE) {
 setOldClass("Rfc3339")
 
 #' @export
-#' @rdname saveAtomicVector
+#' @rdname Rfc3339
 setMethod("saveObject", "Rfc3339", function(x, path, ...) .save_atomic_vector(x, path, ...)) 
 # Put it here to ensure Rfc3339 is defined... we wrap the .save_atomic_vector call
 # in a function so it doesn't get evaluated before saveAtomicVector.R is collated.
