@@ -8,6 +8,8 @@ This effectively unboxes all length-1 vectors in a list, by default; this is pro
 Users can override this by calling \code{I()} on elements that they want to keep as length-1 vectors, in the same manner as \pkg{jsonlite}.
 
 \item Streamlined the definition of the Rfc3339 class so that it behaves better with \code{I()}.
+
+\item Normalize paths to resolve \code{~} prior to calling C++ code.
 }}
 
 \section{Version 1.4.1}{\itemize{

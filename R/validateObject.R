@@ -40,6 +40,7 @@
 #' 
 #' @export
 validateObject <- function(path, metadata=NULL) {
+    path <- normalizePath(path, mustWork=TRUE) # protect C code from ~/.
     validate(path, metadata)
     invisible(NULL)
 }
