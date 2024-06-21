@@ -12,10 +12,8 @@ Users can override this by calling \code{I()} on elements that they want to keep
 \item Normalize paths to resolve \code{~} prior to calling C++ code.
 
 \item Open HDF5 files in read-only mode to avoid permission-related problems for \code{readObject()}-dispatched functions.
-}}
 
-\section{Version 1.4.1}{\itemize{
-\item Store numbers at maximum precision when saving lists in the JSON format via \code{saveObject}.
+\item Store numbers at maximum precision when saving lists in the JSON format via \code{saveObject()}.
 }}
 
 \section{Version 1.4.0}{\itemize{
