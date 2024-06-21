@@ -10,6 +10,8 @@ Users can override this by calling \code{I()} on elements that they want to keep
 \item Streamlined the definition of the Rfc3339 class so that it behaves better with \code{I()}.
 
 \item Normalize paths to resolve \code{~} prior to calling C++ code.
+
+\item Open HDF5 files in read-only mode to avoid permission-related problems for \code{readObject()}-dispatched functions.
 }}
 
 \section{Version 1.4.1}{\itemize{

@@ -27,7 +27,7 @@
 #' @importFrom S4Vectors DataFrame make_zero_col_DFrame
 readDataFrame <- function(path, metadata, ...) {
     fpath <- file.path(path, "basic_columns.h5")
-    fhandle <- H5Fopen(fpath)
+    fhandle <- H5Fopen(fpath, flags="H5F_ACC_RDONLY")
     on.exit(H5Fclose(fhandle), add=TRUE, after=FALSE)
 
     host <- "data_frame"

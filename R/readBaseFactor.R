@@ -24,7 +24,7 @@
 #' @aliases loadBaseFactor
 readBaseFactor <- function(path, metadata, ...) {
     fpath <- file.path(path, "contents.h5")
-    fhandle <- H5Fopen(fpath)
+    fhandle <- H5Fopen(fpath, flags="H5F_ACC_RDONLY")
     on.exit(H5Fclose(fhandle), add=TRUE, after=FALSE)
 
     host <- "string_factor"
