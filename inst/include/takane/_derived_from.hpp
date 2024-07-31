@@ -88,4 +88,3 @@ inline bool derived_from(const std::string& type, const std::string& base, const
 }
 
 #endif
-

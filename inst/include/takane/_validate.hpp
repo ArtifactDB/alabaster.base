@@ -34,6 +34,7 @@
 #include "bed_file.hpp"
 #include "gmt_file.hpp"
 #include "gff_file.hpp"
+#include "rds_file.hpp"
 #include "bumpy_atomic_array.hpp"
 #include "bumpy_data_frame_array.hpp"
 #include "vcf_experiment.hpp"
@@ -80,6 +81,7 @@ inline auto default_registry() {
     registry["bed_file"] = [](const std::filesystem::path& p, const ObjectMetadata& m, Options& o) { bed_file::validate(p, m, o); };
     registry["gmt_file"] = [](const std::filesystem::path& p, const ObjectMetadata& m, Options& o) { gmt_file::validate(p, m, o); };
     registry["gff_file"] = [](const std::filesystem::path& p, const ObjectMetadata& m, Options& o) { gff_file::validate(p, m, o); };
+    registry["rds_file"] = [](const std::filesystem::path& p, const ObjectMetadata& m, Options& o) { rds_file::validate(p, m, o); };
     registry["bumpy_atomic_array"] = [](const std::filesystem::path& p, const ObjectMetadata& m, Options& o) { bumpy_atomic_array::validate(p, m, o); };
     registry["bumpy_data_frame_array"] = [](const std::filesystem::path& p, const ObjectMetadata& m, Options& o) { bumpy_data_frame_array::validate(p, m, o); };
     registry["vcf_experiment"] = [](const std::filesystem::path& p, const ObjectMetadata& m, Options& o) { vcf_experiment::validate(p, m, o); };
@@ -104,25 +106,35 @@ inline auto default_registry() {
  */
 inline void validate(const std::filesystem::path& path, const ObjectMetadata& metadata, Options& options) {
     auto cIt = options.custom_validate.find(metadata.type);
+
     if (cIt != options.custom_validate.end()) {
         try {
             (cIt->second)(path, metadata, options);
         } catch (std::exception& e) {
             throw std::runtime_error("failed to validate '" + metadata.type + "' object at '" + path.string() + "'; " + std::string(e.what()));
         }
-        return;
+
+    } else {
+        static const auto validate_registry = internal_validate::default_registry();
+        auto vrIt = validate_registry.find(metadata.type);
+        if (vrIt == validate_registry.end()) {
+            throw std::runtime_error("no registered 'validate' function for object type '" + metadata.type + "' at '" + path.string() + "'");
+        }
+
+        // Can't easily roll this out, as this is const and the above is not.
+        try {
+            (vrIt->second)(path, metadata, options);
+        } catch (std::exception& e) {
+            throw std::runtime_error("failed to validate '" + metadata.type + "' object at '" + path.string() + "'; " + std::string(e.what()));
+        }
     }
 
-    static const auto validate_registry = internal_validate::default_registry();
-    auto vrIt = validate_registry.find(metadata.type);
-    if (vrIt == validate_registry.end()) {
-        throw std::runtime_error("no registered 'validate' function for object type '" + metadata.type + "' at '" + path.string() + "'");
-    }
-
-    try {
-        (vrIt->second)(path, metadata, options);
-    } catch (std::exception& e) {
-        throw std::runtime_error("failed to validate '" + metadata.type + "' object at '" + path.string() + "'; " + std::string(e.what()));
+    if (options.custom_global_validate) {
+        try {
+            options.custom_global_validate(path, metadata, options);
+        } catch (std::exception& e) {
+            throw std::runtime_error("failed additional validation for '" + metadata.type + "' at '" + path.string() + "'; " + std::string(e.what()));
+        }
     }
 }
 

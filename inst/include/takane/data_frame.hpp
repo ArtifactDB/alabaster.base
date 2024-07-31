@@ -251,7 +251,6 @@ inline std::vector<size_t> dimensions(const std::filesystem::path& path, [[maybe
     return output;
 }
 
-
 }
 
 }

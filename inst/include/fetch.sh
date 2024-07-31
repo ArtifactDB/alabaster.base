@@ -34,5 +34,5 @@ harvester byteme https://github.com/LTLA/byteme v1.1.0
 harvester comservatory https://github.com/ArtifactDB/comservatory v2.0.1
 harvester uzuki2 https://github.com/ArtifactDB/uzuki2 v1.4.0
 harvester ritsuko https://github.com/ArtifactDB/ritsuko v0.5.2
-harvester takane https://github.com/ArtifactDB/takane v0.6.2
+harvester takane https://github.com/ArtifactDB/takane v0.7.0
 harvester chihaya https://github.com/ArtifactDB/chihaya v1.1.0

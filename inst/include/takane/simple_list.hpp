@@ -49,6 +49,18 @@ inline std::string extract_format(const internal_json::JsonObjectMap& map) {
     return reinterpret_cast<millijson::String*>(val.get())->value;
 }
 
+inline std::pair<bool, size_t> extract_length(const internal_json::JsonObjectMap& map) {
+    auto lIt = map.find("length");
+    if (lIt == map.end()) {
+        return std::pair<bool, size_t>(false, 0);
+    }
+    const auto& val = lIt->second;
+    if (val->type() != millijson::NUMBER) {
+        throw std::runtime_error("'simple_list.length' in the object metadata should be a JSON number");
+    }
+    return std::pair<bool, size_t>(true, reinterpret_cast<millijson::Number*>(val.get())->value);
+}
+
 }
 /**
  * @endcond
@@ -93,17 +105,31 @@ inline void validate(const std::filesystem::path& path, const ObjectMetadata& me
         }
     }
 
+    size_t len;
     if (format == "json.gz") {
         uzuki2::json::Options opt;
         opt.parallel = options.parallel_reads;
         auto gzreader = internal_other::open_reader<byteme::GzipFileReader>(path / "list_contents.json.gz");
-        uzuki2::json::validate(gzreader, num_external, opt);
+        auto loaded = uzuki2::json::parse<uzuki2::DummyProvisioner>(gzreader, uzuki2::DummyExternals(num_external), std::move(opt));
+        len = reinterpret_cast<const uzuki2::List*>(loaded.get())->size();
+
     } else if (format == "hdf5") {
         auto handle = ritsuko::hdf5::open_file(path / "list_contents.h5");
         auto ghandle = ritsuko::hdf5::open_group(handle, "simple_list");
-        uzuki2::hdf5::validate(ghandle, num_external);
+        auto loaded = uzuki2::hdf5::parse<uzuki2::DummyProvisioner>(ghandle, uzuki2::DummyExternals(num_external));
+        len = reinterpret_cast<const uzuki2::List*>(loaded.get())->size();
+
     } else {
         throw std::runtime_error("unknown format '" + format + "'");
+    }
+
+    if (version.ge(1, 1, 0)) {
+        auto len_info = internal::extract_length(metamap);
+        if (len_info.first) {
+            if (len_info.second != len) {
+                throw std::runtime_error("'simple_list.length' differs from the length of the list");
+            }
+        }
     }
 }
 
@@ -115,8 +141,13 @@ inline void validate(const std::filesystem::path& path, const ObjectMetadata& me
  */
 inline size_t height(const std::filesystem::path& path, const ObjectMetadata& metadata, Options& options) {
     const auto& metamap = internal_json::extract_typed_object_from_metadata(metadata.other, "simple_list");
-    std::string format = internal::extract_format(metamap);
 
+    auto len_info = internal::extract_length(metamap);
+    if (len_info.first) {
+        return len_info.second;
+    }
+
+    std::string format = internal::extract_format(metamap);
     if (format == "hdf5") {
         auto handle = ritsuko::hdf5::open_file(path / "list_contents.h5");
         auto lhandle = handle.openGroup("simple_list");
@@ -135,8 +166,7 @@ inline size_t height(const std::filesystem::path& path, const ObjectMetadata& me
         uzuki2::json::Options opt;
         opt.parallel = options.parallel_reads;
         auto gzreader = internal_other::open_reader<byteme::GzipFileReader>(path / "list_contents.json.gz");
-        uzuki2::DummyExternals ext(num_external);
-        auto ptr = uzuki2::json::parse<uzuki2::DummyProvisioner>(gzreader, std::move(ext), std::move(opt));
+        auto ptr = uzuki2::json::parse<uzuki2::DummyProvisioner>(gzreader, uzuki2::DummyExternals(num_external), std::move(opt));
         return reinterpret_cast<const uzuki2::List*>(ptr.get())->size();
     }
 }

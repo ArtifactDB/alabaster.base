@@ -22,7 +22,7 @@ namespace takane {
 namespace fasta_file {
 
 /**
- * If `Options::fasta_file_strict_check()` is provided, this enables stricter checking of the FASTA file contents and indices.
+ * If `Options::fasta_file_strict_check` is provided, this enables stricter checking of the FASTA file contents and indices.
  * By default, we just look at the first few bytes to verify the files. 
  *
  * @param path Path to the directory containing the FASTA file.

@@ -27,6 +27,8 @@ namespace takane {
  * @cond
  */
 bool derived_from(const std::string&, const std::string&, const Options& options);
+void validate(const std::filesystem::path&, const ObjectMetadata&, Options& options);
+bool satisfies_interface(const std::string&, const std::string&, const Options& options);
 /**
  * @endcond
  */
@@ -76,7 +78,7 @@ inline void validate_coordinates(const std::filesystem::path& path, size_t ncols
     }
 }
 
-inline void validate_image(const std::filesystem::path& path, size_t i, const std::string& format) {
+inline void validate_image(const std::filesystem::path& path, size_t i, const std::string& format, Options& options, const ritsuko::Version& version) {
     auto ipath = path / std::to_string(i);
 
     if (format == "PNG") {
@@ -96,12 +98,19 @@ inline void validate_image(const std::filesystem::path& path, size_t i, const st
             throw std::runtime_error("incorrect TIFF file signature for '" + ipath.string() + "'");
         }
 
+    } else if (format == "OTHER" && version.ge(1, 1, 0)) {
+        auto imeta = read_object_metadata(ipath);
+        if (!satisfies_interface(imeta.type, "IMAGE", options)) {
+            throw std::runtime_error("object in '" + ipath.string() + "' should satisfy the 'IMAGE' interface");
+        }
+        ::takane::validate(ipath, imeta, options);
+
     } else {
         throw std::runtime_error("image format '" + format + "' is not currently supported");
     }
 }
 
-inline void validate_images(const std::filesystem::path& path, size_t ncols, Options& options) {
+inline void validate_images(const std::filesystem::path& path, size_t ncols, Options& options, const ritsuko::Version& version) {
     auto image_dir = path / "images";
     auto mappath = image_dir / "mapping.h5";
     auto ihandle = ritsuko::hdf5::open_file(mappath);
@@ -198,7 +207,7 @@ inline void validate_images(const std::filesystem::path& path, size_t ncols, Opt
     // Now validating the images themselves.
     size_t num_images = image_formats.size();
     for (size_t i = 0; i < num_images; ++i) {
-        validate_image(image_dir, i, image_formats[i]);
+        validate_image(image_dir, i, image_formats[i], options, version);
     }
 
     size_t num_dir_obj = internal_other::count_directory_entries(image_dir);
@@ -228,7 +237,7 @@ inline void validate(const std::filesystem::path& path, const ObjectMetadata& me
 
     auto dims = ::takane::summarized_experiment::dimensions(path, metadata, options);
     internal::validate_coordinates(path, dims[1], options);
-    internal::validate_images(path, dims[1], options);
+    internal::validate_images(path, dims[1], options, version);
 }
 
 }

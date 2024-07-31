@@ -214,7 +214,6 @@ inline size_t height(const std::filesystem::path& path, [[maybe_unused]] const O
     return ritsuko::hdf5::get_1d_length(dhandle, false);
 }
 
-
 }
 
 }

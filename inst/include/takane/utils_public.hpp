@@ -87,6 +87,9 @@ inline ObjectMetadata read_object_metadata(const std::filesystem::path& path) tr
  * Most **takane** functions will accept a non-`const` reference to an `Options` object.
  * The lack of `const`-ness is intended to support custom functions that mutate some external variable, e.g., to collect statistics for certain object types.
  * While unusual, it is permissible for a **takane** function to modify the supplied `Options`, as long as that modification is reversed upon exiting the function.
+ *
+ * The possibility for modification means that calls to **takane** functions are effectively `const` but not thread-safe with respect to any single `Options` instance.
+ * If thread safety is needed, it is best achieved by creating a separate `Options` instance for use in each thread.
  */
 struct Options {
     /**
@@ -102,18 +105,28 @@ struct Options {
 public:
     /**
      * Custom registry of functions to be used by `validate()`.
+     * Each key is an object type and each value is a function that accepts the same arguments as `validate()`.
      * If a type is specified here, the custom function replaces the default.
      */
     std::unordered_map<std::string, std::function<void(const std::filesystem::path&, const ObjectMetadata&, Options&)> > custom_validate;
 
     /**
+     * Addtional validation function to run for all object types during a call to `validate()`, after running the (default or custom) type-specific validation function.
+     * Arguments for this function are as described for `validate()`.
+     */
+   std::function<void(const std::filesystem::path&, const ObjectMetadata&, Options&)> custom_global_validate;
+
+public:
+    /**
      * Custom registry of functions to be used by `dimensions()`.
+     * Each key is an object type and each value is a function that accepts the same arguments as `dimensions()`.
      * If a type is specified here, the custom function replaces the default. 
      */
     std::unordered_map<std::string, std::function<std::vector<size_t>(const std::filesystem::path&, const ObjectMetadata&, Options&)> > custom_dimensions;
 
     /**
      * Custom registry of functions to be used by `height()`.
+     * Each key is an object type and each value is a function that accepts the same arguments as `height()`.
      * If a type is specified here, the custom function replaces the default. 
      */
     std::unordered_map<std::string, std::function<size_t(const std::filesystem::path&, const ObjectMetadata& m, Options&)> > custom_height;
@@ -207,6 +220,13 @@ public:
      * It should throw an error if the GMT file is not valid, e.g., corrupted file, mismatched indices.
      */
     std::function<void(const std::filesystem::path&, const ObjectMetadata&, Options&)> gmt_file_strict_check;
+
+    /**
+     * Application-specific function to check the validity of a RDS file and its indices in `rds_file::validate()`.
+     * This should accept a path to the directory containing the RDS file, the object metadata and additional reading options.
+     * It should throw an error if the RDS file is not valid, e.g., corrupted file, mismatched indices.
+     */
+    std::function<void(const std::filesystem::path&, const ObjectMetadata&, Options&)> rds_file_strict_check;
 
     /**
      * Options to use for validating **chihaya** specifications in `delayed_array::validate()`.
