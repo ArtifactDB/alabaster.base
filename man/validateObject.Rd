@@ -5,6 +5,8 @@
 \alias{registerValidateObjectFunction}
 \alias{registerValidateObjectHeightFunction}
 \alias{registerValidateObjectDimensionsFunction}
+\alias{registerValidateObjectSatisfiesInterface}
+\alias{registerValidateObjectDerivedFrom}
 \title{Validate an object's on-disk representation}
 \usage{
 validateObject(path, metadata = NULL)
@@ -22,6 +24,14 @@ registerValidateObjectDimensionsFunction(
   fun,
   existing = c("old", "new", "error")
 )
+
+registerValidateObjectSatisfiesInterface(
+  type,
+  interface,
+  action = c("add", "remove")
+)
+
+registerValidateObjectDerivedFrom(type, parent, action = c("add", "remove"))
 }
 \arguments{
 \item{path}{String containing a path to a directory, itself created with a \code{\link{saveObject}} method.}
@@ -43,12 +53,21 @@ This may also be \code{NULL} to delete an existing registry from any of the func
 
 \item{existing}{Logical scalar indicating the action to take if a function has already been registered for \code{type} -
 keep the old or new function, or throw an error.}
+
+\item{interface}{String specifying the name of the interface that is represented by \code{type}.}
+
+\item{action}{String specifying whether to add or remove \code{type} from the list of types that implements \code{interface} or is derived from \code{parent}.}
+
+\item{parent}{String specifying the parent object from which \code{type} is derived.}
 }
 \value{
 For \code{validateObject}, \code{NULL} is returned invisibly upon success, otherwise an error is raised.
 
-For the \code{register*} functions, the supplied \code{fun} is added to the corresponding registry for \code{type}.
-If \code{fun = NULL}, any existing entry for \code{type} is removed.
+For the \code{registerValidObject*Function} functions, the supplied \code{fun} is added to the corresponding registry for \code{type}.
+If \code{fun = NULL}, any existing entry for \code{type} is removed; a logical scalar is returned indicating whether removal was performed.
+
+For the \code{registerValidateObjectSatisfiesInterface} and \code{registerValidateObjectDerivedFrom} functions, \code{type} is added to or removed from relevant list of types.
+A logical scalar is returned indicating whether the \code{type} was added or removed - this may be \code{FALSE} if \code{type} was already present or absent, respectively.
 }
 \description{
 Validate an object's on-disk representation against the \pkg{takane} specifications.

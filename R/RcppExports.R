@@ -73,3 +73,19 @@ register_any_duplicated <- function(set) {
     .Call(`_alabaster_base_register_any_duplicated`, set)
 }
 
+register_satisfies_interface <- function(type, interface) {
+    .Call(`_alabaster_base_register_satisfies_interface`, type, interface)
+}
+
+deregister_satisfies_interface <- function(type, interface) {
+    .Call(`_alabaster_base_deregister_satisfies_interface`, type, interface)
+}
+
+register_derived_from <- function(type, parent) {
+    .Call(`_alabaster_base_register_derived_from`, type, parent)
+}
+
+deregister_derived_from <- function(type, parent) {
+    .Call(`_alabaster_base_deregister_derived_from`, type, parent)
+}
+

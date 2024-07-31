@@ -83,3 +83,27 @@ test_that("conversion from C++ JSON to R list during validation works as expecte
     saveObjectFile(tmp, "foobar", list(foobar=2))
     expect_error(validateObject(tmp), "ARGGGGH");
 })
+
+test_that("interface registration works as expected", {
+    library(S4Vectors)
+    X <- DataFrame(X=S4Vectors::I(DataFrame(Y=1:10)))
+    tmp <- tempfile()
+    saveObject(X, tmp)
+
+    mtmp <- file.path(tmp, "other_annotations")
+    dir.create(mtmp)
+    saveObjectFile(mtmp, "foobar")
+
+    expect_error(validateObject(tmp), "'SIMPLE_LIST' interface");
+    registerValidateObjectSatisfiesInterface("foobar", "SIMPLE_LIST")
+    on.exit(registerValidateObjectSatisfiesInterface("foobar", "SIMPLE_LIST", action="remove"), add=TRUE, after=FALSE)
+
+    expect_error(validateObject(tmp), "no registered 'validate'");
+    registerValidateObjectFunction("foobar", function(path, metadata) {})
+    on.exit(registerValidateObjectFunction("foobar", NULL), add=TRUE, after=FALSE)
+
+    expect_error(validateObject(tmp), NA)
+
+    registerValidateObjectSatisfiesInterface("foobar", "SIMPLE_LIST", action="remove")
+    expect_error(validateObject(tmp), "'SIMPLE_LIST' interface");
+})

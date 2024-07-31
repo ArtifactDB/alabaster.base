@@ -19,12 +19,18 @@
 #' This may also be \code{NULL} to delete an existing registry from any of the functions mentioned above.
 #' @param existing Logical scalar indicating the action to take if a function has already been registered for \code{type} -
 #' keep the old or new function, or throw an error.
+#' @param interface String specifying the name of the interface that is represented by \code{type}.
+#' @param parent String specifying the parent object from which \code{type} is derived.
+#' @param action String specifying whether to add or remove \code{type} from the list of types that implements \code{interface} or is derived from \code{parent}.
 #' 
 #' @return 
 #' For \code{validateObject}, \code{NULL} is returned invisibly upon success, otherwise an error is raised.
 #'
-#' For the \code{register*} functions, the supplied \code{fun} is added to the corresponding registry for \code{type}.
-#' If \code{fun = NULL}, any existing entry for \code{type} is removed.
+#' For the \code{registerValidObject*Function} functions, the supplied \code{fun} is added to the corresponding registry for \code{type}.
+#' If \code{fun = NULL}, any existing entry for \code{type} is removed; a logical scalar is returned indicating whether removal was performed.
+#'
+#' For the \code{registerValidateObjectSatisfiesInterface} and \code{registerValidateObjectDerivedFrom} functions, \code{type} is added to or removed from relevant list of types.
+#' A logical scalar is returned indicating whether the \code{type} was added or removed - this may be \code{FALSE} if \code{type} was already present or absent, respectively.
 #'
 #' @seealso
 #' \url{https://github.com/ArtifactDB/takane}, for detailed specifications of the on-disk representation for various Bioconductor objects.
@@ -72,5 +78,27 @@ registerValidateObjectDimensionsFunction <- function(type, fun, existing=c("old"
         register_dimensions_function(type, fun, match.arg(existing))
     } else {
         deregister_dimensions_function(type);
+    }
+}
+
+#' @export
+#' @rdname validateObject
+registerValidateObjectSatisfiesInterface <- function(type, interface, action=c("add", "remove")) {
+    action <- match.arg(action)
+    if (action == "add") {
+        register_satisfies_interface(type, interface)
+    } else {
+        deregister_satisfies_interface(type, interface)
+    }
+}
+
+#' @export
+#' @rdname validateObject
+registerValidateObjectDerivedFrom <- function(type, parent, action=c("add", "remove")) {
+    action <- match.arg(action)
+    if (action == "add") {
+        register_derived_from(type, parent)
+    } else {
+        deregister_derived_from(type, parent)
     }
 }

@@ -210,6 +210,50 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// register_satisfies_interface
+Rcpp::RObject register_satisfies_interface(std::string type, std::string interface);
+RcppExport SEXP _alabaster_base_register_satisfies_interface(SEXP typeSEXP, SEXP interfaceSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::traits::input_parameter< std::string >::type type(typeSEXP);
+    Rcpp::traits::input_parameter< std::string >::type interface(interfaceSEXP);
+    rcpp_result_gen = Rcpp::wrap(register_satisfies_interface(type, interface));
+    return rcpp_result_gen;
+END_RCPP
+}
+// deregister_satisfies_interface
+Rcpp::RObject deregister_satisfies_interface(std::string type, std::string interface);
+RcppExport SEXP _alabaster_base_deregister_satisfies_interface(SEXP typeSEXP, SEXP interfaceSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::traits::input_parameter< std::string >::type type(typeSEXP);
+    Rcpp::traits::input_parameter< std::string >::type interface(interfaceSEXP);
+    rcpp_result_gen = Rcpp::wrap(deregister_satisfies_interface(type, interface));
+    return rcpp_result_gen;
+END_RCPP
+}
+// register_derived_from
+Rcpp::RObject register_derived_from(std::string type, std::string parent);
+RcppExport SEXP _alabaster_base_register_derived_from(SEXP typeSEXP, SEXP parentSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::traits::input_parameter< std::string >::type type(typeSEXP);
+    Rcpp::traits::input_parameter< std::string >::type parent(parentSEXP);
+    rcpp_result_gen = Rcpp::wrap(register_derived_from(type, parent));
+    return rcpp_result_gen;
+END_RCPP
+}
+// deregister_derived_from
+Rcpp::RObject deregister_derived_from(std::string type, std::string parent);
+RcppExport SEXP _alabaster_base_deregister_derived_from(SEXP typeSEXP, SEXP parentSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::traits::input_parameter< std::string >::type type(typeSEXP);
+    Rcpp::traits::input_parameter< std::string >::type parent(parentSEXP);
+    rcpp_result_gen = Rcpp::wrap(deregister_derived_from(type, parent));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_alabaster_base_check_csv", (DL_FUNC) &_alabaster_base_check_csv, 3},
@@ -230,6 +274,10 @@ static const R_CallMethodDef CallEntries[] = {
     {"_alabaster_base_register_dimensions_function", (DL_FUNC) &_alabaster_base_register_dimensions_function, 3},
     {"_alabaster_base_deregister_dimensions_function", (DL_FUNC) &_alabaster_base_deregister_dimensions_function, 1},
     {"_alabaster_base_register_any_duplicated", (DL_FUNC) &_alabaster_base_register_any_duplicated, 1},
+    {"_alabaster_base_register_satisfies_interface", (DL_FUNC) &_alabaster_base_register_satisfies_interface, 2},
+    {"_alabaster_base_deregister_satisfies_interface", (DL_FUNC) &_alabaster_base_deregister_satisfies_interface, 2},
+    {"_alabaster_base_register_derived_from", (DL_FUNC) &_alabaster_base_register_derived_from, 2},
+    {"_alabaster_base_deregister_derived_from", (DL_FUNC) &_alabaster_base_deregister_derived_from, 2},
     {NULL, NULL, 0}
 };
 

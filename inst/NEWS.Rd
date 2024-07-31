@@ -14,6 +14,9 @@ Users can override this by calling \code{I()} on elements that they want to keep
 \item Open HDF5 files in read-only mode to avoid permission-related problems for \code{readObject()}-dispatched functions.
 
 \item Store numbers at maximum precision when saving lists in the JSON format via \code{saveObject()}.
+
+\item Added \code{registerValidateObjectSatisfiesInterface()} and \code{registerValidateObjectDerivedFrom()},
+to allow developers to declare that custom subclasses satisfy an interface or have an inheritance relationship, respectively. 
 }}
 
 \section{Version 1.4.0}{\itemize{

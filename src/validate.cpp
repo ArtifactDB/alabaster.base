@@ -220,3 +220,50 @@ Rcpp::RObject register_any_duplicated(bool set) {
     }
     return R_NilValue;
 }
+
+//[[Rcpp::export(rng=false)]]
+Rcpp::RObject register_satisfies_interface(std::string type, std::string interface) {
+    auto& known = global_options.custom_satisfies_interface[interface];
+    if (known.find(type) != known.end()) {
+        return Rcpp::LogicalVector::create(false);
+    } else {
+        known.insert(type);
+        return Rcpp::LogicalVector::create(true);
+    }
+}
+
+//[[Rcpp::export(rng=false)]]
+Rcpp::RObject deregister_satisfies_interface(std::string type, std::string interface) {
+    auto& known = global_options.custom_satisfies_interface[interface];
+    auto kIt = known.find(type);
+    if (kIt != known.end()) {
+        known.erase(kIt);
+        return Rcpp::LogicalVector::create(true);
+    } else {
+        return Rcpp::LogicalVector::create(false);
+    }
+}
+
+
+//[[Rcpp::export(rng=false)]]
+Rcpp::RObject register_derived_from(std::string type, std::string parent) {
+    auto& known = global_options.custom_derived_from[parent];
+    if (known.find(type) != known.end()) {
+        return Rcpp::LogicalVector::create(false);
+    } else {
+        known.insert(type);
+        return Rcpp::LogicalVector::create(true);
+    }
+}
+
+//[[Rcpp::export(rng=false)]]
+Rcpp::RObject deregister_derived_from(std::string type, std::string parent) {
+    auto& known = global_options.custom_derived_from[parent];
+    auto kIt = known.find(type);
+    if (kIt != known.end()) {
+        known.erase(kIt);
+        return Rcpp::LogicalVector::create(true);
+    } else {
+        return Rcpp::LogicalVector::create(false);
+    }
+}
