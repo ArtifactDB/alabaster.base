@@ -130,10 +130,10 @@ test_that("staging of weird objects within DFs works correctly", {
 
     # Works in the new world.
     tmp2 <- tempfile()
-    saveObject(df, tmp2)
+    saveObject(input, tmp2)
     expect_identical(readObjectFile(tmp2)$type, "data_frame")
     round2 <- readDataFrame(tmp2)
-    expect_identical(round2, df)
+    expect_identical(round2, input)
 })
 
 test_that("staging of uncompressed Gzip works correctly", {

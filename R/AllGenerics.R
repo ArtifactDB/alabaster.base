@@ -70,9 +70,23 @@ setGeneric("saveObject", function(x, path, ...) {
         }
     }
 
+    # Only validate once we're outside of nested calls, as each parent should
+    # validate its children; separate validation of each child is redundant.
+    do_validate <- !is_nested$status
+    if (do_validate) {
+        is_nested$status <- TRUE
+        on.exit({ is_nested$status <- FALSE }, add=TRUE, after=FALSE)
+    }
+
     standardGeneric("saveObject")
-    validateObject(path)
+
+    if (do_validate) {
+        validateObject(path)
+    }
 })
+
+is_nested <- new.env()
+is_nested$status <- FALSE
 
 #######################################
 ########### OLD STUFF HERE ############
