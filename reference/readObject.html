@@ -4,7 +4,7 @@ This is done by dispatching to an appropriate loading function based on the type
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
 <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
 <![endif]--></head><body data-spy="scroll" data-target="#toc">
-    
+
 
     <div class="container template-reference-topic">
       <header><div class="navbar navbar-default navbar-fixed-top" role="navigation">
@@ -18,7 +18,7 @@ This is done by dispatching to an appropriate loading function based on the type
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">alabaster.base</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.5.3</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.5.4</span>
       </span>
     </div>
 
@@ -29,7 +29,7 @@ This is done by dispatching to an appropriate loading function based on the type
 <li class="dropdown">
   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Articles
-     
+
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu"><li>
@@ -40,13 +40,13 @@ This is done by dispatching to an appropriate loading function based on the type
   </div><!--/.container -->
 </div><!--/.navbar -->
 
-      
+
 
       </header><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Read an object from disk</h1>
-    
+
     <div class="hidden name"><code>readObject.Rd</code></div>
     </div>
 
@@ -65,59 +65,55 @@ This is done by dispatching to an appropriate loading function based on the type
 
     <div id="arguments">
     <h2>Arguments</h2>
-    <dl><dt>path</dt>
+
+
+<dl><dt id="arg-path">path<a class="anchor" aria-label="anchor" href="#arg-path"></a></dt>
 <dd><p>String containing a path to a directory, itself created with a <code><a href="saveObject.html">saveObject</a></code> method.</p></dd>
 
 
-<dt>metadata</dt>
+<dt id="arg-metadata">metadata<a class="anchor" aria-label="anchor" href="#arg-metadata"></a></dt>
 <dd><p>Named list containing metadata for the object - most importantly, the <code>type</code> field that controls dispatch to the correct loading function.
 If <code>NULL</code>, this is automatically read by <code><a href="readObjectFile.html">readObjectFile</a>(path)</code>.</p></dd>
 
 
-<dt>...</dt>
+<dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
 <dd><p>Further arguments to pass to individual methods.</p></dd>
 
 
-<dt>type</dt>
+<dt id="arg-type">type<a class="anchor" aria-label="anchor" href="#arg-type"></a></dt>
 <dd><p>String specifying the name of type of the object.</p></dd>
 
 
-<dt>fun</dt>
+<dt id="arg-fun">fun<a class="anchor" aria-label="anchor" href="#arg-fun"></a></dt>
 <dd><p>A loading function that accepts <code>path</code>, <code>metadata</code> and <code>...</code> (in that order), and returns the associated object.
 This may also be <code>NULL</code> to delete an existing entry in the registry.</p></dd>
 
 
-<dt>existing</dt>
+<dt id="arg-existing">existing<a class="anchor" aria-label="anchor" href="#arg-existing"></a></dt>
 <dd><p>Logical scalar indicating the action to take if a function has already been registered for <code>type</code> -
 keep the old or new function, or throw an error.</p></dd>
 
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    
-
-<p>For <code>readObject</code>, an object created from the on-disk representation in <code>path</code>.</p>
-
-
+    <p>For <code>readObject</code>, an object created from the on-disk representation in <code>path</code>.</p>
 <p>For <code>readObjectFunctionRegistry</code>, a named list of functions used to load each object type.</p>
-
-
 <p>For <code>registerReadObjectFunction</code>, the function is added to the registry.</p>
     </div>
     <div id="comments-for-extension-developers">
     <h2>Comments for extension developers</h2>
-    
+
 
 <p><code>readObject</code> uses an internal registry of functions to decide how an object should be loaded into memory.
 Developers of alabaster extensions can add extra functions to this registry, usually in the <code><a href="https://rdrr.io/r/base/ns-hooks.html" class="external-link">.onLoad</a></code> function of their packages.
 Alternatively, extension developers can request the addition of their packages to default registry.</p>
-<p>If a loading function makes use of additional arguments in <code>...</code>, 
+<p>If a loading function makes use of additional arguments in <code>...</code>,
 those arguments should be prefixed by the name of the object type for each method, e.g., <code>simple_list.parallel</code>.
 This avoids problems with conflicts in the interpretation of identically named arguments between different functions.
 Unlike the <code>...</code> arguments in <code><a href="saveObject.html">saveObject</a></code>, we prefix by the object type instead of the output class, as the former is used for dispatch here.</p>
 <p>When writing loading functions for complex classes, extension developers may need to load child objects to compose the output object.
 In such cases, developers should use <code><a href="altReadObject.html">altReadObject</a></code> on the child subdirectories, rather than calling <code>readObject</code> directly.
-This ensures that any application-level overrides of the loading functions are respected. 
+This ensures that any application-level overrides of the loading functions are respected.
 It is also expected that arguments in <code>...</code> are forwarded to internal <code><a href="altReadObject.html">altReadObject</a></code> calls.</p>
 <p>Developers can manually control <code>readObject</code> dispatch by suppling a <code>metadata</code> list where <code>metadata$type</code> is set to the desired object type.
 This pattern is commonly used inside the loading function for a subclass -
@@ -126,7 +122,7 @@ an instance of the base class is first constructed by an internal <code>readObje
     </div>
     <div id="comments-for-application-developers">
     <h2>Comments for application developers</h2>
-    
+
 
 <p>Application developers can override <code>readObject</code> by specifying a custom function in <code><a href="altReadObject.html">altReadObject</a></code>.
 This can be used to point to a different registry of reading functions, to perform pre- or post-reading actions, etc.
@@ -174,15 +170,15 @@ the <code>OBJECT</code> metadata can then be passed to the <code>metadata</code>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.9.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
 </div>
 
       </footer></div>
 
-  
 
 
-  
+
+
 
   </body></html>
 
