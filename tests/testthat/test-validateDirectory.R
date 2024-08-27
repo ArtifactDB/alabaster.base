@@ -23,6 +23,18 @@ test_that("validateDirectory works as expected", {
     expect_error(validateDirectory(tmp), NA)
 })
 
+test_that("validateDirectory works as expected in the new world", {
+    tmp <- tempfile()
+    dir.create(tmp, recursive=TRUE)
+
+    # Mocking up a directory.
+    saveObject(df, file.path(tmp, "foo"))
+    dir.create(file.path(tmp, "whee"))
+    saveObject(df, file.path(tmp, "whee", "stuff"))
+
+    expect_error(validateDirectory(tmp), NA)
+})
+
 test_that("validateDirectory throws with invalid metadata", {
     tmp <- tempfile()
     dir.create(tmp, recursive=TRUE)
@@ -45,6 +57,18 @@ test_that("validateDirectory throws with invalid objects", {
 
     expect_error(validateDirectory(tmp), NA)
     expect_error(validateDirectory(tmp, attempt.load=TRUE), "foo/simple.csv.gz")
+})
+
+test_that("validateDirectory throws in the new world", {
+    tmp <- tempfile()
+    dir.create(tmp, recursive=TRUE)
+
+    # Mocking up a directory.
+    saveObject(df, file.path(tmp, "foo"))
+    dir.create(file.path(tmp, "bar"))
+    write(file=file.path(tmp, "bar", "OBJECT"), '[ "WHEEE" ]')
+
+    expect_error(validateDirectory(tmp), "JSON object")
 })
 
 test_that("validateDirectory throws with inconsistent paths", {

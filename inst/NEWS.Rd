@@ -17,6 +17,9 @@ Users can override this by calling \code{I()} on elements that they want to keep
 
 \item Added \code{registerValidateObjectSatisfiesInterface()} and \code{registerValidateObjectDerivedFrom()},
 to allow developers to declare that custom subclasses satisfy an interface or have an inheritance relationship, respectively. 
+
+\item Updated \code{validateDirectory()} so that it works with a directory of objects saved via \code{saveObject()}.
+Objects saved under the old regime (i.e., \code{stageObject()}) are auto-detected but can also be explicitly validated by setting \code{legacy=FALSE}.
 }}
 
 \section{Version 1.4.0}{\itemize{

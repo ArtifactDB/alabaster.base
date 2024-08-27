@@ -1,38 +1,18 @@
-#' Check if a staging directory is valid
+#' Validate a directory of objects
 #'
-#' Check whether a staging directory is valid in terms of its structure and metadata.
+#' Check whether each object in a directory is valid by calling \code{\link{validateObject}} on each non-nested object.
 #'
-#' @param dir String containing the path to a staging directory.
-#' @param validate.metadata Whether to validate each metadata JSON file against the schema.
-#' @param schema.locations Character vector containing the name of the package containing the JSON schemas.
-#' Only used if \code{validate.metadata=TRUE}; if \code{NULL}, defaults to the locations described in \code{?\link{loadObject}}.
-#' @param attempt.load Whether to validate each object by attempting to load it into memory.
+#' @param dir String containing the path to a directory with subdirectories populated by \code{\link{saveObject}}.
+#' @param legacy Logical scalar indicating whether to validate a directory with legacy objects (created by the old \code{stageObject}).
+#' If \code{NULL}, this is auto-detected from the contents of \code{dir}.
+#' @param ... Further arguments to use when \code{legacy=TRUE}, for back-compatibility only.
 #'
-#' @return \code{NULL} invisibly on success, otherwise an error is raised.
+#' @return Character vector of the paths inside \code{dir} that were validated, invisibly.
+#' If any validation failed, an error is raised.
 #'
 #' @details
-#' This function verifies that the restrictions described in \code{\link{stageObject}} are respected, namely:
-#' \itemize{
-#' \item Each object is represented by subdirectory with a single JSON document.
-#' \item Each JSON metadata document's \code{path} property exists and is consistent with the path of the document itself.
-#' \item Child objects are nested in subdirectories of the parent object's directory.
-#' \item Child objects have the \code{is_child} property set to true in their metadata.
-#' \item Each child object is referenced exactly once in its parent object's metadata.
-#' }
-#'
-#' This function will also check that redirections are valid:
-#' \itemize{
-#' \item The \code{path} property of the redirection does \emph{not} exist and is consistent with the path of the redirection document.
-#' \item The redirection target location exists in the directory.
-#' }
-#'
-#' If \code{validate.metadata=TRUE}, this function will validate each metadata file against its specified JSON schema.
-#' Applications may set \code{schema.locations} to point to an appropriate set of schemas other than the defaults in \pkg{alabaster.base}.
-#'
-#' If \code{attempt.load=TRUE}, this function will attempt to load each non-child object into memory.
-#' This serves as an additional validation step to check that the contents of each file are valid (at least, according to the current \code{\link{altLoadObject}} function).
-#' However, it may be time-consuming and so defaults to \code{FALSE}.
-#' Child objects are assumed to be loaded as part of their parents and are not explicitly checked.
+#' We assume that the process of validating an object will call \code{\link{validateObject}} on any nested objects.
+#' This allows us to skip explicit calls to \code{\link{validateObject}} on each component of a complex object. 
 #'
 #' @author Aaron Lun
 #' @examples
@@ -48,15 +28,35 @@
 #' # Mocking up the directory:
 #' tmp <- tempfile()
 #' dir.create(tmp, recursive=TRUE)
-#' writeMetadata(stageObject(df, tmp, "foo"), tmp)
+#' saveObject(df, file.path(tmp, "foo"))
 #' 
 #' # Checking that it's valid:
 #' validateDirectory(tmp)
 #'
-#' @export
+#' # Adding an invalid object:
+#' dir.create(file.path(tmp, "bar"))
+#' write(file=file.path(tmp, "bar", "OBJECT"), '[ "WHEEE" ]')
+#' try(validateDirectory(tmp))
+#'
 #' @aliases checkValidDirectory
-#' @importFrom jsonlite fromJSON
-validateDirectory <- function(dir, validate.metadata = TRUE, schema.locations = NULL, attempt.load = FALSE) {
+#' @export
+validateDirectory <- function(dir, legacy=NULL, ...) {
+    if (is.null(legacy)) {
+        legacy <- length(list.files(dir, recursive=TRUE, pattern="^OBJECT$")) == 0L
+    }
+
+    if (!legacy) {
+        objects <- listObjects(dir)
+        for (x in objects$path) {
+            tryCatch(validateObject(file.path(dir, x)), error=function(e) stop("failed to validate '", x, "'; ", e$message))
+        }
+        invisible(objects$path)
+    } else {
+        legacy.validateDirectory(dir, ...)
+    }
+}
+
+legacy.validateDirectory <- function(dir, validate.metadata = TRUE, schema.locations = NULL, attempt.load = FALSE) {
     all.files <- list.files(dir, recursive=TRUE)
     is.json <- endsWith(all.files, ".json")
     meta.files <- all.files[is.json]
