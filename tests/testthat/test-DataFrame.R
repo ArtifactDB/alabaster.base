@@ -625,3 +625,55 @@ test_that("DFs handle POSIX times correctly", {
     saveObject(round2, tmp3)
     expect_identical(readDataFrame(tmp3), round2)
 })
+
+test_that("staging of arrays within DFs works correctly", {
+    skip_if_not_installed("alabaster.matrix")
+    tmp <- tempfile()
+    dir.create(tmp)
+
+    input <- DataFrame(A=1:3, X=0, Y=0)
+    input$X <- array(runif(3)) # 1D array
+    input$Y <- cbind(runif(3)) # matrix with 1 column 
+    input$Z <- cbind(V=runif(3), Z=rnorm(3)) # matrix with 2 columns.
+    info <- stageObject(input, tmp, path="WHEE")
+
+    suppressWarnings(roundtrip <- loadDataFrame(info, project=tmp))
+    input$X <- as.numeric(input$X) # strip 1D arrays as these are rarely desirable.
+    roundtrip$Y <- as.matrix(roundtrip$Y)
+    roundtrip$Z <- as.matrix(roundtrip$Z)
+    expect_equal(roundtrip, input)
+
+    # Works in the new world.
+    tmp <- tempfile()
+    saveObject(input, tmp)
+    roundtrip <- readObject(tmp)
+    roundtrip$Y <- as.matrix(roundtrip$Y)
+    roundtrip$Z <- as.matrix(roundtrip$Z)
+    expect_identical(roundtrip, input)
+})
+
+test_that("staging of arrays continues to work with character matrices", {
+    skip_if_not_installed("alabaster.matrix")
+    tmp <- tempfile()
+    dir.create(tmp)
+
+    input <- DataFrame(A=1:3, X=0, Y=0)
+    input$X <- array(letters[1:3]) # 1D array
+    input$Y <- cbind(LETTERS[1:3]) # matrix with 1 column 
+    input$Z <- cbind(V=letters[4:6], Z=LETTERS[4:6]) # matrix with 2 columns.
+    info <- stageObject(input, tmp, path="WHEE")
+
+    suppressWarnings(roundtrip <- loadDataFrame(info, project=tmp))
+    input$X <- as.character(input$X) # strip 1D arrays as these are rarely desirable.
+    roundtrip$Y <- as.matrix(roundtrip$Y)
+    roundtrip$Z <- as.matrix(roundtrip$Z)
+    expect_equal(roundtrip, input)
+
+    # Works in the new world.
+    tmp <- tempfile()
+    saveObject(input, tmp)
+    roundtrip <- readObject(tmp)
+    roundtrip$Y <- as.matrix(roundtrip$Y)
+    roundtrip$Z <- as.matrix(roundtrip$Z)
+    expect_identical(roundtrip, input)
+})

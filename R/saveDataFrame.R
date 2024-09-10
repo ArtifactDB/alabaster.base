@@ -70,10 +70,7 @@ setMethod("saveObject", "DataFrame", function(x, path, ...) {
         coltype <- NULL
         colformat <- NULL
 
-        if (length(dim(col)) > 1) {
-            is.other <- TRUE
-
-        } else if (is.factor(col)) {
+        if (is.factor(col)) {
             local({
                 colhandle <- H5Gcreate(gdhandle, data.name)
                 on.exit(H5Gclose(colhandle), add=TRUE, after=FALSE)
@@ -96,9 +93,13 @@ setMethod("saveObject", "DataFrame", function(x, path, ...) {
             sanitized <- .sanitize_date(col)
 
         } else if (is.atomic(col)) {
-            coerced <- .remap_atomic_type(col)
-            coltype <- coerced$type
-            sanitized <- coerced$values
+            if (length(dim(col)) > 1) {
+                is.other <- TRUE
+            } else {
+                coerced <- .remap_atomic_type(col)
+                coltype <- coerced$type
+                sanitized <- coerced$values
+            }
 
         } else {
             is.other <- TRUE
