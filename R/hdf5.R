@@ -67,6 +67,7 @@ h5_create_vector <- function(handle, name, len, type, compress=6, chunks=NULL, s
     H5Pset_obj_track_times(phandle, FALSE)
 
     if (compress > 0 && len) {
+        H5Pset_shuffle(phandle)
         H5Pset_deflate(phandle, level=compress)
         if (is.null(chunks)) {
             chunks <- h5_guess_vector_chunks(len)
