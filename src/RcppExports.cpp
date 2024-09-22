@@ -76,6 +76,44 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// collect_character_attributes
+Rcpp::List collect_character_attributes(Rcpp::StringVector x);
+RcppExport SEXP _alabaster_base_collect_character_attributes(SEXP xSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::traits::input_parameter< Rcpp::StringVector >::type x(xSEXP);
+    rcpp_result_gen = Rcpp::wrap(collect_character_attributes(x));
+    return rcpp_result_gen;
+END_RCPP
+}
+// lowest_double
+double lowest_double();
+RcppExport SEXP _alabaster_base_lowest_double() {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    rcpp_result_gen = Rcpp::wrap(lowest_double());
+    return rcpp_result_gen;
+END_RCPP
+}
+// highest_double
+double highest_double();
+RcppExport SEXP _alabaster_base_highest_double() {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    rcpp_result_gen = Rcpp::wrap(highest_double());
+    return rcpp_result_gen;
+END_RCPP
+}
+// collect_numeric_attributes
+Rcpp::List collect_numeric_attributes(Rcpp::NumericVector x);
+RcppExport SEXP _alabaster_base_collect_numeric_attributes(SEXP xSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type x(xSEXP);
+    rcpp_result_gen = Rcpp::wrap(collect_numeric_attributes(x));
+    return rcpp_result_gen;
+END_RCPP
+}
 // not_rfc3339
 Rcpp::LogicalVector not_rfc3339(Rcpp::CharacterVector x);
 RcppExport SEXP _alabaster_base_not_rfc3339(SEXP xSEXP) {
@@ -262,6 +300,10 @@ static const R_CallMethodDef CallEntries[] = {
     {"_alabaster_base_any_actually_numeric_na", (DL_FUNC) &_alabaster_base_any_actually_numeric_na, 1},
     {"_alabaster_base_is_actually_numeric_na", (DL_FUNC) &_alabaster_base_is_actually_numeric_na, 1},
     {"_alabaster_base_choose_numeric_missing_placeholder", (DL_FUNC) &_alabaster_base_choose_numeric_missing_placeholder, 1},
+    {"_alabaster_base_collect_character_attributes", (DL_FUNC) &_alabaster_base_collect_character_attributes, 1},
+    {"_alabaster_base_lowest_double", (DL_FUNC) &_alabaster_base_lowest_double, 0},
+    {"_alabaster_base_highest_double", (DL_FUNC) &_alabaster_base_highest_double, 0},
+    {"_alabaster_base_collect_numeric_attributes", (DL_FUNC) &_alabaster_base_collect_numeric_attributes, 1},
     {"_alabaster_base_not_rfc3339", (DL_FUNC) &_alabaster_base_not_rfc3339, 1},
     {"_alabaster_base_load_csv", (DL_FUNC) &_alabaster_base_load_csv, 4},
     {"_alabaster_base_load_list_hdf5", (DL_FUNC) &_alabaster_base_load_list_hdf5, 3},

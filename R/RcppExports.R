@@ -25,6 +25,22 @@ choose_numeric_missing_placeholder <- function(x) {
     .Call(`_alabaster_base_choose_numeric_missing_placeholder`, x)
 }
 
+collect_character_attributes <- function(x) {
+    .Call(`_alabaster_base_collect_character_attributes`, x)
+}
+
+lowest_double <- function() {
+    .Call(`_alabaster_base_lowest_double`)
+}
+
+highest_double <- function() {
+    .Call(`_alabaster_base_highest_double`)
+}
+
+collect_numeric_attributes <- function(x) {
+    .Call(`_alabaster_base_collect_numeric_attributes`, x)
+}
+
 not_rfc3339 <- function(x) {
     .Call(`_alabaster_base_not_rfc3339`, x)
 }
