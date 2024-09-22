@@ -6,7 +6,7 @@
 Rcpp::List collect_character_attributes(Rcpp::StringVector x) {
     bool has_missing = false;
     bool has_NA = false;
-    bool has_NA_ = false;
+    bool has__NA = false;
     int max_len = 0;
     bool has_non_utf8 = false;
 
@@ -19,8 +19,8 @@ Rcpp::List collect_character_attributes(Rcpp::StringVector x) {
 
         if (s == "NA") {
             has_NA = true;
-        } else if (s == "NA_") {
-            has_NA_ = true;
+        } else if (s == "_NA") {
+            has__NA = true;
         }
 
         max_len = std::max(max_len, static_cast<int>(Rf_length(s.get_sexp()))); 
@@ -34,7 +34,7 @@ Rcpp::List collect_character_attributes(Rcpp::StringVector x) {
     return Rcpp::List::create(
         Rcpp::Named("missing") = Rcpp::LogicalVector::create(has_missing),
         Rcpp::Named("has_NA") = Rcpp::LogicalVector::create(has_NA),
-        Rcpp::Named("has_NA_") = Rcpp::LogicalVector::create(has_NA_),
+        Rcpp::Named("has__NA") = Rcpp::LogicalVector::create(has__NA),
         Rcpp::Named("max_len") = Rcpp::IntegerVector::create(max_len),
         Rcpp::Named("has_non_utf8") = Rcpp::LogicalVector::create(has_non_utf8)
     );

@@ -38,7 +38,7 @@
 #' \itemize{
 #' \item \code{missing}, logical scalar indicating whether any values in \code{x} are \code{NA}.
 #' \item \code{has_NA}, logical scalar indicating whether the \code{"NA"} string is present in \code{x}.
-#' \item \code{has_NA_}, logical scalar indicating whether the \code{"NA_"} string is present in \code{x}.
+#' \item \code{has__NA}, logical scalar indicating whether the \code{"_NA"} string is present in \code{x}.
 #' \item \code{max_len}, integer scalar specifying the maximum length of the strings in \code{x}.
 #' \item \code{has_non_utf8}, logical scalar indicating that \code{x} contains non-UTF8-encoded strings (e.g., Latin-1).
 #' }
@@ -55,6 +55,9 @@
 #' \item \code{other}, other attributes of \code{x} (e.g., number of non-zero elements for sparse vectors).
 #' These should be stored in an \code{other} field in the named list returned by \code{collect_*_ attributes}.
 #' }
+#'
+#' The \code{optimize_string_storage} function has an additional \code{has_non_utf8} field,
+#' specifying whether \code{x} should be converted to UTF-8 via \code{\link{enc2utf8}}.
 #'
 #' @author Aaron Lun
 #' @aliases
@@ -250,7 +253,7 @@ optimize_string_storage <- function(x, fallback = NULL) {
     if (attr$missing) {
         if (!attr[["has_NA"]]) {
             placeholder <- "NA"
-        } else if (!attr[["has_NA_"]]) {
+        } else if (!attr[["has__NA"]]) {
             placeholder <- "_NA"
         } else {
             if (is.null(fallback)) {
@@ -266,7 +269,7 @@ optimize_string_storage <- function(x, fallback = NULL) {
     H5Tset_size(tid, max(1L, attr$max_len))
     H5Tset_cset(tid, "UTF8")
 
-    list(type=tid, placeholder=placeholder, other=attr$other)
+    list(type=tid, placeholder=placeholder, has_non_utf8=attr$has_non_utf8, other=attr$other)
 }
 
 #' @export
@@ -285,9 +288,9 @@ setMethod("collect_boolean_attributes", "array", .collect_boolean_attributes_raw
 #' @rdname optimize_storage
 optimize_boolean_storage <- function(x) {
     attr <- collect_boolean_attributes(x)
+    placeholder <- NULL
     if (attr$missing) {
-        list(type="H5T_NATIVE_INT8", placeholder=-1L, other=attr$other)
-    } else {
-        list(type="H5T_NATIVE_INT8", placeholder=NULL, other=attr$other)
+        placeholder <- -1L
     }
+    list(type="H5T_NATIVE_INT8", placeholder=placeholder, other=attr$other)
 }
