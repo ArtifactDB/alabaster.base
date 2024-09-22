@@ -19,7 +19,7 @@ Rcpp::List collect_numeric_attributes(Rcpp::NumericVector x) {
     uint8_t has_nan = 0;
     uint8_t has_posinf = 0;
     uint8_t has_neginf = 0;
-    uint8_t non_integer = 1;
+    uint8_t non_integer = 0;
     uint8_t has_lowest = 0;
     uint8_t has_highest = 0;
     const double lowest = lowest_double();
@@ -43,7 +43,7 @@ Rcpp::List collect_numeric_attributes(Rcpp::NumericVector x) {
 
     double minv = R_PosInf, maxv = R_NegInf;
     if (!non_integer) {
-        if (has_missing) {
+        if (!has_missing) {
             for (auto y : x) {
                 minv = std::min(y, minv);
                 maxv = std::max(y, maxv);

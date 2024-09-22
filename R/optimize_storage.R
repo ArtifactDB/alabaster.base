@@ -40,7 +40,6 @@
 #' \item \code{has_NA}, logical scalar indicating whether the \code{"NA"} string is present in \code{x}.
 #' \item \code{has__NA}, logical scalar indicating whether the \code{"_NA"} string is present in \code{x}.
 #' \item \code{max_len}, integer scalar specifying the maximum length of the strings in \code{x}.
-#' \item \code{has_non_utf8}, logical scalar indicating that \code{x} contains non-UTF8-encoded strings (e.g., Latin-1).
 #' }
 #'
 #' For \code{collect_boolean_attributes}, a named list containing:
@@ -55,9 +54,6 @@
 #' \item \code{other}, other attributes of \code{x} (e.g., number of non-zero elements for sparse vectors).
 #' These should be stored in an \code{other} field in the named list returned by \code{collect_*_ attributes}.
 #' }
-#'
-#' The \code{optimize_string_storage} function has an additional \code{has_non_utf8} field,
-#' specifying whether \code{x} should be converted to UTF-8 via \code{\link{enc2utf8}}.
 #'
 #' @author Aaron Lun
 #' @aliases
@@ -238,11 +234,32 @@ optimize_number_storage <- function(x, fallback = chooseMissingPlaceholderForHdf
 #' @rdname optimize_storage
 setGeneric("collect_string_attributes", function(x) standardGeneric("collect_string_attributes"))
 
-#' @export
-setMethod("collect_string_attributes", "character", collect_character_attributes)
+.collect_string_attributes_raw <- function(x) {
+    attr <- collect_character_attributes(x)
+
+    # Unfortunately, we need to throw an error, because if we need to change
+    # the encoding (e.g., with enc2utf8), the maximum length of each string in
+    # bytes may no longer be correct due to changes of the multi-byte
+    # characters. So, coercions should be done before 'x' enters this function.
+    if (attr$has_native) {
+        info <- l10n_info()
+        if (!info[["UTF-8"]]) {
+            stop("detected natively encoded strings in a non-UTF-8 locale")
+        }
+    } else if (attr$has_non_utf8) {
+        stop("detected non-UTF-8-encoded strings")
+    }
+
+    attr$has_native <- NULL
+    attr$has_non_utf8 <- NULL
+    attr
+}
 
 #' @export
-setMethod("collect_string_attributes", "array", collect_character_attributes)
+setMethod("collect_string_attributes", "character", .collect_string_attributes_raw)
+
+#' @export
+setMethod("collect_string_attributes", "array", .collect_string_attributes_raw)
 
 #' @export
 #' @rdname optimize_storage
@@ -269,14 +286,14 @@ optimize_string_storage <- function(x, fallback = NULL) {
     H5Tset_size(tid, max(1L, attr$max_len))
     H5Tset_cset(tid, "UTF8")
 
-    list(type=tid, placeholder=placeholder, has_non_utf8=attr$has_non_utf8, other=attr$other)
+    list(type=tid, placeholder=placeholder, other=attr$other)
 }
 
 #' @export
 #' @rdname optimize_storage
 setGeneric("collect_boolean_attributes", function(x) standardGeneric("collect_boolean_attributes"))
 
-.collect_boolean_attributes_raw <- function(x) list(list(missing=anyNA(x)))
+.collect_boolean_attributes_raw <- function(x) list(missing=anyNA(x))
 
 #' @export
 setMethod("collect_boolean_attributes", "logical", .collect_boolean_attributes_raw)

@@ -75,7 +75,6 @@ For \code{collect_string_attributes}, a named list containing:
 \item \code{has_NA}, logical scalar indicating whether the \code{"NA"} string is present in \code{x}.
 \item \code{has__NA}, logical scalar indicating whether the \code{"_NA"} string is present in \code{x}.
 \item \code{max_len}, integer scalar specifying the maximum length of the strings in \code{x}.
-\item \code{has_non_utf8}, logical scalar indicating that \code{x} contains non-UTF8-encoded strings (e.g., Latin-1).
 }
 
 For \code{collect_boolean_attributes}, a named list containing:
@@ -90,9 +89,6 @@ For the \code{optimize_*_storage} functions, a named list containing:
 \item \code{other}, other attributes of \code{x} (e.g., number of non-zero elements for sparse vectors).
 These should be stored in an \code{other} field in the named list returned by \code{collect_*_ attributes}.
 }
-
-The \code{optimize_string_storage} function has an additional \code{has_non_utf8} field,
-specifying whether \code{x} should be converted to UTF-8 via \code{\link{enc2utf8}}.
 }
 \description{
 Optimize HDF5 storage to use the smallest possible storage type. 

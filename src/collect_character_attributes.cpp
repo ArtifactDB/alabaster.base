@@ -8,6 +8,7 @@ Rcpp::List collect_character_attributes(Rcpp::StringVector x) {
     bool has_NA = false;
     bool has__NA = false;
     int max_len = 0;
+    bool has_native = false;
     bool has_non_utf8 = false;
 
     for (auto y : x) {
@@ -26,7 +27,9 @@ Rcpp::List collect_character_attributes(Rcpp::StringVector x) {
         max_len = std::max(max_len, static_cast<int>(Rf_length(s.get_sexp()))); 
 
         auto enc = s.get_encoding();
-        if (enc != CE_UTF8 || enc != CE_ANY) {
+        if (enc == CE_NATIVE) {
+            has_native = true;
+        } else if (enc != CE_UTF8 && enc != CE_ANY) {
             has_non_utf8 = true;
         }
     }
@@ -36,6 +39,7 @@ Rcpp::List collect_character_attributes(Rcpp::StringVector x) {
         Rcpp::Named("has_NA") = Rcpp::LogicalVector::create(has_NA),
         Rcpp::Named("has__NA") = Rcpp::LogicalVector::create(has__NA),
         Rcpp::Named("max_len") = Rcpp::IntegerVector::create(max_len),
+        Rcpp::Named("has_native") = Rcpp::LogicalVector::create(has_native),
         Rcpp::Named("has_non_utf8") = Rcpp::LogicalVector::create(has_non_utf8)
     );
 }
