@@ -143,7 +143,10 @@ h5_read_vector <- function(handle, name, check=FALSE, default=NULL, bit64convers
 
     if (is.raw(output)) {
         storage.mode(output) <- "integer"
+    } else if (is.character(output) && H5Tget_cset(H5Dget_type(dhandle)) == 1L) {
+        Encoding(output) <- "UTF-8"
     }
+
     output
 }
 
@@ -161,7 +164,10 @@ h5_read_attribute <- function(handle, name, check=FALSE, default=NULL, bit64conv
 
     if (is.raw(output)) {
         storage.mode(output) <- "integer"
+    } else if (is.character(output) && H5Tget_cset(H5Aget_type(ahandle)) == 1L) {
+        Encoding(output) <- "UTF-8"
     }
+
     output
 }
 
