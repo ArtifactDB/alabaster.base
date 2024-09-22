@@ -81,6 +81,9 @@ h5_create_vector <- function(handle, name, len, type, compress=6, chunks=NULL, s
 #' @export
 h5_write_vector <- function(handle, name, x, type=NULL, compress=6, chunks=NULL, scalar=FALSE, emit=FALSE) {
     if (is.null(type)) {
+        if (is.character(x)) {
+            x <- enc2utf8(x) # avoid mis-encoding multi-byte characters from Latin-1.
+        }
         type <- .choose_type(x)
     }
 
@@ -101,6 +104,9 @@ h5_write_vector <- function(handle, name, x, type=NULL, compress=6, chunks=NULL,
 #' @export
 h5_write_attribute <- function(handle, name, x, type=NULL, scalar=FALSE) {
     if (is.null(type)) {
+        if (is.character(x)) {
+            x <- enc2utf8(x) # avoid mis-encoding multi-byte characters from Latin-1.
+        }
         type <- .choose_type(x)
     }
 

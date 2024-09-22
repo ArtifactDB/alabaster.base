@@ -36,6 +36,7 @@ transformVectorForHdf5 <- function(x, .version=3) {
         }
 
     } else if (is.character(x)) {
+        x <- enc2utf8(x) # avoid mis-encoding multi-byte characters from Latin-1.
         if (anyNA(x)) {
             placeholder <- chooseMissingPlaceholderForHdf5(x)
             x[is.na(x)] <- placeholder
