@@ -677,3 +677,27 @@ test_that("staging of arrays continues to work with character matrices", {
     roundtrip$Z <- as.matrix(roundtrip$Z)
     expect_identical(roundtrip, input)
 })
+
+test_that("saving works for base data.frames", {
+    nrows <- 123
+    df <- data.frame(
+        stuff = rep(LETTERS[1:3], length.out=nrows),
+        foo = seq_len(nrows),
+        whee = as.numeric(10 + seq_len(nrows))
+    )
+    df$blah <- factor(df$stuff, LETTERS[10:1])
+    df$rabbit <- factor(df$stuff, LETTERS[1:3], ordered=TRUE)
+
+    tmp <- tempfile()
+    saveObject(df, tmp)
+    roundtrip <- readObject(tmp)
+    expect_null(rownames(roundtrip))
+    expect_identical(as.data.frame(roundtrip), df)
+
+    # Respects row names.
+    rownames(df) <- sprintf("GENE_%i", seq_len(nrows))
+    tmp <- tempfile()
+    saveObject(df, tmp)
+    roundtrip <- readObject(tmp)
+    expect_identical(as.data.frame(roundtrip), df)
+})

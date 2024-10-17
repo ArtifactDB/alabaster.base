@@ -20,6 +20,8 @@ to allow developers to declare that custom subclasses satisfy an interface or ha
 
 \item Updated \code{validateDirectory()} so that it works with a directory of objects saved via \code{saveObject()}.
 Objects saved under the old regime (i.e., \code{stageObject()}) are auto-detected but can also be explicitly validated by setting \code{legacy=FALSE}.
+
+\item Added a data.frame method for \code{saveObject()}, to avoid fallback to the list method.
 }}
 
 \section{Version 1.4.0}{\itemize{

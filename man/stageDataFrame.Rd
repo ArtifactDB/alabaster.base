@@ -3,12 +3,15 @@
 \name{saveObject,DataFrame-method}
 \alias{saveObject,DataFrame-method}
 \alias{stageObject,DataFrame-method}
+\alias{saveObject,data.frame-method}
 \title{Save a DataFrame to disk}
 \usage{
 \S4method{saveObject}{DataFrame}(x, path, ...)
+
+\S4method{saveObject}{data.frame}(x, path, ...)
 }
 \arguments{
-\item{x}{A \linkS4class{DataFrame}.}
+\item{x}{A \linkS4class{DataFrame} or data.frame.}
 
 \item{path}{String containing the path to a directory in which to save \code{x}.}
 
@@ -16,7 +19,7 @@
 }
 \value{
 A named list containing the metadata for \code{x}.
-\code{x} itself is written to a CSV or HDF5 file inside \code{path}.
+\code{x} itself is written to a HDF5 file inside \code{path}.
 Additional files may also be created inside \code{path} and referenced from the metadata.
 }
 \description{
@@ -32,6 +35,9 @@ named after its zero-based positional index within \code{x}.
 
 If \code{\link{metadata}} or \code{\link{mcols}} are present, 
 they are saved to the \code{other_annotations} and \code{column_annotations} subdirectories, respectively, via \code{\link{saveObject}}.
+
+In the on-disk representation, no distinction is made between \linkS4class{DataFrame} and data.frame instances of \code{x}.
+Calling \code{readDataFrame} will always produce a \linkS4class{DFrame} regardless of the class of \code{x}.
 }
 \examples{
 library(S4Vectors)

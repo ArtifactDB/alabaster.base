@@ -2,12 +2,12 @@
 #'
 #' Stage a DataFrame by saving it to a HDF5 file.
 #'
-#' @param x A \linkS4class{DataFrame}.
+#' @param x A \linkS4class{DataFrame} or data.frame.
 #' @inheritParams saveObject
 #'
 #' @return
 #' A named list containing the metadata for \code{x}.
-#' \code{x} itself is written to a CSV or HDF5 file inside \code{path}.
+#' \code{x} itself is written to a HDF5 file inside \code{path}.
 #' Additional files may also be created inside \code{path} and referenced from the metadata.
 #'
 #' @details
@@ -20,6 +20,9 @@
 #'
 #' If \code{\link{metadata}} or \code{\link{mcols}} are present, 
 #' they are saved to the \code{other_annotations} and \code{column_annotations} subdirectories, respectively, via \code{\link{saveObject}}.
+#'
+#' In the on-disk representation, no distinction is made between \linkS4class{DataFrame} and data.frame instances of \code{x}.
+#' Calling \code{readDataFrame} will always produce a \linkS4class{DFrame} regardless of the class of \code{x}.
 #'
 #' @author Aaron Lun
 #'
@@ -48,7 +51,7 @@ setMethod("saveObject", "DataFrame", function(x, path, ...) {
 })
 
 #' @importFrom rhdf5 h5write h5createGroup h5createFile H5Gopen H5Gclose H5Acreate H5Aclose H5Awrite H5Fopen H5Fclose H5Dopen H5Dclose
-.write_hdf5_new <- function(x, path, ...) {
+.write_hdf5_new <- function(x, path, row.names=rownames(x), ...) {
     subpath <- "basic_columns.h5"
     ofile <- paste0(path, "/", subpath)
 
@@ -133,10 +136,22 @@ setMethod("saveObject", "DataFrame", function(x, path, ...) {
     }
 
     h5_write_vector(ghandle, "column_names", colnames(x))
-    if (!is.null(rownames(x))) {
-        h5_write_vector(ghandle, "row_names", rownames(x))
+    if (!is.null(row.names)) {
+        h5_write_vector(ghandle, "row_names", row.names)
     }
 }
+
+#' @export
+#' @rdname stageDataFrame
+setMethod("saveObject", "data.frame", function(x, path, ...) {
+    dir.create(path, showWarnings=FALSE)
+    rn <- attr(x, "row.names")
+    if (is.integer(rn)) {
+        rn <- NULL
+    }
+    .write_hdf5_new(x, path, row.names=rn, ...)
+    saveObjectFile(path, "data_frame", list(data_frame=list(version="1.0")))
+})
 
 #######################################
 ########### OLD STUFF HERE ############
