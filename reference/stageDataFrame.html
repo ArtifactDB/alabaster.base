@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">alabaster.base</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.5.9</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.5.10</span>
       </span>
     </div>
 
@@ -61,6 +61,9 @@
 
     <div id="ref-usage">
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="co"># S4 method for class 'DataFrame'</span></span>
+<span><span class="fu"><a href="saveObject.html">saveObject</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">path</span>, <span class="va">...</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S4 method for class 'data.frame'</span></span>
 <span><span class="fu"><a href="saveObject.html">saveObject</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">path</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -69,7 +72,7 @@
 
 
 <dl><dt id="arg-x">x<a class="anchor" aria-label="anchor" href="#arg-x"></a></dt>
-<dd><p>A <a href="https://rdrr.io/pkg/S4Vectors/man/DataFrame-class.html" class="external-link">DataFrame</a>.</p></dd>
+<dd><p>A <a href="https://rdrr.io/pkg/S4Vectors/man/DataFrame-class.html" class="external-link">DataFrame</a> or data.frame.</p></dd>
 
 
 <dt id="arg-path">path<a class="anchor" aria-label="anchor" href="#arg-path"></a></dt>
@@ -83,7 +86,7 @@
     <div id="value">
     <h2>Value</h2>
     <p>A named list containing the metadata for <code>x</code>.
-<code>x</code> itself is written to a CSV or HDF5 file inside <code>path</code>.
+<code>x</code> itself is written to a HDF5 file inside <code>path</code>.
 Additional files may also be created inside <code>path</code> and referenced from the metadata.</p>
     </div>
     <div id="details">
@@ -95,6 +98,8 @@ Factors are saved as a HDF5 group with both the codes and the levels as separate
 named after its zero-based positional index within <code>x</code>.</p>
 <p>If <code><a href="https://rdrr.io/pkg/S4Vectors/man/Annotated-class.html" class="external-link">metadata</a></code> or <code><a href="https://rdrr.io/pkg/S4Vectors/man/Vector-class.html" class="external-link">mcols</a></code> are present,
 they are saved to the <code>other_annotations</code> and <code>column_annotations</code> subdirectories, respectively, via <code><a href="saveObject.html">saveObject</a></code>.</p>
+<p>In the on-disk representation, no distinction is made between <a href="https://rdrr.io/pkg/S4Vectors/man/DataFrame-class.html" class="external-link">DataFrame</a> and data.frame instances of <code>x</code>.
+Calling <code>readDataFrame</code> will always produce a <a href="https://rdrr.io/pkg/S4Vectors/man/DataFrame-class.html" class="external-link">DFrame</a> regardless of the class of <code>x</code>.</p>
     </div>
     <div id="author">
     <h2>Author</h2>
