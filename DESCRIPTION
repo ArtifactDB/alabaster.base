@@ -1,5 +1,5 @@
 Package: alabaster.base
-Title: Save Bioconductor Objects To File
+Title: Save Bioconductor Objects to File
 Version: 1.7.2
 Date: 2024-11-11
 Authors@R: person("Aaron", "Lun", role=c("aut", "cre"), email="infinite.monkeys.with.keyboards@gmail.com")

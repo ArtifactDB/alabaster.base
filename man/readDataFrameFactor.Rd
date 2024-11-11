@@ -8,17 +8,17 @@
 readDataFrameFactor(path, metadata, ...)
 }
 \arguments{
-\item{path}{String containing a path to a directory, itself created with the \code{\link{saveObject}} method for \linkS4class{DataFrameFactor}s.}
+\item{path}{String containing a path to a directory, itself created with the \code{\link{saveObject}} method for \link[S4Vectors]{DataFrameFactor}s.}
 
 \item{metadata}{Named list containing metadata for the object, see \code{\link{readObjectFile}} for details.}
 
 \item{...}{Further arguments to pass to internal \code{\link{altSaveObject}} calls.}
 }
 \value{
-A \linkS4class{DataFrameFactor} represented by \code{path}.
+A \link[S4Vectors]{DataFrameFactor} represented by \code{path}.
 }
 \description{
-Read a \linkS4class{DataFrameFactor} from its on-disk representation.
+Read a \link[S4Vectors]{DataFrameFactor} from its on-disk representation.
 This is usually not directly called by users, but is instead called by dispatch in \code{\link{readObject}}.
 }
 \examples{

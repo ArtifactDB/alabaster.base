@@ -18,7 +18,7 @@ saveBaseListFormat(list.format)
 }
 \arguments{
 \item{x}{An ordinary R list, named or unnamed.
-Alternatively, a \linkS4class{List} to be coerced into a list..}
+Alternatively, a \link[S4Vectors]{List} to be coerced into a list.}
 
 \item{path}{String containing the path to a directory in which to save \code{x}.}
 
@@ -34,8 +34,8 @@ For \code{saveBaseListFormat}; if \code{list.format} is missing, a string contai
 If \code{list.format} is supplied, it is used to define the current format, and the \emph{previous} format is returned.
 }
 \description{
-Save a \link{list} or \linkS4class{List} to a JSON or HDF5 file, with extra files created for any of the more complex list elements (e.g., DataFrames, arrays). 
-This uses the \href{https://github.com/LTLA/uzuki2}{uzuki2} specification to ensure that appropriate types are declared.
+Save a \link{list} or \link[S4Vectors]{List} to a JSON or HDF5 file, with extra files created for any of the more complex list elements (e.g., DataFrames, arrays). 
+This uses the \href{https://github.com/ArtifactDB/uzuki2}{uzuki2} specification to ensure that appropriate types are declared.
 }
 \section{File formats}{
 
@@ -64,7 +64,7 @@ list.files(tmp, recursive=TRUE)
 
 }
 \seealso{
-\url{https://github.com/LTLA/uzuki2} for the specification.
+\url{https://github.com/ArtifactDB/uzuki2} for the specification.
 
 \code{\link{readBaseList}}, to read the list back into the R session.
 }

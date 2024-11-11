@@ -1,7 +1,7 @@
 #' Quickly read and write a CSV file
 #'
 #' Quickly read and write a CSV file, usually as a part of staging or loading a larger object.
-#' This assumes that all files follow the \href{https://github.com/LTLA/comservatory}{comservatory} specification.
+#' This assumes that all files follow the \href{https://github.com/ArtifactDB/comservatory}{comservatory} specification.
 #'
 #' @param path String containing a path to a CSV to read/write.
 #' @param expected.columns Named character vector specifying the type of each column in the CSV (excluding the first column containing row names, if \code{row.names=TRUE}).
@@ -12,13 +12,13 @@
 #' @param expected.nrows Integer scalar specifying the expected number of rows in the CSV.
 #' @param compression String specifying the compression that was/will be used.
 #' This should be either \code{"none"}, \code{"gzip"}.
-#' @param df A \linkS4class{DataFrame} or data.frame object, containing only atomic columns.
+#' @param df A \link[S4Vectors]{DFrame} or data.frame object, containing only atomic columns.
 #' @param ... Further arguments to pass to \code{\link{write.csv}}.
 #' @param validate Whether to double-check that the generated CSV complies with the comservatory specification.
 #'
 #' @author Aaron Lun
 #' 
-#' @return For \code{.quickReadCsv}, a \linkS4class{DataFrame} containing the contents of \code{path}.
+#' @return For \code{.quickReadCsv}, a \link[S4Vectors]{DFrame} containing the contents of \code{path}.
 #'
 #' For \code{.quickWriteCsv}, \code{df} is written to \code{path} and a \code{NULL} is invisibly returned.
 #'

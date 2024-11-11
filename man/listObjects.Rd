@@ -14,7 +14,7 @@ listObjects(dir, include.children = FALSE)
 \item{include.children}{Logical scalar indicating whether to include child objects.}
 }
 \value{
-\linkS4class{DataFrame} where each row corresponds to an object and contains;
+\link[S4Vectors]{DFrame} where each row corresponds to an object and contains;
 \itemize{
 \item \code{path}, the relative path to the object's subdirectory inside \code{dir}.
 \item \code{type}, the type of the object

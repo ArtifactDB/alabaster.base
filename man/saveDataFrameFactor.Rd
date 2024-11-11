@@ -8,7 +8,7 @@
 \S4method{saveObject}{DataFrameFactor}(x, path, ...)
 }
 \arguments{
-\item{x}{A \linkS4class{DataFrameFactor} object.}
+\item{x}{A \link[S4Vectors]{DataFrameFactor} object.}
 
 \item{path}{String containing the path to a directory in which to save \code{x}.}
 
@@ -18,7 +18,7 @@
 \code{x} is saved to an on-disk representation inside \code{path}.
 }
 \description{
-Stage a \linkS4class{DataFrameFactor} object, a generalization of the base factor for \linkS4class{DataFrame} levels.
+Stage a \link[S4Vectors]{DataFrameFactor} object, a generalization of the base factor where each level is a row of a \link[S4Vectors]{DataFrame}.
 }
 \examples{
 library(S4Vectors)

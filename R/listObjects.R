@@ -5,7 +5,7 @@
 #' @param dir String containing a path to a staging directory.
 #' @param include.children Logical scalar indicating whether to include child objects.
 #' 
-#' @return \linkS4class{DataFrame} where each row corresponds to an object and contains;
+#' @return \link[S4Vectors]{DFrame} where each row corresponds to an object and contains;
 #' \itemize{
 #' \item \code{path}, the relative path to the object's subdirectory inside \code{dir}.
 #' \item \code{type}, the type of the object

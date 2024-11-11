@@ -41,20 +41,20 @@ For \code{.quickWriteCsv}, a logical scalar indicating whether to save the row n
 
 \item{parallel}{Whether reading and parsing should be performed concurrently.}
 
-\item{df}{A \linkS4class{DataFrame} or data.frame object, containing only atomic columns.}
+\item{df}{A \link[S4Vectors]{DFrame} or data.frame object, containing only atomic columns.}
 
 \item{...}{Further arguments to pass to \code{\link{write.csv}}.}
 
 \item{validate}{Whether to double-check that the generated CSV complies with the comservatory specification.}
 }
 \value{
-For \code{.quickReadCsv}, a \linkS4class{DataFrame} containing the contents of \code{path}.
+For \code{.quickReadCsv}, a \link[S4Vectors]{DFrame} containing the contents of \code{path}.
 
 For \code{.quickWriteCsv}, \code{df} is written to \code{path} and a \code{NULL} is invisibly returned.
 }
 \description{
 Quickly read and write a CSV file, usually as a part of staging or loading a larger object.
-This assumes that all files follow the \href{https://github.com/LTLA/comservatory}{comservatory} specification.
+This assumes that all files follow the \href{https://github.com/ArtifactDB/comservatory}{comservatory} specification.
 }
 \examples{
 library(S4Vectors)

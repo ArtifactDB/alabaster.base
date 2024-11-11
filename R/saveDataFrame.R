@@ -2,7 +2,7 @@
 #'
 #' Stage a DataFrame by saving it to a HDF5 file.
 #'
-#' @param x A \linkS4class{DataFrame} or data.frame.
+#' @param x A \link[S4Vectors]{DataFrame} or data.frame.
 #' @inheritParams saveObject
 #'
 #' @return
@@ -18,11 +18,11 @@
 #' Any non-atomic columns are saved to a \code{other_columns} subdirectory inside \code{path} via \code{\link{saveObject}},
 #' named after its zero-based positional index within \code{x}.
 #'
-#' If \code{\link{metadata}} or \code{\link{mcols}} are present, 
+#' If \code{\link[S4Vectors]{metadata}} or \code{\link[S4Vectors]{mcols}} are present, 
 #' they are saved to the \code{other_annotations} and \code{column_annotations} subdirectories, respectively, via \code{\link{saveObject}}.
 #'
-#' In the on-disk representation, no distinction is made between \linkS4class{DataFrame} and data.frame instances of \code{x}.
-#' Calling \code{readDataFrame} will always produce a \linkS4class{DFrame} regardless of the class of \code{x}.
+#' In the on-disk representation, no distinction is made between \link[S4Vectors]{DataFrame} and data.frame instances of \code{x}.
+#' Calling \code{readDataFrame} will always produce a \link[S4Vectors]{DFrame} regardless of the class of \code{x}.
 #'
 #' @author Aaron Lun
 #'

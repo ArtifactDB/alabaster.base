@@ -9,12 +9,12 @@
 readMetadata(x, metadata.path, mcols.path, ...)
 }
 \arguments{
-\item{x}{An \linkS4class{Vector} or \linkS4class{Annotated} object.}
+\item{x}{An \link[S4Vectors]{Vector} or \link[S4Vectors]{Annotated} object.}
 
-\item{metadata.path}{String containing a path to a directory, itself containing an on-disk representation of a base R list to be used as the \code{\link{metadata}}.
+\item{metadata.path}{String containing a path to a directory, itself containing an on-disk representation of a base R list to be used as the \code{\link[S4Vectors]{metadata}}.
 Alternatively \code{NULL} to skip loading.}
 
-\item{mcols.path}{String containing a path to a directory, itself containing an on-disk representation of a \linkS4class{DataFrame} to be used as the \code{\link{mcols}}.
+\item{mcols.path}{String containing a path to a directory, itself containing an on-disk representation of a \link[S4Vectors]{DataFrame} to be used as the \code{\link[S4Vectors]{mcols}}.
 Alternatively \code{NULL} to skip loading.}
 
 \item{...}{Further arguments to be passed to \code{\link{altReadObject}}.}
@@ -23,7 +23,7 @@ Alternatively \code{NULL} to skip loading.}
 \code{x} is returned, possibly with \code{mcols} and \code{metadata} added to it.
 }
 \description{
-Read \code{\link{metadata}} and \code{\link{mcols}} for a \linkS4class{Annotated} or \linkS4class{Vector} object, respectively.
+Read \code{\link[S4Vectors]{metadata}} and \code{\link[S4Vectors]{mcols}} for a \link[S4Vectors]{Annotated} or \link[S4Vectors]{Vector} object, respectively.
 This is typically used inside loading functions for concrete subclasses.
 }
 \seealso{

@@ -1,12 +1,12 @@
 #' Read R-level metadata
 #'
-#' Read \code{\link{metadata}} and \code{\link{mcols}} for a \linkS4class{Annotated} or \linkS4class{Vector} object, respectively.
+#' Read \code{\link[S4Vectors]{metadata}} and \code{\link[S4Vectors]{mcols}} for a \link[S4Vectors]{Annotated} or \link[S4Vectors]{Vector} object, respectively.
 #' This is typically used inside loading functions for concrete subclasses.
 #'
-#' @param x An \linkS4class{Vector} or \linkS4class{Annotated} object.
-#' @param mcols.path String containing a path to a directory, itself containing an on-disk representation of a \linkS4class{DataFrame} to be used as the \code{\link{mcols}}.
+#' @param x An \link[S4Vectors]{Vector} or \link[S4Vectors]{Annotated} object.
+#' @param mcols.path String containing a path to a directory, itself containing an on-disk representation of a \link[S4Vectors]{DataFrame} to be used as the \code{\link[S4Vectors]{mcols}}.
 #' Alternatively \code{NULL} to skip loading.
-#' @param metadata.path String containing a path to a directory, itself containing an on-disk representation of a base R list to be used as the \code{\link{metadata}}.
+#' @param metadata.path String containing a path to a directory, itself containing an on-disk representation of a base R list to be used as the \code{\link[S4Vectors]{metadata}}.
 #' Alternatively \code{NULL} to skip loading. 
 #' @param ... Further arguments to be passed to \code{\link{altReadObject}}.
 #'

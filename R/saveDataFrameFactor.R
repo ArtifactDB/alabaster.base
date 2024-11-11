@@ -1,8 +1,8 @@
 #' Stage a DataFrameFactor object
 #'
-#' Stage a \linkS4class{DataFrameFactor} object, a generalization of the base factor for \linkS4class{DataFrame} levels.
+#' Stage a \link[S4Vectors]{DataFrameFactor} object, a generalization of the base factor where each level is a row of a \link[S4Vectors]{DataFrame}.
 #'
-#' @param x A \linkS4class{DataFrameFactor} object.
+#' @param x A \link[S4Vectors]{DataFrameFactor} object.
 #' @inheritParams saveObject 
 #' @param ... Further arguments, to pass to internal \code{\link{altSaveObject}} calls.
 #'

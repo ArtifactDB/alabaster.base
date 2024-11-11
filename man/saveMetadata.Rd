@@ -11,13 +11,13 @@
 saveMetadata(x, metadata.path, mcols.path, ...)
 }
 \arguments{
-\item{x}{A \linkS4class{Vector} or \linkS4class{Annotated} object.}
+\item{x}{A \link[S4Vectors]{Vector} or \link[S4Vectors]{Annotated} object.}
 
 \item{metadata.path}{String containing the path in which to save the \code{metadata}.
-If \code{NULL}, no \code{\link{metadata}} is saved.}
+If \code{NULL}, no \code{\link[S4Vectors]{metadata}} is saved.}
 
 \item{mcols.path}{String containing the path in which to save the \code{mcols}.
-If \code{NULL}, no \code{\link{mcols}} is saved.}
+If \code{NULL}, no \code{\link[S4Vectors]{mcols}} is saved.}
 
 \item{...}{Further arguments to be passed to \code{\link{altSaveObject}}.}
 }
@@ -25,7 +25,7 @@ If \code{NULL}, no \code{\link{mcols}} is saved.}
 The metadata for \code{x} is saved to \code{metadata.path}, and similarly for the \code{mcols}.
 }
 \description{
-Save \code{\link{metadata}} and \code{\link{mcols}} for \linkS4class{Annotated} or \linkS4class{Vector} objects, respectively, to disk.
+Save \code{\link[S4Vectors]{metadata}} and \code{\link[S4Vectors]{mcols}} for \link[S4Vectors]{Annotated} or \link[S4Vectors]{Vector} objects, respectively, to disk.
 These are typically used inside \code{\link{saveObject}} methods for concrete subclasses.
 }
 \details{

@@ -8,17 +8,17 @@
 readDataFrame(path, metadata, ...)
 }
 \arguments{
-\item{path}{String containing a path to the directory, itself created with \code{\link{saveObject}} method for \linkS4class{DataFrame}s.}
+\item{path}{String containing a path to the directory, itself created with \code{\link{saveObject}} method for \link[S4Vectors]{DFrame}s.}
 
 \item{metadata}{Named list containing metadata for the object, see \code{\link{readObjectFile}} for details.}
 
 \item{...}{Further arguments, passed to \code{\link{altLoadObject}} for complex nested columns.}
 }
 \value{
-The \linkS4class{DataFrame} represented by \code{path}.
+The \link[S4Vectors]{DFrame} represented by \code{path}.
 }
 \description{
-Read a \linkS4class{DataFrame} from its on-disk representation.
+Read a \link[S4Vectors]{DFrame} from its on-disk representation.
 This is usually not directly called by users, but is instead called by dispatch in \code{\link{readObject}}.
 }
 \examples{
