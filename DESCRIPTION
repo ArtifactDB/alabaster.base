@@ -1,7 +1,7 @@
 Package: alabaster.base
 Title: Save Bioconductor Objects To File
-Version: 1.7.1
-Date: 2024-11-09
+Version: 1.7.2
+Date: 2024-11-11
 Authors@R: person("Aaron", "Lun", role=c("aut", "cre"), email="infinite.monkeys.with.keyboards@gmail.com")
 License: MIT + file LICENSE
 Description: 
@@ -28,6 +28,7 @@ Suggests:
     alabaster.matrix
 LinkingTo:
     Rcpp,
+    assorthead (>= 1.1.2),
     Rhdf5lib
 VignetteBuilder: knitr
 SystemRequirements: C++17, GNU make
