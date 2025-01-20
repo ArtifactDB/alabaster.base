@@ -6,11 +6,14 @@
 <url><loc>/authors.html</loc></url>
 <url><loc>/index.html</loc></url>
 <url><loc>/reference/Rfc3339.html</loc></url>
+<url><loc>/reference/absolutizePath.html</loc></url>
 <url><loc>/reference/acquireFile.html</loc></url>
 <url><loc>/reference/altReadObject.html</loc></url>
 <url><loc>/reference/altSaveObject.html</loc></url>
 <url><loc>/reference/anyMissing.html</loc></url>
 <url><loc>/reference/chooseMissingPlaceholderForHdf5.html</loc></url>
+<url><loc>/reference/cloneDirectory.html</loc></url>
+<url><loc>/reference/createDedupSession.html</loc></url>
 <url><loc>/reference/createRedirection.html</loc></url>
 <url><loc>/reference/hdf5.html</loc></url>
 <url><loc>/reference/index.html</loc></url>
