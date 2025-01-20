@@ -75,7 +75,8 @@ All processing is purely lexical; the path itself does not have to exist on the 
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>An absolute file path corresponding to <code>path</code>, or <code>path</code> itself if it was already absolute.</p>
+    <p>An absolute file path corresponding to <code>path</code>.
+This is cleaned to remove <code>..</code>, <code>.</code> and <code>~</code> components.</p>
     </div>
     <div id="author">
     <h2>Author</h2>
@@ -86,6 +87,10 @@ All processing is purely lexical; the path itself does not have to exist on the 
     <h2>Examples</h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu">absolutizePath</span><span class="op">(</span><span class="st">"alpha"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "/__w/alabaster.base/alabaster.base/docs/reference/alpha"</span>
+<span class="r-in"><span><span class="fu">absolutizePath</span><span class="op">(</span><span class="st">"../alpha"</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "/__w/alabaster.base/alabaster.base/docs/alpha"</span>
+<span class="r-in"><span><span class="fu">absolutizePath</span><span class="op">(</span><span class="st">"../../alpha/./bravo"</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "/__w/alabaster.base/alabaster.base/alpha/bravo"</span>
 <span class="r-in"><span><span class="fu">absolutizePath</span><span class="op">(</span><span class="st">"/alpha/bravo"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "/alpha/bravo"</span>
 <span class="r-in"><span></span></span>
