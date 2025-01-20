@@ -2,6 +2,18 @@
 \title{alabaster.base News}
 \encoding{UTF-8}
 
+\section{Version 1.8.0}{\itemize{
+\item Added \code{createDedupSession()}, \code{addObjectToDedupSession()} and \code{checkObjectInDedupSession()} utilities,
+that allow \code{saveObject()} method developers to check for duplicated objects and avoid re-saving them.
+Most of this functionality was migrated and generalized from the \pkg{alabaster.matrix} package. 
+
+\item Added the \code{cloneDirectory()} function to easily clone the contents of an existing directory, either by copying or linking to the files.
+This should be used for creating lightweight on-disk representations of duplicated objects.
+
+\item Added the \code{absolutizePath()} function to obtain an absolute file path.
+This is occasionally necessary to ensure that references to deduplicated resources are robust to changes to the working directory.
+}}
+
 \section{Version 1.6.0}{\itemize{
 \item Distinguish between scalars and length-1 vectors when saving/loading lists.
 This effectively unboxes all length-1 vectors in a list, by default; this is probably the more reasonable expectation for other languages that have a concept of scalars.
