@@ -68,7 +68,7 @@ quickReadCsv <- function(path, expected.columns, expected.nrows, compression, ro
 }
 
 read.csv3 <- function(path, compression, nrows, parallel=TRUE) {
-    path <- normalizePath(path, mustWork=TRUE)
+    path <- path.expand(path) # protect C code from '~'.
     df <- load_csv(path, is_compressed=identical(compression, "gzip"), nrecords = nrows, parallel=parallel)
     if (length(df)) {
         df <- data.frame(df, check.names=FALSE)

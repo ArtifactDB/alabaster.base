@@ -44,7 +44,7 @@ readBaseList <- function(path, metadata, simple_list.parallel=TRUE, ...) {
         }
     }
 
-    path <- normalizePath(path) # protect C code from ~/.
+    path <- path.expand(path) # protect C code from ~/.
     format <- metadata$simple_list$format
     if (is.null(format) || format == "hdf5") {
         lpath <- file.path(path, "list_contents.h5")
