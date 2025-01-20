@@ -53,9 +53,10 @@ test_that("cloneDirectory works with symlinks", {
     expect_identical(readLines(file.path(dest, "stuff", "whee.txt")), as.character(1:10))
     expect_identical(readLines(file.path(dest, "stuff", "blah", "kanon.txt")), "air")
 
-    expect_identical(Sys.readlink(file.path(dest, "foobar.txt")), file.path(src, "foobar.txt"))
-    expect_identical(Sys.readlink(file.path(dest, "stuff", "whee.txt")), file.path(src, "stuff", "whee.txt"))
-    expect_identical(Sys.readlink(file.path(dest, "stuff", "blah", "kanon.txt")), file.path(src, "stuff", "blah", "kanon.txt"))
+    cleaned <- absolutizePath(src)
+    expect_identical(Sys.readlink(file.path(dest, "foobar.txt")), file.path(cleaned, "foobar.txt"))
+    expect_identical(Sys.readlink(file.path(dest, "stuff", "whee.txt")), file.path(cleaned, "stuff", "whee.txt"))
+    expect_identical(Sys.readlink(file.path(dest, "stuff", "blah", "kanon.txt")), file.path(cleaned, "stuff", "blah", "kanon.txt"))
 })
 
 test_that("cloneDirectory symlinks are absolute", {
@@ -73,10 +74,10 @@ test_that("cloneDirectory symlinks are absolute", {
     expect_identical(readLines(file.path(dest, "stuff", "whee.txt")), as.character(1:10))
     expect_identical(readLines(file.path(dest, "stuff", "blah", "kanon.txt")), "air")
 
-    prefix <- file.path(getwd(), basename(src))
-    expect_identical(Sys.readlink(file.path(dest, "foobar.txt")), file.path(prefix, "foobar.txt"))
-    expect_identical(Sys.readlink(file.path(dest, "stuff", "whee.txt")), file.path(prefix, "stuff", "whee.txt"))
-    expect_identical(Sys.readlink(file.path(dest, "stuff", "blah", "kanon.txt")), file.path(prefix, "stuff", "blah", "kanon.txt"))
+    cleaned <- absolutizePath(src)
+    expect_identical(Sys.readlink(file.path(dest, "foobar.txt")), file.path(cleaned, "foobar.txt"))
+    expect_identical(Sys.readlink(file.path(dest, "stuff", "whee.txt")), file.path(cleaned, "stuff", "whee.txt"))
+    expect_identical(Sys.readlink(file.path(dest, "stuff", "blah", "kanon.txt")), file.path(cleaned, "stuff", "blah", "kanon.txt"))
 })
 
 test_that("cloneDirectory symlinks and copyies/hardlinks interact correctly", {

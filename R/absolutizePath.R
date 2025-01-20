@@ -5,35 +5,42 @@
 #'
 #' @param path String containing an absolute or relative file path.
 #'
-#' @return An absolute file path corresponding to \code{path}, or \code{path} itself if it was already absolute.
+#' @return An absolute file path corresponding to \code{path}.
+#' This is cleaned to remove \code{..}, \code{.} and \code{~} components.
 #'
 #' @author Aaron Lun
 #'
 #' @examples
 #' absolutizePath("alpha")
+#' absolutizePath("../alpha")
+#' absolutizePath("../../alpha/./bravo")
 #' absolutizePath("/alpha/bravo")
 #' 
 #' @export
 absolutizePath <- function(path) {
-    components <- path_components(path)
-    if (components[1] == ".") {
-        file.path(getwd(), path)
+    tmp <- path
+    decomposed <- decompose_path(path)
+
+    if (decomposed$relative) {
+        # getwd() always returns an absolute path,
+        # so the combined components will also be absolute.
+        wd <- decompose_path(getwd())
+        root <- wd$root
+        comp <- c(wd$components, decomposed$components)
     } else {
-        path
+        root <- decomposed$root
+        comp <- decomposed$components
     }
-}
 
-path_components <- function(path) {
-    output <- character()
-    while (TRUE) {
-        base <- basename(path)
-        dpath <- dirname(path)
-        output <- c(base, output)
-        if (dpath == path) {
-            break
+    # Cleaning the path.
+    cleaned <- character()
+    for (x in comp) {
+        if (x == "..") {
+            cleaned <- head(cleaned, -1)
+        } else if (x != ".") {
+            cleaned <- c(cleaned, x)
         }
-        path <- dpath
     }
-    output
-}
 
+    paste0(root, do.call(file.path, as.list(cleaned)))
+}

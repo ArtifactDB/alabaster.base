@@ -107,11 +107,11 @@ cloneDirectory <- function(src, dest, action=c("link", "copy", "symlink", "relsy
 
 relative_path_to_src <- function(src, dest) {
     src <- normalizePath(src, mustWork=TRUE)
-    src.comp <- path_components(src)
+    src.comp <- decompose_path(src)$components
     src.len <- length(src.comp)
 
     dest <- normalizePath(dest, mustWork=TRUE)
-    dest.comp <- path_components(dest)
+    dest.comp <- decompose_path(dest)$components
     dest.len <- length(dest.comp)
 
     counter <- 0L
@@ -124,4 +124,23 @@ relative_path_to_src <- function(src, dest) {
 
     components <- c(rep("..", dest.len - counter), src.comp[(counter+1):src.len])
     do.call(file.path, as.list(components))
+}
+
+decompose_path <- function(path) {
+    output <- character()
+    repeat {
+        base <- basename(path)
+        dpath <- dirname(path)
+        if (dpath == path) {
+            return(list(relative=FALSE, root=dpath, components=output))
+        }
+        output <- c(base, output)
+        if (dpath == ".") {
+            if (path != base) {
+                output <- c(".", output)
+            }
+            return(list(relative=TRUE, root=NULL, components=output))
+        }
+        path <- dpath
+    }
 }

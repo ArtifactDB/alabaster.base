@@ -10,7 +10,8 @@ absolutizePath(path)
 \item{path}{String containing an absolute or relative file path.}
 }
 \value{
-An absolute file path corresponding to \code{path}, or \code{path} itself if it was already absolute.
+An absolute file path corresponding to \code{path}.
+This is cleaned to remove \code{..}, \code{.} and \code{~} components.
 }
 \description{
 Create an absolute file path from a relative file path.
@@ -18,6 +19,8 @@ All processing is purely lexical; the path itself does not have to exist on the 
 }
 \examples{
 absolutizePath("alpha")
+absolutizePath("../alpha")
+absolutizePath("../../alpha/./bravo")
 absolutizePath("/alpha/bravo")
 
 }
