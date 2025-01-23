@@ -74,7 +74,7 @@ test_that("cloneDirectory symlinks are absolute", {
     expect_identical(readLines(file.path(dest, "stuff", "whee.txt")), as.character(1:10))
     expect_identical(readLines(file.path(dest, "stuff", "blah", "kanon.txt")), "air")
 
-    cleaned <- absolutizePath(src)
+    cleaned <- file.path(absolutizePath(getwd()), basename(src)) # need to clean the path for a valid comparison.
     expect_identical(Sys.readlink(file.path(dest, "foobar.txt")), file.path(cleaned, "foobar.txt"))
     expect_identical(Sys.readlink(file.path(dest, "stuff", "whee.txt")), file.path(cleaned, "stuff", "whee.txt"))
     expect_identical(Sys.readlink(file.path(dest, "stuff", "blah", "kanon.txt")), file.path(cleaned, "stuff", "blah", "kanon.txt"))
