@@ -119,7 +119,7 @@ saveBaseListFormat <- (function() {
     ghandle <- H5Gcreate(handle, name)
     on.exit(H5Gclose(ghandle), add=TRUE, after=FALSE)
 
-    if (is.list(x) && !is.data.frame(x) && !is(x, "POSIXlt")) {
+    if (is.list(x) && !is.data.frame(x) && !is(x, "POSIXlt") && !is.package_version(x)) {
         h5_write_attribute(ghandle, "uzuki_object", "list", scalar=TRUE)
         gdhandle <- H5Gcreate(ghandle, "data")
         on.exit(H5Gclose(gdhandle), add=TRUE, after=FALSE)
@@ -275,6 +275,8 @@ saveBaseListFormat <- (function() {
     } else if (.is_datetime(x)) {
         return("date-time")
     } else if (is.character(x)) {
+        return("string")
+    } else if (is.package_ersion(x)) {
         return("string")
     }
     return(NULL)
