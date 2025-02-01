@@ -85,7 +85,7 @@ validateObject(tmp)
 
 `r self` itself supports a small set of classes from the `r Biocpkg("S4Vectors")` packages;
 support for additional classes can be found in other packages like `r Biocpkg("alabaster.ranges")` and `r Biocpkg("alabaster.se")`.
-Third-party developers can also add support for their own classes by defining new methods, see the [_Extensions_](extensions.html) vignette for details.
+Third-party developers can also add support for their own classes by defining new methods, see [below](#extending-to-new-classes) for details.
 
 # Operating on directories
 
