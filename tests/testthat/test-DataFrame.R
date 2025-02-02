@@ -701,3 +701,17 @@ test_that("saving works for base data.frames", {
     roundtrip <- readObject(tmp)
     expect_identical(as.data.frame(roundtrip), df)
 })
+
+test_that("saving works for data.frames containing package_version columns", {
+    df <- data.frame(
+        stuff = as.package_version(c("1.2", "2.3")),
+        whee = as.package_version(c("2.3.4", "4.5.6"))
+    )
+
+    tmp <- tempfile()
+    saveObject(df, tmp)
+    roundtrip <- readObject(tmp)
+
+    expect_identical(roundtrip$stuff, as.character(df$stuff))
+    expect_identical(roundtrip$whee, as.character(df$whee))
+})

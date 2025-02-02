@@ -119,7 +119,13 @@ saveBaseListFormat <- (function() {
     ghandle <- H5Gcreate(handle, name)
     on.exit(H5Gclose(ghandle), add=TRUE, after=FALSE)
 
-    if (is.list(x) && !is.data.frame(x) && !is(x, "POSIXlt") && !is.package_version(x)) {
+    if (is.null(x)) {
+        h5_write_attribute(ghandle, "uzuki_object", "nothing", scalar=TRUE)
+        return(NULL)
+    }
+
+    sltype <- .is_stringlike(x)
+    if (is.list(x) && !is.data.frame(x) && is.null(sltype)) {
         h5_write_attribute(ghandle, "uzuki_object", "list", scalar=TRUE)
         gdhandle <- H5Gcreate(ghandle, "data")
         on.exit(H5Gclose(gdhandle), add=TRUE, after=FALSE)
@@ -140,11 +146,6 @@ saveBaseListFormat <- (function() {
             })
         }
 
-        return(NULL)
-    }
-
-    if (is.null(x)) {
-        h5_write_attribute(ghandle, "uzuki_object", "nothing", scalar=TRUE)
         return(NULL)
     }
 
@@ -177,7 +178,7 @@ saveBaseListFormat <- (function() {
             }
             return(NULL)
 
-        } else if (!is.null(sltype <- .is_stringlike(x))) {
+        } else if (!is.null(sltype)) {
             h5_write_attribute(ghandle, "uzuki_object", "vector", scalar=TRUE)
             h5_write_attribute(ghandle, "uzuki_type", if (.version == 1) sltype else "string", scalar=TRUE)
 
@@ -276,7 +277,7 @@ saveBaseListFormat <- (function() {
         return("date-time")
     } else if (is.character(x)) {
         return("string")
-    } else if (is.package_ersion(x)) {
+    } else if (is.numeric_version(x)) {
         return("string")
     }
     return(NULL)
@@ -300,7 +301,12 @@ saveBaseListFormat <- (function() {
 }
 
 .transform_list_json <- function(x, dir, path, env, simplified, .version, extra) {
-    if (is.list(x) && !is.data.frame(x)) {
+    if (is.null(x)) {
+        return(list(type="nothing"))
+    }
+
+    sltype <- .is_stringlike(x)
+    if (is.list(x) && !is.data.frame(x) && is.null(sltype)) {
         formatted <- list(type="list")
 
         nn <- names(x)
@@ -323,10 +329,6 @@ saveBaseListFormat <- (function() {
         return(formatted)
     }
 
-    if (is.null(x)) {
-        return(list(type="nothing"))
-    }
-
     if (is.null(dim(x))) {
         if (is.factor(x)) {
             formatted <- list(
@@ -342,7 +344,7 @@ saveBaseListFormat <- (function() {
             formatted <- .add_json_names(x, formatted)
             return(formatted)
 
-        } else if (!is.null(sltype <- .is_stringlike(x))) {
+        } else if (!is.null(sltype)) {
             formatted <- list(
                 type=if (.version == 1) sltype else "string",
                 values=.sanitize_stringlike(x, sltype)

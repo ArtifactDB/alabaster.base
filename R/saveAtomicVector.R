@@ -48,11 +48,6 @@ NULL
         format <- "date"
         contents <- .sanitize_date(x)
 
-    } else if (is.package_version(x)) {
-        type <- "string"
-        format <- NULL
-        contents <- as.character(x)
-
     } else {
         stopifnot(is.atomic(x))
         remapped <- .remap_atomic_type(x)
@@ -121,9 +116,11 @@ setMethod("saveObject", "POSIXlt", .save_atomic_vector)
 #' @rdname saveAtomicVector
 setMethod("saveObject", "POSIXct", .save_atomic_vector)
 
+setOldClass(c("package_version", "numeric_version"))
+
 #' @export
 #' @rdname saveAtomicVector
-setMethod("saveObject", "package_version", .save_atomic_vector)
+setMethod("saveObject", "numeric_version", function(x, path, ...) .save_atomic_vector(as.character(x), path, ...))
 
 #######################################
 ########### OLD STUFF HERE ############

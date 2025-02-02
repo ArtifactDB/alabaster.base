@@ -687,3 +687,18 @@ test_that("lists work correctly in legacy mode (HDF5)", {
     attrs <- rhdf5::h5readAttributes(file.path(tmp, "stuff2/list.h5"), "contents/data/7/data")
     expect_identical(attrs[["missing-value-placeholder"]], NA_real_) # still relying on the payloads.
 })
+
+test_that("lists convert package versions to strings", {
+    vals <- list(foo = as.package_version(c("1.0", "1.0.0", "1.2.1")), bar = package_version("1.2.3.4"))
+
+    tmp <- tempfile()
+    dir.create(tmp)
+
+    saveObject(vals, file.path(tmp, "gunk"))
+    reloaded <- readObject(file.path(tmp, "gunk"))
+    expect_identical(reloaded, lapply(vals, as.character))
+
+    saveObject(vals, file.path(tmp, "gunk.h5"), list.format="hdf5")
+    reloaded <- readObject(file.path(tmp, "gunk.h5"))
+    expect_identical(reloaded, lapply(vals, as.character))
+})
