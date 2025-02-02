@@ -116,6 +116,12 @@ setMethod("saveObject", "POSIXlt", .save_atomic_vector)
 #' @rdname saveAtomicVector
 setMethod("saveObject", "POSIXct", .save_atomic_vector)
 
+setOldClass(c("package_version", "numeric_version"))
+
+#' @export
+#' @rdname saveAtomicVector
+setMethod("saveObject", "numeric_version", function(x, path, ...) .save_atomic_vector(as.character(x), path, ...))
+
 #######################################
 ########### OLD STUFF HERE ############
 #######################################

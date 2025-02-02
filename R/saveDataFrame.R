@@ -90,6 +90,11 @@ setMethod("saveObject", "DataFrame", function(x, path, ...) {
             colformat <- "date-time"
             sanitized <- as.character(as.Rfc3339(col))
 
+        } else if (is.numeric_version(col)) {
+            coltype <- "string"
+            colformat <- NULL
+            sanitized <- as.character(col)
+
         } else if (is(col, "Date")) {
             coltype <- "string"
             colformat <- "date"

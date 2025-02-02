@@ -12,6 +12,9 @@ This should be used for creating lightweight on-disk representations of duplicat
 
 \item Added the \code{absolutizePath()} function to obtain an absolute file path.
 This is occasionally necessary to ensure that references to deduplicated resources are robust to changes to the working directory.
+
+\item Coerce \code{numeric_version} instances to strings or character vectors before saving them in \code{saveObject()}.
+This includ such objects encountered inside lists or DataFrames.
 }}
 
 \section{Version 1.6.0}{\itemize{

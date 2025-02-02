@@ -97,3 +97,14 @@ test_that("vectors preserve date-times as strings", {
     saveObject(reloaded, file.path(tmp, "foo"))
     expect_identical(readAtomicVector(file.path(tmp, "foo")), reloaded)
 })
+
+test_that("vectors convert package versions to strings", {
+    vals <- as.package_version(c("1.0", "1.0.0", "1.2.1"))
+
+    tmp <- tempfile()
+    dir.create(tmp)
+
+    saveObject(vals, file.path(tmp, "gunk"))
+    reloaded <- readAtomicVector(file.path(tmp, "gunk"))
+    expect_identical(reloaded, as.character(vals))
+})
