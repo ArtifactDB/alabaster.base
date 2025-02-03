@@ -78,11 +78,18 @@ setGeneric("saveObject", function(x, path, ...) {
         on.exit({ is_nested$status <- FALSE }, add=TRUE, after=FALSE)
     }
 
+    # Setting up the save environment.
+    sfuns <- registerSaveEnvironment()
+    on.exit(sfuns$restore(), add=TRUE, after=FALSE)
+
     standardGeneric("saveObject")
 
     if (do_validate) {
         validateObject(path)
     }
+
+    sfuns$write(path)
+    invisible(NULL)
 })
 
 is_nested <- new.env()

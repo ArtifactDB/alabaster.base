@@ -9,12 +9,12 @@
 \alias{altReadObjectFunction}
 \title{Alter the reading function}
 \usage{
-altReadObject(...)
+altReadObject(path, ...)
 
 altReadObjectFunction(fun)
 }
 \arguments{
-\item{...}{Further arguments to pass to \code{\link{readObject}} or its equivalent.}
+\item{path, ...}{Further arguments to pass to \code{\link{readObject}} or its equivalent.}
 
 \item{fun}{Function that can serve as a drop-in replacement for \code{\link{readObject}}.}
 }

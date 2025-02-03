@@ -2,7 +2,7 @@
 #'
 #' Allow alabaster applications to specify an alternative reading function in \code{\link{altReadObject}}.
 #' 
-#' @param ... Further arguments to pass to \code{\link{readObject}} or its equivalent.
+#' @param path,... Further arguments to pass to \code{\link{readObject}} or its equivalent.
 #' @param fun Function that can serve as a drop-in replacement for \code{\link{readObject}}. 
 #'
 #' @return
@@ -63,12 +63,18 @@
 #'
 #' @export
 #' @aliases .altLoadObject .loadObject altLoadObject altLoadObjectFunction
-altReadObject <- function(...) {
+altReadObject <- function(path, ...) {
     FUN <- altReadObjectFunction()
+
     if (is.null(FUN)) {
         FUN <- readObject
+    } else {
+        # Setting up the save environment.
+        lfun <- loadSaveEnvironment(path)
+        on.exit(lfun(), add=TRUE, after=FALSE)
     }
-    FUN(...)
+
+    FUN(path, ...)
 }
 
 #' @export

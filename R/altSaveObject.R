@@ -2,7 +2,7 @@
 #'
 #' Allow alabaster applications to divert to a different saving generic instead of \code{\link{saveObject}}.
 #'
-#' @param ... Further arguments to pass to \code{\link{saveObject}} or an equivalent generic.
+#' @param x,path,... Further arguments to pass to \code{\link{saveObject}} or an equivalent generic.
 #' @param generic Generic function that can serve as a drop-in replacement for \code{\link{saveObject}}. 
 #'
 #' @return 
@@ -64,12 +64,21 @@
 #'
 #' @export
 #' @aliases .stageObject .altStageObject altStageObject altStageObjectFunction
-altSaveObject <- function(...) {
+altSaveObject <- function(x, path, ...) {
     FUN <- altSaveObjectFunction()
+
     if (is.null(FUN)) {
         FUN <- saveObject
+    } else {
+        # Setting up the save environment.
+        sfuns <- registerSaveEnvironment()
+        on.exit({ 
+            sfuns$write(path)
+            sfuns$restore()
+        }, add=TRUE, after=FALSE)
     }
-    FUN(...)
+
+    FUN(x, path, ...)
 }
 
 #' @export

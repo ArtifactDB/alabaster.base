@@ -70,6 +70,11 @@ readObject <- function(path, metadata=NULL, ...) {
         meth <- eval(parse(text=meth))
         read.registry$registry[[type]] <- meth
     }
+
+    # Setting up the save environment.
+    lfun <- loadSaveEnvironment(path)
+    on.exit(lfun(), add=TRUE, after=FALSE)
+
     meth(path, metadata=metadata, ...)
 }
 

@@ -9,12 +9,12 @@
 \alias{altSaveObjectFunction}
 \title{Alter the saving generic}
 \usage{
-altSaveObject(...)
+altSaveObject(x, path, ...)
 
 altSaveObjectFunction(generic)
 }
 \arguments{
-\item{...}{Further arguments to pass to \code{\link{saveObject}} or an equivalent generic.}
+\item{x, path, ...}{Further arguments to pass to \code{\link{saveObject}} or an equivalent generic.}
 
 \item{generic}{Generic function that can serve as a drop-in replacement for \code{\link{saveObject}}.}
 }

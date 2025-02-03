@@ -15,6 +15,9 @@ This is occasionally necessary to ensure that references to deduplicated resourc
 
 \item Coerce \code{numeric_version} instances to strings or character vectors before saving them in \code{saveObject()}.
 This includ such objects encountered inside lists or DataFrames.
+
+\item Added \code{getSaveEnvironment()} and related functions to keep track of the R environment used to save each object.
+This facilitates debugging and enables corrective actions to be taken by loading functions when encountering files created by buggy versions of any package in the \pkg{alabaster} stack.
 }}
 
 \section{Version 1.6.0}{\itemize{
