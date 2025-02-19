@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">alabaster.base</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.6</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.7</span>
       </span>
     </div>
 
@@ -68,7 +68,7 @@
 
 
 <dl><dt id="arg-dir">dir<a class="anchor" aria-label="anchor" href="#arg-dir"></a></dt>
-<dd><p>String containing a path to a staging directory.</p></dd>
+<dd><p>String containing a path to a directory containing objects saved by <code><a href="saveObject.html">saveObject</a></code>, possibly in separate subdirectories.</p></dd>
 
 
 <dt id="arg-include-children">include.children<a class="anchor" aria-label="anchor" href="#arg-include-children"></a></dt>
@@ -77,9 +77,10 @@
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p><a href="https://rdrr.io/pkg/S4Vectors/man/DataFrame-class.html" class="external-link">DFrame</a> where each row corresponds to an object and contains;</p><ul><li><p><code>path</code>, the relative path to the object's subdirectory inside <code>dir</code>.</p></li>
-<li><p><code>type</code>, the type of the object</p></li>
-<li><p><code>child</code>, whether or not the object is a child of another object.</p></li>
+    <p>A <a href="https://rdrr.io/pkg/S4Vectors/man/DataFrame-class.html" class="external-link">DFrame</a> where each row corresponds to an object.
+It contains the following columns:</p><ul><li><p><code>path</code>, the relative path to the object's subdirectory inside <code>dir</code>.</p></li>
+<li><p><code>type</code>, the type of the object based on its <code>OBJECT</code> file (see <code>?<a href="readObjectFile.html">readObjectFile</a></code>).</p></li>
+<li><p><code>child</code>, whether the object is a child of another object.</p></li>
 </ul><p>If <code>include.children=FALSE</code>, metadata is only returned for non-child objects.</p>
     </div>
     <div id="author">
