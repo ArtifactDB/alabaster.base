@@ -9,16 +9,17 @@
 listObjects(dir, include.children = FALSE)
 }
 \arguments{
-\item{dir}{String containing a path to a staging directory.}
+\item{dir}{String containing a path to a directory containing objects saved by \code{\link{saveObject}}, possibly in separate subdirectories.}
 
 \item{include.children}{Logical scalar indicating whether to include child objects.}
 }
 \value{
-\link[S4Vectors]{DFrame} where each row corresponds to an object and contains;
+A \link[S4Vectors]{DFrame} where each row corresponds to an object.
+It contains the following columns:
 \itemize{
 \item \code{path}, the relative path to the object's subdirectory inside \code{dir}.
-\item \code{type}, the type of the object
-\item \code{child}, whether or not the object is a child of another object.
+\item \code{type}, the type of the object based on its \code{OBJECT} file (see \code{?\link{readObjectFile}}).
+\item \code{child}, whether the object is a child of another object.
 }
 
 If \code{include.children=FALSE}, metadata is only returned for non-child objects.
