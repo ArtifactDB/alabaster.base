@@ -20,10 +20,10 @@ Character vector of the paths inside \code{dir} that were validated, invisibly.
 If any validation failed, an error is raised.
 }
 \description{
-Check whether each object in a directory is valid by calling \code{\link{validateObject}} on each non-nested object.
+Check whether each object in a directory is valid by calling \code{\link{validateObject}} on each non-child object.
 }
 \details{
-We assume that the process of validating an object will call \code{\link{validateObject}} on any nested objects.
+We assume that the process of validating an object will call \code{\link{validateObject}} on any child objects.
 This allows us to skip explicit calls to \code{\link{validateObject}} on each component of a complex object.
 }
 \examples{

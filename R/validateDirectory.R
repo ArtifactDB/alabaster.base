@@ -1,6 +1,6 @@
 #' Validate a directory of objects
 #'
-#' Check whether each object in a directory is valid by calling \code{\link{validateObject}} on each non-nested object.
+#' Check whether each object in a directory is valid by calling \code{\link{validateObject}} on each non-child object.
 #'
 #' @param dir String containing the path to a directory with subdirectories populated by \code{\link{saveObject}}.
 #' @param legacy Logical scalar indicating whether to validate a directory with legacy objects (created by the old \code{stageObject}).
@@ -11,7 +11,7 @@
 #' If any validation failed, an error is raised.
 #'
 #' @details
-#' We assume that the process of validating an object will call \code{\link{validateObject}} on any nested objects.
+#' We assume that the process of validating an object will call \code{\link{validateObject}} on any child objects.
 #' This allows us to skip explicit calls to \code{\link{validateObject}} on each component of a complex object. 
 #'
 #' @author Aaron Lun
