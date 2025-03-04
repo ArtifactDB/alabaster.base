@@ -57,9 +57,18 @@ NULL
     }
 
     fhandle <- H5Fcreate(ofile, "H5F_ACC_TRUNC")
-    on.exit(H5Fclose(fhandle), add=TRUE, after=FALSE)
+    on.exit({
+        if (!is.null(fhandle)) {
+            H5Fclose(fhandle)
+        }
+    }, add=TRUE, after=FALSE)
+
     ghandle <- H5Gcreate(fhandle, "atomic_vector")
-    on.exit(H5Gclose(ghandle), add=TRUE, after=FALSE)
+    on.exit({
+        if (!is.null(ghandle)) {
+            H5Gclose(ghandle)
+        }
+    }, add=TRUE, after=FALSE)
 
     transformed <- transformVectorForHdf5(contents)
     current <- transformed$transformed
@@ -72,15 +81,21 @@ NULL
             character.vls <- h5_use_vls(len)
         }
         if (character.vls) {
-            N <- length(current)
-            phandle <- h5_create_vls_pointer_dataset(ghandle, "pointers", N, chunks=h5_guess_vector_chunks(N), emit=TRUE)
-            on.exit(H5Dclose(phandle), add=TRUE, after=FALSE)
-            missing_handle <- phandle
-            hhandle <- h5_create_vector(ghandle, "heap", sum(len), "H4T_NATIVE_UINT8", emit=TRUE)
-            on.exit(H5Dclose(hhandle), add=TRUE, after=FALSE)
-            h5_write_vls_array(phandle, hhandle, len)
+            # Need to do this tedious song and dance to get an exclusive file handle.
+            H5Gclose(ghandle)
+            ghandle <- NULL
+            H5Fclose(fhandle)
+            fhandle <- NULL
+
+            h5_write_vls_array(ofile, "atomic_vector", "pointers", "heap", current)
             saved <- TRUE
             type <- "vls"
+
+            # Reopening this for downstream operations.
+            fhandle <- H5Fopen(ofile, "H5F_ACC_RDWR")
+            ghandle <- H5Gopen(fhandle, "atomic_vector")
+            missing_handle <- H5Dopen(ghandle, "pointers")
+            on.exit(H5Dclose(missing_handle), add=TRUE, after=FALSE)
         }
     }
     if (!saved) {
@@ -102,7 +117,7 @@ NULL
         h5_write_vector(ghandle, "names", names(x))
     }
 
-    saveObjectFile(path, "atomic_vector", list(atomic_vector=list(version="1.0")))
+    saveObjectFile(path, "atomic_vector", list(atomic_vector=list(version="1.1")))
     invisible(NULL)
 }
 

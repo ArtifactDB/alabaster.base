@@ -89,19 +89,11 @@ deregister_derived_from <- function(type, parent) {
     .Call(`_alabaster_base_deregister_derived_from`, type, parent)
 }
 
-dump_vls_heap <- function(hid, values, lengths, buffer_size) {
-    .Call(`_alabaster_base_dump_vls_heap`, hid, values, lengths, buffer_size)
+dump_vls <- function(file, group, pointers, heap, x, raw_dims, raw_chunks, compress, scalar, buffer_size) {
+    .Call(`_alabaster_base_dump_vls`, file, group, pointers, heap, x, raw_dims, raw_chunks, compress, scalar, buffer_size)
 }
 
-create_vls_pointer_dataset <- function(gid, name, dimensions, chunks, compress, scalar) {
-    .Call(`_alabaster_base_create_vls_pointer_dataset`, gid, name, dimensions, chunks, compress, scalar)
-}
-
-dump_vls_pointers <- function(pid, lengths, buffer_size) {
-    .Call(`_alabaster_base_dump_vls_pointers`, pid, lengths, buffer_size)
-}
-
-parse_vls_pointers <- function(pid, hid, buffer_size) {
-    .Call(`_alabaster_base_parse_vls_pointers`, pid, hid, buffer_size)
+parse_vls <- function(file, pointers, heap, buffer_size, keep_dim, native) {
+    .Call(`_alabaster_base_parse_vls`, file, pointers, heap, buffer_size, keep_dim, native)
 }
 

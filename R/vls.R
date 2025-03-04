@@ -4,21 +4,41 @@ h5_use_vls <- function(len) {
 }
 
 #' @export
-h5_create_vls_pointer_dataset <- function(handle, name, dimensions, chunks, compress=6, scalar=FALSE, emit=TRUE) {
-    create_vls_pointer_dataset(handle@ID, name, dimensions, chunks, compress, scalar)
-    if (emit) {
-        return(H5Dopen(handle, name))
+h5_write_vls_array <- function(file, group, pointers, heap, x, compress=6, chunks=NULL, buffer.size=1e6, scalar=FALSE) {
+    d <- dim(x)
+    if (is.null(d)) {
+        d <- length(x)
+        if (is.null(chunks)) {
+            chunks <- h5_guess_vector_chunks(d)
+        }
+    } else {
+        if (is.null(chunks)) {
+            stop("'chunks=' must be specified for high-dimensional 'x'")
+        }
     }
+
+    dump_vls(
+        file,
+        group,
+        pointers,
+        heap,
+        x,
+        raw_dims=d,
+        raw_chunks=chunks,
+        compress=compress,
+        scalar=scalar,
+        buffer_size=buffer.size
+    )
 }
 
 #' @export
-h5_write_vls_array <- function(pointers, heap, x, len, buffer.size=1e6) {
-    dump_vls_pointers(pointers@ID, len, buffer.size)
-    dump_vls_heap(heap@ID, x, len, buffer.size)
-}
-
-#' @export
-#' @importFrom rhdf5 H5Dget_space H5Sclose H5Sget_simple_extent_dims
-h5_read_vls_array <- function(pointers, heap, buffer.size=1e6, keep.dim=TRUE, transposed=TRUE) {
-    parse_vls_pointers(pointers@ID, heap, buffer.size)
+h5_read_vls_array <- function(file, pointers, heap, buffer.size=1e6, keep.dim=TRUE, native=FALSE) {
+    parse_vls(
+        file,
+        pointers,
+        heap,
+        buffer.size,
+        keep.dim,
+        native
+    )
 }
