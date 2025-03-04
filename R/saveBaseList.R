@@ -7,6 +7,9 @@
 #' Alternatively, a \link[S4Vectors]{List} to be coerced into a list.
 #' @inheritParams saveObject
 #' @param list.format String specifying the format in which to save the list.
+#' @param list.character.vls Logical scalar indicating whether to save character vectors in the custom variable length string (VLS) array format.
+#' If \code{NULL}, this is determined based on a comparison of the expected storage against a fixed length array.
+#' Only used if \code{list.format="hdf5"}.
 #' @param ... Further arguments, passed to \code{\link{altSaveObject}} for complex child objects.
 #' 
 #' @return

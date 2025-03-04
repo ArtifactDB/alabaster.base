@@ -35,7 +35,7 @@ NULL
 
         tid
     } else {
-        stop("unsupported type '", typeof(x) + "'")
+        stop("unsupported type '", typeof(x), "'")
     }
 }
 

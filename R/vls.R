@@ -1,3 +1,15 @@
+#' VLS saving utilities
+#'
+#' Utilities for saving our custom variable length string array format in HDF5.
+#' Intended for \pkg{alabaster.*} developers only.
+#'
+#' @name vls
+#' @aliases 
+#' h5_use_vls
+#' h5_write_vls_array
+#' h5_parse_vls_array
+NULL
+
 #' @export
 h5_use_vls <- function(x) {
     use_vls(x)

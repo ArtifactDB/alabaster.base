@@ -4,6 +4,8 @@
 #'
 #' @param x Any of the atomic vector types, or \link{Date} objects, or time objects, e.g., \link{POSIXct}.
 #' @inheritParams saveObject
+#' @param character.vls Logical scalar indicating whether to save character vectors in the custom variable length string (VLS) array format.
+#' If \code{NULL}, this is determined based on a comparison of the expected storage against a fixed length array.
 #' @param ... Further arguments that are ignored.
 #' 
 #' @return
@@ -68,7 +70,7 @@ NULL
     saved.vls <- FALSE
     if (type == "string" && is.null(format) && !isFALSE(character.vls)) {
         if (is.null(character.vls)) {
-            character.vls <- h5_use_vls(x)
+            character.vls <- h5_use_vls(current)
         }
         if (character.vls) {
             # Need to do this tedious song and dance to get an exclusive file handle.
@@ -82,13 +84,11 @@ NULL
             # Reopening this for downstream operations.
             fhandle <- H5Fopen(ofile, "H5F_ACC_RDWR")
             ghandle <- H5Gopen(fhandle, "atomic_vector")
-            missing_handle <- H5Dopen(ghandle, "pointers")
-            on.exit(H5Dclose(missing_handle), add=TRUE, after=FALSE)
         }
     }
 
     if (saved.vls) {
-        dhandle <- H5Dopen(ghandle, "values")
+        dhandle <- H5Dopen(ghandle, "pointers")
     } else {
         dhandle <- h5_write_vector(ghandle, "values", current, emit=TRUE)
     }

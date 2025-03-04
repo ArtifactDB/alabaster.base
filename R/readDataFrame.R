@@ -28,11 +28,11 @@
 readDataFrame <- function(path, metadata, ...) {
     fpath <- file.path(path, "basic_columns.h5")
     fhandle <- H5Fopen(fpath, flags="H5F_ACC_RDONLY")
-    on.exit(H5Fclose(fhandle), add=TRUE, after=FALSE)
+    on.exit(.H5Fclose_null(fhandle), add=TRUE, after=FALSE)
 
     host <- "data_frame"
     ghandle <- H5Gopen(fhandle, host)
-    on.exit(H5Gclose(ghandle), add=TRUE, after=FALSE)
+    on.exit(.H5Gclose_null(ghandle), add=TRUE, after=FALSE)
 
     nrows <- h5_read_attribute(ghandle, "row-count")
     colnames <- h5_read_vector(ghandle, "column_names")
@@ -42,7 +42,7 @@ readDataFrame <- function(path, metadata, ...) {
     }
 
     gdhandle <- H5Gopen(ghandle, "data")
-    on.exit(H5Gclose(gdhandle), add=TRUE, after=FALSE)
+    on.exit(.H5Gclose_null(gdhandle), add=TRUE, after=FALSE)
     all.children <- h5ls(gdhandle, recursive=FALSE, datasetinfo=FALSE)$name
 
     columns <- vector("list", length(colnames))
@@ -65,6 +65,31 @@ readDataFrame <- function(path, metadata, ...) {
                     ordered <- h5_read_attribute(colhandle, "ordered", check=TRUE, default=NULL)
                     factor(levels[codes], levels=levels, ordered=isTRUE(ordered > 0L))
                 })
+
+            } else if (type == "vls") {
+                missing.placeholder <- (function() {
+                    colhandle <- H5Gopen(gdhandle, expected)
+                    on.exit(H5Gclose(colhandle), add=TRUE, after=FALSE)
+                    h5_read_attribute(colhandle, missingPlaceholderName, check=TRUE, default=NULL)
+                })()
+
+                # Need to do this tedious song and dance to get an exclusive file handle.
+                gdhandle <- .H5Gclose_null(gdhandle)
+                ghandle <- .H5Gclose_null(ghandle)
+                fhandle <- .H5Fclose_null(fhandle)
+
+                contents <- h5_read_vls_array(
+                    fpath,
+                    paste0("data_frame/data/", expected, "/pointers"),
+                    paste0("data_frame/data/", expected, "/heap"),
+                    missing.placeholder=missing.placeholder
+                )
+                columns[[col]] <- as.vector(contents)
+
+                # Reopening this for downstream operations.
+                fhandle <- H5Fopen(fpath, "H5F_ACC_RDONLY")
+                ghandle <- H5Gopen(fhandle, "data_frame")
+                gdhandle <- H5Gopen(ghandle, "data")
 
             } else {
                 columns[[col]] <- local({

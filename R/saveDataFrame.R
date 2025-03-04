@@ -4,6 +4,8 @@
 #'
 #' @param x A \link[S4Vectors]{DataFrame} or data.frame.
 #' @inheritParams saveObject
+#' @param DataFrame.character.vls Logical scalar indicating whether to save character vectors in the custom variable length string (VLS) array format.
+#' If \code{NULL}, this is determined based on a comparison of the expected storage against a fixed length array.
 #'
 #' @return
 #' A named list containing the metadata for \code{x}.
@@ -53,7 +55,7 @@ setMethod("saveObject", "DataFrame", function(x, path, DataFrame.character.vls=N
         mcols.path=file.path(path, "column_annotations"),
         ...
     )
-    saveObjectFile(path, "data_frame", list(data_frame=list(version="1.0")))
+    saveObjectFile(path, "data_frame", list(data_frame=list(version="1.1")))
 })
 
 #' @importFrom rhdf5 h5write h5createGroup h5createFile H5Gopen H5Gclose H5Acreate H5Aclose H5Awrite H5Fopen H5Fclose H5Dopen H5Dclose
@@ -93,7 +95,7 @@ setMethod("saveObject", "DataFrame", function(x, path, DataFrame.character.vls=N
             })()
 
         } else if (.is_datetime(col)) {
-            oltype <- "string"
+            coltype <- "string"
             colformat <- "date-time"
             sanitized <- as.character(as.Rfc3339(col))
 
@@ -124,7 +126,7 @@ setMethod("saveObject", "DataFrame", function(x, path, DataFrame.character.vls=N
             other.dir <- file.path(path, "other_columns")
             dir.create(other.dir, showWarnings=FALSE)
             tryCatch({
-                altSaveObject(x[[z]], file.path(other.dir, data.name), ...)
+                altSaveObject(x[[z]], file.path(other.dir, data.name), DataFrame.character.vls=DataFrame.character.vls, ...)
             }, error = function(e) stop("failed to stage column '", colnames(x)[z], "'\n  - ", e$message))
 
         } else if (!is.null(sanitized)) {
@@ -135,7 +137,7 @@ setMethod("saveObject", "DataFrame", function(x, path, DataFrame.character.vls=N
             saved.vls <- FALSE
             if (coltype == "string" && is.null(colformat) && !isFALSE(DataFrame.character.vls)) {
                 if (is.null(DataFrame.character.vls)) {
-                    DataFrame.character.vls <- h5_use_vls(x)
+                    DataFrame.character.vls <- h5_use_vls(current)
                 }
                 if (DataFrame.character.vls) {
                     vhandle <- H5Gcreate(gdhandle, data.name)

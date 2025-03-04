@@ -43,12 +43,11 @@ readAtomicVector <- function(path, metadata, ...) {
         fhandle <- .H5Fclose_null(fhandle)
 
         contents <- h5_read_vls_array(fpath, paste0(host, "/pointers"), paste0(host, "/heap"), missing.placeholder=missing.placeholder)
-        contents <- drop(contents)
+        contents <- as.vector(contents)
 
         # Reopening this for downstream operations.
         fhandle <- H5Fopen(fpath, "H5F_ACC_RDONLY")
         ghandle <- H5Gopen(fhandle, "atomic_vector")
-        missing_handle <- H5Dopen(ghandle, "pointers")
 
     } else {
         vhandle <- H5Dopen(ghandle, "values")

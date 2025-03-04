@@ -702,3 +702,43 @@ test_that("lists convert package versions to strings", {
     reloaded <- readObject(file.path(tmp, "gunk.h5"))
     expect_identical(reloaded, lapply(vals, as.character))
 })
+
+test_that("lists work in VLS mode", {
+    tmp <- tempfile()
+    dir.create(tmp)
+
+    x <- list(u=runif(5), w=c("A", "BC", "DEFG"), x=TRUE, y=list(a=c("HIJKL", "MNOP", "QRS", "TU", "V")), z=2:10)
+    saveObject(x, file.path(tmp, "basic"), list.format="hdf5", list.character.vls=TRUE)
+    reloaded <- readObject(file.path(tmp, "basic")) 
+    expect_identical(x, reloaded)
+
+    copy <- x
+    copy$w[3] <- NA
+    saveObject(copy, file.path(tmp, "with_missing"), list.format="hdf5", list.character.vls=TRUE)
+    reloaded <- readObject(file.path(tmp, "with_missing")) 
+    expect_identical(copy, reloaded)
+
+    copy <- x
+    names(copy$w) <- seq_along(copy$w)
+    saveObject(copy, file.path(tmp, "named"), list.format="hdf5", list.character.vls=TRUE)
+    reloaded <- readObject(file.path(tmp, "named")) 
+    expect_identical(copy, reloaded)
+
+    copy <- x
+    copy$w <- c(copy$w, strrep("XXXXX", 100))
+    saveObject(copy, file.path(tmp, "auto"), list.format="hdf5", list.character.vls=NULL)
+    reloaded <- readObject(file.path(tmp, "auto")) 
+    expect_identical(copy, reloaded)
+
+    copy <- x
+    copy$w <- "ABCDEFGHIJK"
+    saveObject(copy, file.path(tmp, "scalar"), list.format="hdf5", list.character.vls=TRUE)
+    reloaded <- readObject(file.path(tmp, "scalar")) 
+    expect_identical(copy, reloaded)
+
+    copy <- x
+    copy$w <- I("ABCDEFGHIJK")
+    saveObject(copy, file.path(tmp, "scalar"), list.format="hdf5", list.character.vls=TRUE)
+    reloaded <- readObject(file.path(tmp, "scalar")) 
+    expect_identical(copy, reloaded)
+})

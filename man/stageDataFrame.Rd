@@ -6,14 +6,17 @@
 \alias{saveObject,data.frame-method}
 \title{Save a DataFrame to disk}
 \usage{
-\S4method{saveObject}{DataFrame}(x, path, ...)
+\S4method{saveObject}{DataFrame}(x, path, DataFrame.character.vls = NULL, ...)
 
-\S4method{saveObject}{data.frame}(x, path, ...)
+\S4method{saveObject}{data.frame}(x, path, DataFrame.character.vls = NULL, ...)
 }
 \arguments{
 \item{x}{A \link[S4Vectors]{DataFrame} or data.frame.}
 
 \item{path}{String containing the path to a directory in which to save \code{x}.}
+
+\item{DataFrame.character.vls}{Logical scalar indicating whether to save character vectors in the custom variable length string (VLS) array format.
+If \code{NULL}, this is determined based on a comparison of the expected storage against a fixed length array.}
 
 \item{...}{Additional named arguments to pass to specific methods.}
 }

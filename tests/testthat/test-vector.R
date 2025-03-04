@@ -108,3 +108,31 @@ test_that("vectors convert package versions to strings", {
     reloaded <- readAtomicVector(file.path(tmp, "gunk"))
     expect_identical(reloaded, as.character(vals))
 })
+
+test_that("vectors work in VLS mode", {
+    tmp <- tempfile()
+    dir.create(tmp)
+
+    x <- c("A", "BC", "DEFG", "HIJKL", "MNOP", "QRS", "TU", "V")
+    saveObject(x, file.path(tmp, "basic"), character.vls=TRUE)
+    reloaded <- readAtomicVector(file.path(tmp, "basic")) 
+    expect_identical(x, reloaded)
+
+    y <- x
+    y[2] <- NA
+    saveObject(y, file.path(tmp, "with_missing"), character.vls=TRUE)
+    reloaded <- readAtomicVector(file.path(tmp, "with_missing")) 
+    expect_identical(y, reloaded)
+
+    y <- x
+    names(y) <- seq_along(y)
+    saveObject(y, file.path(tmp, "named"), character.vls=TRUE)
+    reloaded <- readAtomicVector(file.path(tmp, "named")) 
+    expect_identical(y, reloaded)
+
+    y <- x
+    y[4] <- strrep("HIJKL", 100)
+    saveObject(y, file.path(tmp, "auto"), character.vls=NULL)
+    reloaded <- readAtomicVector(file.path(tmp, "auto")) 
+    expect_identical(y, reloaded)
+})
