@@ -254,6 +254,58 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// dump_vls_heap
+SEXP dump_vls_heap(SEXP hid, Rcpp::CharacterVector values, Rcpp::IntegerVector lengths, size_t buffer_size);
+RcppExport SEXP _alabaster_base_dump_vls_heap(SEXP hidSEXP, SEXP valuesSEXP, SEXP lengthsSEXP, SEXP buffer_sizeSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::traits::input_parameter< SEXP >::type hid(hidSEXP);
+    Rcpp::traits::input_parameter< Rcpp::CharacterVector >::type values(valuesSEXP);
+    Rcpp::traits::input_parameter< Rcpp::IntegerVector >::type lengths(lengthsSEXP);
+    Rcpp::traits::input_parameter< size_t >::type buffer_size(buffer_sizeSEXP);
+    rcpp_result_gen = Rcpp::wrap(dump_vls_heap(hid, values, lengths, buffer_size));
+    return rcpp_result_gen;
+END_RCPP
+}
+// create_vls_pointer_dataset
+SEXP create_vls_pointer_dataset(SEXP gid, std::string name, Rcpp::IntegerVector dimensions, Rcpp::IntegerVector chunks, int compress, bool scalar);
+RcppExport SEXP _alabaster_base_create_vls_pointer_dataset(SEXP gidSEXP, SEXP nameSEXP, SEXP dimensionsSEXP, SEXP chunksSEXP, SEXP compressSEXP, SEXP scalarSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::traits::input_parameter< SEXP >::type gid(gidSEXP);
+    Rcpp::traits::input_parameter< std::string >::type name(nameSEXP);
+    Rcpp::traits::input_parameter< Rcpp::IntegerVector >::type dimensions(dimensionsSEXP);
+    Rcpp::traits::input_parameter< Rcpp::IntegerVector >::type chunks(chunksSEXP);
+    Rcpp::traits::input_parameter< int >::type compress(compressSEXP);
+    Rcpp::traits::input_parameter< bool >::type scalar(scalarSEXP);
+    rcpp_result_gen = Rcpp::wrap(create_vls_pointer_dataset(gid, name, dimensions, chunks, compress, scalar));
+    return rcpp_result_gen;
+END_RCPP
+}
+// dump_vls_pointers
+SEXP dump_vls_pointers(SEXP pid, Rcpp::IntegerVector lengths, size_t buffer_size);
+RcppExport SEXP _alabaster_base_dump_vls_pointers(SEXP pidSEXP, SEXP lengthsSEXP, SEXP buffer_sizeSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::traits::input_parameter< SEXP >::type pid(pidSEXP);
+    Rcpp::traits::input_parameter< Rcpp::IntegerVector >::type lengths(lengthsSEXP);
+    Rcpp::traits::input_parameter< size_t >::type buffer_size(buffer_sizeSEXP);
+    rcpp_result_gen = Rcpp::wrap(dump_vls_pointers(pid, lengths, buffer_size));
+    return rcpp_result_gen;
+END_RCPP
+}
+// parse_vls_pointers
+Rcpp::CharacterVector parse_vls_pointers(SEXP pid, SEXP hid, size_t buffer_size);
+RcppExport SEXP _alabaster_base_parse_vls_pointers(SEXP pidSEXP, SEXP hidSEXP, SEXP buffer_sizeSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::traits::input_parameter< SEXP >::type pid(pidSEXP);
+    Rcpp::traits::input_parameter< SEXP >::type hid(hidSEXP);
+    Rcpp::traits::input_parameter< size_t >::type buffer_size(buffer_sizeSEXP);
+    rcpp_result_gen = Rcpp::wrap(parse_vls_pointers(pid, hid, buffer_size));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_alabaster_base_check_csv", (DL_FUNC) &_alabaster_base_check_csv, 3},
@@ -278,6 +330,10 @@ static const R_CallMethodDef CallEntries[] = {
     {"_alabaster_base_deregister_satisfies_interface", (DL_FUNC) &_alabaster_base_deregister_satisfies_interface, 2},
     {"_alabaster_base_register_derived_from", (DL_FUNC) &_alabaster_base_register_derived_from, 2},
     {"_alabaster_base_deregister_derived_from", (DL_FUNC) &_alabaster_base_deregister_derived_from, 2},
+    {"_alabaster_base_dump_vls_heap", (DL_FUNC) &_alabaster_base_dump_vls_heap, 4},
+    {"_alabaster_base_create_vls_pointer_dataset", (DL_FUNC) &_alabaster_base_create_vls_pointer_dataset, 6},
+    {"_alabaster_base_dump_vls_pointers", (DL_FUNC) &_alabaster_base_dump_vls_pointers, 3},
+    {"_alabaster_base_parse_vls_pointers", (DL_FUNC) &_alabaster_base_parse_vls_pointers, 3},
     {NULL, NULL, 0}
 };
 

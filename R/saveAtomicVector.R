@@ -34,7 +34,7 @@
 #' stageObject,Date-method
 NULL
 
-.save_atomic_vector <- function(x, path, ...) {
+.save_atomic_vector <- function(x, path, character.vls=FALSE, ...) {
     dir.create(path)
     ofile <- file.path(path, "contents.h5")
 
@@ -61,19 +61,41 @@ NULL
     ghandle <- H5Gcreate(fhandle, "atomic_vector")
     on.exit(H5Gclose(ghandle), add=TRUE, after=FALSE)
 
+    transformed <- transformVectorForHdf5(contents)
+    current <- transformed$transformed
+    missing.placeholder <- transformed$placeholder
+
+    saved <- FALSE
+    if (type == "string" && is.null(format) && !isFALSE(character.vls)) {
+        len <- nchar(current, type="bytes")
+        if (is.null(character.vls)) {
+            character.vls <- h5_use_vls(len)
+        }
+        if (character.vls) {
+            N <- length(current)
+            phandle <- h5_create_vls_pointer_dataset(ghandle, "pointers", N, chunks=h5_guess_vector_chunks(N), emit=TRUE)
+            on.exit(H5Dclose(phandle), add=TRUE, after=FALSE)
+            missing_handle <- phandle
+            hhandle <- h5_create_vector(ghandle, "heap", sum(len), "H4T_NATIVE_UINT8", emit=TRUE)
+            on.exit(H5Dclose(hhandle), add=TRUE, after=FALSE)
+            h5_write_vls_array(phandle, hhandle, len)
+            saved <- TRUE
+            type <- "vls"
+        }
+    }
+    if (!saved) {
+        dhandle <- h5_write_vector(ghandle, "values", current, emit=TRUE)
+        missing_handle <- dhandle
+        on.exit(H5Dclose(dhandle), add=TRUE, after=FALSE)
+    }
+
     h5_write_attribute(ghandle, "type", type, scalar=TRUE)
     if (!is.null(format)) {
         h5_write_attribute(ghandle, "format", format, scalar=TRUE)
     }
 
-    transformed <- transformVectorForHdf5(contents)
-    current <- transformed$transformed
-    missing.placeholder <- transformed$placeholder
-
-    dhandle <- h5_write_vector(ghandle, "values", current, emit=TRUE)
-    on.exit(H5Dclose(dhandle), add=TRUE, after=FALSE)
     if (!is.null(missing.placeholder)) {
-        h5_write_attribute(dhandle, missingPlaceholderName, missing.placeholder, scalar=TRUE)
+        h5_write_attribute(missing_handle, missingPlaceholderName, missing.placeholder, scalar=TRUE)
     }
 
     if (!is.null(names(x))) {

@@ -32,19 +32,28 @@ readAtomicVector <- function(path, metadata, ...) {
     on.exit(H5Gclose(ghandle), add=TRUE, after=FALSE)
     expected.type <- h5_read_attribute(ghandle, "type")
 
-    vhandle <- H5Dopen(ghandle, "values")
-    on.exit(H5Dclose(vhandle), add=TRUE, after=FALSE)
-    contents <- H5Dread(vhandle, drop=TRUE)
-    missing.placeholder <- h5_read_attribute(vhandle, missingPlaceholderName, check=TRUE, default=NULL)
+    if (type == "vls") {
+        phandle <- H5Dopen(ghandle, "pointers")
+        on.exit(H5Dclose(phandle), add=TRUE, after=FALSE)
+        hhandle <- H5Dopen(ghandle, "heap")
+        on.exit(H5Dclose(hhandle), add=TRUE, after=FALSE)
+        contents <- h5_read_vls_array(phandle, hhandle, keep.dim=FALSE)
 
-    contents <- h5_cast(contents, expected.type=expected.type, missing.placeholder=missing.placeholder)
-    if (expected.type == "string") {
-        if (H5Aexists(ghandle, "format")) {
-            format <- h5_read_attribute(ghandle, "format")
-            if (format == "date") {
-                contents <- as.Date(contents)
-            } else if (format == "date-time") {
-                contents <- as.Rfc3339(contents)
+    } else {
+        vhandle <- H5Dopen(ghandle, "values")
+        on.exit(H5Dclose(vhandle), add=TRUE, after=FALSE)
+        contents <- H5Dread(vhandle, drop=TRUE)
+        missing.placeholder <- h5_read_attribute(vhandle, missingPlaceholderName, check=TRUE, default=NULL)
+
+        contents <- h5_cast(contents, expected.type=expected.type, missing.placeholder=missing.placeholder)
+        if (expected.type == "string") {
+            if (H5Aexists(ghandle, "format")) {
+                format <- h5_read_attribute(ghandle, "format")
+                if (format == "date") {
+                    contents <- as.Date(contents)
+                } else if (format == "date-time") {
+                    contents <- as.Rfc3339(contents)
+                }
             }
         }
     }
