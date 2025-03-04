@@ -38,9 +38,15 @@
 #' @rdname stageDataFrame
 #' @aliases stageObject,DataFrame-method
 #' @importFrom S4Vectors DataFrame
-setMethod("saveObject", "DataFrame", function(x, path, ...) {
+setMethod("saveObject", "DataFrame", function(x, path, DataFrame.character.vls=NULL, ...) {
     dir.create(path, showWarnings=FALSE)
-    .write_hdf5_new(x, path, ...)
+    .write_hdf5_new(
+        x,
+        path,
+        row.names=rownames(x),
+        DataFrame.character.vls=DataFrame.character.vls,
+        ...
+    )
     saveMetadata(
         x,
         metadata.path=file.path(path, "other_annotations"),
@@ -51,18 +57,18 @@ setMethod("saveObject", "DataFrame", function(x, path, ...) {
 })
 
 #' @importFrom rhdf5 h5write h5createGroup h5createFile H5Gopen H5Gclose H5Acreate H5Aclose H5Awrite H5Fopen H5Fclose H5Dopen H5Dclose
-.write_hdf5_new <- function(x, path, row.names=rownames(x), ...) {
+.write_hdf5_new <- function(x, path, row.names, DataFrame.character.vls, ...) {
     subpath <- "basic_columns.h5"
     ofile <- paste0(path, "/", subpath)
 
     fhandle <- H5Fcreate(ofile, "H5F_ACC_TRUNC")
-    on.exit(H5Fclose(fhandle), add=TRUE, after=FALSE)
+    on.exit(.H5Fclose_null(fhandle), add=TRUE, after=FALSE)
     ghandle <- H5Gcreate(fhandle, "data_frame")
-    on.exit(H5Gclose(ghandle), add=TRUE, after=FALSE)
+    on.exit(.H5Gclose_null(ghandle), add=TRUE, after=FALSE)
     h5_write_attribute(ghandle, "row-count", nrow(x), scalar=TRUE, type="H5T_NATIVE_UINT32")
 
     gdhandle <- H5Gcreate(ghandle, "data")
-    on.exit(H5Gclose(gdhandle), add=TRUE, after=FALSE)
+    on.exit(.H5Gclose_null(gdhandle), add=TRUE, after=FALSE)
 
     collected <- list()
     for (z in seq_len(ncol(x))) {
@@ -74,7 +80,8 @@ setMethod("saveObject", "DataFrame", function(x, path, ...) {
         colformat <- NULL
 
         if (is.factor(col)) {
-            local({
+            # Wrapping in a function to get the on.exits to fire.
+            (function() {
                 colhandle <- H5Gcreate(gdhandle, data.name)
                 on.exit(H5Gclose(colhandle), add=TRUE, after=FALSE)
                 h5_write_attribute(colhandle, "type", "factor", scalar=TRUE)
@@ -83,10 +90,10 @@ setMethod("saveObject", "DataFrame", function(x, path, ...) {
                 }
                 .simple_save_codes(colhandle, col, save.names=FALSE)
                 h5_write_vector(colhandle, "levels", levels(col))
-            })
+            })()
 
         } else if (.is_datetime(col)) {
-            coltype <- "string"
+            oltype <- "string"
             colformat <- "date-time"
             sanitized <- as.character(as.Rfc3339(col))
 
@@ -125,18 +132,56 @@ setMethod("saveObject", "DataFrame", function(x, path, ...) {
             current <- transformed$transformed
             missing.placeholder <- transformed$placeholder
 
-            local({
-                dhandle <- h5_write_vector(gdhandle, data.name, current, emit=TRUE)
-                on.exit(H5Dclose(dhandle), add=TRUE, after=FALSE)
-                if (!is.null(missing.placeholder)) {
-                    h5_write_attribute(dhandle, missingPlaceholderName, missing.placeholder, scalar=TRUE)
+            saved.vls <- FALSE
+            if (coltype == "string" && is.null(colformat) && !isFALSE(DataFrame.character.vls)) {
+                if (is.null(DataFrame.character.vls)) {
+                    DataFrame.character.vls <- h5_use_vls(x)
                 }
+                if (DataFrame.character.vls) {
+                    vhandle <- H5Gcreate(gdhandle, data.name)
+                    H5Gclose(vhandle)
 
-                h5_write_attribute(dhandle, "type", coltype, scalar=TRUE)
-                if (!is.null(colformat)) {
-                    h5_write_attribute(dhandle, "format", colformat, scalar=TRUE)
+                    # Need to do this tedious song and dance to get an exclusive file handle.
+                    gdhandle <- .H5Gclose_null(gdhandle)
+                    ghandle <- .H5Gclose_null(ghandle)
+                    fhandle <- .H5Fclose_null(fhandle)
+
+                    h5_write_vls_array(ofile, paste0("data_frame/data/", data.name), "pointers", "heap", current)
+                    saved.vls <- TRUE
+
+                    # Reopening this for downstream operations.
+                    fhandle <- H5Fopen(ofile, "H5F_ACC_RDWR")
+                    ghandle <- H5Gopen(fhandle, "data_frame")
+                    gdhandle <- H5Gopen(ghandle, "data")
+
+                    # Wrapping in a function to get the on.exits to fire.
+                    (function() {
+                        vhandle <- H5Gopen(gdhandle, data.name)
+                        on.exit(H5Gclose(vhandle), add=TRUE, after=FALSE)
+                        h5_write_attribute(vhandle, "type", "vls", scalar=TRUE)
+                        dhandle <- H5Dopen(vhandle, "pointers")
+                        on.exit(H5Dclose(dhandle), add=TRUE, after=FALSE)
+                        if (!is.null(missing.placeholder)) {
+                            h5_write_attribute(dhandle, missingPlaceholderName, missing.placeholder, scalar=TRUE)
+                        }
+                    })()
                 }
-            })
+            }
+
+            if (!saved.vls) {
+                # Wrapping in a function to get the on.exits to fire.
+                (function() {
+                    dhandle <- h5_write_vector(gdhandle, data.name, current, emit=TRUE)
+                    on.exit(H5Dclose(dhandle), add=TRUE, after=FALSE)
+                    if (!is.null(missing.placeholder)) {
+                        h5_write_attribute(dhandle, missingPlaceholderName, missing.placeholder, scalar=TRUE)
+                    }
+                    h5_write_attribute(dhandle, "type", coltype, scalar=TRUE)
+                    if (!is.null(colformat)) {
+                        h5_write_attribute(dhandle, "format", colformat, scalar=TRUE)
+                    }
+                })()
+            }
         }
     }
 
@@ -148,13 +193,13 @@ setMethod("saveObject", "DataFrame", function(x, path, ...) {
 
 #' @export
 #' @rdname stageDataFrame
-setMethod("saveObject", "data.frame", function(x, path, ...) {
+setMethod("saveObject", "data.frame", function(x, path, DataFrame.character.vls=NULL, ...) {
     dir.create(path, showWarnings=FALSE)
     rn <- attr(x, "row.names")
     if (is.integer(rn)) {
         rn <- NULL
     }
-    .write_hdf5_new(x, path, row.names=rn, ...)
+    .write_hdf5_new(x, path, row.names=rn, DataFrame.character.vls=DataFrame.character.vls, ...)
     saveObjectFile(path, "data_frame", list(data_frame=list(version="1.0")))
 })
 

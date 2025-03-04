@@ -254,6 +254,16 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// use_vls
+bool use_vls(Rcpp::CharacterVector x);
+RcppExport SEXP _alabaster_base_use_vls(SEXP xSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::traits::input_parameter< Rcpp::CharacterVector >::type x(xSEXP);
+    rcpp_result_gen = Rcpp::wrap(use_vls(x));
+    return rcpp_result_gen;
+END_RCPP
+}
 // dump_vls
 SEXP dump_vls(std::string file, std::string group, std::string pointers, std::string heap, Rcpp::CharacterVector x, Rcpp::IntegerVector raw_dims, Rcpp::Nullable<Rcpp::IntegerVector> raw_chunks, int compress, bool scalar, size_t buffer_size);
 RcppExport SEXP _alabaster_base_dump_vls(SEXP fileSEXP, SEXP groupSEXP, SEXP pointersSEXP, SEXP heapSEXP, SEXP xSEXP, SEXP raw_dimsSEXP, SEXP raw_chunksSEXP, SEXP compressSEXP, SEXP scalarSEXP, SEXP buffer_sizeSEXP) {
@@ -274,17 +284,17 @@ BEGIN_RCPP
 END_RCPP
 }
 // parse_vls
-Rcpp::CharacterVector parse_vls(std::string file, std::string pointers, std::string heap, size_t buffer_size, bool keep_dim, bool native);
-RcppExport SEXP _alabaster_base_parse_vls(SEXP fileSEXP, SEXP pointersSEXP, SEXP heapSEXP, SEXP buffer_sizeSEXP, SEXP keep_dimSEXP, SEXP nativeSEXP) {
+Rcpp::CharacterVector parse_vls(std::string file, std::string pointers, std::string heap, size_t buffer_size, Rcpp::Nullable<Rcpp::CharacterVector> placeholder, bool native);
+RcppExport SEXP _alabaster_base_parse_vls(SEXP fileSEXP, SEXP pointersSEXP, SEXP heapSEXP, SEXP buffer_sizeSEXP, SEXP placeholderSEXP, SEXP nativeSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::traits::input_parameter< std::string >::type file(fileSEXP);
     Rcpp::traits::input_parameter< std::string >::type pointers(pointersSEXP);
     Rcpp::traits::input_parameter< std::string >::type heap(heapSEXP);
     Rcpp::traits::input_parameter< size_t >::type buffer_size(buffer_sizeSEXP);
-    Rcpp::traits::input_parameter< bool >::type keep_dim(keep_dimSEXP);
+    Rcpp::traits::input_parameter< Rcpp::Nullable<Rcpp::CharacterVector> >::type placeholder(placeholderSEXP);
     Rcpp::traits::input_parameter< bool >::type native(nativeSEXP);
-    rcpp_result_gen = Rcpp::wrap(parse_vls(file, pointers, heap, buffer_size, keep_dim, native));
+    rcpp_result_gen = Rcpp::wrap(parse_vls(file, pointers, heap, buffer_size, placeholder, native));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -312,6 +322,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_alabaster_base_deregister_satisfies_interface", (DL_FUNC) &_alabaster_base_deregister_satisfies_interface, 2},
     {"_alabaster_base_register_derived_from", (DL_FUNC) &_alabaster_base_register_derived_from, 2},
     {"_alabaster_base_deregister_derived_from", (DL_FUNC) &_alabaster_base_deregister_derived_from, 2},
+    {"_alabaster_base_use_vls", (DL_FUNC) &_alabaster_base_use_vls, 1},
     {"_alabaster_base_dump_vls", (DL_FUNC) &_alabaster_base_dump_vls, 10},
     {"_alabaster_base_parse_vls", (DL_FUNC) &_alabaster_base_parse_vls, 6},
     {NULL, NULL, 0}

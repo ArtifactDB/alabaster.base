@@ -57,38 +57,26 @@ NULL
     }
 
     fhandle <- H5Fcreate(ofile, "H5F_ACC_TRUNC")
-    on.exit({
-        if (!is.null(fhandle)) {
-            H5Fclose(fhandle)
-        }
-    }, add=TRUE, after=FALSE)
-
+    on.exit(.H5Fclose_null(fhandle), add=TRUE, after=FALSE)
     ghandle <- H5Gcreate(fhandle, "atomic_vector")
-    on.exit({
-        if (!is.null(ghandle)) {
-            H5Gclose(ghandle)
-        }
-    }, add=TRUE, after=FALSE)
+    on.exit(.H5Gclose_null(ghandle), add=TRUE, after=FALSE)
 
     transformed <- transformVectorForHdf5(contents)
     current <- transformed$transformed
     missing.placeholder <- transformed$placeholder
 
-    saved <- FALSE
+    saved.vls <- FALSE
     if (type == "string" && is.null(format) && !isFALSE(character.vls)) {
-        len <- nchar(current, type="bytes")
         if (is.null(character.vls)) {
-            character.vls <- h5_use_vls(len)
+            character.vls <- h5_use_vls(x)
         }
         if (character.vls) {
             # Need to do this tedious song and dance to get an exclusive file handle.
-            H5Gclose(ghandle)
-            ghandle <- NULL
-            H5Fclose(fhandle)
-            fhandle <- NULL
+            ghandle <- .H5Gclose_null(ghandle)
+            fhandle <- .H5Fclose_null(fhandle)
 
             h5_write_vls_array(ofile, "atomic_vector", "pointers", "heap", current)
-            saved <- TRUE
+            saved.vls <- TRUE
             type <- "vls"
 
             # Reopening this for downstream operations.
@@ -98,19 +86,21 @@ NULL
             on.exit(H5Dclose(missing_handle), add=TRUE, after=FALSE)
         }
     }
-    if (!saved) {
+
+    if (saved.vls) {
+        dhandle <- H5Dopen(ghandle, "values")
+    } else {
         dhandle <- h5_write_vector(ghandle, "values", current, emit=TRUE)
-        missing_handle <- dhandle
-        on.exit(H5Dclose(dhandle), add=TRUE, after=FALSE)
+    }
+    on.exit(H5Dclose(dhandle), add=TRUE, after=FALSE)
+
+    if (!is.null(missing.placeholder)) {
+        h5_write_attribute(dhandle, missingPlaceholderName, missing.placeholder, scalar=TRUE)
     }
 
     h5_write_attribute(ghandle, "type", type, scalar=TRUE)
     if (!is.null(format)) {
         h5_write_attribute(ghandle, "format", format, scalar=TRUE)
-    }
-
-    if (!is.null(missing.placeholder)) {
-        h5_write_attribute(missing_handle, missingPlaceholderName, missing.placeholder, scalar=TRUE)
     }
 
     if (!is.null(names(x))) {

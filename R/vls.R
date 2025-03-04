@@ -1,6 +1,6 @@
 #' @export
-h5_use_vls <- function(len) {
-    max(len) * length(len) >= 16 * length(len) + sum(len)
+h5_use_vls <- function(x) {
+    use_vls(x)
 }
 
 #' @export
@@ -32,13 +32,13 @@ h5_write_vls_array <- function(file, group, pointers, heap, x, compress=6, chunk
 }
 
 #' @export
-h5_read_vls_array <- function(file, pointers, heap, buffer.size=1e6, keep.dim=TRUE, native=FALSE) {
+h5_read_vls_array <- function(file, pointers, heap, missing.placeholder=NULL, buffer.size=1e6, native=FALSE) {
     parse_vls(
         file,
         pointers,
         heap,
-        buffer.size,
-        keep.dim,
-        native
+        buffer_size=buffer.size,
+        placeholder=missing.placeholder,
+        native=native
     )
 }

@@ -35,3 +35,27 @@
 .cast_atomic <- function(x, type) {
     as(x, as.character(.atomics[type]))
 }
+
+#' @import rhdf5
+.H5Fclose_null <- function(handle) {
+    if (!is.null(handle)) {
+        H5Fclose(handle)
+    }
+    NULL
+}
+
+#' @import rhdf5
+.H5Gclose_null <- function(handle) {
+    if (!is.null(handle)) {
+        H5Gclose(handle)
+    }
+    NULL
+}
+
+#' @import rhdf5
+.H5Dclose_null <- function(handle) {
+    if (!is.null(handle)) {
+        H5Dclose(handle)
+    }
+    NULL
+}

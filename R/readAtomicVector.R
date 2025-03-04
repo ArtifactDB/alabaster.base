@@ -25,42 +25,25 @@
 readAtomicVector <- function(path, metadata, ...) {
     fpath <- file.path(path, "contents.h5")
     fhandle <- H5Fopen(fpath, flags="H5F_ACC_RDONLY")
-    on.exit({
-        if (!is.null(fhandle)) {
-            H5Fclose(fhandle)
-        }
-    }, add=TRUE, after=FALSE)
+    on.exit(.H5Fclose_null(fhandle), add=TRUE, after=FALSE)
 
     host <- "atomic_vector"
     ghandle <- H5Gopen(fhandle, host)
-    on.exit({
-        if (!is.null(ghandle)) {
-            H5Gclose(ghandle)
-        }
-    }, add=TRUE, after=FALSE)
+    on.exit(.H5Gclose_null(ghandle), add=TRUE, after=FALSE)
 
     expected.type <- h5_read_attribute(ghandle, "type")
     if (expected.type == "vls") {
         vhandle <- H5Dopen(ghandle, "pointers")
-        on.exit({
-            if (!is.null(vhandle)) {
-                H5Dclose(vhandle)
-            }
-        }, add=TRUE, after=FALSE)
+        on.exit(.H5Dclose_null(vhandle), add=TRUE, after=FALSE)
         missing.placeholder <- h5_read_attribute(vhandle, missingPlaceholderName, check=TRUE, default=NULL)
-        H5Dclose(vhandle)
-        vhandle <- NULL
 
         # Need to do this tedious song and dance to get an exclusive file handle.
-        H5Gclose(ghandle)
-        ghandle <- NULL
-        H5Fclose(fhandle)
-        fhandle <- NULL
+        vhandle <- .H5Dclose_null(vhandle)
+        ghandle <- .H5Gclose_null(ghandle)
+        fhandle <- .H5Fclose_null(fhandle)
 
-        contents <- h5_read_vls_array(fpath, paste0(host, "/pointers"), paste0(host, "/heap"))
-        if (!is.null(missing.placeholder)) { # TODO: move into C++.
-            contents[contents == missing.placeholder] <- NA
-        }
+        contents <- h5_read_vls_array(fpath, paste0(host, "/pointers"), paste0(host, "/heap"), missing.placeholder=missing.placeholder)
+        contents <- drop(contents)
 
         # Reopening this for downstream operations.
         fhandle <- H5Fopen(fpath, "H5F_ACC_RDONLY")
