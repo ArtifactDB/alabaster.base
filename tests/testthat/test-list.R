@@ -738,7 +738,7 @@ test_that("lists work in VLS mode", {
 
     copy <- x
     copy$w <- I("ABCDEFGHIJK")
-    saveObject(copy, file.path(tmp, "scalar"), list.format="hdf5", list.character.vls=TRUE)
-    reloaded <- readObject(file.path(tmp, "scalar")) 
+    saveObject(copy, file.path(tmp, "not_scalar"), list.format="hdf5", list.character.vls=TRUE)
+    reloaded <- readObject(file.path(tmp, "not_scalar")) 
     expect_identical(copy, reloaded)
 })

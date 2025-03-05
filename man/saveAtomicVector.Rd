@@ -44,6 +44,9 @@
 
 \item{path}{String containing the path to a directory in which to save \code{x}.}
 
+\item{character.vls}{Logical scalar indicating whether to save character vectors in the custom variable length string (VLS) array format.
+If \code{NULL}, this is determined based on a comparison of the expected storage against a fixed length array.}
+
 \item{...}{Further arguments that are ignored.}
 }
 \value{

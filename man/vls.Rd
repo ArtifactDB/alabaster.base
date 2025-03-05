@@ -4,7 +4,7 @@
 \alias{vls}
 \alias{h5_use_vls}
 \alias{h5_write_vls_array}
-\alias{h5_parse_vls_array}
+\alias{h5_read_vls_array}
 \title{VLS saving utilities}
 \description{
 Utilities for saving our custom variable length string array format in HDF5.

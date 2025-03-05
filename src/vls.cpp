@@ -73,11 +73,13 @@ SEXP dump_vls(
         if (raw_chunks.isNotNull()) {
             Rcpp::IntegerVector tmp(raw_chunks);
             chunks.insert(chunks.end(), tmp.begin(), tmp.end());
+            std::reverse(chunks.begin(), chunks.end()); // saving in native form, see comments below.
         }
         auto pcplist = initialize_creat_prop_list(chunks, compress);
 
         size_t ndims = raw_dims.size();
         std::vector<hsize_t> dims(raw_dims.begin(), raw_dims.end()); 
+        std::reverse(dims.begin(), dims.end()); // saving in native form, so we need to transpose to match the real fastest changing dimension.
         H5::DataSpace pdspace(ndims, dims.data()); 
         auto phandle = ghandle.createDataSet(pointers, pdtype, pdspace, pcplist);
 
@@ -95,11 +97,11 @@ SEXP dump_vls(
 
         std::vector<hsize_t> jumps(ndims, 1);
         hsize_t jump = 1;
-        for (size_t d = 0; d < ndims; ++d) {
+        for (size_t d1 = ndims; d1 > 0; --d1) { // reversing as HDF5's last dimension is the fastest changing.
+            size_t d = d1 - 1; 
             jumps[d] = jump;
             jump *= dims[d];
         }
-        std::reverse(jumps.begin(), jumps.end()); // reversing as HDF5's last dimension is the fastest changing.
         std::vector<hsize_t> relative_position(ndims), reset(ndims);
 
         while (!iter.finished()) {
@@ -113,19 +115,19 @@ SEXP dump_vls(
             size_t index = 0;
             for (size_t d = 0; d < ndims; ++d) {
                 index += jumps[d] * starts[d];
-                reset[d] += jumps[d] * counts[d];
+                reset[d] = jumps[d] * counts[d];
             }
 
             for (hsize_t i = 0; i < block_size; ++i) {
                 buffer[i].offset = cumulative[index];
                 buffer[i].length = cumulative[index + 1] - cumulative[index];
 
-                for (hsize_t d1 = ndims; d1 > 0; --d1) { // HDF5's last dimension is the fastest changing.
+                for (hsize_t d1 = ndims; d1 > 0; --d1) { // again, HDF5's last dimension is the fastest changing, so we go back to front.
                     hsize_t d = d1 - 1;
                     auto& relpos = relative_position[d];
                     ++relpos;
+                    index += jumps[d];
                     if (relpos < counts[d]) {
-                        index += jumps[d];
                         break;
                     } 
                     relpos = 0;
@@ -258,23 +260,23 @@ Rcpp::CharacterVector parse_vls(
     auto block = ritsuko::hdf5::pick_nd_block_dimensions(phandle.getCreatePlist(), dims, buffer_size);
     ritsuko::hdf5::IterateNdDataset iter(dims, block);
 
-    hsize_t pfull_length = 1;
-    for (auto d : dims) {
-        pfull_length *= d;
-    }
-    Rcpp::CharacterVector output(pfull_length);
-    std::vector<ritsuko::hdf5::vls::Pointer<uint64_t, uint64_t> > buffer;
-
     std::vector<hsize_t> jumps(ndims, 1);
-    hsize_t jump = 1;
-    for (size_t d = 0; d < ndims; ++d) {
-        jumps[d] = jump;
-        jump *= dims[d];
-    }
-    if (!native) {
-        std::reverse(jumps.begin(), jumps.end()); // reversing as HDF5's last dimension is the fastest changing.
+    hsize_t prod = 1;
+    if (native) {
+        for (size_t d = 0; d < ndims; ++d) {
+            jumps[d] = prod;
+            prod *= dims[d];
+        }
+    } else {
+        for (size_t d1 = ndims; d1 > 0; --d1) {
+            size_t d = d1 - 1;
+            jumps[d] = prod;
+            prod *= dims[d];
+        }
     }
     std::vector<hsize_t> relative_position(ndims), reset(ndims);
+    Rcpp::CharacterVector output(prod);
+    std::vector<ritsuko::hdf5::vls::Pointer<uint64_t, uint64_t> > buffer;
 
     while (!iter.finished()) {
         hsize_t block_size = iter.current_block_size();
@@ -288,17 +290,17 @@ Rcpp::CharacterVector parse_vls(
         size_t index = 0;
         for (size_t d = 0; d < ndims; ++d) {
             index += jumps[d] * starts[d];
-            reset[d] += jumps[d] * counts[d];
+            reset[d] = jumps[d] * counts[d];
         }
 
         for (hsize_t i = 0; i < block_size; ++i) {
             fill_heap_buffers(buffer[i].offset, buffer[i].length, output, index);
-            for (hsize_t d1 = ndims; d1 > 0; --d1) { // HDF5's last dimension is the fastest changing.
-                hsize_t d = d1 - 1;
+            for (size_t d1 = ndims; d1 > 0; --d1) { // HDF5's last dimension is the fastest changing.
+                size_t d = d1 - 1;
                 auto& relpos = relative_position[d];
                 ++relpos;
+                index += jumps[d];
                 if (relpos < counts[d]) {
-                    index += jumps[d];
                     break;
                 } 
                 relpos = 0;

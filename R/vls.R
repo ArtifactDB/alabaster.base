@@ -7,7 +7,7 @@
 #' @aliases 
 #' h5_use_vls
 #' h5_write_vls_array
-#' h5_parse_vls_array
+#' h5_read_vls_array
 NULL
 
 #' @export
