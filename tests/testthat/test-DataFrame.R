@@ -715,3 +715,25 @@ test_that("saving works for data.frames containing package_version columns", {
     expect_identical(roundtrip$stuff, as.character(df$stuff))
     expect_identical(roundtrip$whee, as.character(df$whee))
 })
+
+test_that("DataFrame character columns work in VLS mode", {
+    tmp <- tempfile()
+    dir.create(tmp)
+
+    df <- DataFrame(x = runif(8), y = c("A", "BC", "DEFG", "HIJKL", "MNOP", "QRS", "TU", "V"), z = seq_len(8))
+    saveObject(df, file.path(tmp, "basic"), character.vls=TRUE)
+    reloaded <- readObject(file.path(tmp, "basic")) 
+    expect_identical(df, reloaded)
+
+    copy <- df
+    copy$y[2] <- NA
+    saveObject(copy, file.path(tmp, "with_missing"), character.vls=TRUE)
+    reloaded <- readObject(file.path(tmp, "with_missing")) 
+    expect_identical(copy, reloaded)
+
+    copy <- df
+    copy$y[4] <- strrep("HIJKL", 100)
+    saveObject(copy, file.path(tmp, "auto"), character.vls=NULL)
+    reloaded <- readObject(file.path(tmp, "auto")) 
+    expect_identical(copy, reloaded)
+})

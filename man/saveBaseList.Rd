@@ -10,7 +10,13 @@
 \alias{saveBaseListFormat}
 \title{Save a base list to disk}
 \usage{
-\S4method{saveObject}{list}(x, path, list.format = saveBaseListFormat(), ...)
+\S4method{saveObject}{list}(
+  x,
+  path,
+  list.format = saveBaseListFormat(),
+  list.character.vls = NULL,
+  ...
+)
 
 \S4method{saveObject}{List}(x, path, list.format = saveBaseListFormat(), ...)
 
@@ -23,6 +29,10 @@ Alternatively, a \link[S4Vectors]{List} to be coerced into a list.}
 \item{path}{String containing the path to a directory in which to save \code{x}.}
 
 \item{list.format}{String specifying the format in which to save the list.}
+
+\item{list.character.vls}{Logical scalar indicating whether to save character vectors in the custom variable length string (VLS) array format.
+If \code{NULL}, this is determined based on a comparison of the expected storage against a fixed length array.
+Only used if \code{list.format="hdf5"}.}
 
 \item{...}{Further arguments, passed to \code{\link{altSaveObject}} for complex child objects.}
 }

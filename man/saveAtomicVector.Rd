@@ -21,21 +21,21 @@
 \alias{saveObject,numeric_version-method}
 \title{Save atomic vectors to disk}
 \usage{
-\S4method{saveObject}{integer}(x, path, ...)
+\S4method{saveObject}{integer}(x, path, character.vls = FALSE, ...)
 
-\S4method{saveObject}{character}(x, path, ...)
+\S4method{saveObject}{character}(x, path, character.vls = FALSE, ...)
 
-\S4method{saveObject}{logical}(x, path, ...)
+\S4method{saveObject}{logical}(x, path, character.vls = FALSE, ...)
 
-\S4method{saveObject}{double}(x, path, ...)
+\S4method{saveObject}{double}(x, path, character.vls = FALSE, ...)
 
-\S4method{saveObject}{numeric}(x, path, ...)
+\S4method{saveObject}{numeric}(x, path, character.vls = FALSE, ...)
 
-\S4method{saveObject}{Date}(x, path, ...)
+\S4method{saveObject}{Date}(x, path, character.vls = FALSE, ...)
 
-\S4method{saveObject}{POSIXlt}(x, path, ...)
+\S4method{saveObject}{POSIXlt}(x, path, character.vls = FALSE, ...)
 
-\S4method{saveObject}{POSIXct}(x, path, ...)
+\S4method{saveObject}{POSIXct}(x, path, character.vls = FALSE, ...)
 
 \S4method{saveObject}{numeric_version}(x, path, ...)
 }
@@ -43,6 +43,9 @@
 \item{x}{Any of the atomic vector types, or \link{Date} objects, or time objects, e.g., \link{POSIXct}.}
 
 \item{path}{String containing the path to a directory in which to save \code{x}.}
+
+\item{character.vls}{Logical scalar indicating whether to save character vectors in the custom variable length string (VLS) array format.
+If \code{NULL}, this is determined based on a comparison of the expected storage against a fixed length array.}
 
 \item{...}{Further arguments that are ignored.}
 }

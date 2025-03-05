@@ -18,6 +18,11 @@ This includ such objects encountered inside lists or DataFrames.
 
 \item Added \code{getSaveEnvironment()} and related functions to keep track of the R environment used to save each object.
 This facilitates debugging and enables corrective actions to be taken by loading functions when encountering files created by buggy versions of any package in the \pkg{alabaster} stack.
+
+\item Added preliminary support for custom variable length string (VLS) arrays, which compress the heap for more efficient storage than HDF5's VLS implementation.
+This is enabled in the \code{saveObject()} methods for standalone character vectors as well as character vectors in DataFrames and lists via the relevant \code{character.vls=} option.
+Setting \code{character.vls=NULL} will automatically switch between fixed-length string datasets and VLS arrays based on the estimated storage.
+(Defaults to \code{FALSE} for back-compatibility.)
 }}
 
 \section{Version 1.6.0}{\itemize{

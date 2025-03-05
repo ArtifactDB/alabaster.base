@@ -4,6 +4,8 @@
 #'
 #' @param x Any of the atomic vector types, or \link{Date} objects, or time objects, e.g., \link{POSIXct}.
 #' @inheritParams saveObject
+#' @param character.vls Logical scalar indicating whether to save character vectors in the custom variable length string (VLS) array format.
+#' If \code{NULL}, this is determined based on a comparison of the expected storage against a fixed length array.
 #' @param ... Further arguments that are ignored.
 #' 
 #' @return
@@ -34,7 +36,7 @@
 #' stageObject,Date-method
 NULL
 
-.save_atomic_vector <- function(x, path, ...) {
+.save_atomic_vector <- function(x, path, character.vls=FALSE, ...) {
     dir.create(path)
     ofile <- file.path(path, "contents.h5")
 
@@ -57,30 +59,55 @@ NULL
     }
 
     fhandle <- H5Fcreate(ofile, "H5F_ACC_TRUNC")
-    on.exit(H5Fclose(fhandle), add=TRUE, after=FALSE)
+    on.exit(.H5Fclose_null(fhandle), add=TRUE, after=FALSE)
     ghandle <- H5Gcreate(fhandle, "atomic_vector")
-    on.exit(H5Gclose(ghandle), add=TRUE, after=FALSE)
+    on.exit(.H5Gclose_null(ghandle), add=TRUE, after=FALSE)
+
+    transformed <- transformVectorForHdf5(contents)
+    current <- transformed$transformed
+    missing.placeholder <- transformed$placeholder
+
+    saved.vls <- FALSE
+    if (type == "string" && is.null(format) && !isFALSE(character.vls)) {
+        if (is.null(character.vls)) {
+            character.vls <- h5_use_vls(current)
+        }
+        if (character.vls) {
+            # Need to do this tedious song and dance to get an exclusive file handle.
+            ghandle <- .H5Gclose_null(ghandle)
+            fhandle <- .H5Fclose_null(fhandle)
+
+            h5_write_vls_array(ofile, "atomic_vector", "pointers", "heap", current)
+            saved.vls <- TRUE
+            type <- "vls"
+
+            # Reopening this for downstream operations.
+            fhandle <- H5Fopen(ofile, "H5F_ACC_RDWR")
+            ghandle <- H5Gopen(fhandle, "atomic_vector")
+        }
+    }
+
+    if (saved.vls) {
+        dhandle <- H5Dopen(ghandle, "pointers")
+    } else {
+        dhandle <- h5_write_vector(ghandle, "values", current, emit=TRUE)
+    }
+    on.exit(H5Dclose(dhandle), add=TRUE, after=FALSE)
+
+    if (!is.null(missing.placeholder)) {
+        h5_write_attribute(dhandle, missingPlaceholderName, missing.placeholder, scalar=TRUE)
+    }
 
     h5_write_attribute(ghandle, "type", type, scalar=TRUE)
     if (!is.null(format)) {
         h5_write_attribute(ghandle, "format", format, scalar=TRUE)
     }
 
-    transformed <- transformVectorForHdf5(contents)
-    current <- transformed$transformed
-    missing.placeholder <- transformed$placeholder
-
-    dhandle <- h5_write_vector(ghandle, "values", current, emit=TRUE)
-    on.exit(H5Dclose(dhandle), add=TRUE, after=FALSE)
-    if (!is.null(missing.placeholder)) {
-        h5_write_attribute(dhandle, missingPlaceholderName, missing.placeholder, scalar=TRUE)
-    }
-
     if (!is.null(names(x))) {
         h5_write_vector(ghandle, "names", names(x))
     }
 
-    saveObjectFile(path, "atomic_vector", list(atomic_vector=list(version="1.0")))
+    saveObjectFile(path, "atomic_vector", list(atomic_vector=list(version="1.1")))
     invisible(NULL)
 }
 

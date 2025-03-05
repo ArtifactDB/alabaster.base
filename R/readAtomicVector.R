@@ -25,26 +25,45 @@
 readAtomicVector <- function(path, metadata, ...) {
     fpath <- file.path(path, "contents.h5")
     fhandle <- H5Fopen(fpath, flags="H5F_ACC_RDONLY")
-    on.exit(H5Fclose(fhandle), add=TRUE, after=FALSE)
+    on.exit(.H5Fclose_null(fhandle), add=TRUE, after=FALSE)
 
     host <- "atomic_vector"
     ghandle <- H5Gopen(fhandle, host)
-    on.exit(H5Gclose(ghandle), add=TRUE, after=FALSE)
+    on.exit(.H5Gclose_null(ghandle), add=TRUE, after=FALSE)
+
     expected.type <- h5_read_attribute(ghandle, "type")
+    if (expected.type == "vls") {
+        vhandle <- H5Dopen(ghandle, "pointers")
+        on.exit(.H5Dclose_null(vhandle), add=TRUE, after=FALSE)
+        missing.placeholder <- h5_read_attribute(vhandle, missingPlaceholderName, check=TRUE, default=NULL)
 
-    vhandle <- H5Dopen(ghandle, "values")
-    on.exit(H5Dclose(vhandle), add=TRUE, after=FALSE)
-    contents <- H5Dread(vhandle, drop=TRUE)
-    missing.placeholder <- h5_read_attribute(vhandle, missingPlaceholderName, check=TRUE, default=NULL)
+        # Need to do this tedious song and dance to get an exclusive file handle.
+        vhandle <- .H5Dclose_null(vhandle)
+        ghandle <- .H5Gclose_null(ghandle)
+        fhandle <- .H5Fclose_null(fhandle)
 
-    contents <- h5_cast(contents, expected.type=expected.type, missing.placeholder=missing.placeholder)
-    if (expected.type == "string") {
-        if (H5Aexists(ghandle, "format")) {
-            format <- h5_read_attribute(ghandle, "format")
-            if (format == "date") {
-                contents <- as.Date(contents)
-            } else if (format == "date-time") {
-                contents <- as.Rfc3339(contents)
+        contents <- h5_read_vls_array(fpath, paste0(host, "/pointers"), paste0(host, "/heap"), missing.placeholder=missing.placeholder)
+        contents <- as.vector(contents)
+
+        # Reopening this for downstream operations.
+        fhandle <- H5Fopen(fpath, "H5F_ACC_RDONLY")
+        ghandle <- H5Gopen(fhandle, "atomic_vector")
+
+    } else {
+        vhandle <- H5Dopen(ghandle, "values")
+        on.exit(H5Dclose(vhandle), add=TRUE, after=FALSE)
+        contents <- H5Dread(vhandle, drop=TRUE)
+        missing.placeholder <- h5_read_attribute(vhandle, missingPlaceholderName, check=TRUE, default=NULL)
+
+        contents <- h5_cast(contents, expected.type=expected.type, missing.placeholder=missing.placeholder)
+        if (expected.type == "string") {
+            if (H5Aexists(ghandle, "format")) {
+                format <- h5_read_attribute(ghandle, "format")
+                if (format == "date") {
+                    contents <- as.Date(contents)
+                } else if (format == "date-time") {
+                    contents <- as.Rfc3339(contents)
+                }
             }
         }
     }

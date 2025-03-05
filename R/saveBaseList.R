@@ -7,6 +7,9 @@
 #' Alternatively, a \link[S4Vectors]{List} to be coerced into a list.
 #' @inheritParams saveObject
 #' @param list.format String specifying the format in which to save the list.
+#' @param list.character.vls Logical scalar indicating whether to save character vectors in the custom variable length string (VLS) array format.
+#' If \code{NULL}, this is determined based on a comparison of the expected storage against a fixed length array.
+#' Only used if \code{list.format="hdf5"}.
 #' @param ... Further arguments, passed to \code{\link{altSaveObject}} for complex child objects.
 #' 
 #' @return
@@ -52,7 +55,7 @@
 #' stageObject,List-method
 #' .saveBaseListFormat
 #' @importFrom jsonlite toJSON
-setMethod("saveObject", "list", function(x, path, list.format=saveBaseListFormat(), ...) {
+setMethod("saveObject", "list", function(x, path, list.format=saveBaseListFormat(), list.character.vls=NULL, ...) {
     dir.create(path, showWarnings=FALSE)
     dname <- "simple_list"
 
@@ -63,13 +66,52 @@ setMethod("saveObject", "list", function(x, path, list.format=saveBaseListFormat
     if (list.format == "hdf5") {
         fpath <- file.path(path, "list_contents.h5")
         handle <- H5Fcreate(fpath, "H5F_ACC_TRUNC")
-        on.exit(H5Fclose(handle), add=TRUE, after=FALSE)
+        on.exit(.H5Fclose_null(handle), add=TRUE, after=FALSE)
 
-        .transform_list_hdf5(x, dir=NULL, path=path, handle=handle, name=dname, env=env, simplified=TRUE, .version=3, extra=args)
+        env$vls <- list()
+        .transform_list_hdf5(
+            x,
+            dir=NULL,
+            path=path,
+            handle=handle,
+            name=dname,
+            env=env,
+            simplified=TRUE,
+            .version=3,
+            extra=args,
+            list.character.vls=list.character.vls,
+            path.so.far=""
+        )
+
+        # Handling the VLS externally, because it doesn't interop nicely with rhdf5's handles.
+        if (length(env$vls)) {
+            handle <- .H5Fclose_null(handle)
+            for (vls in env$vls) {
+                h5_write_vls_array(fpath, vls$path, "data", "heap", vls$values, scalar=vls$scalar)
+            }
+
+            handle <- H5Fopen(fpath, "H5F_ACC_RDWR")
+            for (vls in env$vls) {
+                (function() {
+                    ghandle <- H5Gopen(handle, vls$path)
+                    on.exit(H5Gclose(ghandle), add=TRUE, after=FALSE)
+                    h5_write_attribute(ghandle, "uzuki_type", "vls", scalar=TRUE)
+                    if (!is.null(vls$names)) {
+                        h5_write_vector(ghandle, "names", vls$names)
+                    }
+
+                    dhandle <- H5Dopen(ghandle, "data")
+                    on.exit(H5Dclose(dhandle), add=TRUE, after=FALSE)
+                    if (!is.null(vls$placeholder)) {
+                        h5_write_attribute(dhandle, missingPlaceholderName, vls$placeholder, scalar=TRUE)
+                    }
+                })()
+            }
+        }
 
         ghandle <- H5Gopen(handle, dname)
         on.exit(H5Gclose(ghandle), add=TRUE, after=FALSE)
-        h5_write_attribute(ghandle, "uzuki_version", "1.3", scalar=TRUE)
+        h5_write_attribute(ghandle, "uzuki_version", "1.4", scalar=TRUE)
 
     } else {
         formatted <- .transform_list_json(x, dir=NULL, path=path, env=env, simplified=TRUE, .version=2, extra=args)
@@ -115,7 +157,7 @@ saveBaseListFormat <- (function() {
 ##################################
 
 #' @importFrom S4Vectors DataFrame
-.transform_list_hdf5 <- function(x, dir, path, handle, name, env, simplified, .version, extra) {
+.transform_list_hdf5 <- function(x, dir, path, handle, name, env, simplified, .version, extra, list.character.vls, path.so.far) {
     ghandle <- H5Gcreate(handle, name)
     on.exit(H5Gclose(ghandle), add=TRUE, after=FALSE)
 
@@ -139,7 +181,19 @@ saveBaseListFormat <- (function() {
         for (i in seq_along(x)) {
             newname <- as.character(i - 1L)
             tryCatch({
-                .transform_list_hdf5(x[[i]], dir=dir, path=path, handle=gdhandle, name=newname, env=env, simplified=simplified, .version=.version, extra=extra)
+                .transform_list_hdf5(
+                    x[[i]],
+                    dir=dir,
+                    path=path,
+                    handle=gdhandle,
+                    name=newname,
+                    env=env,
+                    simplified=simplified,
+                    .version=.version,
+                    extra=extra,
+                    list.character.vls=list.character.vls,
+                    path.so.far=paste0(path.so.far, name, "/data/")
+                )
             }, error=function(e) {
                 s <- if (is.null(nn)) i else paste0("'", nn[i], "'")
                 stop("failed to stage list element ", s, "\n  - ", e$message)
@@ -180,7 +234,6 @@ saveBaseListFormat <- (function() {
 
         } else if (!is.null(sltype)) {
             h5_write_attribute(ghandle, "uzuki_object", "vector", scalar=TRUE)
-            h5_write_attribute(ghandle, "uzuki_type", if (.version == 1) sltype else "string", scalar=TRUE)
 
             if (.version > 1 && sltype != "string") {
                 h5_write_vector(ghandle, "format", sltype, scalar=TRUE)
@@ -201,13 +254,34 @@ saveBaseListFormat <- (function() {
                 }
             }
 
-            local({
-                dhandle <- h5_write_vector(ghandle, "data", y, emit=TRUE, scalar=scalarize)
-                on.exit(H5Dclose(dhandle), add=TRUE, after=FALSE)
-                if (!is.null(missing.placeholder)) {
-                    h5_write_attribute(dhandle, missingPlaceholderName, missing.placeholder, scalar=TRUE)
+            if (sltype == "string" && !isFALSE(list.character.vls) && .version > 1) {
+                if (is.null(list.character.vls)) {
+                    list.character.vls <- h5_use_vls(y)
                 }
-            })
+                if (list.character.vls) {
+                    env$vls <- append(
+                        env$vls,
+                        list(
+                            list(
+                                path = paste0(path.so.far, name),
+                                values = y,
+                                scalar = scalarize,
+                                placeholder = missing.placeholder,
+                                names = names(x)
+                            )
+                        )
+                    )
+                    return(NULL)
+                }
+            }
+
+            dhandle <- h5_write_vector(ghandle, "data", y, emit=TRUE, scalar=scalarize)
+            on.exit(H5Dclose(dhandle), add=TRUE, after=FALSE)
+            if (!is.null(missing.placeholder)) {
+                h5_write_attribute(dhandle, missingPlaceholderName, missing.placeholder, scalar=TRUE)
+            }
+
+            h5_write_attribute(ghandle, "uzuki_type", if (.version == 1) sltype else "string", scalar=TRUE)
             if (!is.null(names(x))) {
                 h5_write_vector(ghandle, "names", names(x))
             }
@@ -457,7 +531,19 @@ setMethod("stageObject", "list", function(x, dir, path, child=FALSE, fname="list
         local({
             handle <- H5Fcreate(fpath, "H5F_ACC_TRUNC")
             on.exit(H5Fclose(handle), add=TRUE, after=FALSE)
-            .transform_list_hdf5(x, dir=dir, path=path, handle=handle, name=dname, env=env, simplified=FALSE, .version=.version)
+            .transform_list_hdf5(
+                x,
+                dir=dir,
+                path=path,
+                handle=handle,
+                name=dname,
+                env=env,
+                simplified=FALSE,
+                .version=.version,
+                extra=NULL,
+                list.character.vls=FALSE,
+                path.so.far=""
+            )
 
             if (.version > 1) {
                 ghandle <- H5Gopen(handle, dname)
