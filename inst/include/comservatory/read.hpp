@@ -135,9 +135,9 @@ Contents read(Reader& reader, const ReadOptions& options) {
  */
 inline void read_file(const char* path, Contents& contents, const ReadOptions& options) {
 #if __has_include("zlib.h")
-    byteme::SomeFileReader reader(path);
+    byteme::SomeFileReader reader(path, {});
 #else
-    byteme::RawFileReader reader(path);
+    byteme::RawFileReader reader(path, {});
 #endif
     read(reader, contents, options);
 } 

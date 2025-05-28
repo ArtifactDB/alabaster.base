@@ -422,13 +422,13 @@ private:
 public:
     template<class Reader>
     void parse(Reader& reader, Contents& info, bool parallel) const {
+        std::unique_ptr<byteme::PerByteInterface<char> > pb;
         if (parallel) {
-            byteme::PerByteParallel input(&reader);
-            parse_loop(input, info);
+            pb.reset(new byteme::PerByteSerial<char, byteme::Reader*>(&reader));
         } else {
-            byteme::PerByte input(&reader);
-            parse_loop(input, info);
+            pb.reset(new byteme::PerByteParallel<char, byteme::Reader*>(&reader));
         }
+        parse_loop(*pb, info);
     }
 
     const FieldCreator* creator;

@@ -4,7 +4,7 @@
 
 // [[Rcpp::export(rng=false)]]
 SEXP check_list_hdf5(std::string file, std::string name, int num_external) {
-    uzuki2::hdf5::validate(file, name, num_external);
+    uzuki2::hdf5::validate(file, name, num_external, {});
     return R_NilValue;
 }
 

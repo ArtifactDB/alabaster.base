@@ -133,10 +133,10 @@ Rcpp::List load_csv(std::string path, bool is_compressed, int nrecords, bool par
 
     comservatory::Contents output;
     if (is_compressed) {
-        byteme::GzipFileReader reader(path);
+        byteme::GzipFileReader reader(path.c_str(), {});
         output = comservatory::read(reader, opt);
     } else {
-        byteme::RawFileReader reader(path);
+        byteme::RawFileReader reader(path.c_str(), {});
         output = comservatory::read(reader, opt);
     }
 

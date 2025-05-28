@@ -45,20 +45,22 @@ std::shared_ptr<millijson::Base> convert_to_millijson(Rcpp::RObject x) {
         Rcpp::List y(x);
 
         if (y.hasAttribute("names")) {
-            auto optr = new millijson::Object;
-            output.reset(optr);
+            std::unordered_map<std::string, std::shared_ptr<millijson::Base> > contents;
+            contents.reserve(y.size());
             Rcpp::CharacterVector names = y.names();
             for (size_t e = 0, end = names.size(); e < end; ++e) {
                 auto field = Rcpp::as<std::string>(names[e]);
-                optr->add(std::move(field), convert_to_millijson(y[e]));
+                contents[std::move(field)] = convert_to_millijson(y[e]);
             } 
+            output.reset(new millijson::Object(std::move(contents)));
 
         } else {
-            auto aptr = new millijson::Array;
-            output.reset(aptr);
+            std::vector<std::shared_ptr<millijson::Base> > contents;
+            contents.reserve(y.size());
             for (size_t e = 0, end = y.size(); e < end; ++e) {
-                aptr->add(convert_to_millijson(y[e]));
+                contents.emplace_back(convert_to_millijson(y[e]));
             } 
+            output.reset(new millijson::Array(std::move(contents)));
         }
 
     } else {
@@ -72,20 +74,20 @@ Rcpp::RObject convert_to_R(const millijson::Base* x) {
     if (x->type() == millijson::NOTHING) {
         return R_NilValue;
     } else if (x->type() == millijson::BOOLEAN) {
-        return Rcpp::LogicalVector::create(reinterpret_cast<const millijson::Boolean*>(x)->value);
+        return Rcpp::LogicalVector::create(reinterpret_cast<const millijson::Boolean*>(x)->value());
     } else if (x->type() == millijson::NUMBER) {
-        return Rcpp::NumericVector::create(reinterpret_cast<const millijson::Number*>(x)->value);
+        return Rcpp::NumericVector::create(reinterpret_cast<const millijson::Number*>(x)->value());
     } else if (x->type() == millijson::STRING) {
-        return Rcpp::CharacterVector::create(reinterpret_cast<const millijson::String*>(x)->value);
+        return Rcpp::CharacterVector::create(reinterpret_cast<const millijson::String*>(x)->value());
     } else if (x->type() == millijson::ARRAY) {
-        const auto& y = reinterpret_cast<const millijson::Array*>(x)->values;
+        const auto& y = reinterpret_cast<const millijson::Array*>(x)->value();
         Rcpp::List output(y.size());
         for (size_t i = 0, end = y.size(); i < end; ++i) {
             output[i] = convert_to_R(y[i].get());
         }
         return output;
     } else if (x->type() == millijson::OBJECT) {
-        const auto& y = reinterpret_cast<const millijson::Object*>(x)->values;
+        const auto& y = reinterpret_cast<const millijson::Object*>(x)->value();
         Rcpp::List output(y.size());
         Rcpp::CharacterVector names(y.size());
         size_t i = 0;

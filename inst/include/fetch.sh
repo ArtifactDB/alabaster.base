@@ -29,4 +29,4 @@ harvester() {
     cd -
 }
 
-harvester comservatory https://github.com/ArtifactDB/comservatory v2.0.1
+harvester comservatory https://github.com/ArtifactDB/comservatory v2.0.2

@@ -9,10 +9,10 @@ Rcpp::RObject check_csv(std::string path, bool is_compressed, bool parallel) {
     opts.validate_only = true;
 
     if (is_compressed) {
-        byteme::GzipFileReader reader(path);
+        byteme::GzipFileReader reader(path.c_str(), {});
         comservatory::read(reader, opts);
     } else {
-        byteme::RawFileReader reader(path);
+        byteme::RawFileReader reader(path.c_str(), {});
         comservatory::read(reader, opts);
     }
 
