@@ -2,6 +2,10 @@
 \title{alabaster.base News}
 \encoding{UTF-8}
 
+\section{Version 1.10.0}{\itemize{
+\item Bugfix to \code{cloneDirectory()} to work with relative/recursive symlinks in the directory to be cloned.
+}}
+
 \section{Version 1.8.0}{\itemize{
 \item Added \code{createDedupSession()}, \code{addObjectToDedupSession()} and \code{checkObjectInDedupSession()} utilities,
 that allow \code{saveObject()} method developers to check for duplicated objects and avoid re-saving them.

@@ -80,7 +80,7 @@ test_that("cloneDirectory symlinks are absolute", {
     expect_identical(Sys.readlink(file.path(dest, "stuff", "blah", "kanon.txt")), file.path(cleaned, "stuff", "blah", "kanon.txt"))
 })
 
-test_that("cloneDirectory symlinks and copyies/hardlinks interact correctly", {
+test_that("cloneDirectory symlinks and copies/hardlinks interact correctly", {
     skip_on_os("windows")
 
     src0 <- tempfile()
@@ -105,6 +105,26 @@ test_that("cloneDirectory symlinks and copyies/hardlinks interact correctly", {
     expect_identical(Sys.readlink(file.path(dest2, "foobar.txt")), "")
     expect_identical(Sys.readlink(file.path(dest2, "stuff", "whee.txt")), "")
     expect_identical(Sys.readlink(file.path(dest2, "stuff", "blah", "kanon.txt")), "")
+
+    # Checking what happens if the test directory has relative symlinks.
+    src2 <- tempfile()
+    dir.create(file.path(src2, "stuff", "blah"), recursive=TRUE)
+    write(file=file.path(src2, "foobar.txt"), LETTERS)
+    file.symlink(file.path("..", "..", "foobar.txt"), file.path(src2, "stuff", "blah", "kanon.txt"))
+    file.symlink(file.path("blah", "kanon.txt"), file.path(src2, "stuff", "whee.txt")) # recursive symlink
+    alt <- tempfile(tmpdir=dirname(src2))
+    write(file=alt, "ayu")
+    file.symlink(file.path("..", "..", "..", basename(alt)), file.path(src2, "stuff", "blah", "tsukimiya.txt"))
+
+    dest3 <- tempfile()
+    cloneDirectory(src2, dest3, action="link")
+    expect_identical(readLines(file.path(dest3, "foobar.txt")), LETTERS) 
+    expect_identical(readLines(file.path(dest3, "stuff", "whee.txt")), LETTERS)
+    expect_identical(readLines(file.path(dest3, "stuff", "blah", "kanon.txt")), LETTERS)
+    expect_identical(readLines(file.path(dest3, "stuff", "blah", "tsukimiya.txt")), "ayu")
+    expect_identical(Sys.readlink(file.path(dest3, "foobar.txt")), "")
+    expect_identical(Sys.readlink(file.path(dest3, "stuff", "whee.txt")), "")
+    expect_identical(Sys.readlink(file.path(dest3, "stuff", "blah", "kanon.txt")), "")
 })
 
 test_that("cloneDirectory works with relative symlinks", {

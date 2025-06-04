@@ -74,10 +74,21 @@ cloneDirectory <- function(src, dest, action=c("link", "copy", "symlink", "relsy
             to <- file.path(dest, y)
             dir.create(dirname(to), recursive=TRUE, showWarnings=FALSE)
             from <- file.path(src, y)
-            ll <- Sys.readlink(from) # resolving any symlinks so that we hard link to the original file.
-            if (ll != "") {
-                from <- ll
+
+            # Resolving any symlinks so that we hard link to the original file.
+            while (1) {
+                ll <- Sys.readlink(from)
+                if (ll == "") {
+                    break
+                }
+                decomposed <- decompose_path(ll)
+                if (decomposed$relative) {
+                    from <- file.path(dirname(from), ll)
+                } else {
+                    from <- ll
+                }
             }
+
             if (!file.link(from, to) && !file.copy(from, to)) {
                 stop("failed to copy or link '", y, "' from '", src, "' to '", dest, "'")
             }
@@ -88,7 +99,7 @@ cloneDirectory <- function(src, dest, action=c("link", "copy", "symlink", "relsy
             to <- file.path(dest, y)
             dir.create(dirname(to), recursive=TRUE, showWarnings=FALSE)
             from <- file.path(src, y)
-            if (!file.copy(from, to)) {
+            if (!file.copy(from, to)) { # file.copy() follows symbolic links, so no need for special treatment here.
                 stop("failed to copy '", y, "' from '", src, "' to '", dest, "'")
             }
         }
