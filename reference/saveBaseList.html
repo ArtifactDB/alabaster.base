@@ -18,7 +18,7 @@ This uses the uzuki2 specification to ensure that appropriate types are declared
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">alabaster.base</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.7</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.9.2</span>
       </span>
     </div>
 
@@ -63,7 +63,13 @@ This uses the <a href="https://github.com/ArtifactDB/uzuki2" class="external-lin
 
     <div id="ref-usage">
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="co"># S4 method for class 'list'</span></span>
-<span><span class="fu"><a href="saveObject.html">saveObject</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">path</span>, list.format <span class="op">=</span> <span class="fu">saveBaseListFormat</span><span class="op">(</span><span class="op">)</span>, <span class="va">...</span><span class="op">)</span></span>
+<span><span class="fu"><a href="saveObject.html">saveObject</a></span><span class="op">(</span></span>
+<span>  <span class="va">x</span>,</span>
+<span>  <span class="va">path</span>,</span>
+<span>  list.format <span class="op">=</span> <span class="fu">saveBaseListFormat</span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  list.character.vls <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S4 method for class 'List'</span></span>
 <span><span class="fu"><a href="saveObject.html">saveObject</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">path</span>, list.format <span class="op">=</span> <span class="fu">saveBaseListFormat</span><span class="op">(</span><span class="op">)</span>, <span class="va">...</span><span class="op">)</span></span>
@@ -86,6 +92,12 @@ Alternatively, a <a href="https://rdrr.io/pkg/S4Vectors/man/List-class.html" cla
 
 <dt id="arg-list-format">list.format<a class="anchor" aria-label="anchor" href="#arg-list-format"></a></dt>
 <dd><p>String specifying the format in which to save the list.</p></dd>
+
+
+<dt id="arg-list-character-vls">list.character.vls<a class="anchor" aria-label="anchor" href="#arg-list-character-vls"></a></dt>
+<dd><p>Logical scalar indicating whether to save character vectors in the custom variable length string (VLS) array format.
+If <code>NULL</code>, this is determined based on a comparison of the expected storage against a fixed length array.
+Only used if <code>list.format="hdf5"</code>.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
@@ -153,7 +165,7 @@ This reflects the decisions made by <code><a href="readBaseList.html">readBaseLi
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
 </div>
 
       </footer></div>
