@@ -18,7 +18,7 @@ It provides a faithful representation of any RFC3339-compliant string in an R se
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">alabaster.base</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.9.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.9.3</span>
       </span>
     </div>
 
@@ -163,46 +163,46 @@ Users are advised to convert to <a href="https://rdrr.io/r/base/DateTimeClasses.
     <h2>Examples</h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">out</span> <span class="op">&lt;-</span> <span class="fu">as.Rfc3339</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.time</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> <span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">out</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [1] "2025-06-04T18:12:12+00:00" "2025-06-04T18:12:13+00:00"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [3] "2025-06-04T18:12:14+00:00" "2025-06-04T18:12:15+00:00"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [5] "2025-06-04T18:12:16+00:00" "2025-06-04T18:12:17+00:00"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [7] "2025-06-04T18:12:18+00:00" "2025-06-04T18:12:19+00:00"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [9] "2025-06-04T18:12:20+00:00" "2025-06-04T18:12:21+00:00"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [1] "2025-06-24T05:25:31+00:00" "2025-06-24T05:25:32+00:00"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [3] "2025-06-24T05:25:33+00:00" "2025-06-24T05:25:34+00:00"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [5] "2025-06-24T05:25:35+00:00" "2025-06-24T05:25:36+00:00"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [7] "2025-06-24T05:25:37+00:00" "2025-06-24T05:25:38+00:00"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [9] "2025-06-24T05:25:39+00:00" "2025-06-24T05:25:40+00:00"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"class")</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Rfc3339"</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">out</span><span class="op">[</span><span class="fl">2</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "2025-06-04T18:12:13+00:00" "2025-06-04T18:12:14+00:00"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [3] "2025-06-04T18:12:15+00:00" "2025-06-04T18:12:16+00:00"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "2025-06-24T05:25:32+00:00" "2025-06-24T05:25:33+00:00"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [3] "2025-06-24T05:25:34+00:00" "2025-06-24T05:25:35+00:00"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"class")</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Rfc3339"</span>
 <span class="r-in"><span><span class="va">out</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="st">"2"</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">out</span>, <span class="va">out</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [1] "2025-06-04T18:12:12+00:00" NA                         </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [3] "2025-06-04T18:12:14+00:00" "2025-06-04T18:12:15+00:00"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [5] "2025-06-04T18:12:16+00:00" "2025-06-04T18:12:17+00:00"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [7] "2025-06-04T18:12:18+00:00" "2025-06-04T18:12:19+00:00"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [9] "2025-06-04T18:12:20+00:00" "2025-06-04T18:12:21+00:00"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [11] "2025-06-04T18:12:12+00:00" NA                         </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [13] "2025-06-04T18:12:14+00:00" "2025-06-04T18:12:15+00:00"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [15] "2025-06-04T18:12:16+00:00" "2025-06-04T18:12:17+00:00"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [17] "2025-06-04T18:12:18+00:00" "2025-06-04T18:12:19+00:00"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [19] "2025-06-04T18:12:20+00:00" "2025-06-04T18:12:21+00:00"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [1] "2025-06-24T05:25:31+00:00" NA                         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [3] "2025-06-24T05:25:33+00:00" "2025-06-24T05:25:34+00:00"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [5] "2025-06-24T05:25:35+00:00" "2025-06-24T05:25:36+00:00"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [7] "2025-06-24T05:25:37+00:00" "2025-06-24T05:25:38+00:00"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [9] "2025-06-24T05:25:39+00:00" "2025-06-24T05:25:40+00:00"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [11] "2025-06-24T05:25:31+00:00" NA                         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [13] "2025-06-24T05:25:33+00:00" "2025-06-24T05:25:34+00:00"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [15] "2025-06-24T05:25:35+00:00" "2025-06-24T05:25:36+00:00"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [17] "2025-06-24T05:25:37+00:00" "2025-06-24T05:25:38+00:00"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [19] "2025-06-24T05:25:39+00:00" "2025-06-24T05:25:40+00:00"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"class")</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Rfc3339"</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">as.character</a></span><span class="op">(</span><span class="va">out</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [1] "2025-06-04T18:12:12+00:00" NA                         </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [3] "2025-06-04T18:12:14+00:00" "2025-06-04T18:12:15+00:00"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [5] "2025-06-04T18:12:16+00:00" "2025-06-04T18:12:17+00:00"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [7] "2025-06-04T18:12:18+00:00" "2025-06-04T18:12:19+00:00"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [9] "2025-06-04T18:12:20+00:00" "2025-06-04T18:12:21+00:00"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [1] "2025-06-24T05:25:31+00:00" NA                         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [3] "2025-06-24T05:25:33+00:00" "2025-06-24T05:25:34+00:00"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [5] "2025-06-24T05:25:35+00:00" "2025-06-24T05:25:36+00:00"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [7] "2025-06-24T05:25:37+00:00" "2025-06-24T05:25:38+00:00"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [9] "2025-06-24T05:25:39+00:00" "2025-06-24T05:25:40+00:00"</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/as.POSIXlt.html" class="external-link">as.POSIXct</a></span><span class="op">(</span><span class="va">out</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [1] "2025-06-04 18:12:12 UTC" NA                       </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [3] "2025-06-04 18:12:14 UTC" "2025-06-04 18:12:15 UTC"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [5] "2025-06-04 18:12:16 UTC" "2025-06-04 18:12:17 UTC"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [7] "2025-06-04 18:12:18 UTC" "2025-06-04 18:12:19 UTC"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [9] "2025-06-04 18:12:20 UTC" "2025-06-04 18:12:21 UTC"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [1] "2025-06-24 05:25:31 UTC" NA                       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [3] "2025-06-24 05:25:33 UTC" "2025-06-24 05:25:34 UTC"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [5] "2025-06-24 05:25:35 UTC" "2025-06-24 05:25:36 UTC"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [7] "2025-06-24 05:25:37 UTC" "2025-06-24 05:25:38 UTC"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [9] "2025-06-24 05:25:39 UTC" "2025-06-24 05:25:40 UTC"</span>
 </code></pre></div>
     </div>
   </div>
