@@ -206,6 +206,9 @@ h5_cast <- function(current, expected.type, missing.placeholder, respect.nan.pay
         out <- restore_min_integer(current)
         current <- out$y
         converted <- out$converted
+        if (is.raw(current)) {
+            current <- as.integer(current) # doing this here as raw vectors cannot contain NAs.
+        }
         current[which(current == missing.placeholder)] <- NA # Using which() to avoid problems with existing NAs.
     }
 
