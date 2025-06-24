@@ -70,7 +70,9 @@ readDataFrame <- function(path, metadata, ...) {
                 missing.placeholder <- (function() {
                     colhandle <- H5Gopen(gdhandle, expected)
                     on.exit(H5Gclose(colhandle), add=TRUE, after=FALSE)
-                    h5_read_attribute(colhandle, missingPlaceholderName, check=TRUE, default=NULL)
+                    phandle <- H5Dopen(colhandle, "pointers")
+                    on.exit(H5Dclose(phandle), add=TRUE, after=FALSE)
+                    h5_read_attribute(phandle, missingPlaceholderName, check=TRUE, default=NULL)
                 })()
 
                 # Need to do this tedious song and dance to get an exclusive file handle.

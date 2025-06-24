@@ -720,20 +720,37 @@ test_that("DataFrame character columns work in VLS mode", {
     tmp <- tempfile()
     dir.create(tmp)
 
+    has_vls <- function(file, column) {
+        fhandle <- rhdf5::H5Fopen(file, "H5F_ACC_RDONLY")
+        on.exit(rhdf5::H5Fclose(fhandle), add=TRUE, after=FALSE)
+        dfhandle <- rhdf5::H5Gopen(fhandle, "data_frame")
+        on.exit(rhdf5::H5Gclose(dfhandle), add=TRUE, after=FALSE)
+        dhandle <- rhdf5::H5Gopen(dfhandle, "data")
+        on.exit(rhdf5::H5Gclose(dhandle), add=TRUE, after=FALSE)
+        precolhandle <- rhdf5::H5Oopen(dhandle, column)
+        on.exit(rhdf5::H5Oclose(precolhandle), add=TRUE, after=FALSE)
+        alabaster.base:::h5_read_attribute(precolhandle, "type") == "vls"
+    }
+
     df <- DataFrame(x = runif(8), y = c("A", "BC", "DEFG", "HIJKL", "MNOP", "QRS", "TU", "V"), z = seq_len(8))
-    saveObject(df, file.path(tmp, "basic"), character.vls=TRUE)
+    saveObject(df, file.path(tmp, "basic"), DataFrame.character.vls=TRUE)
     reloaded <- readObject(file.path(tmp, "basic")) 
     expect_identical(df, reloaded)
+    expect_true(has_vls(file.path(tmp, 'basic', 'basic_columns.h5'), '1'))
 
     copy <- df
     copy$y[2] <- NA
-    saveObject(copy, file.path(tmp, "with_missing"), character.vls=TRUE)
+    saveObject(copy, file.path(tmp, "with_missing"), DataFrame.character.vls=TRUE)
     reloaded <- readObject(file.path(tmp, "with_missing")) 
     expect_identical(copy, reloaded)
+    expect_true(has_vls(file.path(tmp, 'with_missing', 'basic_columns.h5'), '1'))
 
     copy <- df
-    copy$y[4] <- strrep("HIJKL", 100)
-    saveObject(copy, file.path(tmp, "auto"), character.vls=NULL)
+    copy$aa <- copy$y
+    copy$aa[4] <- strrep("HIJKL", 100)
+    saveObject(copy, file.path(tmp, "auto"), DataFrame.character.vls=NULL)
     reloaded <- readObject(file.path(tmp, "auto")) 
     expect_identical(copy, reloaded)
+    expect_false(has_vls(file.path(tmp, 'auto', 'basic_columns.h5'), '1'))
+    expect_true(has_vls(file.path(tmp, 'auto', 'basic_columns.h5'), '3'))
 })

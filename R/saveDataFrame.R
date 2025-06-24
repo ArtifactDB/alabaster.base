@@ -136,10 +136,11 @@ setMethod("saveObject", "DataFrame", function(x, path, DataFrame.character.vls=N
 
             saved.vls <- FALSE
             if (coltype == "string" && is.null(colformat) && !isFALSE(DataFrame.character.vls)) {
-                if (is.null(DataFrame.character.vls)) {
-                    DataFrame.character.vls <- h5_use_vls(current)
+                use.vls <- DataFrame.character.vls
+                if (is.null(use.vls)) {
+                    use.vls <- h5_use_vls(current)
                 }
-                if (DataFrame.character.vls) {
+                if (use.vls) {
                     vhandle <- H5Gcreate(gdhandle, data.name)
                     H5Gclose(vhandle)
 
