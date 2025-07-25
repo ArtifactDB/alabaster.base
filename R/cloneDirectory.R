@@ -142,14 +142,11 @@ decompose_path <- function(path) {
     repeat {
         base <- basename(path)
         dpath <- dirname(path)
-        if (dpath == path) {
+        if (dpath == path && dpath != ".") {
             return(list(relative=FALSE, root=dpath, components=output))
         }
         output <- c(base, output)
         if (dpath == ".") {
-            if (path != base) {
-                output <- c(".", output)
-            }
             return(list(relative=TRUE, root=NULL, components=output))
         }
         path <- dpath

@@ -27,10 +27,23 @@ test_that("absolutizePath resolves relative paths", {
     tmp <- tempfile()
     setwd(dirname(tmp))
 
+    path <- absolutizePath(".")
+    expect_false(path == ".")
+    expect_identical(normalizePath(path), normalizePath(dirname(tmp)))
+
     write(file=tmp, letters)
     path <- absolutizePath(basename(tmp))
+    expect_false(path == basename(tmp))
     expect_identical(readLines(path), letters)
     if (.Platform$OS.type == "unix") {
         expect_true(startsWith(path, "/"))
     }
+
+    # Works with leading '..' references.
+    tmp2 <- tempfile(tmpdir=dirname(tmp))
+    dir.create(basename(tmp2), showWarnings=FALSE)
+    setwd(basename(tmp2))
+    path2 <- absolutizePath(file.path("..", basename(tmp)))
+    expect_false(startsWith(path2, ".."))
+    expect_identical(path, path2)
 })
