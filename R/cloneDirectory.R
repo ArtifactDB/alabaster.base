@@ -89,7 +89,7 @@ cloneDirectory <- function(src, dest, action=c("link", "copy", "symlink", "relsy
                 }
             }
 
-            if (!file.link(from, to) && !file.copy(from, to)) {
+            if (!suppressWarnings(file.link(from, to)) && !file.copy(from, to)) {
                 stop("failed to copy or link '", y, "' from '", src, "' to '", dest, "'")
             }
         }
