@@ -130,7 +130,7 @@ h5_object_exists <- function(handle, name) {
 }
 
 #' @export
-h5_read_vector <- function(handle, name, check=FALSE, default=NULL, bit64conversion) {
+h5_read_vector <- function(handle, name, check=FALSE, default=NULL, bit64conversion = "int") {
     if (check) {
         if (!h5_object_exists(handle, name)) {
             return(default)
@@ -151,7 +151,7 @@ h5_read_vector <- function(handle, name, check=FALSE, default=NULL, bit64convers
 }
 
 #' @export
-h5_read_attribute <- function(handle, name, check=FALSE, default=NULL, bit64conversion) {
+h5_read_attribute <- function(handle, name, check=FALSE, default=NULL, bit64conversion = "int") {
     if (check) {
         if (!H5Aexists(handle, name)) {
             return(default)
