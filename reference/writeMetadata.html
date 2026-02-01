@@ -19,7 +19,7 @@ This is commonly used inside stageObject methods to create the metadata file for
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">alabaster.base</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.11.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.11.2</span>
       </span>
     </div>
 
@@ -93,7 +93,7 @@ A list of resource metadata is returned, e.g., for inclusion as the <code>"resou
     <h2>Details</h2>
     <p>Any <code>NULL</code> values in <code>meta</code> are pruned out prior to writing when <code>ignore.null=TRUE</code>.
 This is done recursively so any <code>NULL</code> values in sub-lists of <code>meta</code> are also ignored.</p>
-<p>Any scalars are automatically unboxed so array values should be explicitly specified as such with <code><a href="https://rdrr.io/r/base/AsIs.html" class="external-link">I</a>()</code>.</p>
+<p>Any scalars are automatically unboxed so array values should be explicitly specified as such with <code><a href="https://rdrr.io/r/base/AsIs.html" class="external-link">I()</a></code>.</p>
 <p>Any starting <code>"./"</code> in <code>meta$path</code> will be automatically removed.
 This allows staging methods to save in the current directory by setting <code>path="."</code>,
 without the need to pollute the paths with a <code>"./"</code> prefix.</p>
@@ -168,7 +168,7 @@ or if the artifact does not actually exist in its full form on the file system.<
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
       </footer></div>

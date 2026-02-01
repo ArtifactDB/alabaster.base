@@ -13,6 +13,7 @@
 <url><loc>/reference/anyMissing.html</loc></url>
 <url><loc>/reference/chooseMissingPlaceholderForHdf5.html</loc></url>
 <url><loc>/reference/cloneDirectory.html</loc></url>
+<url><loc>/reference/cloneFile.html</loc></url>
 <url><loc>/reference/createDedupSession.html</loc></url>
 <url><loc>/reference/createRedirection.html</loc></url>
 <url><loc>/reference/getSaveEnvironment.html</loc></url>
