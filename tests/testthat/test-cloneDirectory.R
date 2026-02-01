@@ -57,13 +57,8 @@ test_that("cloneDirectory works with symlinks", {
     expect_identical(Sys.readlink(file.path(dest, "foobar.txt")), file.path(cleaned, "foobar.txt"))
     expect_identical(Sys.readlink(file.path(dest, "stuff", "whee.txt")), file.path(cleaned, "stuff", "whee.txt"))
     expect_identical(Sys.readlink(file.path(dest, "stuff", "blah", "kanon.txt")), file.path(cleaned, "stuff", "blah", "kanon.txt"))
-})
 
-test_that("cloneDirectory symlinks are absolute", {
-    skip_on_os("windows")
-
-    src <- tempfile()
-    create_test_directory(src)
+    # Checking that we save absolute paths, even if the input 'src' is relative.
     pwd <- getwd()
     setwd(dirname(src))
     on.exit(setwd(pwd))
@@ -74,7 +69,6 @@ test_that("cloneDirectory symlinks are absolute", {
     expect_identical(readLines(file.path(dest, "stuff", "whee.txt")), as.character(1:10))
     expect_identical(readLines(file.path(dest, "stuff", "blah", "kanon.txt")), "air")
 
-    cleaned <- file.path(absolutizePath(getwd()), basename(src)) # need to clean the path for a valid comparison.
     expect_identical(Sys.readlink(file.path(dest, "foobar.txt")), file.path(cleaned, "foobar.txt"))
     expect_identical(Sys.readlink(file.path(dest, "stuff", "whee.txt")), file.path(cleaned, "stuff", "whee.txt"))
     expect_identical(Sys.readlink(file.path(dest, "stuff", "blah", "kanon.txt")), file.path(cleaned, "stuff", "blah", "kanon.txt"))
@@ -87,6 +81,10 @@ test_that("cloneDirectory symlinks and copies/hardlinks interact correctly", {
     create_test_directory(src0)
     src <- tempfile()
     cloneDirectory(src0, src, action="symlink")
+
+    expect_identical(alabaster.base:::resolve_symlinks(file.path(src, "foobar.txt")), file.path(src0, "foobar.txt"))
+    expect_identical(alabaster.base:::resolve_symlinks(file.path(src, "stuff", "whee.txt")), file.path(src0, "stuff", "whee.txt"))
+    expect_identical(alabaster.base:::resolve_symlinks(file.path(src, "stuff", "blah", "kanon.txt")), file.path(src0, "stuff", "blah", "kanon.txt"))
 
     dest1 <- tempfile()
     cloneDirectory(src, dest1, action="link")
@@ -115,6 +113,9 @@ test_that("cloneDirectory symlinks and copies/hardlinks interact correctly", {
     alt <- tempfile(tmpdir=dirname(src2))
     write(file=alt, "ayu")
     file.symlink(file.path("..", "..", "..", basename(alt)), file.path(src2, "stuff", "blah", "tsukimiya.txt"))
+
+    expect_identical(absolutizePath(alabaster.base:::resolve_symlinks(file.path(src2, "stuff", "whee.txt"))), absolutizePath(file.path(src2, "foobar.txt")))
+    expect_identical(absolutizePath(alabaster.base:::resolve_symlinks(file.path(src2, "stuff", "blah", "tsukimiya.txt"))), absolutizePath(alt))
 
     dest3 <- tempfile()
     cloneDirectory(src2, dest3, action="link")

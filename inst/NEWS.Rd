@@ -2,6 +2,10 @@
 \title{alabaster.base News}
 \encoding{UTF-8}
 
+\section{Version 1.12.0}{\itemize{
+\item Added a \code{cloneFile()} utility to clone a single file, by copying, hard-linking or (relative) symlinking.
+}}
+
 \section{Version 1.10.0}{\itemize{
 \item Bugfix to \code{cloneDirectory()} to work with relative/recursive symlinks in the directory to be cloned.
 }}
