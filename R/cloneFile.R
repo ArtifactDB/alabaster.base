@@ -45,7 +45,7 @@ cloneFile <- function(src, dest, action=c("link", "copy", "symlink", "relsymlink
         on.exit(setwd(pwd))
         setwd(destdir)
         if (!file.symlink(newtarget, basename(dest))) {
-            stop("failed to link '", y, "' from '", src, "' to '", dest, "'")
+            stop("failed to link from '", src, "' to '", dest, "'")
         }
 
     } else if (action == "link") {
