@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">alabaster.base</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.11.3</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.11.4</span>
       </span>
     </div>
 
@@ -138,15 +138,15 @@ Individual reader functions can simply call <code>getSaveEnvironment</code> to a
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="fu">formatSaveEnvironment</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> List of 4</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ type    : chr "R"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ version : chr "4.6.0"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ version : chr "4.7.0"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ platform: chr "x86_64-pc-linux-gnu"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ packages:List of 53</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ S4Vectors        : chr "0.49.0"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ BiocGenerics     : chr "0.57.0"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ generics         : chr "0.1.4"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ alabaster.base   : chr "1.11.3"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ alabaster.base   : chr "1.11.4"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ jsonlite         : chr "2.0.0"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ compiler         : chr "4.6.0"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ compiler         : chr "4.7.0"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ BiocManager      : chr "1.30.27"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ Rcpp             : chr "1.1.1"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ xml2             : chr "1.5.2"</span>
@@ -189,9 +189,9 @@ Individual reader functions can simply call <code>getSaveEnvironment</code> to a
 <span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ whisker          : chr "0.4.1"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ ragg             : chr "1.5.1"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ fansi            : chr "1.0.7"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ rmarkdown        : chr "2.30"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ rmarkdown        : chr "2.31"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ purrr            : chr "1.2.1"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ tools            : chr "4.6.0"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ tools            : chr "4.7.0"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ pkgconfig        : chr "2.0.3"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ htmltools        : chr "0.5.9"</span>
 <span class="r-in"><span></span></span>
@@ -201,7 +201,7 @@ Individual reader functions can simply call <code>getSaveEnvironment</code> to a
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">wfun</span> <span class="op">&lt;-</span> <span class="fu">registerSaveEnvironment</span><span class="op">(</span><span class="va">tmp</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">getSaveEnvironment</span><span class="op">(</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "/tmp/Rtmpe4V2dt/file1c79855e634"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "/tmp/RtmpMPTf6S/file29f7f3e2d84"</span>
 <span class="r-in"><span><span class="va">wfun</span><span class="op">$</span><span class="fu">restore</span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">useSaveEnvironment</span><span class="op">(</span><span class="va">prev</span><span class="op">)</span></span></span>
