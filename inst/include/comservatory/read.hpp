@@ -134,12 +134,17 @@ Contents read(Reader& reader, const ReadOptions& options) {
  * Gzip support requires linking to the Zlib library.
  */
 inline void read_file(const char* path, Contents& contents, const ReadOptions& options) {
+    std::unique_ptr<byteme::Reader> reader;
 #if __has_include("zlib.h")
-    byteme::SomeFileReader reader(path, {});
+    if (byteme::is_gzip(path)) {
+        reader.reset(new byteme::GzipFileReader(path, {}));
+    } else {
+        reader.reset(new byteme::RawFileReader(path, {}));
+    }
 #else
-    byteme::RawFileReader reader(path, {});
+    reader.reset(new byteme::RawFileReader(path, {}));
 #endif
-    read(reader, contents, options);
+    read(*reader, contents, options);
 } 
 
 /**

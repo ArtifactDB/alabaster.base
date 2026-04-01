@@ -13,7 +13,7 @@
 #include "Field.hpp"
 #include "Creator.hpp"
 
-#include "byteme/PerByte.hpp"
+#include "byteme/byteme.hpp"
 
 /**
  * @file Parser.hpp
@@ -422,11 +422,11 @@ private:
 public:
     template<class Reader>
     void parse(Reader& reader, Contents& info, bool parallel) const {
-        std::unique_ptr<byteme::PerByteInterface<char> > pb;
+        std::unique_ptr<byteme::BufferedReader<char> > pb;
         if (parallel) {
-            pb.reset(new byteme::PerByteSerial<char, byteme::Reader*>(&reader));
+            pb.reset(new byteme::SerialBufferedReader<char, byteme::Reader*>(&reader, 65536));
         } else {
-            pb.reset(new byteme::PerByteParallel<char, byteme::Reader*>(&reader));
+            pb.reset(new byteme::ParallelBufferedReader<char, byteme::Reader*>(&reader, 65536));
         }
         parse_loop(*pb, info);
     }
