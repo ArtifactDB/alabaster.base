@@ -32,7 +32,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">alabaster.base</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.11.4</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.13.0</span>
       </span>
     </div>
 
@@ -92,7 +92,7 @@
 <div class="section level2">
 <h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
 </h2>
-<p>The <em><a href="https://bioconductor.org/packages/3.23/alabaster.base" class="external-link">alabaster.base</a></em>
+<p>The <em><a href="https://bioconductor.org/packages/3.24/alabaster.base" class="external-link">alabaster.base</a></em>
 package (and its family) implements methods to save common Bioconductor
 objects to file artifacts and load them back into R. This aims to
 provide a functional equivalent to RDS-based serialization that is:</p>
@@ -114,7 +114,7 @@ rewriting all files.</li>
 <h2 id="quick-start">Quick start<a class="anchor" aria-label="anchor" href="#quick-start"></a>
 </h2>
 <p>To demonstrate, let’s mock up a <code>DataFrame</code> object from
-the <em><a href="https://bioconductor.org/packages/3.23/S4Vectors" class="external-link">S4Vectors</a></em>
+the <em><a href="https://bioconductor.org/packages/3.24/S4Vectors" class="external-link">S4Vectors</a></em>
 package.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://bioconductor.org/packages/S4Vectors" class="external-link">S4Vectors</a></span><span class="op">)</span></span>
@@ -186,7 +186,7 @@ correct loading function for each class is automatically called by the
 <span><span class="co">## 8          8           h</span></span>
 <span><span class="co">## 9          9           i</span></span>
 <span><span class="co">## 10        10           j</span></span></code></pre>
-<p><em><a href="https://bioconductor.org/packages/3.23/alabaster.base" class="external-link">alabaster.base</a></em>
+<p><em><a href="https://bioconductor.org/packages/3.24/alabaster.base" class="external-link">alabaster.base</a></em>
 also provides a <code><a href="../reference/validateObject.html">validateObject()</a></code> function, which checks
 that each object’s on-disk representation follows its associated
 specification. For all <strong>alabaster</strong>-supported objects,
@@ -197,11 +197,11 @@ readers like <code><a href="../reference/readObject.html">readObject()</a></code
 <code><a href="../reference/validateObject.html">validateObject()</a></code> on the directory to ensure compliance.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/validateObject.html">validateObject</a></span><span class="op">(</span><span class="va">tmp</span><span class="op">)</span></span></code></pre></div>
-<p><em><a href="https://bioconductor.org/packages/3.23/alabaster.base" class="external-link">alabaster.base</a></em>
-itself supports a small set of classes from the <em><a href="https://bioconductor.org/packages/3.23/S4Vectors" class="external-link">S4Vectors</a></em>
+<p><em><a href="https://bioconductor.org/packages/3.24/alabaster.base" class="external-link">alabaster.base</a></em>
+itself supports a small set of classes from the <em><a href="https://bioconductor.org/packages/3.24/S4Vectors" class="external-link">S4Vectors</a></em>
 packages; support for additional classes can be found in other packages
-like <em><a href="https://bioconductor.org/packages/3.23/alabaster.ranges" class="external-link">alabaster.ranges</a></em>
-and <em><a href="https://bioconductor.org/packages/3.23/alabaster.se" class="external-link">alabaster.se</a></em>.
+like <em><a href="https://bioconductor.org/packages/3.24/alabaster.ranges" class="external-link">alabaster.ranges</a></em>
+and <em><a href="https://bioconductor.org/packages/3.24/alabaster.se" class="external-link">alabaster.se</a></em>.
 Third-party developers can also add support for their own classes by
 defining new methods, see <a href="#extending-to-new-classes">below</a>
 for details.</p>
@@ -215,7 +215,7 @@ easily copy the entire directory to a new file system and everything
 will still be correctly referenced within the directory. The simplest
 way to share objects is to just <code>zip</code> or <code>tar</code> the
 staging directory for <em>ad hoc</em> distribution. For more serious
-applications, <em><a href="https://bioconductor.org/packages/3.23/alabaster.base" class="external-link">alabaster.base</a></em>
+applications, <em><a href="https://bioconductor.org/packages/3.24/alabaster.base" class="external-link">alabaster.base</a></em>
 can be used in conjunction with storage systems like AWS S3 for
 large-scale distribution.</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
@@ -248,7 +248,7 @@ users can exploit this by loading components from subdirectories if only
 the full object is not required:</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Creating a nested DF to be a little spicy:</span></span>
-<span><span class="va">df2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/DataFrame-class.html" class="external-link">DataFrame</a></span><span class="op">(</span>Z<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">)</span>, AA<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/AsIs.html" class="external-link">I</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/DataFrame-class.html" class="external-link">DataFrame</a></span><span class="op">(</span>B<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html" class="external-link">runif</a></span><span class="op">(</span><span class="fl">5</span><span class="op">)</span>, C<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">5</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">df2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/DataFrame-class.html" class="external-link">DataFrame</a></span><span class="op">(</span>Z<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">)</span>, AA<span class="op">=</span><span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/S4Vectors-internals.html" class="external-link">I</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/DataFrame-class.html" class="external-link">DataFrame</a></span><span class="op">(</span>B<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html" class="external-link">runif</a></span><span class="op">(</span><span class="fl">5</span><span class="op">)</span>, C<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">5</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">tmp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="va">meta2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/saveObject.html">saveObject</a></span><span class="op">(</span><span class="va">df2</span>, <span class="va">tmp</span><span class="op">)</span></span>
 <span></span>
@@ -282,7 +282,7 @@ contents of the object inside the directory. It should also produce an
 <li>Writing a function for <code><a href="../reference/readObject.html">readObject()</a></code> and registering it
 with <code><a href="../reference/readObject.html">registerReadObjectFunction()</a></code> (or, for core
 Bioconductor classes, by requesting a change to the default registry in
-<em><a href="https://bioconductor.org/packages/3.23/alabaster.base" class="external-link">alabaster.base</a></em>).
+<em><a href="https://bioconductor.org/packages/3.24/alabaster.base" class="external-link">alabaster.base</a></em>).
 This should accept a path to a directory and read its contents to
 reconstruct the object. The registered type should be the same as that
 used in the <code>OBJECT</code> file.</li>
@@ -419,13 +419,13 @@ application-specific saving generic with the same signature as
 <div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/methods/setMethod.html" class="external-link">setMethod</a></span><span class="op">(</span><span class="st">"appSaveObject"</span>, <span class="st">"ANY"</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span>, <span class="va">path</span>, <span class="va">...</span><span class="op">)</span> <span class="op">{</span></span>
 <span>    <span class="fu"><a href="../reference/saveObject.html">saveObject</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">path</span>, <span class="va">...</span><span class="op">)</span> <span class="co"># does the real work</span></span>
-<span>    <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>authors<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/AsIs.html" class="external-link">I</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Sys.info.html" class="external-link">Sys.info</a></span><span class="op">(</span><span class="op">)</span><span class="op">[[</span><span class="st">"user"</span><span class="op">]</span><span class="op">]</span><span class="op">)</span><span class="op">)</span> <span class="co"># adds the desired metadata</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>authors<span class="op">=</span><span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/S4Vectors-internals.html" class="external-link">I</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Sys.info.html" class="external-link">Sys.info</a></span><span class="op">(</span><span class="op">)</span><span class="op">[[</span><span class="st">"user"</span><span class="op">]</span><span class="op">]</span><span class="op">)</span><span class="op">)</span> <span class="co"># adds the desired metadata</span></span>
 <span><span class="op">}</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># We can specialize the behavior for specific classes like DataFrames.</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/methods/setMethod.html" class="external-link">setMethod</a></span><span class="op">(</span><span class="st">"appSaveObject"</span>, <span class="st">"DFrame"</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span>, <span class="va">path</span>, <span class="va">...</span><span class="op">)</span> <span class="op">{</span></span>
 <span>    <span class="va">ans</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/methods/NextMethod.html" class="external-link">callNextMethod</a></span><span class="op">(</span><span class="op">)</span></span>
-<span>    <span class="va">ans</span><span class="op">$</span><span class="va">columns</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/AsIs.html" class="external-link">I</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/row_colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span></span>
+<span>    <span class="va">ans</span><span class="op">$</span><span class="va">columns</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/S4Vectors-internals.html" class="external-link">I</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/row_colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span></span>
 <span>    <span class="va">ans</span></span>
 <span><span class="op">}</span><span class="op">)</span></span></code></pre></div>
 <p>Applications should call <code><a href="../reference/altSaveObject.html">altSaveObjectFunction()</a></code> to
@@ -442,7 +442,7 @@ as the nested <code>DataFrame</code> below.</p>
 <span><span class="op">}</span></span>
 <span></span>
 <span><span class="co"># Saving our mocked up DataFrame with our overrides active.</span></span>
-<span><span class="va">df2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/DataFrame-class.html" class="external-link">DataFrame</a></span><span class="op">(</span>Z<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">)</span>, AA<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/AsIs.html" class="external-link">I</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/DataFrame-class.html" class="external-link">DataFrame</a></span><span class="op">(</span>B<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html" class="external-link">runif</a></span><span class="op">(</span><span class="fl">5</span><span class="op">)</span>, C<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">5</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">df2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/DataFrame-class.html" class="external-link">DataFrame</a></span><span class="op">(</span>Z<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">)</span>, AA<span class="op">=</span><span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/S4Vectors-internals.html" class="external-link">I</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/DataFrame-class.html" class="external-link">DataFrame</a></span><span class="op">(</span>B<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html" class="external-link">runif</a></span><span class="op">(</span><span class="fl">5</span><span class="op">)</span>, C<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">5</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">tmp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="fu">saveForApplication</span><span class="op">(</span><span class="va">df2</span>, <span class="va">tmp</span><span class="op">)</span></span>
 <span></span>
@@ -505,7 +505,7 @@ their own needs.</p>
 </h2>
 <div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/sessionInfo.html" class="external-link">sessionInfo</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## R Under development (unstable) (2026-03-28 r89738)</span></span>
+<pre><code><span><span class="co">## R version 4.6.0 (2026-04-24)</span></span>
 <span><span class="co">## Platform: x86_64-pc-linux-gnu</span></span>
 <span><span class="co">## Running under: Ubuntu 24.04.4 LTS</span></span>
 <span><span class="co">## </span></span>
@@ -529,26 +529,26 @@ their own needs.</p>
 <span><span class="co">## [8] base     </span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## other attached packages:</span></span>
-<span><span class="co">## [1] Matrix_1.7-5          alabaster.base_1.11.4 S4Vectors_0.49.0     </span></span>
-<span><span class="co">## [4] BiocGenerics_0.57.0   generics_0.1.4        BiocStyle_2.39.0     </span></span>
+<span><span class="co">## [1] Matrix_1.7-5          alabaster.base_1.13.0 S4Vectors_0.51.3     </span></span>
+<span><span class="co">## [4] BiocGenerics_0.59.7   generics_0.1.4        BiocStyle_2.41.0     </span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## loaded via a namespace (and not attached):</span></span>
-<span><span class="co">##  [1] sass_0.4.10              SparseArray_1.11.11      lattice_0.22-9          </span></span>
-<span><span class="co">##  [4] h5mread_1.3.2            digest_0.6.39            evaluate_1.0.5          </span></span>
-<span><span class="co">##  [7] grid_4.7.0               bookdown_0.46            fastmap_1.2.0           </span></span>
-<span><span class="co">## [10] jsonlite_2.0.0           alabaster.schemas_1.11.0 BiocManager_1.30.27     </span></span>
-<span><span class="co">## [13] HDF5Array_1.39.0         textshaping_1.0.5        jquerylib_0.1.4         </span></span>
-<span><span class="co">## [16] abind_1.4-8              cli_3.6.5                rlang_1.1.7             </span></span>
-<span><span class="co">## [19] XVector_0.51.0           cachem_1.1.0             DelayedArray_0.37.0     </span></span>
-<span><span class="co">## [22] yaml_2.3.12              otel_0.2.0               S4Arrays_1.11.1         </span></span>
-<span><span class="co">## [25] tools_4.7.0              Rhdf5lib_1.33.6          alabaster.matrix_1.11.0 </span></span>
+<span><span class="co">##  [1] sass_0.4.10              SparseArray_1.13.2       lattice_0.22-9          </span></span>
+<span><span class="co">##  [4] h5mread_1.5.0            digest_0.6.39            evaluate_1.0.5          </span></span>
+<span><span class="co">##  [7] grid_4.6.0               bookdown_0.47            fastmap_1.2.0           </span></span>
+<span><span class="co">## [10] jsonlite_2.0.0           alabaster.schemas_1.13.0 BiocManager_1.30.27     </span></span>
+<span><span class="co">## [13] HDF5Array_1.41.0         textshaping_1.0.5        jquerylib_0.1.4         </span></span>
+<span><span class="co">## [16] abind_1.4-8              cli_3.6.6                rlang_1.2.0             </span></span>
+<span><span class="co">## [19] XVector_0.53.0           cachem_1.1.0             DelayedArray_0.39.3     </span></span>
+<span><span class="co">## [22] yaml_2.3.12              otel_0.2.0               S4Arrays_1.13.0         </span></span>
+<span><span class="co">## [25] tools_4.6.0              Rhdf5lib_2.1.0           alabaster.matrix_1.13.0 </span></span>
 <span><span class="co">## [28] R6_2.6.1                 matrixStats_1.5.0        lifecycle_1.0.5         </span></span>
-<span><span class="co">## [31] rhdf5_2.55.16            fs_2.0.0                 htmlwidgets_1.6.4       </span></span>
-<span><span class="co">## [34] IRanges_2.45.0           ragg_1.5.1               desc_1.4.3              </span></span>
-<span><span class="co">## [37] pkgdown_2.2.0            bslib_0.10.0             Rcpp_1.1.1              </span></span>
-<span><span class="co">## [40] systemfonts_1.3.2        xfun_0.57                MatrixGenerics_1.23.0   </span></span>
-<span><span class="co">## [43] knitr_1.51               rhdf5filters_1.23.3      htmltools_0.5.9         </span></span>
-<span><span class="co">## [46] rmarkdown_2.31           compiler_4.7.0</span></span></code></pre>
+<span><span class="co">## [31] rhdf5_2.57.1             fs_2.1.0                 htmlwidgets_1.6.4       </span></span>
+<span><span class="co">## [34] IRanges_2.47.2           ragg_1.5.2               desc_1.4.3              </span></span>
+<span><span class="co">## [37] pkgdown_2.2.0            bslib_0.11.0             Rcpp_1.1.1-1.1          </span></span>
+<span><span class="co">## [40] systemfonts_1.3.2        xfun_0.59                MatrixGenerics_1.25.0   </span></span>
+<span><span class="co">## [43] knitr_1.51               rhdf5filters_1.25.0      htmltools_0.5.9         </span></span>
+<span><span class="co">## [46] rmarkdown_2.31           compiler_4.6.0</span></span></code></pre>
 </div>
   </div>
 
