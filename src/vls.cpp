@@ -196,7 +196,7 @@ Rcpp::CharacterVector parse_vls(
     Rcpp::Nullable<Rcpp::CharacterVector> placeholder,
     bool native)
 {
-    H5::H5File handle(file, H5F_ACC_RDWR);
+    H5::H5File handle(file, H5F_ACC_RDONLY);
     auto phandle = handle.openDataSet(pointers);
     auto pspace = phandle.getSpace();
 

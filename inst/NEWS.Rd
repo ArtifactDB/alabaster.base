@@ -2,6 +2,10 @@
 \title{alabaster.base News}
 \encoding{UTF-8}
 
+\section{Version 1.14.0}{\itemize{
+\item Bugfix to avoid requiring write access to files when reading VLS structures in various \code{read*()} functions.
+}}
+
 \section{Version 1.12.0}{\itemize{
 \item Added a \code{cloneFile()} utility to clone a single file, by copying, hard-linking or (relative) symlinking.
 }}
