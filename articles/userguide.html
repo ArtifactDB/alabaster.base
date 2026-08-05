@@ -32,7 +32,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">alabaster.base</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.13.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.13.2</span>
       </span>
     </div>
 
@@ -373,7 +373,8 @@ function.</p>
 <code class="sourceCode R"><span><span class="va">tmp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/saveObject.html">saveObject</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">tmp</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/list.files.html" class="external-link">list.files</a></span><span class="op">(</span><span class="va">tmp</span>, recursive<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## [1] "dimensions.txt" "matrix.csv"     "OBJECT"</span></span></code></pre>
+<pre><code><span><span class="co">## [1] "_environment.json" "dimensions.txt"    "matrix.csv"       </span></span>
+<span><span class="co">## [4] "OBJECT"</span></span></code></pre>
 <div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/readObject.html">readObject</a></span><span class="op">(</span><span class="va">tmp</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## 10 x 10 sparse Matrix of class "dgTMatrix"</span></span>
@@ -529,7 +530,7 @@ their own needs.</p>
 <span><span class="co">## [8] base     </span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## other attached packages:</span></span>
-<span><span class="co">## [1] Matrix_1.7-6          alabaster.base_1.13.1 S4Vectors_0.51.6     </span></span>
+<span><span class="co">## [1] Matrix_1.7-6          alabaster.base_1.13.2 S4Vectors_0.51.6     </span></span>
 <span><span class="co">## [4] BiocGenerics_0.59.10  generics_0.1.4        BiocStyle_2.41.0     </span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## loaded via a namespace (and not attached):</span></span>
