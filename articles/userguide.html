@@ -306,7 +306,7 @@ is required.</li>
 <code>dgTMatrix</code> from the <em><a href="https://CRAN.R-project.org/package=Matrix" class="external-link">Matrix</a></em>
 package. First, the saving method:</p>
 <div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://Matrix.R-forge.R-project.org" class="external-link">Matrix</a></span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://codeberg.org/jaganmn/Matrix" class="external-link">Matrix</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/methods/setMethod.html" class="external-link">setMethod</a></span><span class="op">(</span><span class="st">"saveObject"</span>, <span class="st">"dgTMatrix"</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span>, <span class="va">path</span>, <span class="va">...</span><span class="op">)</span> <span class="op">{</span></span>
 <span>    <span class="co"># Create a directory to stash our contents.</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/files2.html" class="external-link">dir.create</a></span><span class="op">(</span><span class="va">path</span><span class="op">)</span></span>
@@ -505,7 +505,7 @@ their own needs.</p>
 </h2>
 <div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/sessionInfo.html" class="external-link">sessionInfo</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## R version 4.6.0 (2026-04-24)</span></span>
+<pre><code><span><span class="co">## R version 4.6.1 (2026-06-24)</span></span>
 <span><span class="co">## Platform: x86_64-pc-linux-gnu</span></span>
 <span><span class="co">## Running under: Ubuntu 24.04.4 LTS</span></span>
 <span><span class="co">## </span></span>
@@ -529,26 +529,26 @@ their own needs.</p>
 <span><span class="co">## [8] base     </span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## other attached packages:</span></span>
-<span><span class="co">## [1] Matrix_1.7-5          alabaster.base_1.13.1 S4Vectors_0.51.3     </span></span>
-<span><span class="co">## [4] BiocGenerics_0.59.7   generics_0.1.4        BiocStyle_2.41.0     </span></span>
+<span><span class="co">## [1] Matrix_1.7-6          alabaster.base_1.13.1 S4Vectors_0.51.6     </span></span>
+<span><span class="co">## [4] BiocGenerics_0.59.10  generics_0.1.4        BiocStyle_2.41.0     </span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## loaded via a namespace (and not attached):</span></span>
 <span><span class="co">##  [1] sass_0.4.10              SparseArray_1.13.2       lattice_0.22-9          </span></span>
 <span><span class="co">##  [4] h5mread_1.5.0            digest_0.6.39            evaluate_1.0.5          </span></span>
-<span><span class="co">##  [7] grid_4.6.0               bookdown_0.47            fastmap_1.2.0           </span></span>
+<span><span class="co">##  [7] grid_4.6.1               bookdown_0.47            fastmap_1.2.0           </span></span>
 <span><span class="co">## [10] jsonlite_2.0.0           alabaster.schemas_1.13.0 BiocManager_1.30.27     </span></span>
 <span><span class="co">## [13] HDF5Array_1.41.0         textshaping_1.0.5        jquerylib_0.1.4         </span></span>
-<span><span class="co">## [16] abind_1.4-8              cli_3.6.6                rlang_1.2.0             </span></span>
+<span><span class="co">## [16] abind_1.4-8              cli_3.6.6                rlang_1.3.0             </span></span>
 <span><span class="co">## [19] XVector_0.53.0           cachem_1.1.0             DelayedArray_0.39.3     </span></span>
 <span><span class="co">## [22] yaml_2.3.12              otel_0.2.0               S4Arrays_1.13.0         </span></span>
-<span><span class="co">## [25] tools_4.6.0              Rhdf5lib_2.1.0           alabaster.matrix_1.13.0 </span></span>
+<span><span class="co">## [25] tools_4.6.1              Rhdf5lib_2.1.0           alabaster.matrix_1.13.0 </span></span>
 <span><span class="co">## [28] R6_2.6.1                 matrixStats_1.5.0        lifecycle_1.0.5         </span></span>
-<span><span class="co">## [31] rhdf5_2.57.1             fs_2.1.0                 htmlwidgets_1.6.4       </span></span>
+<span><span class="co">## [31] rhdf5_2.57.3             fs_2.1.0                 htmlwidgets_1.6.4       </span></span>
 <span><span class="co">## [34] IRanges_2.47.2           ragg_1.5.2               desc_1.4.3              </span></span>
-<span><span class="co">## [37] pkgdown_2.2.0            bslib_0.11.0             Rcpp_1.1.1-1.1          </span></span>
-<span><span class="co">## [40] systemfonts_1.3.2        xfun_0.59                MatrixGenerics_1.25.0   </span></span>
-<span><span class="co">## [43] knitr_1.51               rhdf5filters_1.25.0      htmltools_0.5.9         </span></span>
-<span><span class="co">## [46] rmarkdown_2.31           compiler_4.6.0</span></span></code></pre>
+<span><span class="co">## [37] pkgdown_2.2.1            bslib_0.11.0             Rcpp_1.1.2              </span></span>
+<span><span class="co">## [40] systemfonts_1.3.2        xfun_0.60                MatrixGenerics_1.25.0   </span></span>
+<span><span class="co">## [43] knitr_1.51               rhdf5filters_1.25.3      htmltools_0.5.9         </span></span>
+<span><span class="co">## [46] rmarkdown_2.31           compiler_4.6.1</span></span></code></pre>
 </div>
   </div>
 
@@ -567,7 +567,7 @@ their own needs.</p>
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
       </footer>
