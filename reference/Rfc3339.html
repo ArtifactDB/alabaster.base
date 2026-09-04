@@ -163,46 +163,46 @@ Users are advised to convert to <a href="https://rdrr.io/r/base/DateTimeClasses.
     <h2>Examples</h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">out</span> <span class="op">&lt;-</span> <span class="fu">as.Rfc3339</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.time</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> <span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">out</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [1] "2026-09-04T05:55:54+00:00" "2026-09-04T05:55:55+00:00"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [3] "2026-09-04T05:55:56+00:00" "2026-09-04T05:55:57+00:00"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [5] "2026-09-04T05:55:58+00:00" "2026-09-04T05:55:59+00:00"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [7] "2026-09-04T05:56:00+00:00" "2026-09-04T05:56:01+00:00"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [9] "2026-09-04T05:56:02+00:00" "2026-09-04T05:56:03+00:00"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [1] "2026-09-04T06:07:34+00:00" "2026-09-04T06:07:35+00:00"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [3] "2026-09-04T06:07:36+00:00" "2026-09-04T06:07:37+00:00"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [5] "2026-09-04T06:07:38+00:00" "2026-09-04T06:07:39+00:00"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [7] "2026-09-04T06:07:40+00:00" "2026-09-04T06:07:41+00:00"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [9] "2026-09-04T06:07:42+00:00" "2026-09-04T06:07:43+00:00"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"class")</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Rfc3339"</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">out</span><span class="op">[</span><span class="fl">2</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "2026-09-04T05:55:55+00:00" "2026-09-04T05:55:56+00:00"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [3] "2026-09-04T05:55:57+00:00" "2026-09-04T05:55:58+00:00"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "2026-09-04T06:07:35+00:00" "2026-09-04T06:07:36+00:00"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [3] "2026-09-04T06:07:37+00:00" "2026-09-04T06:07:38+00:00"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"class")</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Rfc3339"</span>
 <span class="r-in"><span><span class="va">out</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="st">"2"</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">out</span>, <span class="va">out</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [1] "2026-09-04T05:55:54+00:00" NA                         </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [3] "2026-09-04T05:55:56+00:00" "2026-09-04T05:55:57+00:00"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [5] "2026-09-04T05:55:58+00:00" "2026-09-04T05:55:59+00:00"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [7] "2026-09-04T05:56:00+00:00" "2026-09-04T05:56:01+00:00"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [9] "2026-09-04T05:56:02+00:00" "2026-09-04T05:56:03+00:00"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [11] "2026-09-04T05:55:54+00:00" NA                         </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [13] "2026-09-04T05:55:56+00:00" "2026-09-04T05:55:57+00:00"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [15] "2026-09-04T05:55:58+00:00" "2026-09-04T05:55:59+00:00"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [17] "2026-09-04T05:56:00+00:00" "2026-09-04T05:56:01+00:00"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [19] "2026-09-04T05:56:02+00:00" "2026-09-04T05:56:03+00:00"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [1] "2026-09-04T06:07:34+00:00" NA                         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [3] "2026-09-04T06:07:36+00:00" "2026-09-04T06:07:37+00:00"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [5] "2026-09-04T06:07:38+00:00" "2026-09-04T06:07:39+00:00"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [7] "2026-09-04T06:07:40+00:00" "2026-09-04T06:07:41+00:00"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [9] "2026-09-04T06:07:42+00:00" "2026-09-04T06:07:43+00:00"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [11] "2026-09-04T06:07:34+00:00" NA                         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [13] "2026-09-04T06:07:36+00:00" "2026-09-04T06:07:37+00:00"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [15] "2026-09-04T06:07:38+00:00" "2026-09-04T06:07:39+00:00"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [17] "2026-09-04T06:07:40+00:00" "2026-09-04T06:07:41+00:00"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [19] "2026-09-04T06:07:42+00:00" "2026-09-04T06:07:43+00:00"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"class")</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Rfc3339"</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">as.character</a></span><span class="op">(</span><span class="va">out</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [1] "2026-09-04T05:55:54+00:00" NA                         </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [3] "2026-09-04T05:55:56+00:00" "2026-09-04T05:55:57+00:00"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [5] "2026-09-04T05:55:58+00:00" "2026-09-04T05:55:59+00:00"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [7] "2026-09-04T05:56:00+00:00" "2026-09-04T05:56:01+00:00"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [9] "2026-09-04T05:56:02+00:00" "2026-09-04T05:56:03+00:00"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [1] "2026-09-04T06:07:34+00:00" NA                         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [3] "2026-09-04T06:07:36+00:00" "2026-09-04T06:07:37+00:00"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [5] "2026-09-04T06:07:38+00:00" "2026-09-04T06:07:39+00:00"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [7] "2026-09-04T06:07:40+00:00" "2026-09-04T06:07:41+00:00"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [9] "2026-09-04T06:07:42+00:00" "2026-09-04T06:07:43+00:00"</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/as.POSIXlt.html" class="external-link">as.POSIXct</a></span><span class="op">(</span><span class="va">out</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [1] "2026-09-04 05:55:54 UTC" NA                       </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [3] "2026-09-04 05:55:56 UTC" "2026-09-04 05:55:57 UTC"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [5] "2026-09-04 05:55:58 UTC" "2026-09-04 05:55:59 UTC"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [7] "2026-09-04 05:56:00 UTC" "2026-09-04 05:56:01 UTC"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [9] "2026-09-04 05:56:02 UTC" "2026-09-04 05:56:03 UTC"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [1] "2026-09-04 06:07:34 UTC" NA                       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [3] "2026-09-04 06:07:36 UTC" "2026-09-04 06:07:37 UTC"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [5] "2026-09-04 06:07:38 UTC" "2026-09-04 06:07:39 UTC"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [7] "2026-09-04 06:07:40 UTC" "2026-09-04 06:07:41 UTC"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [9] "2026-09-04 06:07:42 UTC" "2026-09-04 06:07:43 UTC"</span>
 </code></pre></div>
     </div>
   </div>
