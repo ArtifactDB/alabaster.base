@@ -20,7 +20,7 @@ Children are used to assemble their parent objects and are not reported here."><
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">alabaster.base</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.13.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.13.3</span>
       </span>
     </div>
 
@@ -101,6 +101,15 @@ Children are used to assemble their parent objects and are not reported here.</p
 <span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://bioconductor.org/packages/S4Vectors" class="external-link">S4Vectors</a></span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/DataFrame-class.html" class="external-link">DataFrame</a></span><span class="op">(</span>A<span class="op">=</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span>, B<span class="op">=</span><span class="va">LETTERS</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">]</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">meta</span> <span class="op">&lt;-</span> <span class="fu"><a href="saveObject.html">stageObject</a></span><span class="op">(</span><span class="va">df</span>, <span class="va">tmp</span>, path<span class="op">=</span><span class="st">"whee"</span><span class="op">)</span></span></span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>'stageObject' is deprecated.</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> Use 'saveObject' instead.</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> See help("Deprecated")</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>'processMcols' is deprecated.</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> Use 'saveMetadata' instead.</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> See help("Deprecated")</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>'processMetadata' is deprecated.</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> Use 'saveMetadata' instead.</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> See help("Deprecated")</span>
 <span class="r-in"><span><span class="fu"><a href="writeMetadata.html">writeMetadata</a></span><span class="op">(</span><span class="va">meta</span>, <span class="va">tmp</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $type</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "local"</span>
@@ -111,6 +120,18 @@ Children are used to assemble their parent objects and are not reported here.</p
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">ll</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>A<span class="op">=</span><span class="fl">1</span>, B<span class="op">=</span><span class="va">LETTERS</span>, C<span class="op">=</span><span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/DataFrame-class.html" class="external-link">DataFrame</a></span><span class="op">(</span>X<span class="op">=</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">meta</span> <span class="op">&lt;-</span> <span class="fu"><a href="saveObject.html">stageObject</a></span><span class="op">(</span><span class="va">ll</span>, <span class="va">tmp</span>, path<span class="op">=</span><span class="st">"stuff"</span><span class="op">)</span></span></span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>'stageObject' is deprecated.</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> Use 'saveObject' instead.</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> See help("Deprecated")</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>'stageObject' is deprecated.</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> Use 'saveObject' instead.</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> See help("Deprecated")</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>'processMcols' is deprecated.</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> Use 'saveMetadata' instead.</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> See help("Deprecated")</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>'processMetadata' is deprecated.</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> Use 'saveMetadata' instead.</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> See help("Deprecated")</span>
 <span class="r-in"><span><span class="fu"><a href="writeMetadata.html">writeMetadata</a></span><span class="op">(</span><span class="va">meta</span>, <span class="va">tmp</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $type</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "local"</span>
@@ -120,6 +141,8 @@ Children are used to assemble their parent objects and are not reported here.</p
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">redirect</span> <span class="op">&lt;-</span> <span class="fu"><a href="createRedirection.html">createRedirection</a></span><span class="op">(</span><span class="va">tmp</span>, <span class="st">"whoop"</span>, <span class="st">"whee/simple.csv.gz"</span><span class="op">)</span></span></span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>'createRedirection' is deprecated.</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> See help("Deprecated")</span>
 <span class="r-in"><span><span class="fu"><a href="writeMetadata.html">writeMetadata</a></span><span class="op">(</span><span class="va">redirect</span>, <span class="va">tmp</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $type</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "local"</span>
@@ -129,6 +152,41 @@ Children are used to assemble their parent objects and are not reported here.</p
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">all.meta</span> <span class="op">&lt;-</span> <span class="fu">loadDirectory</span><span class="op">(</span><span class="va">tmp</span><span class="op">)</span></span></span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>'listDirectory' is deprecated.</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> Use 'listObjects' instead.</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> See help("Deprecated")</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>'loadObject' is deprecated.</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> Use 'readObject' instead.</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> See help("Deprecated")</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>'loadBaseList' is deprecated.</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> Use 'readBaseList' instead.</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> See help("Deprecated")</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>'acquireMetadata' is deprecated.</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> See help("Deprecated")</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>'loadObject' is deprecated.</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> Use 'readObject' instead.</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> See help("Deprecated")</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>'loadDataFrame' is deprecated.</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> Use 'readDataFrame' instead.</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> See help("Deprecated")</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>'acquireFile' is deprecated.</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> See help("Deprecated")</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>'restoreMetadata' is deprecated.</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> Use 'readMetadata' instead.</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> See help("Deprecated")</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>'acquireFile' is deprecated.</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> See help("Deprecated")</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>'loadObject' is deprecated.</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> Use 'readObject' instead.</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> See help("Deprecated")</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>'loadDataFrame' is deprecated.</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> Use 'readDataFrame' instead.</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> See help("Deprecated")</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>'acquireFile' is deprecated.</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> See help("Deprecated")</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>'restoreMetadata' is deprecated.</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> Use 'readMetadata' instead.</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> See help("Deprecated")</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">all.meta</span><span class="op">)</span> </span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> List of 2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ stuff/list.json.gz:List of 3</span>
