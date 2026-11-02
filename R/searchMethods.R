@@ -1,8 +1,10 @@
 # Make sure to put derived classes before base classes,
 # otherwise the subclass look-up might not find the most appropriate method.
 implementers <- list(
+    SpatialFeatureExperiment = "alabaster.sfe",
     SpatialExperiment = "alabaster.spatial", 
 
+    TreeSummarizedExperiment = "alabaster.treese",
     SingleCellExperiment = "alabaster.sce",
 
     VCF = "alabaster.vcf",

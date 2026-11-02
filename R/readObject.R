@@ -98,6 +98,8 @@ read.registry$registry <- list(
     multi_sample_dataset="alabaster.mae::readMultiAssayExperiment",
     sequence_string_set="alabaster.string::readXStringSet",
     spatial_experiment="alabaster.spatial::readSpatialExperiment",
+    spatial_feature_experiment="alabaster.sfe::readSpatialFeatureExperiment",
+    tree_summarized_experiment="alabaster.treese::readTreeSummarizedExperiment",
     bam_file="alabaster.files::readBamFileReference",
     bcf_file="alabaster.files::readBcfFileReference",
     bigbed_file="alabaster.files::readBigBedFileReference",
